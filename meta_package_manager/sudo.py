@@ -100,6 +100,7 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -111,6 +112,8 @@ from typing import Final
 
 from click_extra import echo
 
+from .version import parse_version
+
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
@@ -121,6 +124,7 @@ if TYPE_CHECKING:
     from .capabilities import Operations
     from .execution import CLIExecutor
     from .manager import PackageManager
+    from .version import TokenizedString
 
 
 _STALL_NOTICE_DELAY: Final = 30
@@ -202,6 +206,20 @@ def _run_probe(args: tuple[str, ...]) -> subprocess.CompletedProcess[str] | None
         )
     except OSError:
         return None
+
+
+@cache
+def _installed_release(version_args: tuple[str, ...]) -> TokenizedString | None:
+    """The release `version_args` reports, or `None` when it reports none.
+
+    Cached like {func}`resolve_escalator`, since the binary does not change
+    mid-run.
+    """
+    probe = _run_probe(version_args)
+    if probe is None or probe.returncode != 0:
+        return None
+    match = re.search(r"\d+(?:\.\d+)*", probe.stdout or "")
+    return parse_version(match.group()) if match else None
 
 
 @dataclass(frozen=True)
@@ -364,6 +382,23 @@ class Escalator:
     keeps `None` until a manager on a polkit-only host asks for one.
     """
 
+    gated_options: tuple[tuple[str, str], ...] = ()
+    """Options following {attr}`escalate_args` on the releases accepting them,
+    each paired with the first such release.
+
+    {meth}`supported_options` reads the installed release through
+    {attr}`version_args`, and keeps the options it accepts. Only `pkexec` has
+    one: `--keep-cwd` arrived in polkit `121`
+    ([polkit-org/polkit@af533784a330](https://github.com/polkit-org/polkit/commit/af533784a33040ce91b03744c6fd5ba9aff3e007)),
+    and an older `pkexec` reads it as the program to run, failing every
+    escalation on `Cannot run program --keep-cwd`. SliTaz 5.0 ships polkit
+    `0.104`.
+    """
+
+    version_args: tuple[str, ...] | None = None
+    """Argv printing the installed release, for {attr}`gated_options`, or `None`
+    where no option is gated."""
+
     @property
     def binary_name(self) -> str:
         """The file {func}`resolve_escalator` looks for on `PATH`."""
@@ -419,6 +454,22 @@ class Escalator:
         """
         pid = str(os.getpid())
         return tuple(arg.replace("{pid}", pid) for arg in self.probe_args)
+
+    def supported_options(self) -> tuple[str, ...]:
+        """The {attr}`gated_options` the installed release accepts.
+
+        A release that cannot be read keeps every option. A rejected option
+        then fails the escalation with the escalator's own error, where
+        dropping it would change the command without a word.
+        """
+        if not self.gated_options or not self.version_args:
+            return ()
+        release = _installed_release(self.version_args)
+        return tuple(
+            option
+            for option, since in self.gated_options
+            if release is None or release >= parse_version(since)
+        )
 
     def is_genuine(self) -> bool:
         """Whether the binary on `PATH` really is this escalator.
@@ -497,9 +548,10 @@ ESCALATORS: Final[tuple[Escalator, ...]] = (
         # No `--` separator: pkexec stops parsing at the first non-option and
         # would try to execute `--` itself. Nothing is at risk without one,
         # since the first argument mpm appends is the manager's absolute path,
-        # which is already a non-option. `--keep-cwd` holds the working
-        # directory, which pkexec otherwise resets to the target user's home.
-        escalate_args=("pkexec", "--keep-cwd"),
+        # which is already a non-option. `--keep-cwd` follows where the release
+        # accepts it (see `gated_options`), and holds the working directory,
+        # which pkexec otherwise resets to the target user's home.
+        escalate_args=("pkexec",),
         # pkexec carries no non-interactive switch and no validate mode: it
         # always executes a program, and asking it anything either prompts or
         # dies for want of an agent. `pkcheck` is polkit's own query tool and
@@ -533,12 +585,17 @@ ESCALATORS: Final[tuple[Escalator, ...]] = (
             "{pid}",
         ),
         passwordless_probe_args=None,
-        prompt_args=("pkexec", "--keep-cwd", "true"),
+        # `true` ignores its working directory, so the prompt needs no
+        # `--keep-cwd` on any release.
+        prompt_args=("pkexec", "true"),
         # polkit owns retention, and the action pkexec defaults to is
         # `auth_admin` rather than `auth_admin_keep`, so nothing is kept at all
         # unless the host says otherwise.
         refreshable=False,
         brands_prompt=False,
+        gated_options=(("--keep-cwd", "121"),),
+        # `pkexec version 0.104` on SliTaz 5.0, `pkexec version 127` on Arch.
+        version_args=("pkexec", "--version"),
     ),
     Escalator(
         id="gsudo",

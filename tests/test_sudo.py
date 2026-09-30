@@ -52,6 +52,7 @@ from meta_package_manager.sudo import (
     ESCALATION,
     ESCALATORS,
     Escalator,
+    _installed_release,
     _is_permission_failure,
     _is_sudo_auth_failure,
     _is_sudo_denied,
@@ -169,10 +170,13 @@ def _clear_escalator_cache():
 
     `resolve_escalator` caches on the assumption that `PATH` does not move
     mid-run, which a test patching `shutil.which` breaks in both directions.
+    `_installed_release` caches the same way, on the binary not changing.
     """
     resolve_escalator.cache_clear()
+    _installed_release.cache_clear()
     yield
     resolve_escalator.cache_clear()
+    _installed_release.cache_clear()
 
 
 @contextmanager
@@ -183,10 +187,12 @@ def only_escalator(escalator_id: str | None, *, selected: str | None = None):
     test can force an escalator the way `--sudo-command` does.
 
     The binary is also pinned as genuine, so `resolve_escalator` never spends a
-    `subprocess.run` on {meth}`~meta_package_manager.sudo.Escalator.is_genuine`.
-    That keeps the call counts these tests assert on measuring credential
-    probes alone, and keeps a pretended host from probing the real one. A test
-    about an impostor patches `is_genuine` itself instead.
+    `subprocess.run` on {meth}`~meta_package_manager.sudo.Escalator.is_genuine`,
+    and as a current release accepting every
+    {attr}`~meta_package_manager.sudo.Escalator.gated_options`. That keeps the
+    call counts these tests assert on measuring credential probes alone, and
+    keeps a pretended host from probing the real one. A test about an impostor
+    or an old release patches those methods itself instead.
 
     A test that plants a stand-in escalator binary on `PATH` runs under this
     context. `write_fake_executable` answers every argv the same way, so the
@@ -203,6 +209,11 @@ def only_escalator(escalator_id: str | None, *, selected: str | None = None):
             ),
         ),
         patch.object(Escalator, "is_genuine", return_value=True),
+        patch.object(
+            Escalator,
+            "supported_options",
+            lambda self: tuple(option for option, _ in self.gated_options),
+        ),
     ):
         resolve_escalator.cache_clear()
         ESCALATION.select(selected)
@@ -1362,7 +1373,10 @@ def test_escalator_identity_probe_survives_a_missing_binary():
 
 @pytest.mark.parametrize(
     "probe",
-    (pytest.param(ESCALATORS[0].is_genuine, id="identity"),),
+    (
+        pytest.param(ESCALATORS[0].is_genuine, id="identity"),
+        pytest.param(lambda: _installed_release(("pkexec", "--version")), id="release"),
+    ),
 )
 def test_escalator_probes_never_reach_the_terminal(probe):
     """A stand-in may prompt, so a probe gets no terminal to prompt on.
@@ -1375,6 +1389,43 @@ def test_escalator_probes_never_reach_the_terminal(probe):
         probe()
     assert run.call_args.kwargs["stdin"] is subprocess.DEVNULL
     assert run.call_args.kwargs["start_new_session"] is True
+
+
+@pytest.mark.parametrize(
+    ("returncode", "stdout", "expected"),
+    (
+        pytest.param(0, "pkexec version 0.104\n", (), id="slitaz-0.104"),
+        pytest.param(0, "pkexec version 0.120\n", (), id="last-without"),
+        pytest.param(0, "pkexec version 121\n", ("--keep-cwd",), id="first-with"),
+        pytest.param(0, "pkexec version 127\n", ("--keep-cwd",), id="arch-127"),
+        # An unreadable release keeps the option, so a rejection stays loud.
+        pytest.param(0, "", ("--keep-cwd",), id="no-version"),
+        pytest.param(1, "pkexec version 0.104\n", ("--keep-cwd",), id="failed"),
+    ),
+)
+def test_pkexec_keeps_cwd_from_polkit_121(returncode, stdout, expected):
+    """An older `pkexec` reads `--keep-cwd` as the program to run."""
+    pkexec = next(e for e in ESCALATORS if e.id == "pkexec")
+    with patch("meta_package_manager.sudo.subprocess.run") as run:
+        run.return_value = subprocess.CompletedProcess((), returncode, stdout=stdout)
+        assert pkexec.supported_options() == expected
+    assert run.call_args.args[0] == ("pkexec", "--version")
+
+
+def test_supported_options_survive_a_missing_binary():
+    """A release that cannot be read keeps every option."""
+    pkexec = next(e for e in ESCALATORS if e.id == "pkexec")
+    with patch("meta_package_manager.sudo.subprocess.run", side_effect=OSError):
+        assert pkexec.supported_options() == ("--keep-cwd",)
+
+
+def test_escalators_without_gated_options_spend_no_probe():
+    """Only an escalator gating an option reads its release."""
+    with patch("meta_package_manager.sudo.subprocess.run") as run:
+        for escalator in ESCALATORS:
+            if not escalator.gated_options:
+                assert escalator.supported_options() == ()
+    run.assert_not_called()
 
 
 def test_resolve_escalator_skips_an_impostor_for_the_real_thing():

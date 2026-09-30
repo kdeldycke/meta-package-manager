@@ -1985,8 +1985,8 @@ class CLIExecutor:
         # has already warned about that, so the command runs unprivileged and
         # fails on the manager's own permission error rather than on a missing
         # binary. Root has nothing to escalate either, and wrapping its commands
-        # only adds ways to fail: SliTaz 5.0's `pkexec` predates `--keep-cwd`
-        # and reads it as the program to run.
+        # only adds ways to fail: `pkexec` needs a running polkit authority,
+        # which an OpenRC host may lack.
         escalate = bool(
             sudo
             and policy_escalates
@@ -2011,6 +2011,7 @@ class CLIExecutor:
                 auto_pre_cmds = False
             assert escalator is not None
             params.extend(escalator.escalate_args)
+            params.extend(escalator.supported_options())
         elif override_pre_cmds:
             params.extend(override_pre_cmds)  # type: ignore[arg-type]
         elif auto_pre_cmds:

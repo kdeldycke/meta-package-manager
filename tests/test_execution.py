@@ -55,7 +55,7 @@ from meta_package_manager.execution import (
     format_plan_command,
 )
 from meta_package_manager.pool import pool
-from meta_package_manager.sudo import _STALL_NOTICE_OPERATIONS
+from meta_package_manager.sudo import _STALL_NOTICE_OPERATIONS, Escalator
 
 from .fake_manager import FakeManager
 from .test_sudo import only_escalator
@@ -827,8 +827,8 @@ def test_build_cli_escalates_with_sudo_n_when_policy_on():
 def test_build_cli_no_escalation_as_root():
     """Root runs a privileged op bare, whatever escalator the host carries.
 
-    Wrapping it would only add ways to fail: SliTaz 5.0's `pkexec` predates
-    `--keep-cwd`, and a container often ships no escalator at all.
+    Wrapping it would only add ways to fail: `pkexec` needs a running polkit
+    authority, which an OpenRC host may lack.
     """
     manager = FakeManager()
     manager.sudo = True
@@ -839,6 +839,28 @@ def test_build_cli_no_escalation_as_root():
         cli = manager.build_cli("install", "pkg", sudo=True)
     assert cli[0] == str(manager.cli_path)
     assert "pkexec" not in cli
+
+
+@pytest.mark.parametrize(
+    "options",
+    (
+        pytest.param(("--keep-cwd",), id="polkit-121"),
+        pytest.param((), id="polkit-0.104"),
+    ),
+)
+def test_build_cli_passes_the_options_the_release_accepts(options):
+    """The gated options sit between the escalator and the command."""
+    manager = FakeManager()
+    manager.sudo = True
+    with (
+        only_escalator("pkexec"),
+        patch.object(Escalator, "supported_options", return_value=options),
+        patch(
+            "meta_package_manager.execution.os.geteuid", return_value=501, create=True
+        ),
+    ):
+        cli = manager.build_cli("install", "pkg", sudo=True)
+    assert cli[: 2 + len(options)] == ("pkexec", *options, str(manager.cli_path))
 
 
 def test_build_cli_no_escalation_when_policy_off():

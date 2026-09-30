@@ -22,11 +22,12 @@ from typing import ClassVar
 from extra_platforms import SLITAZ
 
 from ..capabilities import search_capabilities, version_not_implemented
+from ..execution import CLIError
 from ..manager import PackageManager
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Iterable, Iterator
 
     from ..package import Package
 
@@ -86,6 +87,10 @@ class Tazpkg(PackageManager):
     """A bare integer Mercurial revision on cooking releases (`944`) or a dotted
     version on stable ones (`4.9.2`)."""
 
+    _SELF_UPGRADE_REFUSAL = "You need upgrade tazpkg first"
+    """What TazPkg prints, with exit code `0`, when it refuses an install until it
+    has upgraded itself. `LC_ALL=C` keeps it in English."""
+
     _ANSI_REGEXP = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
 
     _PACKAGE_LINE_REGEXP = re.compile(
@@ -101,6 +106,26 @@ class Tazpkg(PackageManager):
             match = self._PACKAGE_LINE_REGEXP.match(line)
             if match:
                 yield match.group("package_id"), match.group("version")
+
+    def _raise_self_upgrade_refusal(self, output: str) -> None:
+        """Raise the refusal TazPkg reports with exit code `0` while it waits to
+        upgrade itself.
+
+        The failure is relayed at `WARNING` and recorded in
+        {attr}`~meta_package_manager.execution.CLIExecutor.cli_errors`, as the
+        executor's own failure gate does for a non-zero exit.
+        """
+        if self._SELF_UPGRADE_REFUSAL not in output:
+            return
+        exception = CLIError(
+            0,
+            output,
+            "TazPkg refuses to install packages until it upgrades itself: "
+            "run `tazpkg get-install tazpkg --forced`, then try again.",
+        )
+        self._relay_failure(exception, is_escalation=False)
+        self.cli_errors.append(exception)
+        raise exception
 
     @property
     def installed(self) -> Iterator[Package]:
@@ -170,12 +195,20 @@ class Tazpkg(PackageManager):
         `--forced` skips the already-installed guard, keeping the call
         non-interactive.
 
+        SliTaz's `check_tazpkgupg.sh` boot script creates
+        `/var/lock/tazpkgup.lock` when the mirror has a newer TazPkg. While that
+        lock exists, TazPkg refuses to install anything but itself, prints
+        `You need upgrade tazpkg first !` and exits `0`. That refusal is raised
+        as an error naming the command to run first.
+
         ```{code-block} shell-session
 
         $ sudo tazpkg get-install nano --forced --output=raw
         ```
         """
-        return self.run_cli("get-install", package_id, "--forced", sudo=True)
+        output = self.run_cli("get-install", package_id, "--forced", sudo=True)
+        self._raise_self_upgrade_refusal(output)
+        return output
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages.
@@ -207,6 +240,24 @@ class Tazpkg(PackageManager):
         ```
         """
         return self.build_cli("get-install", package_id, "--forced", sudo=True)
+
+    def upgrade(
+        self,
+        package_id: str | None = None,
+        version: str | None = None,
+        *,
+        outdated_ids: Iterable[str] | None = None,
+    ) -> str:
+        """Upgrade one or all packages, and raise TazPkg's self-upgrade refusal.
+
+        Both commands run `get-install`, so the lock that stops
+        {meth}`install` stops them too. `up -i` keeps going after a refusal:
+        it skips the packages its list places before `tazpkg`, upgrades
+        `tazpkg`, which deletes the lock, then upgrades the rest.
+        """
+        output = super().upgrade(package_id, version, outdated_ids=outdated_ids)
+        self._raise_self_upgrade_refusal(output)
+        return output
 
     def remove(self, package_id: str) -> str:
         """Remove one package.

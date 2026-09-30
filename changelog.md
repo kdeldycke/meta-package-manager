@@ -27,6 +27,7 @@
 - [mpm] Ask for the `sudo` password up front only for managers whose commands in the run need root: a `gem` forced to escalate no longer prompts on `sync`.
 - [mpm] Run privileged commands directly when `mpm` runs as root, instead of through `sudo`, `doas`, `run0` or `pkexec`: as root on SliTaz 5.0, every one failed.
 - [tazpkg] Fix `search` listing an installed package twice.
+- [tazpkg] Fail `install` and `upgrade` when TazPkg refuses to install anything until it upgrades itself, instead of reporting success.
 
 ## [`8.0.2` (2026-09-28)](https://github.com/kdeldycke/meta-package-manager/compare/v8.0.1...v8.0.2)
 

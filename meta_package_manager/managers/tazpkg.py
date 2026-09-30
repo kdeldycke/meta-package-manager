@@ -127,21 +127,40 @@ class Tazpkg(PackageManager):
         """Fetch matching packages.
 
         tazpkg matches the query as a case-insensitive substring of
-        `name-version`, over installed then mirrored packages.
+        `name-version`, and answers in two sections: the installed matches, then
+        the mirror's. Only the mirror section is read, since it lists every match
+        once, at the version `get-install` fetches. Reading both would report an
+        installed package twice.
 
         ```{code-block} shell-session
 
         $ tazpkg search nano --output=raw
+
+        Search result for "nano"
+        ================================================================================
         Installed packages
         --------------------------------------------------------------------------------
-        nano                    6.2               editors
+        nano                    9.0               utilities
+        nanochess               1.0               games
+        ================================================================================
+        2 installed packages found for "nano"
+
+        Available packages
         --------------------------------------------------------------------------------
-        1 installed package found for: nano
+        nano                    9.0               utilities
+        nano-doc                9.0               utilities
+        nano-lang               9.0               utilities
+        nanochess               1.0               games
+        nanoshot                0.2.15            utilities
+        ================================================================================
+        5 available packages found for "nano"
         ```
         """
         output = self.run_cli("search", query)
 
-        for package_id, version in self._parse_listing(output):
+        # Without a mirror section, the whole output is read.
+        _, marker, available = output.partition("Available packages")
+        for package_id, version in self._parse_listing(available if marker else output):
             yield self.package(id=package_id, latest_version=version)
 
     @version_not_implemented

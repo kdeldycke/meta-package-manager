@@ -252,6 +252,7 @@ keywords = [
   "volta",
   "vscode",
   "vscodium",
+  "whalebrew",
   "winget",
   "xbar",
   "xbar-plugin",
@@ -1197,6 +1198,7 @@ metrics.subjects.vim-pack = "https://github.com/neovim/neovim"
 metrics.subjects.volta = "https://github.com/volta-cli/volta"
 metrics.subjects.vscode = "https://github.com/microsoft/vscode"
 metrics.subjects.vscodium = "https://github.com/VSCodium/vscodium"
+metrics.subjects.whalebrew = "https://github.com/whalebrew/whalebrew"
 metrics.subjects.winget = "https://github.com/microsoft/winget-cli"
 metrics.subjects.xbps = "https://github.com/void-linux/xbps"
 metrics.subjects.xcodes = "https://github.com/XcodesOrg/xcodes"
@@ -1498,6 +1500,7 @@ labels.file-rules."📦 manager: vscode-based" = [
   "tests/*vscode*",
   "tests/*vscodium*",
 ]
+labels.file-rules."📦 manager: whalebrew" = [ "meta_package_manager/managers/whalebrew.*", "tests/*whalebrew*" ]
 labels.file-rules."📦 manager: winget" = [ "meta_package_manager/managers/winget.*", "tests/*winget*" ]
 labels.file-rules."📦 manager: xbps" = [ "meta_package_manager/managers/xbps.*", "tests/*xbps*" ]
 labels.file-rules."📦 manager: xcodes" = [ "meta_package_manager/managers/xcodes.*", "tests/*xcodes*" ]
@@ -1986,6 +1989,11 @@ description = "vcpkg"
 name = "📦 manager: vscode-based"
 color = "bfdadc"
 description = "vscode, vscodium"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: whalebrew"
+color = "bfdadc"
+description = "whalebrew"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: winget"

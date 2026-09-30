@@ -78,6 +78,7 @@
    meta_package_manager.managers.vagrant
    meta_package_manager.managers.vcpkg
    meta_package_manager.managers.volta
+   meta_package_manager.managers.whalebrew
    meta_package_manager.managers.winget
    meta_package_manager.managers.xbps
    meta_package_manager.managers.yarn

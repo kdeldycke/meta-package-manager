@@ -100,6 +100,7 @@ from .managers.uv import UV, UVX
 from .managers.vagrant import Vagrant
 from .managers.vcpkg import VCPKG
 from .managers.volta import Volta
+from .managers.whalebrew import Whalebrew
 from .managers.winget import WinGet
 from .managers.xbps import XBPS
 from .managers.yarn import YarnBerry, YarnClassic
@@ -201,6 +202,7 @@ manager_classes = (
     VCPKG,
     Vim_Pack,
     Volta,
+    Whalebrew,
     WinGet,
     XBPS,
     YarnBerry,

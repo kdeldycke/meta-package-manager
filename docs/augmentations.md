@@ -97,6 +97,7 @@ print(augmentations_table())
 | [`uv`](managers/uv.md)                     |          ✅          |              |                  |              |                 |               |
 | [`vagrant`](managers/vagrant.md)           |          ✅          |              |                  |      ✅      |       ✅        |               |
 | [`vcpkg`](managers/vcpkg.md)               |                      |              |                  |      ✅      |       ✅        |               |
+| [`whalebrew`](managers/whalebrew.md)       |                      |              |                  |      ✅      |       ✅        |               |
 | [`xbps`](managers/xbps.md)                 |                      |              |        ✅        |      ✅      |       ✅        |               |
 | [`yarn`](managers/yarn.md)                 |                      |              |                  |      ✅      |       ✅        |               |
 | [`yarn-berry`](managers/yarn-berry.md)     |                      |              |                  |      ✅      |       ✅        |               |

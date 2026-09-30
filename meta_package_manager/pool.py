@@ -29,6 +29,7 @@ from .dispatch import warm_availability
 from .managers.am import AM
 from .managers.antidote import Antidote
 from .managers.antigen import Antigen
+from .managers.antigravity import Antigravity_CLI_Plugins
 from .managers.apk import APK
 from .managers.apm import APM
 from .managers.apt import APT, APT_Mint
@@ -126,6 +127,7 @@ manager_classes = (
     AM,
     Antidote,
     Antigen,
+    Antigravity_CLI_Plugins,
     APK,
     APM,
     APT,

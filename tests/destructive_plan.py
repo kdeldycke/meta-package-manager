@@ -50,6 +50,9 @@ PACKAGE_IDS = {
     "antidote": "zdharma-continuum/null",
     # Declares no install operation: the round-trip auto-skips.
     "antigen": "zdharma-continuum/null",
+    # agy installs a plugin from a local directory holding a `plugin.json`, which no
+    # host keeps at a known path, hence the entry in INSTALL_REMOVE_BLOCKED_WHEN.
+    "antigravity-cli-plugins": "apricot-notes",
     "apk": "nyancat",
     "apm": "markdown-pdf",
     # AppManager keys every per-app operation on the path of the AppImage file it
@@ -728,6 +731,8 @@ INSTALL_REMOVE_BLOCKED_WHEN: dict[str, bool | Callable[[], bool]] = {
     # AppManager installs an AppImage file the user downloaded, and no host keeps one
     # at a known path. It moves that file away on success besides, so a round-trip
     # would consume its own input.
+    # agy installs a plugin from a local directory, and the runners hold none.
+    "antigravity-cli-plugins": True,
     "app-manager": True,
     # basalt refuses every command, the read-only listing included, without a GitHub
     # token file of its own, and needs the environment its shell-init snippet exports.

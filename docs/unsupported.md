@@ -39,7 +39,7 @@ Declined in {mpm-release}`8.1.0`.
 
 The Antigravity CLI, `agy`, as `topgrade` drives it: `agy update` replaces the `agy` binary and nothing else ([`generic.rs`](https://github.com/topgrade-rs/topgrade/blob/v17.12.2/src/steps/generic.rs#L2919-L2925)). That is the verdict of the [self-updating applications](#self-updating-applications). `antigravity-cli` has a section of its own because it was declined after that family was published.
 
-The same binary also manages plugins, through `agy plugin list`, `install`, `uninstall`, `enable` and `disable` ([Antigravity docs](https://antigravity.google/docs/plugins?tab=cli)). That surface is a separate candidate, and this verdict does not cover it.
+The same binary also manages plugins, through `agy plugin list`, `install`, `uninstall`, `enable` and `disable` ([Antigravity docs](https://antigravity.google/docs/plugins?tab=cli)). That surface is wrapped on its own, as [`antigravity-cli-plugins`](managers/antigravity-cli-plugins.md).
 
 Declined in {mpm-release}`8.1.0`.
 
@@ -672,7 +672,7 @@ Declined in {mpm-release}`8.0.0`.
 
 None of them documents the extension flags VS Code does, so there is no contract to build on, and the one fork the community tested opens a window where a listing was asked for. Contrast [`vscode`](managers/vscode.md), whose `--list-extensions --show-versions` is documented and stable, which is why it is wrapped.
 
-- `antigravity` is two separate products under one name: the Antigravity **IDE**, a VS Code fork that `topgrade` drives with `--update-extensions`, and the Antigravity **CLI** ([`antigravity-cli`](#antigravity-cli)), whose [plugin subcommands](https://antigravity.google/docs/plugins?tab=cli) manage an unrelated set. The IDE's extension flags are documented nowhere, so the row `topgrade` covers has no contract to build on. The `agy plugin list`/`install`/`uninstall` surface is a different tool and would be its own candidate.
+- `antigravity` is two separate products under one name: the Antigravity **IDE**, a VS Code fork that `topgrade` drives with `--update-extensions`, and the Antigravity **CLI** ([`antigravity-cli`](#antigravity-cli)), whose [plugin subcommands](https://antigravity.google/docs/plugins?tab=cli) manage an unrelated set. The IDE's extension flags are documented nowhere, so the row `topgrade` covers has no contract to build on. The `agy plugin list`/`install`/`uninstall` surface is a different tool, wrapped as [`antigravity-cli-plugins`](managers/antigravity-cli-plugins.md).
 - `cursor` opens the editor window instead of listing anything: `--list-extensions` launches the Cursor GUI ([forum.cursor.com](https://forum.cursor.com/t/command-line-list-extensions/103565), where a moderator grants "*this is not expected behavior*" and the thread closes with no fix). Silently opening a window where a listing was asked for is worse than an error, since nothing signals the failure. Its own [CLI documentation](https://cursor.com/docs/cli/installation) covers the separate [`cursor-agent`](#self-updating-applications) binary and never documents the extension flags at all.
 - `windsurf` documents a launcher (`windsurf .`) and never the extension-management flags, so nothing upstream commits to `--list-extensions` behaving as it does in VS Code. The one fork where the community did test it is `cursor`, above. Reassess with a citation the day Windsurf documents the flags or a listing is confirmed working.
 

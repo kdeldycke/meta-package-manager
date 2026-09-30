@@ -15,6 +15,7 @@ keywords = [
   "anaconda",
   "antidote",
   "antigen",
+  "antigravity-cli-plugins",
   "apk",
   "apm",
   "app store",
@@ -1270,6 +1271,11 @@ labels.content-rules."🖥 platform: macOS" = [ "apple", "mac os", "macos", "os 
 labels.content-rules."🖥 platform: Unix" = [ "unix" ]
 labels.content-rules."🖥 platform: Windows" = [ "c:", "microsoft", "windows" ]
 labels.file-rules."📦 manager: am" = [ "meta_package_manager/managers/am.*", "tests/*am*" ]
+labels.file-rules."📦 manager: antigravity-cli-plugins" = [
+  "meta_package_manager/managers/antigravity.*",
+  "tests/*antigravity*",
+  "tests/*antigravity_cli_plugins*",
+]
 labels.file-rules."📦 manager: apk" = [ "meta_package_manager/managers/apk.*", "tests/*apk*" ]
 labels.file-rules."📦 manager: apm" = [ "meta_package_manager/managers/apm.*", "tests/*apm*" ]
 labels.file-rules."📦 manager: app-manager" = [ "meta_package_manager/managers/app_manager.*", "tests/*app_manager*" ]
@@ -1536,6 +1542,11 @@ labels.file-rules."🔌 plugin" = [
 name = "📦 manager: am"
 color = "bfdadc"
 description = "am"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: antigravity-cli-plugins"
+color = "bfdadc"
+description = "antigravity-cli-plugins"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: apk"

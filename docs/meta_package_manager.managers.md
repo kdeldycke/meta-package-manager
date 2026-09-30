@@ -16,6 +16,7 @@
    meta_package_manager.managers.am
    meta_package_manager.managers.antidote
    meta_package_manager.managers.antigen
+   meta_package_manager.managers.antigravity
    meta_package_manager.managers.apk
    meta_package_manager.managers.apm
    meta_package_manager.managers.apt

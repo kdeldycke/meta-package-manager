@@ -674,6 +674,7 @@ through the same service as GitHub.
 """
 
 NO_UPSTREAM = {
+    "antigravity-cli-plugins": "Google ships the Antigravity CLI as a proprietary binary.",
     "apt-mint": "Ships in a distribution package with no public repository.",
     "gcloud": "Google publishes the Cloud SDK as a binary; its source is not.",
     "opkg": "Hosted on the Yocto Project's cgit, which serves no API.",

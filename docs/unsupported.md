@@ -27,22 +27,6 @@ One section per tool, except where several share a verdict word for word: those 
 None of these verdicts are permanent. Each section closes on the `mpm` release that first published its verdict, so an old one rests on an older reading of the tool. If a tool here looks misjudged, make the case in a [new manager request](https://github.com/kdeldycke/meta-package-manager/issues/new?template=new-package-manager.yml) and the entry will be reassessed.
 ```
 
-## [`adless`](https://github.com/WIttyJudge/adless) ❌ 🛟
-
-A domain blocker that rewrites the system hosts file from a set of blocklists and whitelists. Its README names [`maza`](#data-feed-refreshers) and [`pihole`](#data-feed-refreshers) as the projects that inspired it. Its commands are `config`, `enable`, `disable`, `restore`, `status` and `update`, and none of them addresses a package: a blocklist is data fetched from upstream, with nothing to enumerate, version, install or uninstall. The step `topgrade` drives is `sudo adless update`, which refreshes the hosts file ([`unix.rs`](https://github.com/topgrade-rs/topgrade/blob/v17.12.2/src/steps/os/unix.rs#L1147-L1154)).
-
-That is the verdict of the [data feed refreshers](#data-feed-refreshers). `adless` has a section of its own because it was declined after that family was published.
-
-Declined in {mpm-release}`8.1.0`.
-
-## [`antigravity-cli`](https://antigravity.google/product/antigravity-cli) ❌ 🛟
-
-The Antigravity CLI, `agy`, as `topgrade` drives it: `agy update` replaces the `agy` binary and nothing else ([`generic.rs`](https://github.com/topgrade-rs/topgrade/blob/v17.12.2/src/steps/generic.rs#L2919-L2925)). That is the verdict of the [self-updating applications](#self-updating-applications). `antigravity-cli` has a section of its own because it was declined after that family was published.
-
-The same binary also manages plugins, through `agy plugin list`, `install`, `uninstall`, `enable` and `disable` ([Antigravity docs](https://antigravity.google/docs/plugins?tab=cli)). That surface is wrapped on its own, as [`antigravity-cli-plugins`](managers/antigravity-cli-plugins.md).
-
-Declined in {mpm-release}`8.1.0`.
-
 ## [`app-man`](https://github.com/ivan-hc/AppMan) ❌ 🛟
 
 The same AppImage manager as [`am`](managers/am.md), which `mpm` wraps, under a second name. Its repository carries no implementation at all, only a stub that replaces its own contents with AM's and re-executes it: "*Since version 5, "AppMan" and "AM" have been meged to share the same code*". The script then reads the path it was invoked through to decide whether to install system-wide or under the user's home, which is the entire difference between the two. Wrapping it would also double-count, since `am -fi` already lists AppMan's applications in a table of their own.
@@ -142,9 +126,9 @@ Declined in {mpm-release}`8.0.0`.
 
 ## Data feed refreshers ❌ 🛟
 
-[`maza`](https://github.com/tanrax/maza-ad-blocking), [`pihole`](https://pi-hole.net) and [`tldr`](https://tldr.sh).
+[`adless`](https://github.com/WIttyJudge/adless), [`maza`](https://github.com/tanrax/maza-ad-blocking), [`pihole`](https://pi-hole.net) and [`tldr`](https://tldr.sh).
 
-Each refreshes a local copy of data fetched from upstream, and that data is not a package: there is nothing to enumerate, version, install or uninstall. `maza` rewrites the local hosts file from an upstream blocklist. `pihole` is a DNS ad blocker updating its own installation and its blocklists, so it manages a network service and its data rather than packages on the host. `tldr` refreshes a local cache of community-written command summaries, and those pages are documentation.
+Each refreshes a local copy of data fetched from upstream, and that data is not a package: there is nothing to enumerate, version, install or uninstall. `adless` and `maza` rewrite the local hosts file from upstream blocklists. `pihole` is a DNS ad blocker updating its own installation and its blocklists, so it manages a network service and its data rather than packages on the host. `tldr` refreshes a local cache of community-written command summaries, and those pages are documentation.
 
 Contrast the [system database refreshers](#system-database-refreshers), which rebuild from files already on disk.
 
@@ -550,11 +534,16 @@ Declined in {mpm-release}`8.0.0`.
 
 ## Self-updating applications ❌ 🛟
 
-[`atuin`](https://atuin.sh), [`claude-code`](https://claude.com/product/claude-code), [`codex`](https://github.com/openai/codex), [`cursor-agent`](https://cursor.com/cli), [`deno`](https://deno.com), [`flutter`](https://flutter.dev), [`fossil`](https://fossil-scm.org), [`helix-db`](https://helix-db.com), [`hermes-agent`](https://hermes-agent.nousresearch.com), [`opencode`](https://github.com/sst/opencode), [`spicetify`](https://spicetify.app) and [`typst`](https://typst.app).
+[`antigravity-cli`](https://antigravity.google/product/antigravity-cli), [`atuin`](https://atuin.sh), [`claude-code`](https://claude.com/product/claude-code), [`codex`](https://github.com/openai/codex), [`cursor-agent`](https://cursor.com/cli), [`deno`](https://deno.com), [`flutter`](https://flutter.dev), [`fossil`](https://fossil-scm.org), [`helix-db`](https://helix-db.com), [`hermes-agent`](https://hermes-agent.nousresearch.com), [`opencode`](https://github.com/sst/opencode), [`spicetify`](https://spicetify.app), [`typst`](https://typst.app) and [`zed`](https://zed.dev).
 
 Update only themselves. There is no catalog, no inventory and no per-package operation to map: the whole surface is one command that replaces the binary in place.
 
-Wikipedia: [Claude Code](https://en.wikipedia.org/wiki/Claude_Code), [Codex CLI](https://en.wikipedia.org/wiki/Codex_CLI), [Deno (software)](https://en.wikipedia.org/wiki/Deno_(software)), [Flutter (software)](https://en.wikipedia.org/wiki/Flutter_(software)), [Fossil (software)](https://en.wikipedia.org/wiki/Fossil_(software)), [Hermes Agent](https://en.wikipedia.org/wiki/Hermes_Agent), [OpenCode](https://en.wikipedia.org/wiki/OpenCode) and [Typst](https://en.wikipedia.org/wiki/Typst).
+Two carry evidence of their own:
+
+- `antigravity-cli` is `agy`, whose `agy update` replaces the binary and nothing else ([`generic.rs`](https://github.com/topgrade-rs/topgrade/blob/v17.12.2/src/steps/generic.rs#L2919-L2925)). The same binary also manages plugins, wrapped on their own as [`antigravity-cli-plugins`](managers/antigravity-cli-plugins.md).
+- `zed` does have a catalog of extensions, but nothing outside the editor reaches it: its command line declares no flag to list, install, remove or update one ([`crates/cli/src/main.rs`](https://github.com/zed-industries/zed/blob/v1.21.0/crates/cli/src/main.rs#L67-L156)), and `topgrade` reinstalls the editor alone ([`linux.rs`](https://github.com/topgrade-rs/topgrade/blob/v17.12.2/src/steps/os/linux.rs#L1203-L1288)). The request for such a command line is an open discussion, [zed-industries/zed#49790](https://github.com/zed-industries/zed/discussions/49790), where a `topgrade` maintainer says of that step: "*Only Zed itself though, not the extensions*" ([comment](https://github.com/zed-industries/zed/discussions/49790#discussioncomment-18518653)). Two earlier requests, [zed-industries/zed#12324](https://github.com/zed-industries/zed/issues/12324) and [zed-industries/zed#19906](https://github.com/zed-industries/zed/issues/19906), were closed as not planned in a cleanup of old feature requests, not on their merits. Reassess once the command line can list extensions. Checked against Zed `1.21.0`.
+
+Wikipedia: [Claude Code](https://en.wikipedia.org/wiki/Claude_Code), [Codex CLI](https://en.wikipedia.org/wiki/Codex_CLI), [Deno (software)](https://en.wikipedia.org/wiki/Deno_(software)), [Flutter (software)](https://en.wikipedia.org/wiki/Flutter_(software)), [Fossil (software)](https://en.wikipedia.org/wiki/Fossil_(software)), [Hermes Agent](https://en.wikipedia.org/wiki/Hermes_Agent), [OpenCode](https://en.wikipedia.org/wiki/OpenCode), [Typst](https://en.wikipedia.org/wiki/Typst) and [Zed (text editor)](https://en.wikipedia.org/wiki/Zed_(text_editor)).
 
 Declined in {mpm-release}`8.0.0`.
 
@@ -672,7 +661,7 @@ Declined in {mpm-release}`8.0.0`.
 
 None of them documents the extension flags VS Code does, so there is no contract to build on, and the one fork the community tested opens a window where a listing was asked for. Contrast [`vscode`](managers/vscode.md), whose `--list-extensions --show-versions` is documented and stable, which is why it is wrapped.
 
-- `antigravity` is two separate products under one name: the Antigravity **IDE**, a VS Code fork that `topgrade` drives with `--update-extensions`, and the Antigravity **CLI** ([`antigravity-cli`](#antigravity-cli)), whose [plugin subcommands](https://antigravity.google/docs/plugins?tab=cli) manage an unrelated set. The IDE's extension flags are documented nowhere, so the row `topgrade` covers has no contract to build on. The `agy plugin list`/`install`/`uninstall` surface is a different tool, wrapped as [`antigravity-cli-plugins`](managers/antigravity-cli-plugins.md).
+- `antigravity` is two separate products under one name: the Antigravity **IDE**, a VS Code fork that `topgrade` drives with `--update-extensions`, and the Antigravity **CLI** ([`antigravity-cli`](#self-updating-applications)), whose [plugin subcommands](https://antigravity.google/docs/plugins?tab=cli) manage an unrelated set. The IDE's extension flags are documented nowhere, so the row `topgrade` covers has no contract to build on. The `agy plugin list`/`install`/`uninstall` surface is a different tool, wrapped as [`antigravity-cli-plugins`](managers/antigravity-cli-plugins.md).
 - `cursor` opens the editor window instead of listing anything: `--list-extensions` launches the Cursor GUI ([forum.cursor.com](https://forum.cursor.com/t/command-line-list-extensions/103565), where a moderator grants "*this is not expected behavior*" and the thread closes with no fix). Silently opening a window where a listing was asked for is worse than an error, since nothing signals the failure. Its own [CLI documentation](https://cursor.com/docs/cli/installation) covers the separate [`cursor-agent`](#self-updating-applications) binary and never documents the extension flags at all.
 - `windsurf` documents a launcher (`windsurf .`) and never the extension-management flags, so nothing upstream commits to `--list-extensions` behaving as it does in VS Code. The one fork where the community did test it is `cursor`, above. Reassess with a citation the day Windsurf documents the flags or a listing is confirmed working.
 
@@ -713,16 +702,6 @@ That is the verdict the [self-updating applications](#self-updating-applications
 Wikipedia: [yt-dlp](https://en.wikipedia.org/wiki/Yt-dlp).
 
 Declined in {mpm-release}`8.0.0`.
-
-## [`zed`](https://zed.dev) ❌ 🛟
-
-The Zed editor. `topgrade` updates the editor alone: on Linux, its step compares the installed version with the latest GitHub release and reruns Zed's install script ([`linux.rs`](https://github.com/topgrade-rs/topgrade/blob/v17.12.2/src/steps/os/linux.rs#L1203-L1288)). Zed has a catalog of extensions, but nothing outside the editor reaches it: its command line declares no flag to list, install, remove or update one ([`crates/cli/src/main.rs`](https://github.com/zed-industries/zed/blob/v1.21.0/crates/cli/src/main.rs#L67-L156)).
-
-The request for such a command line is an open discussion, [zed-industries/zed#49790](https://github.com/zed-industries/zed/discussions/49790), where a `topgrade` maintainer says of the new step: "*Only Zed itself though, not the extensions*" ([comment](https://github.com/zed-industries/zed/discussions/49790#discussioncomment-18518653)). Two earlier requests, [zed-industries/zed#12324](https://github.com/zed-industries/zed/issues/12324) and [zed-industries/zed#19906](https://github.com/zed-industries/zed/issues/19906), were closed as not planned in a cleanup of old feature requests, not on their merits. Reassess once the command line can list extensions. Checked against Zed `1.21.0`.
-
-Wikipedia: [Zed (text editor)](https://en.wikipedia.org/wiki/Zed_(text_editor)).
-
-Declined in {mpm-release}`8.1.0`.
 
 ## [`zgenom`](https://github.com/jandamm/zgenom) ❌ 🛟
 

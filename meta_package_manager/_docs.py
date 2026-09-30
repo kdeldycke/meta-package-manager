@@ -382,10 +382,12 @@ def unsupported_sections() -> tuple[UnsupportedSection, ...]:
     fifteen JetBrains IDEs answer to a single section rather than fifteen copies
     of one paragraph.
 
-    A family shares its {data}`DECLINE_STAMP` too, since its members were
-    declined together. A tool joining one later is declined into a verdict that
-    already stood, so it earns its own section unless the family's release is
-    still true of it.
+    A family also shares its {data}`DECLINE_STAMP`, which names the release that
+    first published the verdict. A tool declined later on the same grounds joins
+    the family rather than opening a section of its own: one shared reason is less
+    to read than several saying the same thing. Evidence of its own goes in a
+    bullet under the shared verdict, and the changelog records the release that
+    added it.
 
     Only glyph-bearing headings are verdicts. A heading without them is plain
     page structure, like the project-scoped ecosystems closing the page, and is

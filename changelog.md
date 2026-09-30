@@ -31,6 +31,7 @@
 - [mpm] Fix every command hanging for a non-root user in a SliTaz terminal: the `sudo` check waited on the root password prompt of SliTaz's `su` wrapper.
 - [mpm] Pass `--keep-cwd` to `pkexec` only from polkit `121` on: older releases read it as the program to run, which failed every escalated command.
 - [mpm] Make a `pkexec` call that polkit does not authorize fail, instead of waiting on a password prompt inside the run.
+- [mpm] Document the `.pkla` grant for `pkexec` on polkit older than `0.106`, which reads no JavaScript rules.
 
 ## [`8.0.2` (2026-09-28)](https://github.com/kdeldycke/meta-package-manager/compare/v8.0.1...v8.0.2)
 

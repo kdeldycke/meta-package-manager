@@ -377,7 +377,9 @@ class Escalator:
 
     `sudo` and `doas` need no template: both reset the environment too, but
     through a `sudoers` policy whose `env_keep` the host owns, which is where
-    such a decision belongs. `pkexec` clears it outright and would need the
+    such a decision belongs. `pkexec` clears it down to a fixed list, which
+    holds `LANG` and every `LC_*` variable, so the `LC_ALL=C` above survives
+    it and only `BATCH=yes` is lost. Carrying that one would need the
     `pkexec env NAME=VALUE ...` idiom rather than a per-variable flag, so it
     keeps `None` until a manager on a polkit-only host asks for one.
     """
@@ -696,13 +698,15 @@ a run raises its own UAC dialog, where one answered `gsudo cache on` covers
 every later one. It is the fallback for a host carrying no `gsudo`, not the
 default for a host carrying both.
 
-`pkexec` sits before them, and auto-detection essentially never reaches it: it
-ships wherever polkit does, which is nearly every desktop Linux, and those
-carry `sudo` too. It is there for `--sudo-command pkexec`, and it only works
-where a polkit rule already grants `org.freedesktop.policykit.exec`, since it
-cannot escalate without prompting. The probe is what keeps that honest: a host
-without the rule reports a cold cache and its managers decline to run, rather
-than each of them stopping on a prompt inside the fan-out.
+`pkexec` sits before them, and auto-detection rarely reaches it: it ships
+wherever polkit does, which is nearly every desktop Linux, and those carry
+`sudo` too. SliTaz is the exception, its `sudo` being a `su -c` wrapper that
+fails the identity probe. It is also there for `--sudo-command pkexec`, and
+it only works where a polkit rule already grants
+`org.freedesktop.policykit.exec`, since it cannot escalate without prompting.
+The probe is what keeps that honest: a host without the rule reports a cold
+cache and its managers decline to run, rather than each of them stopping on a
+prompt inside the fan-out.
 """
 
 _SUDO_KEEPALIVE_INTERVAL: Final = 60

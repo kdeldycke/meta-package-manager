@@ -10,6 +10,7 @@
 - [scoop] Raise the Scoop floor to `0.6.0`, which fixes its `--version` output. Run `scoop update` to upgrade an older install.
 - [scoop] Install the requested version on `mpm install <package>@<version>` and `mpm restore`. Scoop pins such a package, so `outdated` and `upgrade` skip it.
 - [sfsu] Note on its page that upstream looks for new maintainers and now ships only fixes.
+- [mpm] Record `hok` as unsupported: its listing drops every app that Scoop `0.6.0` installed.
 - [bar-plugin] Fix the preview screenshot Xbar's website shows for the plugin, which named a renamed file.
 - [mpm] Close `install`, `remove`, `upgrade`, `restore` and `cleanup --orphans` on a report of every package upgraded, downgraded, installed, removed, held or still outdated, with its versions, as a table honoring `--table-format` and `--columns`.
 - [mpm] List the privileged operations of every manager on its page, not only those of the bundled definitions.

@@ -249,6 +249,14 @@ Wikipedia: [Helm (package manager)](https://en.wikipedia.org/wiki/Helm_(package_
 
 Declined in {mpm-release}`8.0.0`.
 
+## [`hok`](https://github.com/chawyehsu/hok) ❌
+
+Rust reimplementation of Scoop, working on the same buckets and `~/scoop` tree as [`scoop`](managers/scoop.md) and [`sfsu`](managers/sfsu.md). Its listing disqualifies it. `hok list` predates the `scoop-install.json` and `scoop-manifest.json` names that Scoop `0.6.0` writes, and `0.6.0` is the floor `mpm` requires, so every app Scoop installed or updated since then silently drops out. On a Windows 11 arm64 host it listed 2 of 5 apps and exited `0`, and a copy of the missing app's metadata under the old names brought it back. No upstream issue tracks the rename yet.
+
+Its mutating verbs are no fallback: the author's own checklist in [chawyehsu/hok#15](https://github.com/chawyehsu/hok/issues/15) still leaves archive decompression, shims and PowerShell hosting unfinished before `hok install` and `hok uninstall` can be relied on. The newest release, `0.1.0-beta.7`, dates from 2024-12-10, and the community pull requests opened since then stay open. Reassess once a release reads the `scoop-` names. Checked against hok `0.1.0-beta.7` and Scoop `0.6.0`.
+
+Declined in {mpm-release}`8.1.0`.
+
 ## [`install-release`](https://github.com/Rishang/install-release) ❌ 🛟
 
 Installer of single-binary tools from GitHub and GitLab releases, reporting no version of its own, which is the requirement {attr}`~meta_package_manager.manager.PackageManager.fresh` enforces: without one the manager is never considered available. Both executables it ships, `ir` and `install-release`, reject `--version`, `-V`, `-v` and a `version` subcommand alike, all four checked against `0.8.4`, and no request for one has ever been filed upstream. The companion-binary route that rescued [`raco`](managers/raco.md) does not apply either, the two executables being one entry point under two names rather than a versioned sibling. Otherwise well shaped, which is worth recording: `ls`, `get`, `rm`, `upgrade` and `hold` would have mapped cleanly. The [`zgenom`](#zgenom) verdict. Its own scope is narrower than its help suggests, too: every invocation on macOS answers "*Package installation is only supported on Linux*" and lists nothing, where the help advertises "*Linux/MacOS*".

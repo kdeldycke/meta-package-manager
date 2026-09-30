@@ -223,6 +223,13 @@ class ProtonPlus(PackageManager):
 
         A record naming no launcher or no runner is skipped, since no command
         could address its release.
+
+        ```{todo}
+        Read the inventory from `protonplus list` and drop the record scan, with
+        {data}`GROUP_DIRECTORIES` and the launcher directory table, once
+        [Vysp3r/ProtonPlus#1313](https://github.com/Vysp3r/ProtonPlus/issues/1313)
+        makes `list` print the runner ID and tag of each release.
+        ```
         """
         tags: dict[str, list[str]] = {}
         for record in self._records():

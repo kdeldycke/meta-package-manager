@@ -177,6 +177,33 @@ goes unflagged. Priming still authenticates; only the watchdog is suppressed.
 """
 
 
+def _run_probe(args: tuple[str, ...]) -> subprocess.CompletedProcess[str] | None:
+    """Ask an escalator binary a question, detached from the terminal.
+
+    `stdin` is closed and the probe runs in a session of its own, so it has no
+    terminal to read a password from. A stand-in for an escalator may prompt,
+    and the prompt would land in the output captured here, where nobody sees
+    it. SliTaz's `/usr/bin/sudo` is such a stand-in, a BusyBox `su -c` wrapper:
+    its root password prompt blocked every command a non-root user ran in a
+    terminal, before the first manager call.
+
+    Returns `None` when the binary cannot run: it vanished between `which()`
+    and here, or is not executable.
+    """
+    try:
+        return subprocess.run(
+            args,
+            capture_output=True,
+            check=False,
+            text=True,
+            encoding="UTF-8",
+            stdin=subprocess.DEVNULL,
+            start_new_session=True,
+        )
+    except OSError:
+        return None
+
+
 @dataclass(frozen=True)
 class Escalator:
     """One privilege-escalation binary, and the argv dialects mpm drives it with.
@@ -401,17 +428,8 @@ class Escalator:
         """
         if not self.identity_args:
             return True
-        try:
-            probe = subprocess.run(
-                self.identity_args,
-                capture_output=True,
-                check=False,
-                text=True,
-                encoding="UTF-8",
-            )
-        except OSError:
-            # The binary vanished between `which()` and here, or is not
-            # executable. Either way it cannot be driven.
+        probe = _run_probe(self.identity_args)
+        if probe is None:
             return False
         # `stdout` is `None` whenever the output was not captured, so it is
         # normalized rather than trusted to be a string.

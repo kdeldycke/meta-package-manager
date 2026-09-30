@@ -1325,6 +1325,9 @@ def _both_escalators_installed():
         # A stand-in free to accept the option is still not sudo, so the
         # marker is checked and not just the exit status.
         pytest.param(0, "some other tool 1.0\n", False, id="silent-impostor"),
+        # SliTaz 5.0's `su -c` wrapper, run as a non-root user with no terminal:
+        # BusyBox `su` prints its prompt, reads nothing, and the wrapper exits 0.
+        pytest.param(0, "Password: \n", False, id="slitaz-su-wrapper"),
         # Nothing captured at all.
         pytest.param(0, None, False, id="no-output"),
     ),
@@ -1355,6 +1358,23 @@ def test_escalator_identity_probe_survives_a_missing_binary():
     rather than crashing the run."""
     with patch("meta_package_manager.sudo.subprocess.run", side_effect=OSError):
         assert ESCALATORS[0].is_genuine() is False
+
+
+@pytest.mark.parametrize(
+    "probe",
+    (pytest.param(ESCALATORS[0].is_genuine, id="identity"),),
+)
+def test_escalator_probes_never_reach_the_terminal(probe):
+    """A stand-in may prompt, so a probe gets no terminal to prompt on.
+
+    SliTaz's `/usr/bin/sudo` wraps `su -c`, whose root password prompt landed
+    in the captured output and blocked every command of a non-root user.
+    """
+    with patch("meta_package_manager.sudo.subprocess.run") as run:
+        run.return_value = subprocess.CompletedProcess((), 0, stdout="")
+        probe()
+    assert run.call_args.kwargs["stdin"] is subprocess.DEVNULL
+    assert run.call_args.kwargs["start_new_session"] is True
 
 
 def test_resolve_escalator_skips_an_impostor_for_the_real_thing():

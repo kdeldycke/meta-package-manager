@@ -28,6 +28,7 @@
 - [mpm] Run privileged commands directly when `mpm` runs as root, instead of through `sudo`, `doas`, `run0` or `pkexec`: as root on SliTaz 5.0, every one failed.
 - [tazpkg] Fix `search` listing an installed package twice.
 - [tazpkg] Fail `install` and `upgrade` when TazPkg refuses to install anything until it upgrades itself, instead of reporting success.
+- [mpm] Fix every command hanging for a non-root user in a SliTaz terminal: the `sudo` check waited on the root password prompt of SliTaz's `su` wrapper.
 
 ## [`8.0.2` (2026-09-28)](https://github.com/kdeldycke/meta-package-manager/compare/v8.0.1...v8.0.2)
 

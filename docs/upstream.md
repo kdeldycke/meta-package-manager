@@ -140,6 +140,10 @@ The SPDX documents `brew` generates point their `documentNamespace` at `https://
 
 - [astral-sh/uv#18792](https://github.com/astral-sh/uv/issues/18792): prune stale `exclude-newer-package` entries on `uv lock`.
 
+### `sfsu`
+
+- [winpax/sfsu#1180](https://github.com/winpax/sfsu/issues/1180): on Windows on ARM, [`sfsu`](managers/sfsu.md) reads every app installed for `arm64` as `Install failed`, and its `status` skips them.
+
 ### [packageurl-python](https://github.com/package-url/packageurl-python)
 
 - [package-url/packageurl-python#188](https://github.com/package-url/packageurl-python/pull/188): add `PURL_TYPES` and enforce validation of purl types. Until it lands, `mpm` ships its own purl-type mapping in `meta_package_manager/specifier.py`.

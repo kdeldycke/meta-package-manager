@@ -40,6 +40,13 @@ class SFSU(PackageManager):
     parsed as structured objects instead of the whitespace tables Scoop prints.
     """
 
+    maintenance_note = (
+        "Since 2026-09-21, the sfsu readme [looks for maintainers]"
+        "(https://github.com/orgs/winpax/discussions/958): its author no longer "
+        "runs Windows, and commits only to bug fixes and parity with Scoop. It "
+        "points to [hok](https://github.com/chawyehsu/hok) as an alternative."
+    )
+
     # sfsu implements no mutating verbs, so `install`, `remove` and both
     # upgrade commands are bound straight to Scoop through the `Delegate`
     # descriptor: those operations run the `scoop` binary, and a host with

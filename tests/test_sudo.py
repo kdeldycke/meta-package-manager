@@ -1673,11 +1673,16 @@ def test_prime_sudo_names_the_remedy_without_tty(escalator, caplog):
     )
 
 
-@pytest.mark.parametrize("escalator", ESCALATORS, ids=[e.id for e in ESCALATORS])
+PROMPT_BLIND = [e for e in ESCALATORS if e.retention_markers is None]
+"""Escalators whose probe cannot tell ahead of a prompt whether it would keep
+the authorization."""
+
+
+@pytest.mark.parametrize("escalator", PROMPT_BLIND, ids=[e.id for e in PROMPT_BLIND])
 def test_prime_sudo_warns_when_the_prompt_keeps_nothing(escalator, caplog):
     """A prompt answered, then a probe still cold: the policy keeps no
-    authorization, like `doas` without `persist` or polkit under `auth_admin`.
-    One warning names the remedy, and no keepalive pretends otherwise."""
+    authorization, like `doas` without `persist` or `run0` over SSH. One
+    warning names the remedy, and no keepalive pretends otherwise."""
     ctx = click.Context(click.Command("mpm"))
     prompt_args = escalator.prompt_args
 
@@ -1704,6 +1709,51 @@ def test_prime_sudo_warns_when_the_prompt_keeps_nothing(escalator, caplog):
         and escalator.remedy in record.getMessage()
         for record in caplog.records
     )
+
+
+# `pkcheck` answers, on polkit 0.104 under SliTaz 5.0, a cold probe of each policy.
+AUTH_ADMIN_KEEP = b"polkit\\56retains_authorization_after_challenge=1\n"
+AUTH_ADMIN = b""
+
+
+@pytest.mark.parametrize(
+    ("probe_stdout", "prompted"),
+    (
+        pytest.param(AUTH_ADMIN_KEEP, True, id="auth_admin_keep"),
+        pytest.param(AUTH_ADMIN, False, id="auth_admin"),
+    ),
+)
+def test_prime_sudo_prompts_only_when_polkit_keeps_it(caplog, probe_stdout, prompted):
+    """polkit says ahead of a prompt whether it keeps what the password buys.
+    Under `auth_admin` it keeps nothing, so no password is asked for at all."""
+    pkexec = next(e for e in ESCALATORS if e.id == "pkexec")
+    ctx = click.Context(click.Command("mpm"))
+    authenticated = []
+
+    def answer(argv, **kwargs):
+        """A cold probe until the prompt authenticates, as polkit keeps it."""
+        if tuple(argv) == pkexec.prompt_args:
+            authenticated.append(argv)
+            return subprocess.CompletedProcess((), 0)
+        return subprocess.CompletedProcess((), 0 if authenticated else 2, probe_stdout)
+
+    with (
+        prime_sudo_env(stdin_tty=True, stderr_tty=True) as run,
+        only_escalator("pkexec", selected="pkexec"),
+        caplog.at_level(logging.WARNING),
+    ):
+        run.side_effect = answer
+        try:
+            prime_sudo(ctx, [_escalating_manager()], operations=INSTALL_RUN)
+            assert _SUDO_CACHE_WARM.is_set() is prompted
+        finally:
+            ctx.close()
+    assert bool(authenticated) is prompted
+    warned = any(
+        "keeps no authorization past a password prompt" in record.getMessage()
+        for record in caplog.records
+    )
+    assert warned is not prompted
 
 
 @pytest.mark.parametrize("escalator", ESCALATORS, ids=[e.id for e in ESCALATORS])

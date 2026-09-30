@@ -360,6 +360,18 @@ class Escalator:
     (`test-framework/sudo-test/src/lib.rs`).
     """
 
+    retention_markers: tuple[str, ...] | None = None
+    """Substrings a cold {attr}`probe_args` answer prints when a password prompt
+    would authorize the commands after it too, or `None` where the probe cannot
+    tell.
+
+    Only `pkcheck` can: polkit adds
+    `polkit\\56retains_authorization_after_challenge=1` to its `<stdout>` under
+    `auth_admin_keep`, and nothing under `auth_admin`, where a prompt authorizes
+    its own command alone. {func}`prime_sudo` then skips the prompt, since the
+    password would buy nothing. Measured on polkit `0.104`, SliTaz 5.0.
+    """
+
     probe_command: str | None = None
     """The stand-in command {attr}`probe_args` runs, where the escalator's rules
     can match single commands, or `None`.
@@ -639,6 +651,7 @@ ESCALATORS: Final[tuple[Escalator, ...]] = (
             "Grant `org.freedesktop.policykit.exec` with a polkit rule, or with a "
             "`.pkla` file before polkit `0.106`."
         ),
+        retention_markers=("retains_authorization_after_challenge=1",),
         gated_options=(("--keep-cwd", "121"),),
         # `pkexec version 0.104` on SliTaz 5.0, `pkexec version 127` on Arch.
         version_args=("pkexec", "--version"),
@@ -1456,6 +1469,11 @@ def prime_sudo(
         f"{escalator.id} keeps no authorization past a password prompt: {ids} "
         f"may fail. {escalator.remedy}"
     )
+    if escalator.retention_markers is not None:
+        probe_output = (probe.stdout or b"").decode("UTF-8", errors="replace")
+        if not any(marker in probe_output for marker in escalator.retention_markers):
+            logging.warning(no_retention)
+            return
 
     echo(
         f"{ids} need{'s' if len(escalating) == 1 else ''} administrator rights to "

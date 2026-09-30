@@ -56,6 +56,7 @@ from meta_package_manager.sudo import (
     _is_permission_failure,
     _is_sudo_auth_failure,
     _is_sudo_denied,
+    _probe_credentials,
     inspect_install_root,
     prime_sudo,
     resolve_escalator,
@@ -1649,6 +1650,45 @@ def test_every_escalator_names_a_remedy(escalator):
     """Warnings go on after the remedy, so it is a sentence of its own."""
     assert escalator.remedy[0].isupper()
     assert escalator.remedy.endswith(".")
+
+
+def test_credential_probe_keeps_the_terminal_but_not_its_input():
+    """`sudo` keys its credential cache on the controlling terminal, so the
+    probe stays in mpm's session. A stand-in asking for a password reads
+    nothing instead of waiting."""
+    with patch("meta_package_manager.sudo.subprocess.run") as run:
+        run.return_value = subprocess.CompletedProcess((), 0)
+        _probe_credentials(ESCALATORS[0])
+    assert run.call_args.kwargs["stdin"] is subprocess.DEVNULL
+    assert "start_new_session" not in run.call_args.kwargs
+
+
+@pytest.mark.parametrize(
+    ("on_path", "genuine", "warns"),
+    (
+        pytest.param(True, False, True, id="stand-in"),
+        pytest.param(True, True, False, id="genuine"),
+        pytest.param(False, False, False, id="missing"),
+    ),
+)
+def test_override_warns_on_a_stand_in(caplog, on_path, genuine, warns):
+    """`--sudo-command` is honored even for a stand-in, with one warning:
+    SliTaz's `sudo` wraps `su -c` and exits 0 whatever happened."""
+    with (
+        patch(
+            "meta_package_manager.sudo.shutil.which",
+            return_value="/usr/bin/sudo" if on_path else None,
+        ),
+        patch.object(Escalator, "is_genuine", return_value=genuine),
+        caplog.at_level(logging.WARNING),
+    ):
+        escalator = resolve_escalator("sudo")
+    assert escalator is not None
+    assert escalator.id == "sudo"
+    warned = any(
+        "does not identify as sudo" in record.getMessage() for record in caplog.records
+    )
+    assert warned is warns
 
 
 # Stall watchdog: a mutating call of an internal escalator (cask, fink) that goes

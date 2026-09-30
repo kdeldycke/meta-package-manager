@@ -773,6 +773,14 @@ def resolve_escalator(override: str | None = None) -> Escalator | None:
     if override is not None:
         for escalator in ESCALATORS:
             if escalator.id == override:
+                # Honored all the same, but a stand-in answers differently:
+                # SliTaz's `sudo` wraps `su -c` and exits 0 whatever happened,
+                # and Alpine's `doas-sudo-shim` rejects every probe.
+                if shutil.which(escalator.binary_name) and not escalator.is_genuine():
+                    logging.warning(
+                        f"The {escalator.binary_name} on PATH does not identify "
+                        f"as {escalator.id}: mpm may misread its answers.",
+                    )
                 return escalator
         # An unknown name is a configuration error, not a reason to escalate
         # through something the user did not ask for.
@@ -1091,6 +1099,28 @@ def inspect_install_root(manager: PackageManager) -> InstallRoot | None:
     return InstallRoot(path=path, owner_uid=uid, owner_name=owner_name)
 
 
+def _probe_credentials(
+    escalator: Escalator,
+) -> subprocess.CompletedProcess[bytes] | None:
+    """Run the credential probe of `escalator`, or `None` when it cannot run.
+
+    Unlike `_run_probe`, it keeps the controlling terminal, since `sudo` keys
+    its credential cache on it. Only `stdin` is closed, so a stand-in escalator
+    that asks for a password reads nothing and fails instead of waiting.
+    """
+    try:
+        return subprocess.run(
+            escalator.resolved_probe_args(),
+            capture_output=True,
+            check=False,
+            stdin=subprocess.DEVNULL,
+        )
+    except OSError:
+        # Not on PATH (FileNotFoundError), or one that cannot be run: not
+        # executable for this user (PermissionError), not a valid binary.
+        return None
+
+
 def _start_sudo_keepalive(ctx: Context, escalator: Escalator) -> None:
     """Keep the credential cache of `escalator` fresh for the rest of the invocation.
 
@@ -1117,16 +1147,12 @@ def _start_sudo_keepalive(ctx: Context, escalator: Escalator) -> None:
 
     def keepalive() -> None:
         while not stop.wait(_SUDO_KEEPALIVE_INTERVAL):
-            refresh = subprocess.run(
-                escalator.resolved_probe_args(),
-                capture_output=True,
-                check=False,
-            )
+            refresh = _probe_credentials(escalator)
             # A refresh racing the teardown must not touch the flag the
             # teardown just cleared.
             if stop.is_set():
                 break
-            if refresh.returncode == 0:
+            if refresh is not None and escalator.probe_says_warm(refresh):
                 if not _SUDO_CACHE_WARM.is_set():
                     logging.info("The sudo credentials are warm again.")
                 else:
@@ -1200,7 +1226,12 @@ def _escalation_is_passwordless(
         probe_cli = (*escalator.passwordless_probe_args, str(cli_path))
         logging.debug(f"Probe the {escalator.id} policy: {' '.join(probe_cli)}")
         try:
-            probe = subprocess.run(probe_cli, capture_output=True, check=False)
+            probe = subprocess.run(
+                probe_cli,
+                capture_output=True,
+                check=False,
+                stdin=subprocess.DEVNULL,
+            )
         except OSError:
             return False
         if probe.returncode != 0:
@@ -1318,20 +1349,14 @@ def prime_sudo(
                 extra={"label": manager.subject},
             )
 
-    probe_args = escalator.resolved_probe_args()
-    try:
-        logging.debug(
-            f"Probe the {escalator.id} credential cache: {' '.join(probe_args)}",
-        )
-        probe = subprocess.run(
-            probe_args,
-            capture_output=True,
-            check=False,
-        )
-    except OSError:
-        # Not on PATH (FileNotFoundError), or one that cannot be run: not executable
-        # for this user (PermissionError), not a valid binary (OSError). Degrade to a
-        # warning and let unprivileged managers proceed rather than crash.
+    logging.debug(
+        f"Probe the {escalator.id} credential cache: "
+        f"{' '.join(escalator.resolved_probe_args())}",
+    )
+    probe = _probe_credentials(escalator)
+    if probe is None:
+        # Degrade to a warning and let unprivileged managers proceed rather
+        # than crash.
         logging.warning(
             f"{escalator.id} could not be run: managers needing root may fail. "
             "Drop escalation with `--no-sudo` or a `[mpm] sudo = false` entry in "

@@ -814,9 +814,31 @@ def test_build_cli_escalates_with_sudo_n_when_policy_on():
     """
     manager = FakeManager()
     manager.sudo = True
-    with only_escalator("sudo"):
+    with (
+        only_escalator("sudo"),
+        patch(
+            "meta_package_manager.execution.os.geteuid", return_value=501, create=True
+        ),
+    ):
         cli = manager.build_cli("install", "pkg", sudo=True)
     assert cli[:2] == ("sudo", "--non-interactive")
+
+
+def test_build_cli_no_escalation_as_root():
+    """Root runs a privileged op bare, whatever escalator the host carries.
+
+    Wrapping it would only add ways to fail: SliTaz 5.0's `pkexec` predates
+    `--keep-cwd`, and a container often ships no escalator at all.
+    """
+    manager = FakeManager()
+    manager.sudo = True
+    with (
+        only_escalator("pkexec"),
+        patch("meta_package_manager.execution.os.geteuid", return_value=0, create=True),
+    ):
+        cli = manager.build_cli("install", "pkg", sudo=True)
+    assert cli[0] == str(manager.cli_path)
+    assert "pkexec" not in cli
 
 
 def test_build_cli_no_escalation_when_policy_off():
@@ -976,7 +998,12 @@ def test_run_hints_when_sudo_cannot_authenticate(tmp_path, monkeypatch, caplog):
     # `run0` on a systemd runner and nothing on macOS, and `resolve_escalator`
     # caches, so the failure only lands when this test is the first in its
     # worker to resolve one.
-    with only_escalator("sudo"):
+    with (
+        only_escalator("sudo"),
+        patch(
+            "meta_package_manager.execution.os.geteuid", return_value=501, create=True
+        ),
+    ):
         cli = manager.build_cli("-c", "pass", sudo=True)
         assert cli[:2] == ("sudo", "--non-interactive")
         with caplog.at_level(logging.WARNING):

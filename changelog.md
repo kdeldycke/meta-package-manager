@@ -25,6 +25,7 @@
 - [mpm] Close `install`, `remove`, `upgrade`, `restore` and `cleanup --orphans` on a report of every package upgraded, downgraded, installed, removed, held or still outdated, with its versions, as a table honoring `--table-format` and `--columns`.
 - [mpm] List the privileged operations of every manager on its page, not only those of the bundled definitions.
 - [mpm] Ask for the `sudo` password up front only for managers whose commands in the run need root: a `gem` forced to escalate no longer prompts on `sync`.
+- [mpm] Run privileged commands directly when `mpm` runs as root, instead of through `sudo`, `doas`, `run0` or `pkexec`: as root on SliTaz 5.0, every one failed.
 
 ## [`8.0.2` (2026-09-28)](https://github.com/kdeldycke/meta-package-manager/compare/v8.0.1...v8.0.2)
 

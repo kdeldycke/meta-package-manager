@@ -1984,8 +1984,15 @@ class CLIExecutor:
         # host with no escalator cannot escalate whatever it runs. prime_sudo()
         # has already warned about that, so the command runs unprivileged and
         # fails on the manager's own permission error rather than on a missing
-        # binary.
-        escalate = bool(sudo and policy_escalates and escalator is not None)
+        # binary. Root has nothing to escalate either, and wrapping its commands
+        # only adds ways to fail: SliTaz 5.0's `pkexec` predates `--keep-cwd`
+        # and reads it as the program to run.
+        escalate = bool(
+            sudo
+            and policy_escalates
+            and escalator is not None
+            and getattr(os, "geteuid", lambda: 1)() != 0
+        )
         # A privileged marker the policy left dormant, remembered for the
         # failure gate of run(): a permission error is then the marker's
         # prediction coming true, worth the hint naming the opt-in.

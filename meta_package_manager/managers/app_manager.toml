@@ -1,0 +1,72 @@
+# AppManager is a GTK application installing the AppImage files dropped on it and
+# keeping them updated, with a command line for the same jobs. See docs/overrides.md
+# ("Define a new manager") for the schema and meta_package_manager/definitions.py
+# (build_bundled_managers) for the loader.
+#
+# Parsing notes, verified against AppManager 3.8.0 on Ubuntu 26.04 aarch64:
+#   - Every declared verb completes headless. `--version`, `--update-check` and
+#     `--update-all` are answered before the application starts, and `install`,
+#     `update` and `uninstall` completed with no display attached.
+#   - `update` and `uninstall` find an app by its installed path, by the path it was
+#     installed from, or by the checksum of a file at that path, and never by name
+#     (`locate_record()` in src/application.vala): `uninstall AppManager` answers
+#     "No installation matches AppManager" with exit code 3. The per-app operations are
+#     therefore keyed on the path the app was installed from, which the registry keeps
+#     after `install` moved the file away, so one id round-trips from install to remove.
+#   - `--update-check` names each app instead, and nothing lists the installed apps: the
+#     registry at ~/.local/share/app-manager/installations.json is read by the
+#     application alone. That leaves `outdated` keyed on names the other operations do
+#     not accept, which the operation notes below tell the user. It also leaves `update`
+#     unmapped: mpm routes a single-package upgrade through the manager's inventory.
+#   - `install` and `uninstall` print "gtk4-update-icon-cache: Cache file created
+#     successfully." on stderr while exiting 0.
+#   - `--is-installed` is not used: pointed at an installed file, it opened the window
+#     and never answered.
+
+[mpm.overrides.app-manager]
+name = "AppManager"
+repository_url = "https://github.com/kem-a/AppManager"
+# A GTK 4 desktop application shipped as an AppImage for Linux alone.
+platforms = ["linux_like"]
+cli_names = ["app-manager"]
+# 3.6.0 added `--update-check`, `--update-all` and `update`.
+requirement = ">=3.6.0"
+# `app-manager --version` prints "AppManager 3.8.0".
+version_regexes = ['^AppManager (?P<version>\S+)']
+
+[mpm.overrides.app-manager.operation_notes]
+installed = "No command lists the installed apps: only the application reads its registry."
+search = "No catalog: AppManager installs AppImage files the user downloaded."
+outdated = "Reports each app by name, a key the other per-app operations do not accept."
+install = "Takes the path of a downloaded AppImage file, and moves that file into `~/Applications`."
+upgrade = "No single-app upgrade: routing one needs an inventory, which nothing lists."
+remove = "Takes the path the app was installed from, or its installed path, never its name."
+
+# One line per app with an update, as `<name>: <current> -> <latest>`. The latest
+# version is read off the release tag, so it keeps a leading `v` the installed one
+# lacks. The "All apps up to date" and "No installed apps" lines match nothing.
+[mpm.overrides.app-manager.operations.outdated]
+args = ["--update-check"]
+regex = '^(?P<package_id>.+?): (?:v(?=\d))?(?P<installed_version>\S+) -> (?:v(?=\d))?(?P<latest_version>\S+)$'
+
+[mpm.overrides.app-manager.operations.install]
+args = ["install", "{package_id}"]
+
+[mpm.overrides.app-manager.operations.upgrade_all]
+args = ["--update-all"]
+
+[mpm.overrides.app-manager.operations.remove]
+args = ["uninstall", "{package_id}"]
+
+# Output samples locking the version probe and the outdated parser, captured from
+# AppManager 3.8.0 upgrading an AppManager 3.7.3 it had installed. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+[samples.version]
+output = "AppManager 3.8.0"
+expected = "3.8.0"
+
+[[samples.outdated]]
+output = "AppManager: 3.7.3 -> v3.8.0"
+packages = [
+  { id = "AppManager", version = "3.8.0" },
+]

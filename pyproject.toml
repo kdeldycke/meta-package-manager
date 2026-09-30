@@ -18,6 +18,7 @@ keywords = [
   "apk",
   "apm",
   "app store",
+  "app-manager",
   "app-store",
   "appimage",
   "apt",
@@ -1072,6 +1073,7 @@ metrics.subjects.antidote = "https://github.com/mattmc3/antidote"
 metrics.subjects.antigen = "https://github.com/zsh-users/antigen"
 metrics.subjects.apk = "https://gitlab.alpinelinux.org/alpine/apk-tools"
 metrics.subjects.apm = "https://github.com/atom/apm"
+metrics.subjects.app-manager = "https://github.com/kem-a/AppManager"
 metrics.subjects.apt = "https://salsa.debian.org/apt-team/apt"
 metrics.subjects.apt-cyg = "https://github.com/transcode-open/apt-cyg"
 metrics.subjects.aptitude = "https://salsa.debian.org/apt-team/aptitude"
@@ -1268,6 +1270,7 @@ labels.content-rules."🖥 platform: Windows" = [ "c:", "microsoft", "windows" ]
 labels.file-rules."📦 manager: am" = [ "meta_package_manager/managers/am.*", "tests/*am*" ]
 labels.file-rules."📦 manager: apk" = [ "meta_package_manager/managers/apk.*", "tests/*apk*" ]
 labels.file-rules."📦 manager: apm" = [ "meta_package_manager/managers/apm.*", "tests/*apm*" ]
+labels.file-rules."📦 manager: app-manager" = [ "meta_package_manager/managers/app_manager.*", "tests/*app_manager*" ]
 labels.file-rules."📦 manager: apt-cyg" = [ "meta_package_manager/managers/apt_cyg.*", "tests/*apt_cyg*" ]
 labels.file-rules."📦 manager: asdf-based" = [
   "meta_package_manager/managers/asdf.*",
@@ -1540,6 +1543,11 @@ description = "apk"
 name = "📦 manager: apm"
 color = "bfdadc"
 description = "apm"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: app-manager"
+color = "bfdadc"
+description = "app-manager"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: apt-cyg"

@@ -12,6 +12,7 @@
 - [sfsu] Note on its page that upstream looks for new maintainers and now ships only fixes.
 - [mpm] Record `hok` as unsupported: its listing drops every app that Scoop `0.6.0` installed.
 - [mpm] Record three tools `topgrade` gained as unsupported: `adless` refreshes a hosts-file blocklist, while `antigravity-cli` and `zed` only update themselves.
+- [app-manager] Add the AppManager AppImage manager with `outdated`, `install`, `remove` and full `upgrade` support. `install` and `remove` take the AppImage's file path, and nothing lists the installed apps.
 - [mpm,sheldon,zeroinstall] Fix `remove` exiting on "No manager selected" when the only manager selected keeps no inventory: that manager now gets the package as is.
 - [mpm] Refresh the benchmark against `topgrade` `17.12.2`, `pacaptr` `0.23.2`, `metapac` `0.10.2` and Homebrew `7.0.7`, citing evidence for every competitor cell: four new `topgrade` steps, Homebrew's `vulns` scan and its dropped parallel installs.
 - [bar-plugin] Fix the preview screenshot Xbar's website shows for the plugin, which named a renamed file.

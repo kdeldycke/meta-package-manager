@@ -52,6 +52,10 @@ PACKAGE_IDS = {
     "antigen": "zdharma-continuum/null",
     "apk": "nyancat",
     "apm": "markdown-pdf",
+    # AppManager keys every per-app operation on the path of the AppImage file it
+    # was handed, relative to the working directory. Its own AppImage is the one
+    # app certain to exist, the way deb-get and topgrade reference themselves.
+    "app-manager": "AppManager-3.8.0-anylinux-x86_64.AppImage",
     "apt": "nyancat",
     "apt-cyg": "tree",
     "apt-mint": "nyancat",
@@ -717,6 +721,10 @@ def flatpak_install_blocked() -> bool:
 
 
 INSTALL_REMOVE_BLOCKED_WHEN: dict[str, bool | Callable[[], bool]] = {
+    # AppManager installs an AppImage file the user downloaded, and no host keeps one
+    # at a known path. It moves that file away on success besides, so a round-trip
+    # would consume its own input.
+    "app-manager": True,
     # basalt refuses every command, the read-only listing included, without a GitHub
     # token file of its own, and needs the environment its shell-init snippet exports.
     # Neither is set up on a runner.

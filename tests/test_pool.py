@@ -83,7 +83,7 @@ def test_manager_count():
     # The rest are the bundled config-defined managers, shipped as package data
     # and loaded into the pool at construction.
     assert len(pool) == len(manager_classes) + len(pool.bundled_manager_ids)
-    assert len(pool) == 149
+    assert len(pool) == 150
     assert len(pool) == len(pool.all_manager_ids)
     assert pool.all_manager_ids == tuple(sorted(set(pool)))
 

@@ -548,15 +548,18 @@ ESCALATORS: Final[tuple[Escalator, ...]] = (
         # No `--` separator: pkexec stops parsing at the first non-option and
         # would try to execute `--` itself. Nothing is at risk without one,
         # since the first argument mpm appends is the manager's absolute path,
-        # which is already a non-option. `--keep-cwd` follows where the release
-        # accepts it (see `gated_options`), and holds the working directory,
-        # which pkexec otherwise resets to the target user's home.
-        escalate_args=("pkexec",),
-        # pkexec carries no non-interactive switch and no validate mode: it
-        # always executes a program, and asking it anything either prompts or
-        # dies for want of an agent. `pkcheck` is polkit's own query tool and
-        # the only way to read the answer without doing either, reporting `0`
-        # when the action is authorized and `2` when it is not. Verified on
+        # which is already a non-option. `--disable-internal-agent` makes it
+        # fail on `No authentication agent found` where it would otherwise
+        # raise its textual agent on the terminal, inside the fan-out.
+        # `--keep-cwd` follows where the release accepts it (see
+        # `gated_options`), and holds the working directory, which pkexec
+        # otherwise resets to the target user's home.
+        escalate_args=("pkexec", "--disable-internal-agent"),
+        # pkexec carries no validate mode: it always executes a program, and
+        # asking it anything either prompts or dies for want of an agent.
+        # `pkcheck` is polkit's own query tool and the only way to read the
+        # answer without doing either, reporting `0` when the action is
+        # authorized and `2` when it is not. Verified on
         # polkit `127`, where it answers `2` and `polkit\56result=auth_admin`
         # for a `wheel` user over SSH, that session being remote.
         #

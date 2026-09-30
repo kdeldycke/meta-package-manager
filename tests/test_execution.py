@@ -860,7 +860,12 @@ def test_build_cli_passes_the_options_the_release_accepts(options):
         ),
     ):
         cli = manager.build_cli("install", "pkg", sudo=True)
-    assert cli[: 2 + len(options)] == ("pkexec", *options, str(manager.cli_path))
+    assert cli[: 3 + len(options)] == (
+        "pkexec",
+        "--disable-internal-agent",
+        *options,
+        str(manager.cli_path),
+    )
 
 
 def test_build_cli_no_escalation_when_policy_off():

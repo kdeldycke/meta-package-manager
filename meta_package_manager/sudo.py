@@ -1429,6 +1429,11 @@ def prime_sudo(
         )
         return
 
+    no_retention = (
+        f"{escalator.id} keeps no authorization past a password prompt: {ids} "
+        f"may fail. {escalator.remedy}"
+    )
+
     echo(
         f"{ids} need{'s' if len(escalating) == 1 else ''} administrator rights to "
         f"{ctx.command.name}.",
@@ -1452,6 +1457,13 @@ def prime_sudo(
             f"Could not acquire {escalator.id} credentials: managers needing root "
             "may fail.",
         )
+        return
+    # The prompt authorized its own command. Whether the authorization holds
+    # for the commands to come is up to the host's policy, and `doas` without
+    # `persist` or polkit under `auth_admin` keep nothing: ask again.
+    reprobe = _probe_credentials(escalator)
+    if reprobe is None or not escalator.probe_says_warm(reprobe):
+        logging.warning(no_retention)
         return
     _start_sudo_keepalive(ctx, escalator)
 

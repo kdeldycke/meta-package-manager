@@ -131,14 +131,16 @@ flowchart TD
     skip -->|"no"| audit["Tamper audit: warn on an escalated<br/>binary that others can modify"]
     audit --> pick{"Which escalator does<br/>the host carry?"}
     pick -->|"none"| noesc["One warning:<br/>escalations run unprivileged"]
-    pick -->|"sudo, or doas"| probe["Probe its credential cache,<br/>without prompting"]
+    pick -->|"sudo, doas, run0<br/>or pkexec"| probe["Probe its credential cache,<br/>without prompting"]
     probe -->|"warm"| keepalive["Silent keepalive: every escalated call<br/>spends the cache, refreshed<br/>until the run ends"]
     probe -->|"cold: sudoers<br/>denies the user"| denied["One warning, no prompt:<br/>escalations fail fast"]
     probe -->|"cold:<br/>no terminal"| notty["One warning:<br/>escalations fail fast"]
     probe -->|"cold:<br/>on a terminal"| who{"Does mpm itself<br/>escalate a manager?"}
     who -->|"yes"| prompt["One branded password prompt<br/>for the whole run"]
     who -->|"no: internal<br/>escalators only"| stall["No prompt: the 30 s stall notice<br/>flags a hidden mid-run prompt"]
-    prompt -->|"authenticated"| keepalive
+    prompt -->|"authenticated"| reprobe{"Probe again: does the<br/>authorization hold?"}
+    reprobe -->|"yes"| keepalive
+    reprobe -->|"no: doas without persist,<br/>polkit under auth_admin"| nokeep["One warning naming the fix:<br/>escalations fail fast"]
     prompt -->|"refused"| failed["One warning:<br/>escalations may fail"]
     keepalive -->|"credentials dropped mid-run:<br/>every Homebrew command resets them"| dropped["One warning:<br/>stall notices re-arm"]
     dropped -->|"a new sudo authentication<br/>in the same terminal"| keepalive
@@ -153,6 +155,8 @@ apt, deb-get need administrator rights to upgrade.
 ```
 
 The prompt names the account whose password `sudo` accepts, which is not always the caller. A `targetpw`, `rootpw` or `runaspw` policy asks for a different one, and openSUSE ships `Defaults targetpw`, so the same prompt reads `password for root` there.
+
+The prompt authorizes its own command, and the escalator's policy decides whether that authorization carries over to the commands after it. `doas` keeps nothing without `persist`, and polkit keeps nothing under `auth_admin`, which is what `pkexec` gets by default and `run0` gets over SSH. So `mpm` probes again after the prompt. When the authorization did not hold, one warning names what the host needs, and the escalated commands fail fast instead of asking again inside the run.
 
 Off a terminal (a pipe, CI, the {doc}`bar plugin <bar-plugin>` or the {doc}`GNOME Shell extension <gnome-shell>`), `mpm` cannot prompt: a warning names the managers needing root, and they fail fast with a clear error instead of hanging. That warning, and the error of each failed call, close on what the escalator's policy needs: a `NOPASSWD` rule for `sudo`, `persist` or `nopass` in `doas.conf`, a polkit grant for `run0` and `pkexec`. To escalate unattended, configure a `NOPASSWD` rule for the managers' commands: `mpm` then asks `sudo --list` whether each escalated command is granted without a password, and proceeds silently when they all are. That second question is needed because `sudo --validate` answers a different one: it refuses whenever *any* matching `sudoers` entry wants a password, so a `NOPASSWD` rule reads as a cold cache as soon as a distribution's stock `ALL ALL=(ALL) ALL` sits beside it, which is what openSUSE ships. A prior `sudo --validate` also works, but only from the same terminal session `mpm` runs in: under sudo's default terminal-keyed timestamps, credentials cached in one terminal do not carry to a `mpm` launched without one (a desktop frontend, a CI step), so `NOPASSWD` is the robust choice there.
 

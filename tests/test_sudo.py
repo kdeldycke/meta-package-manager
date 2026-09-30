@@ -437,12 +437,16 @@ def test_prime_sudo_authenticates_and_keeps_alive_on_tty():
     then the keepalive until the context closes."""
     ctx = click.Context(click.Command("mpm"))
     with prime_sudo_env(stdin_tty=True, stderr_tty=True) as run:
+        authenticated = []
 
         def answer(argv, **kwargs):
-            """Cold cache, and a policy granting nothing unauthenticated, so the
-            interactive prompt is the only call that succeeds. Keyed on argv
+            """A cold cache until the interactive prompt succeeds, and a policy
+            granting nothing unauthenticated, as sudo behaves. Keyed on argv
             rather than on call order, which the probes ahead of it may shift."""
-            code = 0 if "--prompt" in argv else 1
+            if "--prompt" in argv:
+                authenticated.append(argv)
+                return subprocess.CompletedProcess((), 0)
+            code = 0 if authenticated and "--validate" in argv else 1
             return subprocess.CompletedProcess((), code)
 
         run.side_effect = answer
@@ -1592,11 +1596,14 @@ def test_prime_sudo_probes_and_prompts_through_doas(capsys):
         run.side_effect = (
             subprocess.CompletedProcess((), 1),  # Cold-cache probe.
             subprocess.CompletedProcess((), 0),  # Successful password prompt.
+            subprocess.CompletedProcess((), 0),  # A `persist` rule kept it.
         )
         try:
             prime_sudo(ctx, [manager], operations=INSTALL_RUN)
             assert run.call_args_list[0].args[0] == ("doas", "-n", "true")
             assert run.call_args_list[1].args[0] == ("doas", "true")
+            assert run.call_args_list[2].args[0] == ("doas", "-n", "true")
+            assert _SUDO_CACHE_WARM.is_set()
         finally:
             ctx.close()
     assert "needs administrator rights to upgrade" in capsys.readouterr().err
@@ -1641,6 +1648,39 @@ def test_prime_sudo_names_the_remedy_without_tty(escalator, caplog):
         prime_sudo(ctx, [_escalating_manager()], operations=INSTALL_RUN)
     assert any(
         "no terminal" in record.getMessage() and escalator.remedy in record.getMessage()
+        for record in caplog.records
+    )
+
+
+@pytest.mark.parametrize("escalator", ESCALATORS, ids=[e.id for e in ESCALATORS])
+def test_prime_sudo_warns_when_the_prompt_keeps_nothing(escalator, caplog):
+    """A prompt answered, then a probe still cold: the policy keeps no
+    authorization, like `doas` without `persist` or polkit under `auth_admin`.
+    One warning names the remedy, and no keepalive pretends otherwise."""
+    ctx = click.Context(click.Command("mpm"))
+    prompt_args = escalator.prompt_args
+
+    def answer(argv, **kwargs):
+        """Only the interactive prompt succeeds."""
+        return subprocess.CompletedProcess(
+            (), 0 if tuple(argv[: len(prompt_args)]) == prompt_args else 1
+        )
+
+    with (
+        prime_sudo_env(stdin_tty=True, stderr_tty=True) as run,
+        only_escalator(escalator.id, selected=escalator.id),
+        caplog.at_level(logging.WARNING),
+    ):
+        run.side_effect = answer
+        try:
+            prime_sudo(ctx, [_escalating_manager()], operations=INSTALL_RUN)
+            assert not _SUDO_CACHE_WARM.is_set()
+        finally:
+            ctx.close()
+    assert run.call_args.args[0] == escalator.resolved_probe_args()
+    assert any(
+        "keeps no authorization past a password prompt" in record.getMessage()
+        and escalator.remedy in record.getMessage()
         for record in caplog.records
     )
 

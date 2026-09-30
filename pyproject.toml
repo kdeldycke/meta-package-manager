@@ -187,6 +187,7 @@ keywords = [
   "powershell gallery",
   "powershell-gallery",
   "prefix.dev",
+  "protonplus",
   "prt-get",
   "psgallery",
   "psresourceget",
@@ -1168,6 +1169,7 @@ metrics.subjects.pkgm = "https://github.com/pkgxdev/pkgm"
 metrics.subjects.platformio-core = "https://github.com/platformio/platformio-core"
 metrics.subjects.pnpm = "https://github.com/pnpm/pnpm"
 metrics.subjects.ports = "https://github.com/freebsd/freebsd-ports"
+metrics.subjects.protonplus = "https://github.com/Vysp3r/ProtonPlus"
 metrics.subjects.pwsh-gallery = "https://github.com/PowerShell/PSResourceGet"
 metrics.subjects.pyenv = "https://github.com/pyenv/pyenv"
 metrics.subjects.raco = "https://github.com/racket/racket"
@@ -1438,6 +1440,7 @@ labels.file-rules."📦 manager: platformio-core" = [
   "meta_package_manager/managers/platformio_core.*",
   "tests/*platformio_core*",
 ]
+labels.file-rules."📦 manager: protonplus" = [ "meta_package_manager/managers/protonplus.*", "tests/*protonplus*" ]
 labels.file-rules."📦 manager: prt-get" = [ "meta_package_manager/managers/prt_get.*", "tests/*prt_get*" ]
 labels.file-rules."📦 manager: pwsh-gallery" = [
   "meta_package_manager/managers/pwsh_gallery.*",
@@ -1861,6 +1864,11 @@ description = "pkgm"
 name = "📦 manager: platformio-core"
 color = "bfdadc"
 description = "platformio-core"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: protonplus"
+color = "bfdadc"
+description = "protonplus"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: prt-get"

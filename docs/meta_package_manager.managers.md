@@ -64,6 +64,7 @@
    meta_package_manager.managers.pkg
    meta_package_manager.managers.pkgit
    meta_package_manager.managers.pnpm
+   meta_package_manager.managers.protonplus
    meta_package_manager.managers.prt_get
    meta_package_manager.managers.pwsh_gallery
    meta_package_manager.managers.roswell

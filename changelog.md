@@ -15,6 +15,7 @@
 - [app-manager] Add the AppManager AppImage manager with `outdated`, `install`, `remove` and full `upgrade` support. `install` and `remove` take the AppImage's file path, and nothing lists the installed apps.
 - [antigravity-cli-plugins] Add the plugin manager of the Antigravity CLI, `agy`, with `installed`, `install` and `remove` support.
 - [whalebrew] Add Whalebrew, which installs Docker images as commands, with `installed`, `search`, `install` and `remove` support. Packages are keyed on their image.
+- [protonplus] Add ProtonPlus, which installs Proton, Wine, DXVK and VKD3D builds into game launchers, with `installed`, `install`, `upgrade` and `remove` support.
 - [mpm,sheldon,zeroinstall] Fix `remove` exiting on "No manager selected" when the only manager selected keeps no inventory: that manager now gets the package as is.
 - [mpm] Drop `upt` from the benchmark comparison: its last commit dates from 2024-10, and its owner has answered nothing since 2024-12.
 - [mpm] Refresh the benchmark against `topgrade` `17.12.2`, `pacaptr` `0.23.2`, `metapac` `0.10.2` and Homebrew `7.0.7`, citing evidence for every competitor cell: four new `topgrade` steps, Homebrew's `vulns` scan and its dropped parallel installs.

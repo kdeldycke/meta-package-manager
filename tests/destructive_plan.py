@@ -240,6 +240,8 @@ PACKAGE_IDS = {
     "platformio-core": "ArduinoJson",
     "pnpm": "ms",
     "ports": "net/nyancat",
+    # A 3 MB DXVK build, on the Lutris launcher the wrapper was driven against.
+    "protonplus": "lutris-system/dxvk-doitsujin",
     "prt-get": "dosfstools",
     "pwsh-gallery": "Posh-Git",
     # A PyPy rather than a CPython: pyenv builds CPython from source, dragging

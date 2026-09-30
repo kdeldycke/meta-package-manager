@@ -360,6 +360,19 @@ class Escalator:
     (`test-framework/sudo-test/src/lib.rs`).
     """
 
+    probe_command: str | None = None
+    """The stand-in command {attr}`probe_args` runs, where the escalator's rules
+    can match single commands, or `None`.
+
+    Only `doas`: `permit nopass tester as root cmd /sbin/apk` denies the
+    `doas -n true` probe with `Operation not permitted` and still runs
+    `doas -n /sbin/apk` unprompted, measured on Alpine's doas `6.8.2`. A
+    denial of the probe then speaks for that command alone, so
+    {func}`prime_sudo` does not say the managers will fail. `doas -C` would
+    answer for the managers' own commands, but it reads `doas.conf` as the
+    caller, and Alpine installs that file mode `640`, owned by `root:root`.
+    """
+
     probe_success_markers: tuple[str, ...] | None = None
     """Substrings proving {attr}`probe_args` found escalation ready, for an
     escalator whose probe cannot say so through its exit code. Any one is enough.
@@ -535,6 +548,7 @@ ESCALATORS: Final[tuple[Escalator, ...]] = (
             "Add `persist` to the matching `doas.conf` rule to keep the "
             "authorization, or `nopass` to need no password."
         ),
+        probe_command="true",
     ),
     Escalator(
         id="run0",
@@ -1381,7 +1395,16 @@ def prime_sudo(
     # matcher knows yet (the sudo-rs precedent, see _is_sudo_auth_failure).
     logging.debug(f"The {escalator.id} probe answered: {probe_error.strip()!r}")
     if _is_sudo_denied(probe_error):
-        if escalating:
+        if escalating and escalator.probe_command:
+            their = "its" if len(escalating) == 1 else "their"
+            logging.warning(
+                f"{ids} need{'s' if len(escalating) == 1 else ''} administrator "
+                f"rights, and {escalator.id} denies the "
+                f"`{escalator.probe_command}` command it is probed with: {they} "
+                f"run only where a rule permits {their} own commands with no "
+                "password.",
+            )
+        elif escalating:
             logging.warning(
                 f"{ids} need{'s' if len(escalating) == 1 else ''} administrator "
                 f"rights, but you are not authorized to run {escalator.id} on "

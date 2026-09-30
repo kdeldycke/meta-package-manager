@@ -671,6 +671,27 @@ def test_prime_sudo_denied_user_skips_prompt(caplog):
     )
 
 
+def test_prime_sudo_denied_doas_probe_speaks_for_its_command_alone(caplog):
+    """doas rules can match single commands: `permit nopass tester as root cmd
+    /sbin/apk` denies the `doas -n true` probe while it runs apk unprompted,
+    measured on Alpine's doas 6.8.2. So the warning does not say the managers
+    will fail, and no prompt is raised."""
+    ctx = click.Context(click.Command("mpm"))
+    with (
+        prime_sudo_env(stdin_tty=True, stderr_tty=True) as run,
+        only_escalator("doas", selected="doas"),
+        caplog.at_level(logging.WARNING),
+    ):
+        run.return_value = subprocess.CompletedProcess(
+            (), 1, stderr=b"doas: Operation not permitted\n"
+        )
+        prime_sudo(ctx, [_escalating_manager()], operations=INSTALL_RUN)
+    assert run.call_count == 1
+    messages = [record.getMessage() for record in caplog.records]
+    assert any("denies the `true` command it is probed with" in m for m in messages)
+    assert not any("will fail" in m for m in messages)
+
+
 def test_prime_sudo_denied_internal_only_stays_silent(caplog):
     """A sudoers denial with only internal escalators selected stays silent:
     each manager's own sudo surfaces the denial through its error path."""

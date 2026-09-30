@@ -26,6 +26,7 @@ from functools import partial
 
 import pytest
 from boltons.strutils import strip_ansi
+from extra_platforms import is_windows
 
 from meta_package_manager.pool import pool
 from meta_package_manager.tables import PackageOutcome
@@ -106,6 +107,39 @@ def test_remove_absent_package_is_idempotent(invoke, fake_pool):
     """
     result = invoke("remove", "package-installed-by-no-manager")
     assert result.exit_code == 0
+
+
+@pytest.mark.skipif(is_windows(), reason="sheldon runs on Linux and macOS alone")
+def test_remove_with_manager_lacking_inventory(invoke, create_config, tmp_path):
+    """A package handed to a lone manager keeping no inventory reaches its `remove`.
+
+    `sheldon` implements `remove` but no `installed`, so no lookup can find a package
+    in it. The lookup selecting the managers implementing `installed` exited the
+    command on its empty selection, and past that the package was skipped as
+    unrecognized.
+    """
+    fake_sheldon = tmp_path / "sheldon"
+    fake_sheldon.write_text(
+        "#!/bin/sh\n"
+        'case "$1" in\n'
+        '  --version) echo "sheldon 0.8.5";;\n'
+        '  remove) echo "removed $2";;\n'
+        "esac\n",
+        encoding="UTF-8",
+    )
+    fake_sheldon.chmod(0o755)
+    conf_path = create_config(
+        "conf.toml",
+        f"""
+        [mpm.overrides.sheldon]
+        cli_search_path = ["{tmp_path}"]
+        """,
+    )
+    result = invoke(
+        "--config", str(conf_path), "--sheldon", "remove", "zsh-autosuggestions"
+    )
+    assert result.exit_code == 0
+    assert "✓ sheldon.remove: zsh-autosuggestions" in strip_ansi(result.stderr)
 
 
 def check_report(stdout: str, expected: dict[str, tuple[str, ...]]) -> None:

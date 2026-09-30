@@ -48,6 +48,7 @@ from click_extra.theme import get_current_theme as theme
 from .capabilities import (
     Operations,
     cleanup_orphan_is_synthesized,
+    implements,
     implements_method,
     supports_cleanup_cache,
     supports_cleanup_repair,
@@ -227,12 +228,23 @@ def _dispatch_sourced_operation(
     prime_sudo(ctx, selected_managers, operations=(operation, *reads))
 
     # Subset of selected managers implementing `installed`, queried to discover which
-    # manager(s) a spec untied to one was installed with.
-    sourcing_managers = tuple(
-        ctx.obj.selected_managers(
-            keep=manager_ids,
-            implements_operation=Operations.installed,
-        ),
+    # manager(s) a spec untied to one was installed with. A manager with no inventory
+    # (`sheldon`, `zeroinstall`) still acts on a spec tied to it, so an empty subset
+    # is skipped rather than handed to the selection, which exits when nothing is left.
+    sourcing_ids = tuple(
+        manager.id
+        for manager in selected_managers
+        if implements(manager, Operations.installed)
+    )
+    sourcing_managers = (
+        tuple(
+            ctx.obj.selected_managers(
+                keep=sourcing_ids,
+                implements_operation=Operations.installed,
+            ),
+        )
+        if sourcing_ids
+        else ()
     )
 
     # Collect every (package, manager) attempt that genuinely failed, to exit non-zero.
@@ -262,6 +274,18 @@ def _dispatch_sourced_operation(
                         f"with {theme().invoked_command(manager.id)}.",
                     )
                     source_manager_ids.add(manager.id)
+            # A manager keeping no inventory can never be found this way, so when it
+            # is the only one selected the package goes to it directly.
+            if (
+                not source_manager_ids
+                and not sourcing_managers
+                and len(manager_ids) == 1
+            ):
+                logging.info(
+                    f"{theme().invoked_command(manager_ids[0])} keeps no inventory "
+                    f"to look {package_id} up in. Hand it over as is.",
+                )
+                source_manager_ids.add(manager_ids[0])
 
         if not source_manager_ids:
             logging.error(
@@ -755,7 +779,9 @@ def remove(ctx, orphans, packages_specs):
     fine-tune this behavior with more precise package specifiers (like purl) and/or
     tighter selection of managers.
 
-    Packages unrecognized by any selected manager will be skipped.
+    Packages unrecognized by any selected manager will be skipped. A manager keeping
+    no inventory, like sheldon, recognizes none, so when it is the only one selected
+    it is handed every package as is.
 
     With `--orphans`, each package is removed together with the dependencies it alone
     pulled in, mapped to the manager's native cascade verb (``apt remove

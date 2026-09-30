@@ -548,16 +548,12 @@ Both measure the vertical axis in powers of ten, so the series orders of magnitu
 | Version benchmarked |                                                                      `8.0.2`                                                                      |                                                                `17.12.2`                                                                |                                                             `0.23.2`                                                              |                                                              `0.10.2`                                                               |                                                             `7.0.7`                                                              |
 | Benchmark date      |                                                                      2026-09                                                                      |                                                                 2026-09                                                                 |                                                              2026-09                                                              |                                                               2026-09                                                               |                                                             2026-09                                                              |
 
-:::{admonition} Coming from `pacapt`, `sysget` or `whohas`?
-:class: tip
-`mpm`'s three closest peers are all retired. See [unsupported managers](unsupported.md) for what happened to each and how their backend coverage maps onto `mpm`.
-:::
-
 ## Excluded projects
 
-```{note}
-[`upt`](https://github.com/sigoden/upt) left the comparison in September 2026. Its last commit dates from 2024-10-30, and its owner has answered no issue or pull request since 2024-12. It unifies the syntax of 27 OS-level managers, but runs exactly one per invocation ([sigoden/upt#60](https://github.com/sigoden/upt/issues/60#issuecomment-2560419544)).
-```
+:::{admonition} Coming from `pacapt`, `sysget`, `whohas` or `upt`?
+:class: tip
+[`pacapt`](unsupported.md#retired-cross-manager-tools), [`sysget`](unsupported.md#retired-cross-manager-tools) and [`whohas`](unsupported.md#retired-cross-manager-tools), `mpm`'s three closest peers, are all retired, and `mpm` ships every manager they reached. [`upt`](unsupported.md#cross-manager-aliases) left the comparison in September 2026, its upstream silent since late 2024.
+:::
 
 ## Project's URL
 

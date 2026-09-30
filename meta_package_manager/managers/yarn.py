@@ -349,7 +349,7 @@ class YarnClassic(Yarn):
         else:
             answer = "The registry did not answer."
         exception = CLIError(code, output, " ".join((*messages, answer)))
-        self._relay_failure(exception, is_escalation=False)
+        self._relay_failure(exception)
         self.cli_errors.append(exception)
         raise exception
 

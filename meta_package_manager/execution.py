@@ -99,6 +99,7 @@ if TYPE_CHECKING:
     from click_extra.envvar import TEnvVars
     from click_extra.execution import TArg, TNestedArgs
 
+    from .sudo import Escalator
     from .version import TokenizedString
 
 DIAGNOSIS_TAIL_LINES: Final = 10
@@ -1693,7 +1694,7 @@ class CLIExecutor:
         failed = bool(code) if strict else bool(code and error)
         if failed:
             exception = CLIError(code, output, error)
-            self._relay_failure(exception, is_escalation=is_escalation)
+            self._relay_failure(exception, escalator=escalator)
             # Accumulate before deciding whether to raise: the error is recorded
             # whether or not it also propagates. A rejected version probe is the
             # one exemption: see the `cli_errors` docstring for why, and note it
@@ -1847,29 +1848,36 @@ class CLIExecutor:
         self._cleanup_windows_processes()
         return result.returncode, result.stdout or "", result.stderr or ""
 
-    def _relay_failure(self, exception: CLIError, *, is_escalation: bool) -> None:
+    def _relay_failure(
+        self,
+        exception: CLIError,
+        *,
+        escalator: Escalator | None = None,
+    ) -> None:
         """Log what a failed run has to say, the moment it happened.
 
         Three notices, each gated on what the failure looks like: the credential
         hint of an escalation that could not authenticate, the command's own
         diagnosis otherwise, and the opt-in hint when a dormant privileged
         marker meets a permission refusal.
+
+        `escalator` is the one mpm wrapped the command in, or `None` for a
+        command it ran as is.
         """
         error = exception.error
         # `id` is declared on the `PackageManager` subclass, not this mixin.
         manager_id = self.id  # type: ignore[attr-defined]
         # A non-interactive escalation that could not authenticate is a
         # missing-credential problem, not a real command failure. Point the user
-        # at the fix, naming the manager (this also answers "which one just asked
-        # for my password?"). The tailored message stands in for the generic
-        # diagnosis relay below: the raw "password is required" tail carries
-        # less than the fix.
-        if is_escalation and _is_sudo_auth_failure(error):
+        # at the fix the escalator needs, under the manager's label (this also
+        # answers "which one just asked for my password?"). The tailored message
+        # stands in for the generic diagnosis relay below: the raw "password is
+        # required" tail carries less than the fix.
+        if escalator is not None and _is_sudo_auth_failure(error):
             logging.warning(
-                "Needs administrator rights but sudo has no cached "
-                "credentials; re-run in a terminal, or with `mpm --sudo` "
-                "(or a `[mpm] sudo = true` entry in your configuration file) "
-                "to authenticate once up front.",
+                f"Needs administrator rights, but {escalator.id} could not "
+                "authorize the command without a password prompt. "
+                f"{escalator.remedy}",
                 extra={"label": self.subject},
             )
         # Relay the command's own account of the failure at WARNING, the

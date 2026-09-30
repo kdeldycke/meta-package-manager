@@ -396,6 +396,7 @@ def test_prime_sudo_warns_without_tty(caplog):
     assert any(
         "fakemanager needs administrator rights" in record.getMessage()
         and "no terminal" in record.getMessage()
+        and "`NOPASSWD` rule" in record.getMessage()
         for record in caplog.records
     )
 
@@ -1623,6 +1624,31 @@ def test_doas_gets_no_keepalive_thread(caplog):
     assert any(
         "cannot be refreshed on a schedule" in r.getMessage() for r in caplog.records
     )
+
+
+@pytest.mark.parametrize("escalator", ESCALATORS, ids=[e.id for e in ESCALATORS])
+def test_prime_sudo_names_the_remedy_without_tty(escalator, caplog):
+    """Off a terminal, the warning closes on what the escalator's policy needs,
+    rather than on a pre-authentication that most escalators do not keep."""
+    ctx = click.Context(click.Command("mpm"))
+    with (
+        prime_sudo_env(stdin_tty=False) as run,
+        only_escalator(escalator.id, selected=escalator.id),
+        caplog.at_level(logging.WARNING),
+    ):
+        run.return_value = subprocess.CompletedProcess((), 1)
+        prime_sudo(ctx, [_escalating_manager()], operations=INSTALL_RUN)
+    assert any(
+        "no terminal" in record.getMessage() and escalator.remedy in record.getMessage()
+        for record in caplog.records
+    )
+
+
+@pytest.mark.parametrize("escalator", ESCALATORS, ids=[e.id for e in ESCALATORS])
+def test_every_escalator_names_a_remedy(escalator):
+    """Warnings go on after the remedy, so it is a sentence of its own."""
+    assert escalator.remedy[0].isupper()
+    assert escalator.remedy.endswith(".")
 
 
 # Stall watchdog: a mutating call of an internal escalator (cask, fink) that goes

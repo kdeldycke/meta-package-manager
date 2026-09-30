@@ -32,6 +32,7 @@
 - [mpm] Pass `--keep-cwd` to `pkexec` only from polkit `121` on: older releases read it as the program to run, which failed every escalated command.
 - [mpm] Make a `pkexec` call that polkit does not authorize fail, instead of waiting on a password prompt inside the run.
 - [mpm] Document the `.pkla` grant for `pkexec` on polkit older than `0.106`, which reads no JavaScript rules.
+- [mpm] Name the escalator and what its policy needs in the warning of a failed escalation, instead of always pointing at `sudo` and `--sudo`.
 
 ## [`8.0.2` (2026-09-28)](https://github.com/kdeldycke/meta-package-manager/compare/v8.0.1...v8.0.2)
 

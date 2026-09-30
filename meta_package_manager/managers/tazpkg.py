@@ -123,7 +123,7 @@ class Tazpkg(PackageManager):
             "TazPkg refuses to install packages until it upgrades itself: "
             "run `tazpkg get-install tazpkg --forced`, then try again.",
         )
-        self._relay_failure(exception, is_escalation=False)
+        self._relay_failure(exception)
         self.cli_errors.append(exception)
         raise exception
 

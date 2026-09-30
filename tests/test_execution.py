@@ -55,7 +55,7 @@ from meta_package_manager.execution import (
     format_plan_command,
 )
 from meta_package_manager.pool import pool
-from meta_package_manager.sudo import _STALL_NOTICE_OPERATIONS, Escalator
+from meta_package_manager.sudo import _STALL_NOTICE_OPERATIONS, ESCALATORS, Escalator
 
 from .fake_manager import FakeManager
 from .test_sudo import only_escalator
@@ -999,21 +999,37 @@ def test_dormant_marker_hint_negative_gates(caplog, marker, stderr, euid):
 
 
 @pytest.mark.skipif(is_any_windows(), reason="escalation is UNIX-only")
-def test_run_hints_when_sudo_cannot_authenticate(tmp_path, monkeypatch, caplog):
-    """A real `sudo --non-interactive` that cannot authenticate triggers the actionable hint.
+@pytest.mark.parametrize(
+    ("escalator_id", "refusal", "returncode"),
+    (
+        pytest.param("sudo", "sudo: a password is required\n", 1, id="sudo"),
+        pytest.param("doas", "doas: Authentication required\n", 1, id="doas"),
+        # polkit 0.104 on SliTaz 5.0, under `--disable-internal-agent`.
+        pytest.param(
+            "pkexec",
+            "Error executing command as another user: No authentication agent found.\n",
+            127,
+            id="pkexec",
+        ),
+    ),
+)
+def test_run_hints_when_escalation_cannot_authenticate(
+    tmp_path, monkeypatch, caplog, escalator_id, refusal, returncode
+):
+    """A real escalator that cannot authenticate triggers the actionable hint,
+    naming that escalator and what its policy needs.
 
-    A fake `sudo` on `PATH` mimics "no cached credentials", so the whole
-    build_cli → subprocess → failure-gate → hint path runs for real, without root.
+    A fake escalator on `PATH` mimics the refusal, so the whole build_cli →
+    subprocess → failure-gate → hint path runs for real, without root.
     """
     # write_fake_executable() writes a Python-shebang stand-in (not "#!/bin/sh"),
     # so it still execs in hermetic build sandboxes that ship no /bin/sh (Guix,
-    # etc.). It mimics "no cached credentials": a diagnostic on <stderr>, exit 1.
+    # etc.). It mimics the refusal: a diagnostic on <stderr>, non-zero exit.
     write_fake_executable(
-        tmp_path / "sudo",
-        stderr="sudo: a password is required\n",
-        returncode=1,
+        tmp_path / escalator_id, stderr=refusal, returncode=returncode
     )
     monkeypatch.setenv("PATH", f"{tmp_path}{os.pathsep}{os.environ['PATH']}")
+    escalator = next(e for e in ESCALATORS if e.id == escalator_id)
 
     manager = FakeManager()
     manager.sudo = True
@@ -1026,16 +1042,20 @@ def test_run_hints_when_sudo_cannot_authenticate(tmp_path, monkeypatch, caplog):
     # caches, so the failure only lands when this test is the first in its
     # worker to resolve one.
     with (
-        only_escalator("sudo"),
+        only_escalator(escalator_id),
         patch(
             "meta_package_manager.execution.os.geteuid", return_value=501, create=True
         ),
     ):
         cli = manager.build_cli("-c", "pass", sudo=True)
-        assert cli[:2] == ("sudo", "--non-interactive")
+        assert cli[: len(escalator.escalate_args)] == escalator.escalate_args
         with caplog.at_level(logging.WARNING):
             manager.run(*cli)
-    assert any("mpm --sudo" in record.getMessage() for record in caplog.records)
+    assert any(
+        f"{escalator_id} could not authorize the command" in record.getMessage()
+        and escalator.remedy in record.getMessage()
+        for record in caplog.records
+    )
 
 
 @pytest.mark.parametrize("escalate", (True, False))

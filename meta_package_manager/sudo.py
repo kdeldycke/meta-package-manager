@@ -299,6 +299,17 @@ class Escalator:
     loses the `[mpm]` marker, not the explanation.
     """
 
+    remedy: str
+    """What lets escalated commands run with no password prompt mid-run, as the
+    sentence closing each warning about a missing authorization.
+
+    It names what the host owns: a `sudoers` or `doas.conf` rule, or a polkit
+    grant. A password typed up front cannot stand in for one where the
+    escalator keeps no authorization for later commands: `doas` without
+    `persist`, or polkit under `auth_admin`, which is what `pkexec` gets by
+    default and `run0` gets over SSH.
+    """
+
     binary: str | None = None
     """The name to look for on `PATH`, where it differs from {attr}`id`.
 
@@ -501,6 +512,11 @@ ESCALATORS: Final[tuple[Escalator, ...]] = (
         prompt_args=("sudo", "--validate"),
         refreshable=True,
         brands_prompt=True,
+        remedy=(
+            "Allow the escalated commands without a password with a `NOPASSWD` "
+            "rule, or authenticate first with `sudo --validate` in the same "
+            "terminal."
+        ),
         identity_args=("sudo", "--version"),
         identity_markers=("Sudo version", "sudo-rs"),
     ),
@@ -515,6 +531,10 @@ ESCALATORS: Final[tuple[Escalator, ...]] = (
         prompt_args=("doas", "true"),
         refreshable=False,
         brands_prompt=False,
+        remedy=(
+            "Add `persist` to the matching `doas.conf` rule to keep the "
+            "authorization, or `nopass` to need no password."
+        ),
     ),
     Escalator(
         id="run0",
@@ -541,6 +561,9 @@ ESCALATORS: Final[tuple[Escalator, ...]] = (
         # from the action's own message. run0 has no `--prompt`, and
         # systemd/systemd#33902 asks for control over that text.
         brands_prompt=False,
+        # systemd's own policy keeps the authorization for an active local
+        # session only (`auth_admin_keep`): an SSH session gets `auth_admin`.
+        remedy="Grant `org.freedesktop.systemd1.manage-units` with a polkit rule.",
         identity_args=("run0", "--version"),
         # run0 reports the systemd version it ships with, not one of its own.
         identity_markers=("systemd",),
@@ -598,6 +621,10 @@ ESCALATORS: Final[tuple[Escalator, ...]] = (
         # unless the host says otherwise.
         refreshable=False,
         brands_prompt=False,
+        remedy=(
+            "Grant `org.freedesktop.policykit.exec` with a polkit rule, or with a "
+            "`.pkla` file before polkit `0.106`."
+        ),
         gated_options=(("--keep-cwd", "121"),),
         # `pkexec version 0.104` on SliTaz 5.0, `pkexec version 127` on Arch.
         version_args=("pkexec", "--version"),
@@ -624,6 +651,7 @@ ESCALATORS: Final[tuple[Escalator, ...]] = (
         refreshable=False,
         # The prompt is the UAC consent dialog, which Windows words itself.
         brands_prompt=False,
+        remedy="Warm its cache first with `gsudo cache on --pid 0`.",
         identity_args=("gsudo", "--version"),
         # `gsudo v2.6.1 (Branch...)`, measured on Windows 11 21H2.
         identity_markers=("gsudo",),
@@ -674,6 +702,10 @@ ESCALATORS: Final[tuple[Escalator, ...]] = (
         refreshable=False,
         # The prompt is the UAC consent dialog, which Windows words itself.
         brands_prompt=False,
+        remedy=(
+            "Set Windows `sudo` to inline mode in Settings, or install `gsudo`, "
+            "whose cache one UAC dialog warms for the whole run."
+        ),
         # `--version` prints a bare `sudo 1.0.0`, which a reimplementation
         # shipping its own `1.x` under this name would also match. The help
         # banner names the tool outright and has no version in it to drift.
@@ -1352,8 +1384,7 @@ def prime_sudo(
             logging.warning(
                 f"{ids} need{'s' if len(escalating) == 1 else ''} administrator "
                 "rights, but no terminal is available to prompt for a password: "
-                f"{they} may fail. Re-run in a terminal, pre-authenticate with "
-                f"`{' '.join(escalator.prompt_args)}`, or drop escalation with "
+                f"{they} may fail. {escalator.remedy} Or drop escalation with "
                 "`--no-sudo` or a `[mpm] sudo = false` entry in your "
                 "configuration file.",
             )

@@ -41,6 +41,8 @@
 - [mpm] Exit `0` from `mpm doctor` when no selected manager has a diagnostic verb, instead of failing on `No manager selected` after the escalation report.
 - [guix] Fix `outdated` reporting no package while updates are available.
 - [guix] Fix `upgrade <package>` also upgrading every installed package whose name contains `<package>`, like `glib-networking` for `glib`.
+- [guix] Fix the package IDs of `installed` ending in spaces.
+- [guix] List a package output other than `out` as a package of its own, like `glib:bin`, which `remove` takes back.
 
 ## [`8.0.2` (2026-09-28)](https://github.com/kdeldycke/meta-package-manager/compare/v8.0.1...v8.0.2)
 

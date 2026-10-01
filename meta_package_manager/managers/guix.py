@@ -122,24 +122,32 @@ class Guix(PackageManager):
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
-        Output is tab-separated: name, version, output, store path.
+        Columns are tab-separated: name, version, output and store path. Guix pads
+        the first three with spaces, which are stripped. An output other than `out`
+        is an entry of its own, reported as `name:output`: the specification that
+        `guix install` and `guix remove` take back.
 
         ```{code-block} shell-session
 
         $ guix package --list-installed
-        hello	2.10	out	/gnu/store/k74skdjjb9c9zqjv9nmgd6zi92wpf3q0-hello-2.10
-        python	3.10.7	out	/gnu/store/2n3g8n7d5xkp6h4qz1v8m0rjc9wf5aby-python-3.10.7
+        hello          	2.12.2	out	/gnu/store/8qjzxdk26p8c5nyj98s3321vbkmv9za0-hello-2.12.2
+        lua            	5.1.5 	out	/gnu/store/sq2sj9gj8bqzgv493249xd8gzhhw1f0x-lua-5.1.5
+        glib           	2.83.3	out	/gnu/store/h95r1yvlbrlqap6l8fsdzp7lpxair7sv-glib-2.83.3
+        glib           	2.83.3	bin	/gnu/store/06w4p65r8hli2qnsdsnp0l8r1zghz5qr-glib-2.83.3-bin
+        glib-networking	2.78.1	out	/gnu/store/n4nicicydz8d24m2qi3ddwlcxlr534qn-glib-networking-2.78.1
         ```
         """
         output = self.run_cli("package", "--list-installed")
 
         for line in output.splitlines():
-            parts = line.split("\t")
-            if len(parts) >= 2:
-                yield self.package(
-                    id=parts[0],
-                    installed_version=parts[1],
-                )
+            fields = [field.strip() for field in line.split("\t")]
+            if len(fields) < 3 or not fields[0]:
+                continue
+            name, version, package_output = fields[:3]
+            yield self.package(
+                id=name if package_output == "out" else f"{name}:{package_output}",
+                installed_version=version,
+            )
 
     @property
     def outdated(self) -> Iterator[Package]:

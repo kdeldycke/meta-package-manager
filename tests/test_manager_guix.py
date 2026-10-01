@@ -28,6 +28,15 @@ import pytest
 
 from meta_package_manager.managers.guix import Guix
 
+LIST_INSTALLED = (
+    "hello          \t2.12.2\tout\t/gnu/store/8qjzxdk26p8c5nyj98s3321vbkmv9za0-hello-2.12.2\n"
+    "lua            \t5.1.5 \tout\t/gnu/store/sq2sj9gj8bqzgv493249xd8gzhhw1f0x-lua-5.1.5\n"
+    "glib           \t2.83.3\tout\t/gnu/store/h95r1yvlbrlqap6l8fsdzp7lpxair7sv-glib-2.83.3\n"
+    "glib           \t2.83.3\tbin\t/gnu/store/06w4p65r8hli2qnsdsnp0l8r1zghz5qr-glib-2.83.3-bin\n"
+    "glib-networking\t2.78.1\tout\t/gnu/store/n4nicicydz8d24m2qi3ddwlcxlr534qn-glib-networking-2.78.1\n"
+)
+"""`guix package --list-installed`, with the `bin` output of `glib` installed."""
+
 UPGRADE_REPORT = (
     "guix upgrade: warning: Consider running 'guix pull' followed by\n"
     "'guix package -u' to get up-to-date packages and security updates.\n"
@@ -57,6 +66,19 @@ def guix(monkeypatch):
     monkeypatch.setattr(manager, "cli_errors", [])
     monkeypatch.setattr(manager, "cli_path", Path("/usr/bin/guix"), raising=False)
     return manager
+
+
+def test_installed_strips_padding_and_names_outputs(guix, monkeypatch):
+    monkeypatch.setattr(guix, "run_cli", lambda *args, **kwargs: LIST_INSTALLED)
+    assert [
+        (package.id, str(package.installed_version)) for package in guix.installed
+    ] == [
+        ("hello", "2.12.2"),
+        ("lua", "5.1.5"),
+        ("glib", "2.83.3"),
+        ("glib:bin", "2.83.3"),
+        ("glib-networking", "2.78.1"),
+    ]
 
 
 @pytest.mark.parametrize(

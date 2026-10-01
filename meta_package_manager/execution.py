@@ -339,8 +339,8 @@ READ_ONLY_TIMEOUT: Final = 120
 
 These operations only inspect state, so a short cap lets a wedged binary fail fast
 instead of stalling the whole run. The value is generous enough for legitimately
-slow scans (a freshly-pulled `guix search` walking every package's metadata)
-while still being far below {data}`MUTATING_TIMEOUT`.
+slow scans (a `guix search` from a development checkout, which evaluates every
+package definition) while still being far below {data}`MUTATING_TIMEOUT`.
 """
 
 MUTATING_TIMEOUT: Final = 500

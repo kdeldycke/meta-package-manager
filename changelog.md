@@ -45,6 +45,7 @@
 - [guix] List a package output other than `out` as a package of its own, like `glib:bin`, which `install` and `remove` take back.
 - [guix] Fix `install` crashing on a package Guix ships in several versions, like `lua`, which `search` now lists once, at its newest version.
 - [guix] Strip the trailing spaces from the descriptions of `search` results.
+- [guix] Note on its page that a first `guix pull` outlasts the default timeout of `sync`, and how to raise it.
 
 ## [`8.0.2` (2026-09-28)](https://github.com/kdeldycke/meta-package-manager/compare/v8.0.1...v8.0.2)
 

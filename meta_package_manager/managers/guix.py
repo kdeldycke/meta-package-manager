@@ -39,18 +39,29 @@ class Guix(PackageManager):
     system configuration (Guix System `config.scm`) is not covered.
     ```
 
-    Guix is a rolling release with no upstream semver to pin against:
-    `guix --version` reports a release tag, a `git describe` string, or the
-    bare commit hash of an in-tree checkout. No `requirement` floor is
-    enforced, since any working `guix` will do.
+    Guix is a rolling release with no upstream semver to pin against: the `guix`
+    of a fresh install reports its release, and once `guix pull` ran, the commit it
+    was built from. No `requirement` floor is enforced, since any working `guix`
+    will do.
 
-    ```{warning}
-    `search` evaluates every package definition to match the query, so its
-    cost scales with the size of the package set, not the result count: tens
-    of seconds on a freshly pulled Guix, longer still from an in-tree
-    development checkout. The call is bounded by `mpm --timeout` (120s by
-    default), past which it is killed with no results returned, so a slow
-    search can look like a hang.
+    :::{caution}
+    `sync` runs `guix pull`, which outlasts the 500 second ceiling `mpm` puts on a
+    state-changing command. A first pull authenticates the commit history of the
+    channel, then builds Guix itself when no substitute is available yet: on an
+    `aarch64` virtual machine, it took 28 minutes. Raise the ceiling for this
+    manager alone, in the configuration file:
+
+    ```toml
+    [mpm.overrides.guix]
+    timeout = 3600
+    ```
+    :::
+
+    ```{note}
+    `guix pull` builds a cache of the package set, so `search` answers in about a
+    second. A `guix` run from a development checkout has no such cache and
+    evaluates every package definition instead: there a search can outlast the
+    120 second ceiling of a read-only command, which kills it with no results.
     ```
     """
 
@@ -76,13 +87,14 @@ class Guix(PackageManager):
     # `requirement` specifier is the only honest option: any working
     # `guix` is fine.
     version_regexes = (
-        # Stable release or `git describe` output:
-        #   `guix (GNU Guix) 1.4.0`
+        # Release, or `git describe` output of an in-tree checkout:
+        #   `guix (GNU Guix) 1.5.0`
         #   `guix (GNU Guix) 1.4.0-7-gabc1234`
         r"guix \(GNU Guix\) (?P<version>\d[\w.\-+]*)",
-        # Bare git-hash output from an in-tree dev wrapper whose
-        # `git describe` had no nearby tag:
-        #   `guix (GNU Guix) abc1234`
+        # The full commit hash of a pulled Guix, or the short one of an
+        # in-tree checkout with no tag nearby. A hash opening on a digit
+        # already matched above:
+        #   `guix (GNU Guix) 5ef098e1eef807cffba753b1fa335fab07ce4a79`
         # Restrict to a 7–40 hex run so corrupted output isn't accepted
         # as a "version".
         r"guix \(GNU Guix\) (?P<version>[0-9a-f]{7,40})\b",
@@ -91,7 +103,11 @@ class Guix(PackageManager):
     ```{code-block} shell-session
 
     $ guix --version
-    guix (GNU Guix) 1.4.0
+    guix (GNU Guix) 1.5.0
+    Copyright (C) 2025 the Guix authors
+    License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+    This is free software: you are free to change and redistribute it.
+    There is NO WARRANTY, to the extent permitted by law.
     ```
     """
 
@@ -199,19 +215,6 @@ class Guix(PackageManager):
         the best subset of results and let
         {meth}`meta_package_manager.manager.PackageManager.refiltered_search`
         refine them.
-        ```
-
-        ```{caution}
-        `guix search` loads and evaluates every package definition to
-        match the query against each package's name, synopsis, and
-        description, so it is inherently slow: its cost scales with the
-        size of the package set, not the number of results. A single
-        search runs for tens of seconds on a freshly pulled Guix, and far
-        longer from an in-tree dev checkout that recompiles modules on the
-        fly. The call is bounded by `mpm --timeout`; when that is
-        unset, `search` uses the 120s read-only default, past which the
-        process is killed and no results are returned, so a slow search can
-        look like a hang.
         ```
 
         Guix keeps some packages in several versions under one name, like `lua`

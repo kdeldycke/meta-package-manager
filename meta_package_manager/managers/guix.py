@@ -100,16 +100,15 @@ class Guix(PackageManager):
     """Match a single recutils field line (`name: value`)."""
 
     _OUTDATED_REGEXP = re.compile(
-        r"^\s+(?P<package_id>\S+)\s+(?P<installed_version>\S+)\s+→\s+(?P<latest_version>\S+)\s*$",
-        re.MULTILINE,
+        r"^\s+(?P<package_id>\S+)\s+(?P<installed_version>\S+)\s+(?:→|->)\s+"
+        r"(?P<latest_version>\S+)$",
     )
-    """Match an upgrade line from `guix upgrade --dry-run`.
+    """Match an upgrade row of the transaction `guix upgrade --dry-run` reports.
 
-    Sample output::
-
-        The following packages would be upgraded:
-           hello 2.12.1 → 2.12.3
-           sed   4.8 → 4.9
+    Guix pads the name column, names an output other than `out` as `name:output`,
+    and prints `->` in place of the arrow when `<stderr>` cannot encode it. A row
+    whose version did not change reads `(dependencies or package changed)`, and is
+    left out: no newer version is available.
     """
 
     @property
@@ -139,25 +138,38 @@ class Guix(PackageManager):
     def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
-        Relies on `guix upgrade --dry-run` which lists every package that
-        would be upgraded without modifying the user profile.
+        `guix upgrade --dry-run` lists every package it would upgrade, and leaves
+        the profile as it is.
+
+        ```{important}
+        The report is written to `<stderr>` while `<stdout>` stays empty, so it is
+        read from the recorded run.
+        ```
 
         ```{code-block} shell-session
 
         $ guix upgrade --dry-run
+        ```
+
+        ```{code-block} console
+
         The following packages would be upgraded:
-           hello 2.12.1 → 2.12.3
-           sed   4.8 → 4.9
+           glib            2.83.3 → 2.86.0
+           glib-networking 2.78.1 → 2.80.1
+           glib:bin        2.83.3 → 2.86.0
+           hello           2.12.2 → 2.12.3
+           lua             5.1.5 → 5.5.0
+
+        22.6 MB would be downloaded
         ```
         """
-        output = self.run_cli("upgrade", "--dry-run")
+        self.run_cli("upgrade", "--dry-run")
 
-        for match in self._OUTDATED_REGEXP.finditer(output):
-            yield self.package(
-                id=match.group("package_id"),
-                installed_version=match.group("installed_version"),
-                latest_version=match.group("latest_version"),
-            )
+        last = self._last_run
+        if last is None:
+            return
+        _code, _stdout, stderr = last
+        yield from self.parse_regex_lines(self._OUTDATED_REGEXP, stderr)
 
     @search_capabilities(extended_support=False, exact_support=False)
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:

@@ -175,7 +175,7 @@ The probe also reads `sudo`'s answer: a user the `sudoers` policy does not autho
 
 ## Checking escalation
 
-`mpm doctor` opens on a report of how escalation stands: the escalator `mpm` drives and the ones it passed over, the installed release where an option depends on it, whether the credentials are ready, whether a password prompt would hold for the whole run, and the fix when they are not. The report never prompts, and never changes the exit code. On SliTaz 5.0, for a user polkit grants nothing:
+`mpm doctor` opens on a report of how escalation stands: the escalator `mpm` drives and the ones it passed over, the installed release where an option depends on it, whether the credentials are ready, whether a password prompt would hold for the whole run, and the fix when they are not. The report never prompts, and never changes the exit code. It also runs where no selected manager has a diagnostic verb, and is then the whole diagnosis. That is the case on SliTaz 5.0, here for a user polkit grants nothing:
 
 ```shell-session
 $ mpm doctor

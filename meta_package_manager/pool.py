@@ -566,11 +566,23 @@ class ManagerPool:
 
             yield manager
 
-    def select_managers(self, *args, **kwargs) -> Iterator[PackageManager]:
-        """Wraps `_select_managers()` to stop CLI execution if no manager are selected."""
+    def select_managers(
+        self,
+        *args,
+        allow_empty: bool = False,
+        **kwargs,
+    ) -> Iterator[PackageManager]:
+        """Wraps `_select_managers()` to stop CLI execution if no manager are selected.
+
+        `allow_empty` lets an empty selection through instead, for a subcommand
+        that has something to report whatever the managers: `mpm doctor`
+        reports on privilege escalation, which belongs to the host.
+        """
         managers = self._select_managers(*args, **kwargs)
         first = next(managers, None)
         if first is None:
+            if allow_empty:
+                return
             logging.critical("No manager selected.")
             get_current_context().exit(2)
         yield first

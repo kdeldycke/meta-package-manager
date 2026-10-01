@@ -1050,7 +1050,8 @@ def doctor(ctx):
     The trail marks each manager `✓` (healthy) or `✘` (problems found), and the
     run exits non-zero when any manager reports problems, so the command can gate a
     CI job. `-0`/`--zero-exit` keeps the exit code at `0`. Managers with no
-    diagnostic verb are skipped.
+    diagnostic verb are skipped. When none of the selected managers has one, the
+    escalation report below is the whole diagnosis, and the run exits `0`.
 
     A first section reports how privilege escalation stands: the escalator mpm
     drives, whether its credentials are ready, whether a password prompt would
@@ -1060,12 +1061,24 @@ def doctor(ctx):
     # Escalation belongs to the host, so every selected manager counts, not only
     # those with a diagnostic verb. Probed before priming, which could warm the
     # credentials it reports on.
-    escalation = diagnose_escalation(ctx.obj.selected_managers()).lines()
+    selected = list(ctx.obj.selected_managers(allow_empty=True))
+    escalation = diagnose_escalation(selected).lines()
     echo("Privilege escalation:")
     for line in escalation:
         echo(line)
     echo()
-    managers = list(ctx.obj.selected_managers(implements_operation=Operations.doctor))
+    # An empty selection stays the usual error, after the report. Selected
+    # managers that all lack a diagnostic verb are not one: the report above
+    # is then the whole diagnosis.
+    managers = list(
+        ctx.obj.selected_managers(
+            implements_operation=Operations.doctor,
+            allow_empty=bool(selected),
+        ),
+    )
+    if not managers:
+        logging.warning("None of the selected managers has a diagnostic verb.")
+        return
     prime_sudo(ctx, managers, operations=(Operations.doctor,))
     announce = _announce_level(ctx)
 

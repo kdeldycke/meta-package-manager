@@ -206,6 +206,33 @@ def test_doctor_opens_on_the_escalation_report(invoke, patch_pool_with):
     assert result.stdout.startswith("Privilege escalation:\nEscalator: none found")
 
 
+def test_doctor_without_diagnostic_verb_still_reports(invoke, monkeypatch):
+    """Selected managers that all lack a diagnostic verb are no selection error:
+    the escalation report is the whole diagnosis, as on SliTaz with `tazpkg`."""
+    fake = FakeManager()
+    assert not implements(fake, Operations.doctor)
+
+    def select(*args, implements_operation=None, **kwargs):
+        if implements_operation is None or implements(fake, implements_operation):
+            yield fake
+
+    monkeypatch.setattr(pool, "_select_managers", select)
+    result = invoke("doctor")
+    assert result.exit_code == 0
+    assert result.stdout.startswith("Privilege escalation:")
+    assert "None of the selected managers has a diagnostic verb." in result.stderr
+
+
+def test_doctor_with_no_manager_selected_fails_after_reporting(invoke, monkeypatch):
+    """No manager selected at all stays the usual error, once the escalation
+    report is out."""
+    monkeypatch.setattr(pool, "_select_managers", lambda *args, **kwargs: iter(()))
+    result = invoke("doctor")
+    assert result.exit_code == 2
+    assert result.stdout.startswith("Privilege escalation:")
+    assert "No manager selected." in result.stderr
+
+
 def test_doctor_unhealthy_exits_nonzero(invoke, patch_pool_with):
     fake = patch_pool_with(SickDoctorFakeManager())
     result = invoke("doctor")

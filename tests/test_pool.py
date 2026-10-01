@@ -383,6 +383,13 @@ def test_select_managers(kwargs, expected):
     assert tuple(m.id for m in selection) == expected
 
 
+def test_select_managers_allow_empty_lets_an_empty_selection_through():
+    """No manager selected ends the run by default, and yields nothing on request."""
+    assert list(pool.select_managers(keep=(), allow_empty=True)) == []
+    with click.Context(click.Command("mpm")), pytest.raises(click.exceptions.Exit):
+        list(pool.select_managers(keep=()))
+
+
 def test_select_managers_timeout_stamping():
     """The user's `--timeout` lands on every selected manager even when
     unavailable ones are kept (`mpm managers`), whose version probes fire

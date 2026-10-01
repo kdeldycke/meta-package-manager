@@ -25,6 +25,10 @@ body:
         package managers.
 
 
+        Then run `mpm --<manager_id> doctor`. It relays the manager's own health check, like `brew doctor` or
+        `pip check`. If the manager reports problems, fix them first: they can cause what looks like an `mpm` bug.
+
+
         Try to run your problematic command with the `--verbosity DEBUG` option. Most issues are self-explanatory and
         can be solved by looking at the verbosiest logs. One thing to look for is the all the CLI `mpm` is executing
         under the hood. Try to run them manually in your terminal to see if they behave the same.
@@ -75,6 +79,15 @@ body:
         `mpm --verbosity DEBUG --all-managers managers` command in your terminal.
       render: shell-session
       placeholder: mpm --verbosity DEBUG --all-managers managers
+
+  - type: textarea
+    id: manager-health
+    attributes:
+      label: Package manager health
+      description: >
+        Provide the self-diagnosis of the manager with `mpm --<manager_id> doctor`. Only some managers have one.
+      render: shell-session
+      placeholder: mpm --brew doctor
 
   - type: textarea
     id: binary-resolution

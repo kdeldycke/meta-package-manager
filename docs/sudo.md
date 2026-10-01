@@ -173,6 +173,22 @@ One tool undoes the priming from inside the run: every Homebrew command [resets 
 
 The probe also reads `sudo`'s answer: a user the `sudoers` policy does not authorize at all gets one warning and no password prompt, since a password could not change the answer.
 
+## Checking escalation
+
+`mpm doctor` opens on a report of how escalation stands: the escalator `mpm` drives and the ones it passed over, the installed release where an option depends on it, whether the credentials are ready, whether a password prompt would hold for the whole run, and the fix when they are not. The report never prompts, and never changes the exit code. On SliTaz 5.0, for a user polkit grants nothing:
+
+```shell-session
+$ mpm doctor
+Privilege escalation:
+Escalator: pkexec at /usr/bin/pkexec, detected.
+Skipped: the sudo on PATH does not identify as sudo.
+Release: 0.104, too old for --keep-cwd.
+Credentials: a password is needed (Authorization requires authentication and -u wasn't passed.).
+Prompt: the authorization would not hold past it, so mpm asks for no password.
+Fix: Grant `org.freedesktop.policykit.exec` with a polkit rule, or with a `.pkla` file before polkit `0.106`.
+Escalated by mpm: tazpkg.
+```
+
 ## Managers escalating internally
 
 Some managers run `sudo` from inside their own commands: on macOS, [`brew`](managers/brew.md) escalates while installing a cask with a privileged payload (the `macfuse` example above) and [`fink`](managers/fink.md) re-execs its root commands through `sudo`, while on Linux the AUR helpers call `sudo pacman` for their privileged phases, [`pacstall`](managers/pacstall.md) re-execs itself through `sudo pacstall`, [`shelly`](managers/shelly.md) calls `sudo` from inside every mutating verb, and [`topgrade`](managers/topgrade.md) drives each privileged step through its own per-step `sudo`. `mpm` never wraps these managers in `sudo` (`brew` even refuses to run as root, and `topgrade` warns and prompts when launched as root), and most of their runs never escalate, so a stock `mpm upgrade` does not pre-authenticate for them: prompting on every run would be worse than the rare mid-run prompt it avoids.

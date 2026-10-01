@@ -78,7 +78,7 @@ from .execution import CLIError, elapsed_clock, operation_subject
 from .manager import PackageManager
 from .pool import pool
 from .specifier import Solver, Specifier
-from .sudo import inspect_install_root, prime_sudo
+from .sudo import diagnose_escalation, inspect_install_root, prime_sudo
 from .tables import CHANGE_REPORT_COLUMNS, PackageOutcome, column_specs
 
 TYPE_CHECKING = False
@@ -1051,7 +1051,20 @@ def doctor(ctx):
     run exits non-zero when any manager reports problems, so the command can gate a
     CI job. `-0`/`--zero-exit` keeps the exit code at `0`. Managers with no
     diagnostic verb are skipped.
+
+    A first section reports how privilege escalation stands: the escalator mpm
+    drives, whether its credentials are ready, whether a password prompt would
+    hold for the whole run, and the fix when they are not. It never prompts, and
+    never changes the exit code.
     """
+    # Escalation belongs to the host, so every selected manager counts, not only
+    # those with a diagnostic verb. Probed before priming, which could warm the
+    # credentials it reports on.
+    escalation = diagnose_escalation(ctx.obj.selected_managers()).lines()
+    echo("Privilege escalation:")
+    for line in escalation:
+        echo(line)
+    echo()
     managers = list(ctx.obj.selected_managers(implements_operation=Operations.doctor))
     prime_sudo(ctx, managers, operations=(Operations.doctor,))
     announce = _announce_level(ctx)

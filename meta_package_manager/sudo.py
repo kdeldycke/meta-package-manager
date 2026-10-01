@@ -106,7 +106,7 @@ import subprocess
 import sys
 import threading
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from functools import cache
 from typing import Final
 
@@ -525,23 +525,31 @@ class Escalator:
             if release is None or release >= parse_version(since)
         )
 
-    def is_genuine(self) -> bool:
-        """Whether the binary on `PATH` really is this escalator.
+    def identity(self) -> str:
+        """What the identity probe found: `genuine`, `stand-in` or `unrunnable`.
 
-        `True` when the escalator declares no {attr}`identity_args`, so an
-        escalator opts into the check rather than out of it.
+        `genuine` when the escalator declares no {attr}`identity_args`, so an
+        escalator opts into the check rather than out of it. `unrunnable` keeps
+        a binary that cannot run apart from one that runs and answers as
+        something else, which `mpm doctor` reports differently.
         """
         if not self.identity_args:
-            return True
+            return "genuine"
         probe = _run_probe(self.identity_args)
         if probe is None:
-            return False
+            return "unrunnable"
         # `stdout` is `None` whenever the output was not captured, so it is
         # normalized rather than trusted to be a string.
         stdout = probe.stdout or ""
-        return probe.returncode == 0 and any(
+        if probe.returncode == 0 and any(
             marker in stdout for marker in self.identity_markers or ()
-        )
+        ):
+            return "genuine"
+        return "stand-in"
+
+    def is_genuine(self) -> bool:
+        """Whether the binary on `PATH` really is this escalator."""
+        return self.identity() == "genuine"
 
 
 ESCALATORS: Final[tuple[Escalator, ...]] = (
@@ -881,6 +889,11 @@ class _EscalationChoice:
     def resolve(self) -> Escalator | None:
         """The escalator to drive, or `None` when the host carries none."""
         return resolve_escalator(self._override)
+
+    @property
+    def chosen(self) -> bool:
+        """Whether the user named the escalator, instead of letting mpm detect it."""
+        return self._override is not None
 
 
 ESCALATION: Final = _EscalationChoice()
@@ -1551,6 +1564,226 @@ def prime_sudo(
         logging.warning(no_retention)
         return
     _start_sudo_keepalive(ctx, escalator)
+
+
+@dataclass(frozen=True)
+class EscalationDiagnosis:
+    """How escalation stands on this host, as `mpm doctor` reports it.
+
+    Gathered by {func}`diagnose_escalation`, which never prompts: it runs the
+    non-interactive probes {func}`prime_sudo` runs.
+    """
+
+    escalated: tuple[str, ...]
+    """The selected managers whose privileged commands mpm escalates."""
+
+    internal: tuple[str, ...]
+    """The selected managers that run `sudo` from inside their own commands."""
+
+    is_root: bool = False
+    """Whether `mpm` runs as root, which leaves nothing to escalate."""
+
+    escalator: Escalator | None = None
+    """The escalator mpm drives, or `None` when the host carries none."""
+
+    chosen: bool = False
+    """Whether `--sudo-command` or the `sudo_command` key named the escalator."""
+
+    path: str | None = None
+    """Where the binary of the escalator resolves on `PATH`."""
+
+    skipped: tuple[tuple[str, str], ...] = ()
+    """Escalators on `PATH` that auto-detection passed over, each with what
+    {meth}`Escalator.identity` found: `stand-in` or `unrunnable`."""
+
+    identity: str = "genuine"
+    """What {meth}`Escalator.identity` found for the escalator."""
+
+    release: TokenizedString | None = None
+    """The installed release, for an escalator that reads one."""
+
+    missing_options: tuple[str, ...] = ()
+    """The gated options the installed release predates."""
+
+    credentials: str = ""
+    """What the credential probe found: `ready`, `passwordless`, `denied`,
+    `cold` or `unrunnable`, or empty when nothing was probed."""
+
+    answer: str = ""
+    """The first line the credential probe printed."""
+
+    prompt_kept: bool | None = None
+    """Whether a password prompt would authorize the commands after it, or
+    `None` where the probe cannot tell."""
+
+    def lines(self) -> list[str]:
+        """The report, one fact per line."""
+        if self.is_root:
+            return ["Running as root: no command needs an escalator."]
+        lines = []
+        escalator = self.escalator
+        if escalator is None:
+            lines.append(
+                f"Escalator: none found among {', '.join(e.id for e in ESCALATORS)}.",
+            )
+            if self.escalated:
+                lines.append(
+                    "Fix: Install one, or drop escalation with `--no-sudo` or a "
+                    "`[mpm] sudo = false` entry in your configuration file.",
+                )
+        else:
+            how = "chosen with --sudo-command" if self.chosen else "detected"
+            where = f" at {self.path}" if self.path else ", not found on PATH"
+            lines.append(f"Escalator: {escalator.id}{where}, {how}.")
+            lines.extend(
+                f"Skipped: the {skipped} on PATH could not run."
+                if verdict == "unrunnable"
+                else f"Skipped: the {skipped} on PATH does not identify as {skipped}."
+                for skipped, verdict in self.skipped
+            )
+            if self.identity == "stand-in":
+                lines.append(
+                    f"Identity: the {escalator.binary_name} on PATH does not "
+                    f"identify as {escalator.id}, so mpm may misread its answers.",
+                )
+            if self.release is not None:
+                too_old = (
+                    f", too old for {', '.join(self.missing_options)}"
+                    if self.missing_options
+                    else ""
+                )
+                lines.append(f"Release: {self.release}{too_old}.")
+            lines.extend(self._credential_lines(escalator))
+        escalated = ", ".join(self.escalated) or "no selected manager"
+        lines.append(f"Escalated by mpm: {escalated}.")
+        if self.internal:
+            lines.append(f"Escalating on their own: {', '.join(self.internal)}.")
+        return lines
+
+    def _credential_lines(self, escalator: Escalator) -> list[str]:
+        """The lines on what the credential probe found, and the fix."""
+        answer = f" ({self.answer})" if self.answer else ""
+        if self.credentials == "ready":
+            return ["Credentials: ready, escalated commands run with no prompt."]
+        if self.credentials == "passwordless":
+            return [
+                (
+                    "Credentials: the policy runs every escalated command with no "
+                    "password."
+                ),
+            ]
+        if self.credentials == "unrunnable":
+            return [f"Credentials: {escalator.id} could not run."]
+        lines = []
+        if self.credentials == "denied":
+            lines.append(f"Credentials: denied{answer}.")
+            if escalator.probe_command:
+                lines.append(
+                    f"Probe: it runs `{escalator.probe_command}`, and a rule can "
+                    "still permit the managers' own commands.",
+                )
+        else:
+            lines.append(f"Credentials: a password is needed{answer}.")
+            if self.prompt_kept is True:
+                lines.append(
+                    "Prompt: the authorization would hold for the whole run.",
+                )
+            elif self.prompt_kept is False:
+                lines.append(
+                    "Prompt: the authorization would not hold past it, so mpm "
+                    "asks for no password.",
+                )
+        if self.escalated or self.internal:
+            # A denial needs a rule, which no authentication can stand in for.
+            if self.credentials == "denied":
+                lines.append(
+                    f"Fix: Give this user a {escalator.id} rule for the escalated "
+                    "commands, or drop escalation with `--no-sudo`.",
+                )
+            else:
+                lines.append(f"Fix: {escalator.remedy}")
+        return lines
+
+
+def diagnose_escalation(managers: Iterable[PackageManager]) -> EscalationDiagnosis:
+    """Report how escalation stands on this host, without prompting.
+
+    Runs the probes {func}`prime_sudo` runs, in the same non-interactive shape:
+    the identity check of the escalators auto-detection passed over, the
+    release read and the credential probe. `managers` are the selected ones,
+    all operations included: escalation belongs to the host, not to the
+    managers one subcommand reaches.
+    """
+    managers = list(managers)
+    escalated = tuple(
+        sorted(
+            manager.id
+            for manager in managers
+            if _resolved_sudo(manager)
+            and not manager.internal_sudo
+            and manager.privileged_operations
+        ),
+    )
+    internal = tuple(sorted(m.id for m in managers if m.internal_sudo))
+    if getattr(os, "geteuid", lambda: 1)() == 0:
+        return EscalationDiagnosis(escalated, internal, is_root=True)
+    escalator = ESCALATION.resolve()
+    if escalator is None:
+        return EscalationDiagnosis(escalated, internal)
+    chosen = ESCALATION.chosen
+    skipped: list[tuple[str, str]] = []
+    if not chosen:
+        for earlier in ESCALATORS[: ESCALATORS.index(escalator)]:
+            if shutil.which(earlier.binary_name):
+                verdict = earlier.identity()
+                if verdict != "genuine":
+                    skipped.append((earlier.id, verdict))
+    supported = escalator.supported_options()
+    found = EscalationDiagnosis(
+        escalated,
+        internal,
+        escalator=escalator,
+        chosen=chosen,
+        path=shutil.which(escalator.binary_name),
+        skipped=tuple(skipped),
+        identity=escalator.identity(),
+        release=(
+            _installed_release(escalator.version_args)
+            if escalator.version_args
+            else None
+        ),
+        missing_options=tuple(
+            option for option, _ in escalator.gated_options if option not in supported
+        ),
+    )
+    probe = _probe_credentials(escalator)
+    if probe is None:
+        return replace(found, credentials="unrunnable")
+    output = (probe.stdout or b"").decode("UTF-8", errors="replace")
+    error = (probe.stderr or b"").decode("UTF-8", errors="replace")
+    answer = next(
+        (
+            stripped
+            for line in (*error.splitlines(), *output.splitlines())
+            if (stripped := line.strip())
+        ),
+        "",
+    )
+    if escalator.probe_says_warm(probe):
+        return replace(found, credentials="ready")
+    if _is_sudo_denied(error):
+        return replace(found, credentials="denied", answer=answer)
+    if _escalation_is_passwordless(
+        escalator,
+        [manager for manager in managers if manager.id in escalated],
+    ):
+        return replace(found, credentials="passwordless")
+    return replace(
+        found,
+        credentials="cold",
+        answer=answer,
+        prompt_kept=_prompt_kept(escalator, probe),
+    )
 
 
 def _hidden_prompt_risk(internal_sudo: bool, operation: str | None) -> bool:

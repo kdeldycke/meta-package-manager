@@ -32,6 +32,7 @@ from meta_package_manager.execution import CLIError
 from meta_package_manager.pool import pool
 
 from .fake_manager import FakeManager
+from .test_sudo import only_escalator
 
 
 @pytest.mark.parametrize(
@@ -155,6 +156,16 @@ def test_base_doctor_not_implemented():
 # CLI plumbing, driven through deterministic fakes.
 
 
+@pytest.fixture(autouse=True)
+def _no_host_escalator():
+    """Keep the escalation report of `mpm doctor` off the real host's escalator.
+
+    Pretends the host carries none, so the report spends no probe.
+    """
+    with only_escalator(None):
+        yield
+
+
 class HealthyDoctorFakeManager(FakeManager):
     """Fake manager whose diagnosis succeeds with a report."""
 
@@ -185,6 +196,14 @@ def test_doctor_healthy_relays_report(invoke, patch_pool_with):
     assert result.exit_code == 0
     assert f"{fake.id}:" in result.stdout
     assert "Your system is ready." in result.stdout
+
+
+def test_doctor_opens_on_the_escalation_report(invoke, patch_pool_with):
+    """The escalation report comes first, and never changes the exit code."""
+    patch_pool_with(HealthyDoctorFakeManager())
+    result = invoke("doctor")
+    assert result.exit_code == 0
+    assert result.stdout.startswith("Privilege escalation:\nEscalator: none found")
 
 
 def test_doctor_unhealthy_exits_nonzero(invoke, patch_pool_with):

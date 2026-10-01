@@ -57,6 +57,7 @@ from meta_package_manager.sudo import (
     _is_sudo_auth_failure,
     _is_sudo_denied,
     _probe_credentials,
+    diagnose_escalation,
     inspect_install_root,
     prime_sudo,
     resolve_escalator,
@@ -1852,6 +1853,133 @@ def test_override_warns_on_a_stand_in(caplog, on_path, genuine, warns):
         "does not identify as sudo" in record.getMessage() for record in caplog.records
     )
     assert warned is warns
+
+
+# `mpm doctor` escalation report: what the probes find, without ever prompting.
+
+PKEXEC = next(e for e in ESCALATORS if e.id == "pkexec")
+PKCHECK_COLD = b"Authorization requires authentication and -u wasn't passed.\n"
+
+
+def _slitaz_answer(argv, **kwargs):
+    """How a non-root user's SliTaz 5.0 answers each probe: its `sudo` is a
+    BusyBox `su -c` wrapper, its polkit `0.104` grants nothing by default."""
+    if tuple(argv) == ("sudo", "--version"):
+        return subprocess.CompletedProcess(argv, 0, stdout="Password: \n")
+    if tuple(argv) == ("pkexec", "--version"):
+        return subprocess.CompletedProcess(argv, 0, stdout="pkexec version 0.104\n")
+    return subprocess.CompletedProcess(argv, 2, stdout=b"", stderr=PKCHECK_COLD)
+
+
+def test_diagnose_escalation_on_slitaz():
+    """The whole report of a SliTaz host, where auto-detection passes over the
+    `su` wrapper, and polkit would keep nothing a prompt buys."""
+    with (
+        patch(
+            "meta_package_manager.sudo.shutil.which",
+            side_effect=lambda name: (
+                f"/usr/bin/{name}" if name in ("sudo", "pkexec") else None
+            ),
+        ),
+        patch("meta_package_manager.sudo.subprocess.run", side_effect=_slitaz_answer),
+        patch("meta_package_manager.sudo.os.geteuid", return_value=1000, create=True),
+    ):
+        diagnosis = diagnose_escalation([_escalating_manager()])
+    assert diagnosis.lines() == [
+        "Escalator: pkexec at /usr/bin/pkexec, detected.",
+        "Skipped: the sudo on PATH does not identify as sudo.",
+        "Release: 0.104, too old for --keep-cwd.",
+        (
+            "Credentials: a password is needed "
+            "(Authorization requires authentication and -u wasn't passed.)."
+        ),
+        (
+            "Prompt: the authorization would not hold past it, so mpm asks for "
+            "no password."
+        ),
+        f"Fix: {PKEXEC.remedy}",
+        "Escalated by mpm: fakemanager.",
+    ]
+
+
+def test_diagnose_escalation_as_root():
+    """Root runs every command as is, so nothing is probed."""
+    with (
+        patch("meta_package_manager.sudo.subprocess.run") as run,
+        patch("meta_package_manager.sudo.os.geteuid", return_value=0, create=True),
+    ):
+        diagnosis = diagnose_escalation([_escalating_manager()])
+    run.assert_not_called()
+    assert diagnosis.lines() == ["Running as root: no command needs an escalator."]
+
+
+@pytest.mark.parametrize(
+    ("probe", "expected"),
+    (
+        pytest.param(
+            subprocess.CompletedProcess((), 0, stdout=b"", stderr=b""),
+            ["Credentials: ready, escalated commands run with no prompt."],
+            id="warm",
+        ),
+        pytest.param(
+            subprocess.CompletedProcess(
+                (), 1, stdout=b"", stderr=b"doas: Operation not permitted\n"
+            ),
+            [
+                "Credentials: denied (doas: Operation not permitted).",
+                (
+                    "Probe: it runs `true`, and a rule can still permit the "
+                    "managers' own commands."
+                ),
+                (
+                    "Fix: Give this user a doas rule for the escalated commands, "
+                    "or drop escalation with `--no-sudo`."
+                ),
+            ],
+            id="scoped-rule",
+        ),
+    ),
+)
+def test_diagnose_doas_credentials(probe, expected):
+    """What the doas credential probe found, as the report words it."""
+    with (
+        only_escalator("doas"),
+        patch("meta_package_manager.sudo.subprocess.run", return_value=probe),
+        patch("meta_package_manager.sudo.os.geteuid", return_value=1000, create=True),
+    ):
+        lines = diagnose_escalation([_escalating_manager()]).lines()
+    assert lines[0] == "Escalator: doas at /usr/bin/doas, detected."
+    assert lines[1 : 1 + len(expected)] == expected
+
+
+def test_diagnose_escalation_without_escalator():
+    """A host carrying none names the ones mpm looks for, and the way out."""
+    with (
+        only_escalator(None),
+        patch("meta_package_manager.sudo.os.geteuid", return_value=1000, create=True),
+    ):
+        lines = diagnose_escalation([_escalating_manager()]).lines()
+    assert lines[0] == (
+        "Escalator: none found among sudo, doas, run0, pkexec, gsudo, win-sudo."
+    )
+    assert lines[1].startswith("Fix: Install one")
+
+
+def test_diagnose_escalation_tells_unrunnable_from_stand_in():
+    """A binary that cannot run is no stand-in: the report says which it is."""
+    with (
+        patch(
+            "meta_package_manager.sudo.shutil.which",
+            side_effect=lambda name: (
+                f"/usr/bin/{name}" if name in ("sudo", "doas") else None
+            ),
+        ),
+        patch("meta_package_manager.sudo.subprocess.run", side_effect=OSError),
+        patch("meta_package_manager.sudo.os.geteuid", return_value=1000, create=True),
+    ):
+        lines = diagnose_escalation([_escalating_manager()]).lines()
+    assert "Skipped: the sudo on PATH could not run." in lines
+    assert "Credentials: doas could not run." in lines
 
 
 # Stall watchdog: a mutating call of an internal escalator (cask, fink) that goes

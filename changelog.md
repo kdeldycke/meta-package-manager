@@ -40,6 +40,7 @@
 - [mpm] Open `mpm doctor` on a report of privilege escalation: the escalator, whether its credentials are ready, whether a password prompt would hold, and the fix.
 - [mpm] Exit `0` from `mpm doctor` when no selected manager has a diagnostic verb, instead of failing on `No manager selected` after the escalation report.
 - [guix] Fix `outdated` reporting no package while updates are available.
+- [guix] Fix `upgrade <package>` also upgrading every installed package whose name contains `<package>`, like `glib-networking` for `glib`.
 
 ## [`8.0.2` (2026-09-28)](https://github.com/kdeldycke/meta-package-manager/compare/v8.0.1...v8.0.2)
 

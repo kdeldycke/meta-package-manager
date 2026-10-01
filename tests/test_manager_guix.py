@@ -82,3 +82,17 @@ def test_outdated_reads_the_report_from_stderr(guix, monkeypatch, report, expect
         (package.id, str(package.installed_version), str(package.latest_version))
         for package in guix.outdated
     ] == expected
+
+
+@pytest.mark.parametrize(
+    ("package_id", "regexp"),
+    (
+        pytest.param("lua", "^lua$", id="anchored"),
+        pytest.param("glib:bin", "^glib$", id="output_dropped"),
+        pytest.param("gtk+", r"^gtk\+$", id="plus_escaped"),
+        pytest.param("python-ruamel.yaml", r"^python-ruamel\.yaml$", id="dot_escaped"),
+    ),
+)
+def test_upgrade_one_matches_the_name_alone(guix, package_id, regexp):
+    """`guix upgrade glib` would also upgrade `glib-networking`."""
+    assert guix.upgrade_one_cli(package_id)[1:] == ("upgrade", regexp)

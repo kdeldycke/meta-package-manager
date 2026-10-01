@@ -111,6 +111,13 @@ class Guix(PackageManager):
     left out: no newer version is available.
     """
 
+    _REGEXP_SPECIALS = re.compile(r"([.^$*+?()\[\]{}|\\])")
+    """Characters a POSIX extended regular expression reads as operators."""
+
+    def _name_regexp(self, name: str) -> str:
+        """A regular expression matching the package name `name`, and no other."""
+        return "^" + self._REGEXP_SPECIALS.sub(r"\\\1", name) + "$"
+
     @property
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
@@ -264,12 +271,20 @@ class Guix(PackageManager):
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade one package.
 
+        `guix upgrade` reads its argument as a regular expression, and upgrades
+        every installed package whose name it matches: `guix upgrade glib` also
+        upgrades `glib-networking`. So the name is escaped and anchored, to match
+        itself alone. Entries match by name, so the `:output` suffix is dropped,
+        and every installed output of the package is upgraded.
+
         ```{code-block} shell-session
 
-        $ guix upgrade hello
+        $ guix upgrade ^lua$
         ```
         """
-        return self.build_cli("upgrade", package_id)
+        return self.build_cli(
+            "upgrade", self._name_regexp(package_id.partition(":")[0])
+        )
 
     def remove(self, package_id: str) -> str:
         """Remove one package.

@@ -36,7 +36,7 @@
 - [mpm] Warn when `--sudo-command` names a stand-in for that escalator, like SliTaz's `su` wrapper named `sudo`, and stop its probes from waiting on a password.
 - [mpm] Warn after the password prompt when the escalator keeps no authorization for later commands, naming the fix: `persist` for `doas`, a polkit grant for `pkexec` or `run0`.
 - [mpm] Stop claiming `doas` managers will fail when a `doas.conf` rule permits their own commands but not the `true` mpm probes with.
-- [mpm] Skip the `pkexec` password prompt when polkit would keep nothing of it, warning with the fix instead.
+- [mpm] Skip the `pkexec` or `run0` password prompt when polkit would keep nothing of it, as `run0` over SSH, warning with the fix instead.
 
 ## [`8.0.2` (2026-09-28)](https://github.com/kdeldycke/meta-package-manager/compare/v8.0.1...v8.0.2)
 

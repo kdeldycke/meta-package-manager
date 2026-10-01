@@ -1756,6 +1756,58 @@ def test_prime_sudo_prompts_only_when_polkit_keeps_it(caplog, probe_stdout, prom
     assert warned is not prompted
 
 
+@pytest.mark.parametrize(
+    ("pkcheck_stdout", "prompted"),
+    (
+        # `pkcheck` on `org.freedesktop.systemd1.manage-units`, measured on
+        # Fedora 44 with polkit 127, under each policy systemd ships.
+        pytest.param(
+            "polkit\\56result=auth_admin_keep\n"
+            "polkit\\56retains_authorization_after_challenge=1\n",
+            True,
+            id="local-session",
+        ),
+        pytest.param("polkit\\56result=auth_admin\n", False, id="ssh-session"),
+        # No `pkcheck` to ask: the prompt goes ahead, as before.
+        pytest.param(None, True, id="no-pkcheck"),
+    ),
+)
+def test_prime_sudo_asks_polkit_before_prompting_for_run0(
+    caplog, pkcheck_stdout, prompted
+):
+    """run0's own probe cannot tell whether polkit keeps what a password buys,
+    so `pkcheck` asks about the action run0 authorizes against."""
+    run0 = next(e for e in ESCALATORS if e.id == "run0")
+    ctx = click.Context(click.Command("mpm"))
+    authenticated = []
+
+    def answer(argv, **kwargs):
+        """A cold probe until the prompt authenticates, as polkit keeps it."""
+        argv = tuple(argv)
+        if argv[0] == "pkcheck":
+            if pkcheck_stdout is None:
+                raise FileNotFoundError(argv[0])
+            return subprocess.CompletedProcess(argv, 2, stdout=pkcheck_stdout)
+        if argv == run0.prompt_args:
+            authenticated.append(argv)
+            return subprocess.CompletedProcess(argv, 0)
+        return subprocess.CompletedProcess(argv, 0 if authenticated else 1)
+
+    with (
+        prime_sudo_env(stdin_tty=True, stderr_tty=True) as run,
+        only_escalator("run0", selected="run0"),
+        caplog.at_level(logging.WARNING),
+    ):
+        run.side_effect = answer
+        try:
+            prime_sudo(ctx, [_escalating_manager()], operations=INSTALL_RUN)
+            assert _SUDO_CACHE_WARM.is_set() is prompted
+        finally:
+            ctx.close()
+    assert bool(authenticated) is prompted
+    assert any(call.args[0][0] == "pkcheck" for call in run.call_args_list)
+
+
 @pytest.mark.parametrize("escalator", ESCALATORS, ids=[e.id for e in ESCALATORS])
 def test_every_escalator_names_a_remedy(escalator):
     """Warnings go on after the remedy, so it is a sentence of its own."""

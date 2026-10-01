@@ -181,6 +181,12 @@ goes unflagged. Priming still authenticates; only the watchdog is suppressed.
 """
 
 
+def _with_pid(args: tuple[str, ...]) -> tuple[str, ...]:
+    """`args`, with any `{pid}` token replaced by mpm's own process id."""
+    pid = str(os.getpid())
+    return tuple(arg.replace("{pid}", pid) for arg in args)
+
+
 def _run_probe(args: tuple[str, ...]) -> subprocess.CompletedProcess[str] | None:
     """Ask an escalator binary a question, detached from the terminal.
 
@@ -365,11 +371,22 @@ class Escalator:
     would authorize the commands after it too, or `None` where the probe cannot
     tell.
 
-    Only `pkcheck` can: polkit adds
+    Only polkit's `pkcheck` can, for `pkexec` and `run0`: it adds
     `polkit\\56retains_authorization_after_challenge=1` to its `<stdout>` under
     `auth_admin_keep`, and nothing under `auth_admin`, where a prompt authorizes
     its own command alone. {func}`prime_sudo` then skips the prompt, since the
     password would buy nothing. Measured on polkit `0.104`, SliTaz 5.0.
+    """
+
+    retention_probe_args: tuple[str, ...] | None = None
+    """Argv asking polkit about {attr}`retention_markers`, where the credential
+    probe cannot answer, or `None` to read the answer of that probe.
+
+    Only `run0` needs one: its probe runs `true` through systemd, while
+    `pkcheck` asks polkit about `org.freedesktop.systemd1.manage-units`, the
+    action run0 authorizes against. systemd's policy grants it
+    `auth_admin_keep` for an active local session and `auth_admin` for an SSH
+    one. Measured on Fedora 44, systemd `259`, polkit `127`.
     """
 
     probe_command: str | None = None
@@ -490,8 +507,7 @@ class Escalator:
         `Subject not specified`. Every other escalator answers for whoever runs
         it and carries no token, so the substitution is a no-op there.
         """
-        pid = str(os.getpid())
-        return tuple(arg.replace("{pid}", pid) for arg in self.probe_args)
+        return _with_pid(self.probe_args)
 
     def supported_options(self) -> tuple[str, ...]:
         """The {attr}`gated_options` the installed release accepts.
@@ -590,6 +606,14 @@ ESCALATORS: Final[tuple[Escalator, ...]] = (
         # systemd's own policy keeps the authorization for an active local
         # session only (`auth_admin_keep`): an SSH session gets `auth_admin`.
         remedy="Grant `org.freedesktop.systemd1.manage-units` with a polkit rule.",
+        retention_markers=("retains_authorization_after_challenge=1",),
+        retention_probe_args=(
+            "pkcheck",
+            "--action-id",
+            "org.freedesktop.systemd1.manage-units",
+            "--process",
+            "{pid}",
+        ),
         identity_args=("run0", "--version"),
         # run0 reports the systemd version it ships with, not one of its own.
         identity_markers=("systemd",),
@@ -1148,6 +1172,28 @@ def _probe_credentials(
         return None
 
 
+def _prompt_kept(
+    escalator: Escalator,
+    probe: subprocess.CompletedProcess[bytes],
+) -> bool | None:
+    """Whether a password prompt would authorize the commands after it, read
+    from polkit ahead of any prompt, or `None` where nothing tells.
+
+    `probe` is the cold answer of the credential probe, which carries the
+    answer for `pkexec`. A `pkcheck` that cannot run leaves the question open.
+    """
+    if escalator.retention_markers is None:
+        return None
+    if escalator.retention_probe_args:
+        answer = _run_probe(_with_pid(escalator.retention_probe_args))
+        if answer is None:
+            return None
+        output = answer.stdout or ""
+    else:
+        output = (probe.stdout or b"").decode("UTF-8", errors="replace")
+    return any(marker in output for marker in escalator.retention_markers)
+
+
 def _start_sudo_keepalive(ctx: Context, escalator: Escalator) -> None:
     """Keep the credential cache of `escalator` fresh for the rest of the invocation.
 
@@ -1469,11 +1515,9 @@ def prime_sudo(
         f"{escalator.id} keeps no authorization past a password prompt: {ids} "
         f"may fail. {escalator.remedy}"
     )
-    if escalator.retention_markers is not None:
-        probe_output = (probe.stdout or b"").decode("UTF-8", errors="replace")
-        if not any(marker in probe_output for marker in escalator.retention_markers):
-            logging.warning(no_retention)
-            return
+    if _prompt_kept(escalator, probe) is False:
+        logging.warning(no_retention)
+        return
 
     echo(
         f"{ids} need{'s' if len(escalating) == 1 else ''} administrator rights to "

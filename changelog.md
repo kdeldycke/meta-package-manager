@@ -42,7 +42,9 @@
 - [guix] Fix `outdated` reporting no package while updates are available.
 - [guix] Fix `upgrade <package>` also upgrading every installed package whose name contains `<package>`, like `glib-networking` for `glib`.
 - [guix] Fix the package IDs of `installed` ending in spaces.
-- [guix] List a package output other than `out` as a package of its own, like `glib:bin`, which `remove` takes back.
+- [guix] List a package output other than `out` as a package of its own, like `glib:bin`, which `install` and `remove` take back.
+- [guix] Fix `install` crashing on a package Guix ships in several versions, like `lua`, which `search` now lists once, at its newest version.
+- [guix] Strip the trailing spaces from the descriptions of `search` results.
 
 ## [`8.0.2` (2026-09-28)](https://github.com/kdeldycke/meta-package-manager/compare/v8.0.1...v8.0.2)
 

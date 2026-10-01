@@ -22,6 +22,7 @@ from extra_platforms import LINUX_LIKE
 
 from ..capabilities import search_capabilities, version_not_implemented
 from ..manager import PackageManager
+from ..version import parse_version
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
@@ -95,9 +96,12 @@ class Guix(PackageManager):
     """
 
     _SEARCH_FIELD_REGEXP = re.compile(
-        r"^(?P<field>\w[\w-]*):\s+(?P<value>.+)$",
+        r"^(?P<field>\w[\w-]*):(?:\s+(?P<value>.*))?$",
     )
-    """Match a single recutils field line (`name: value`)."""
+    """Match a recutils field line (`name: value`), whose value may be empty."""
+
+    _SEARCH_OUTPUT_REGEXP = re.compile(r"^\+ (?P<output>[^\s:]+): ")
+    """Match an output listed under the `outputs` field of a search record."""
 
     _OUTDATED_REGEXP = re.compile(
         r"^\s+(?P<package_id>\S+)\s+(?P<installed_version>\S+)\s+(?:→|->)\s+"
@@ -210,45 +214,96 @@ class Guix(PackageManager):
         look like a hang.
         ```
 
+        Guix keeps some packages in several versions under one name, like `lua`
+        from `5.1.5` to `5.4.8`. A name is reported once, at its newest version:
+        the one `guix install` picks.
+
+        A query naming an output, like `glib:bin`, reports that output of the
+        package of that exact name. That is the form `installed` reports, and
+        `mpm install` searches for a package before it installs it.
+
         Results are printed in recutils format with records separated by blank
         lines.
 
         ```{code-block} shell-session
 
-        $ guix search hello
-        name: hello
-        version: 2.10
-        outputs: out
-        systems: x86_64-linux i686-linux
-        dependencies: glibc@2.35 ...
-        location: gnu/packages/base.scm:86:2
-        homepage: https://www.gnu.org/software/hello/
+        $ guix search cowsay
+        name: cowsay
+        version: 3.8.4
+        outputs:
+        + out: everything
+        systems: x86_64-linux mips64el-linux aarch64-linux powerpc64le-linux
+        + i686-linux armhf-linux powerpc-linux
+        dependencies: perl@5.36.0
+        location: gnu/packages/games.scm:1431:2
+        homepage: https://web.archive.org/web/20071026043648/http://www.nog.net:80/~tony/warez/cowsay.shtml
         license: GPL 3+
-        synopsis: Hello, GNU world: an example GNU package
-        description: GNU Hello prints the message "Hello, world!"
-        + and then exits.  It serves as an example of standard
-        + GNU coding practices.
-        relevance: 10
+        synopsis: Speaking cow text filter
+        description: Cowsay is basically a text filter.  Send some text into it, and
+        + you get a cow saying your text.  If you think a talking cow isn't enough, cows
+        + can think too: all you have to do is run `cowthink'.  If you're tired of cows,
+        + a variety of other ASCII-art messengers are available.
+        relevance: 32
+
+        name: python-snakesay
+        version: 0.10.4
+        outputs:
+        + out: everything
+        systems: x86_64-linux mips64el-linux aarch64-linux powerpc64le-linux
+        + i686-linux armhf-linux powerpc-linux
+        dependencies: python-pytest@8.4.1 python-setuptools@80.9.0
+        location: gnu/packages/python-xyz.scm:2293:2
+        homepage: https://github.com/pythonanywhere/snakesay
+        license: Expat
+        synopsis: Like `cowsay' but with Python flavor
+        description: This package provides a simple ASCII art pictures generator of a
+        + Snake with a message.
+        relevance: 3
         ```
         """
-        output = self.run_cli("search", query)
+        name, _, wanted_output = query.partition(":")
+        listing = self.run_cli(
+            "search", self._name_regexp(name) if wanted_output else query
+        )
 
-        for record in re.split(r"\n\n+", output.strip()):
+        newest: dict[str, Package] = {}
+        for record in re.split(r"\n\n+", listing.strip()):
             fields: dict[str, str] = {}
+            outputs: list[str] = []
+            field = None
             for line in record.splitlines():
                 match = self._SEARCH_FIELD_REGEXP.match(line)
                 if match:
-                    fields[match.group("field")] = match.group("value")
-                # Continuation lines (`+ ...`) are ignored; we only need the
-                # first line of multi-line fields like description.
+                    field = match.group("field")
+                    # Guix ends some values with spaces, like the synopsis.
+                    fields[field] = (match.group("value") or "").strip()
+                elif field == "outputs":
+                    output_match = self._SEARCH_OUTPUT_REGEXP.match(line)
+                    if output_match:
+                        outputs.append(output_match.group("output"))
 
-            name = fields.get("name")
-            if name:
-                yield self.package(
-                    id=name,
-                    description=fields.get("synopsis"),
-                    latest_version=fields.get("version"),
+            package_id = fields.get("name")
+            if not package_id:
+                continue
+            if wanted_output:
+                # The regular expression also matches synopses and descriptions.
+                if package_id != name or wanted_output not in outputs:
+                    continue
+                package_id = f"{name}:{wanted_output}"
+            version = fields.get("version") or None
+            held = newest.get(package_id)
+            if (
+                held is None
+                or held.latest_version is None
+                or (version and parse_version(version) > held.latest_version)
+            ):
+                newest[package_id] = self.package(
+                    id=package_id,
+                    description=fields.get("synopsis") or None,
+                    latest_version=version,
                 )
+
+        yield from newest.values()
 
     @version_not_implemented
     def install(self, package_id: str, version: str | None = None) -> str:

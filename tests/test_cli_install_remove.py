@@ -182,6 +182,27 @@ def test_install_untied_reports_every_attempt(invoke, changing_fake_pool):
     )
 
 
+def test_dry_run_install_names_plan(invoke, changing_fake_pool, queries_through_a_cli):
+    """A simulated search finds nothing, which is no proof the package is missing."""
+    mid = changing_fake_pool.id
+    result = invoke("--dry-run", "install", "fake-pkg-theta")
+    stderr = strip_ansi(result.stderr)
+    assert f"✘ {mid}.install: fake-pkg-theta (dry-run)" in stderr
+    assert "Run with --plan to resolve it." in stderr
+
+
+def test_plan_install_resolves_what_dry_run_cannot(
+    invoke, changing_fake_pool, queries_through_a_cli
+):
+    """The control: `--plan` runs the search, so the same package resolves."""
+    mid = changing_fake_pool.id
+    result = invoke("--plan", "install", "fake-pkg-theta")
+    stderr = strip_ansi(result.stderr)
+    assert result.exit_code == 0
+    assert f"✓ {mid}.install: fake-pkg-theta" in stderr
+    assert "Run with --plan" not in stderr
+
+
 def test_install_report_serialized_keeps_the_exit_code(invoke, changing_fake_pool):
     """The serialized report prints, and a failed package still exits non-zero."""
     mid = changing_fake_pool.id

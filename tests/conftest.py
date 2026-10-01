@@ -436,6 +436,31 @@ def changing_fake_pool(patch_pool_with):
 
 
 @fixture
+def queries_through_a_cli(monkeypatch):
+    """Answer the `installed` and `search` queries of
+    {class}`~tests.fake_manager.ChangingFakeManager` through a command, as a real
+    manager does.
+
+    `--dry-run` simulates that command, where `--plan` runs it.
+    """
+
+    def installed(manager):
+        script = f"print({' '.join(sorted(manager.inventory))!r})"
+        for package_id in manager.run(str(manager.cli_path), "-c", script).split():
+            yield manager.package(
+                id=package_id, installed_version=manager.inventory[package_id]
+            )
+
+    def search(manager, query, extended, exact):
+        output = manager.run(str(manager.cli_path), "-c", f"print({query!r})")
+        for package_id in output.split():
+            yield manager.package(id=package_id, latest_version="1.0.0")
+
+    monkeypatch.setattr(ChangingFakeManager, "installed", property(installed))
+    monkeypatch.setattr(ChangingFakeManager, "search", search)
+
+
+@fixture
 def subcmd():
     """Fixture used in `test_cli_*.py` files to set the subcommand arguments in all
     CLI calls.

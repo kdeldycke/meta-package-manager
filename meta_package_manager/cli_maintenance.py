@@ -100,6 +100,21 @@ first."""
 SWEEP_RESULTS = (PackageOutcome.REMOVED,)
 """The outcome an orphan sweep counts on each manager's trail line."""
 
+DRY_RUN_HINT = (
+    "--dry-run also simulates the read-only queries, so it cannot find which "
+    "manager provides a package. Run with --plan to resolve it."
+)
+"""Why `--dry-run` leaves a package untied to a manager unresolved, and the option
+that resolves it."""
+
+
+def _simulates_reads(manager: PackageManager) -> bool:
+    """Whether `--dry-run` simulates the read-only queries of `manager`.
+
+    `--plan` runs them for real, even when `--dry-run` is also set.
+    """
+    return manager.dry_run and not manager.plan
+
 
 def cooldown_permits(manager: PackageManager) -> bool:
     """Decide whether a release-introducing operation may run on `manager`.
@@ -255,6 +270,7 @@ def _dispatch_sourced_operation(
     tasks: list[tuple[PackageManager, Callable[[], tuple[bool, str]]]] = []
     # The package IDs each manager acts on, the ones an upgrade expects to move.
     requested: dict[str, set[str]] = {}
+    unresolved_in_simulation = False
     solver = Solver(packages_specs, manager_priority=manager_ids)
     for package_id, spec in solver.resolve_package_specs():
         source_manager_ids = set()
@@ -289,9 +305,11 @@ def _dispatch_sourced_operation(
 
         if not source_manager_ids:
             logging.error(
-                f"{package_id} is not recognized by any of the selected manager. "
+                f"{package_id} is not recognized by any of the selected managers. "
                 "Skip it.",
             )
+            if any(_simulates_reads(manager) for manager in sourcing_managers):
+                unresolved_in_simulation = True
             continue
 
         # Announce the managers we will act with (also the non-TTY signal).
@@ -331,6 +349,8 @@ def _dispatch_sourced_operation(
         operation=operation.name,
     )
     report.show(ctx)
+    if unresolved_in_simulation:
+        logging.warning(DRY_RUN_HINT)
 
     exit_on_failures(ctx, verb, failures)
 
@@ -524,17 +544,22 @@ def install(ctx, packages_specs):
     def trail(spec: Specifier, manager_id: str, status: str, seconds: float) -> None:
         """Map an install attempt to a `✓`/`✘` ledger line through `op`.
 
-        `status` is `installed` (✓), or `not_found` / `failed` / `cooldown`
-        (✘). `seconds` is how long the attempt took, closing the line the way
-        every other trail line closes.
+        `status` is `installed` (✓), or `not_found` / `simulated` / `failed` /
+        `cooldown` (✘). `seconds` is how long the attempt took, closing the line
+        the way every other trail line closes.
         """
-        detail = {"not_found": "not found", "cooldown": "cooldown"}.get(status)
+        detail = {
+            "not_found": "not found",
+            "simulated": "dry-run",
+            "cooldown": "cooldown",
+        }.get(status)
         subject = operation_subject(manager_id, Operations.install.name)
         text = trail_label(subject, package_label(spec), detail)
         op.mark(status == "installed", f"{text}{elapsed_clock(seconds)}")
 
     # Drop managers that cannot honor an active cooldown (once, not per package).
     eligible_managers = tuple(m for m in selected_managers if cooldown_permits(m))
+    simulated_search = False
     for spec in unmatched_packages:
         installed = False
         held = False
@@ -574,6 +599,14 @@ def install(ctx, packages_specs):
                 trail(spec, manager.id, "not_found", time.monotonic() - start)
                 continue
             else:
+                if not matches and _simulates_reads(manager):
+                    logging.info(
+                        f"Search for {spec.package_id} only simulated.",
+                        extra={"label": manager.subject},
+                    )
+                    trail(spec, manager.id, "simulated", time.monotonic() - start)
+                    simulated_search = True
+                    continue
                 if not matches:
                     logging.info(
                         f"No {spec.package_id} package found.",
@@ -611,6 +644,8 @@ def install(ctx, packages_specs):
     op.finish(installed_count == total, f"Installed {installed_count}/{total} packages")
     report.close_all()
     report.show(ctx)
+    if simulated_search:
+        logging.warning(DRY_RUN_HINT)
 
     # Fail with a non-zero exit code if any requested package went uninstalled by every
     # selected manager.

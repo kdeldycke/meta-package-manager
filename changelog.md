@@ -46,6 +46,7 @@
 - [guix] Fix `install` crashing on a package Guix ships in several versions, like `lua`, which `search` now lists once, at its newest version.
 - [guix] Strip the trailing spaces from the descriptions of `search` results.
 - [guix] Note on its page that a first `guix pull` outlasts the default timeout of `sync`, and how to raise it.
+- [mpm] Point to `--plan` when `--dry-run` cannot tell which manager provides a package to `install`, `remove` or `upgrade`, instead of reporting it not found.
 
 ## [`8.0.2` (2026-09-28)](https://github.com/kdeldycke/meta-package-manager/compare/v8.0.1...v8.0.2)
 

@@ -209,6 +209,29 @@ def test_sourcing_survives_a_failing_manager(
     assert "fake-pkg-alpha is not recognized" in result.stderr
 
 
+@pytest.mark.parametrize("subcommand", ("upgrade", "remove"))
+def test_dry_run_names_plan_to_resolve_a_package(
+    invoke, changing_fake_pool, queries_through_a_cli, subcommand
+):
+    """`--dry-run` also simulates the listing that ties a package to its manager."""
+    result = invoke("--dry-run", subcommand, "fake-pkg-alpha")
+    stderr = strip_ansi(result.stderr)
+    assert "fake-pkg-alpha is not recognized by any of the selected managers." in stderr
+    assert "Run with --plan to resolve it." in stderr
+
+
+@pytest.mark.parametrize("subcommand", ("upgrade", "remove"))
+def test_plan_resolves_a_package_dry_run_cannot(
+    invoke, changing_fake_pool, queries_through_a_cli, subcommand
+):
+    """The control: `--plan` runs the listing, so the same package resolves."""
+    result = invoke("--plan", subcommand, "fake-pkg-alpha")
+    stderr = strip_ansi(result.stderr)
+    assert result.exit_code == 0
+    assert "is not recognized" not in stderr
+    assert "Run with --plan" not in stderr
+
+
 def test_installed_inventory_reads_none_on_a_failing_cli(
     fake_pool, failing_installed_query
 ):

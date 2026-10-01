@@ -149,7 +149,7 @@ Design around the DSL's fixed limits (all detailed in {doc}`/overrides`): no ver
 
 A definition has two homes:
 
-- **Private (a user's config).** Drop the `[mpm.overrides.<id>]` block into your own configuration file. `mpm` picks it up on the next run: nothing else to touch, and it never leaves your machine.
+- **Private (a user's config).** Drop the `[mpm.overrides.<id>]` block into your own configuration file. `mpm` picks it up on the next run, and it never leaves your machine.
 - **Bundled (shipped with `mpm`).** Put the block in its own `meta_package_manager/managers/<id>.toml` file. `mpm` loads every shipped `*.toml` at startup and registers it like a built-in, so every user gets its `--<id>` flag. Bundled files are read-only package data, so they load without the config-file trust gate that guards a user's own definitions (see {doc}`/security`). `meta_package_manager/managers/gh_ext.toml` is the worked example.
 
 Shipping a bundled definition is far lighter than the class-based checklist below, with no module:

@@ -226,7 +226,7 @@ $ mpm --bar-plugin-path
 ~/Library/Python/3.11/lib/python/site-packages/meta_package_manager/bar_plugin.py
 ```
 
-Symlinking that path into the host's plugin folder is what keeps the menu on the latest plugin: every `mpm` upgrade is then picked up with no further action. That is [how my dotfiles install it](https://github.com/kdeldycke/dotfiles/blob/8e1fa1f8223e9a1c2cbaef8286480d2b148ead23/install.sh#L341-L357).
+Symlinking that path into the host's plugin folder is what keeps the menu on the latest plugin: every `mpm` upgrade is then picked up. That is [how my dotfiles install it](https://github.com/kdeldycke/dotfiles/blob/8e1fa1f8223e9a1c2cbaef8286480d2b148ead23/install.sh#L341-L357).
 
 Where that folder is, and how it is set, differs between the two hosts:
 

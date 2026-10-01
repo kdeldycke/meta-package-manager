@@ -21,7 +21,7 @@ There are no Workers, no KV namespaces and no D1 databases. The whole edge confi
 
 GitHub Actions renders it and uploads the finished tree, which is what a Direct Upload flow means: Cloudflare has no access to this repository and no build configuration capable of producing a usable site. The `deploy-docs-cloudflare` job of repomatic's shared `docs.yaml` runs `sphinx-build`, then `wrangler pages deploy ./docs/_build`.
 
-One repository secret feeds it. `CLOUDFLARE_API_TOKEN` needs exactly one permission, `Account → Cloudflare Pages → Edit`, and it is the only one: an account-owned token resolves its own account, so the deploy needs no separate identifier beside it.
+One repository secret feeds it. `CLOUDFLARE_API_TOKEN` needs exactly one permission, `Account → Cloudflare Pages → Edit`. An account-owned token resolves its own account.
 
 The token does need rotating, and nothing warns when it lapses: Cloudflare sends no expiry notice for account API tokens. Give it a TTL, and remember that a docs deploy only runs when the docs change, so an expired token surfaces whenever the next documentation push happens to land.
 
@@ -143,8 +143,7 @@ Single Redirects live in the `rulesets` API, which accepts account-owned tokens:
 
 - **Nothing reconciles the edge configuration.** The rules and records above are recorded here by hand; no script diffs them against the live zone, so this file can drift from reality without anything noticing.
 - **The wildcard covers hostnames nobody registered.** `*.mpm.run` answers for every label, so a typo becomes a redirect into the site's 404 rather than a DNS failure. That is the friendlier failure, and it is deliberate, but it does mean the zone answers for names the project never chose.
-- **No `AAAA` on the apex beyond the proxy.** Not needed while Cloudflare terminates everything, and noted only so a future reader does not go looking for one.
-- **The Read the Docs era cannot be redirected from here.** The site published to `meta-package-manager.readthedocs.io` between 2016-12-25 and 2021-10-08, and that project was deleted: its host answers `404` to every path, including the root, so nothing can be handed back to this one. The rules `docs/_redirects` carries for those paths are inert until somebody reclaims the project and points it here, which is also the reason to reclaim it: the subdomain is unclaimed, and a name that once served this documentation is a name worth not leaving to someone else. Everything from the GitHub Pages era is fine by contrast, that site still holding `mpm.run` as its custom domain and `301`-ing each request onto it.
+- **The Read the Docs era cannot be redirected from here.** The site published to `meta-package-manager.readthedocs.io` between 2016-12-25 and 2021-10-08, and that project was deleted: its host answers `404` to every path, including the root, so nothing can be handed back to this one. The rules `docs/_redirects` carries for those paths are inert until somebody reclaims the project and points it here, which is also the reason to reclaim it: the subdomain is unclaimed, and a name that once served this documentation is a name worth not leaving to someone else. The GitHub Pages site still holds `mpm.run` as its custom domain and `301`s each request onto it.
 
 ## Keeping this current
 

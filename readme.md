@@ -119,7 +119,7 @@ Standalone binaries of `mpm` latest version are available as direct downloads fo
 | **macOS**   | [Download `meta-package-manager-macos-arm64.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/meta-package-manager-macos-arm64.bin)     | [Download `meta-package-manager-macos-x64.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/meta-package-manager-macos-x64.bin)     |
 | **Windows** | [Download `meta-package-manager-windows-arm64.exe`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/meta-package-manager-windows-arm64.exe) | [Download `meta-package-manager-windows-x64.exe`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/meta-package-manager-windows-x64.exe) |
 
-No need to install Python or `uv`. Useful for CI/CD pipelines running on minimal images, or old platforms where dependency management is painful.
+Useful for CI/CD pipelines running on minimal images, or old platforms where dependency management is painful.
 
 ## Used in
 

@@ -114,7 +114,7 @@ sudo = true # Run global npm installs through sudo.
 sudo = false # Rootless setup: never escalate pacman.
 ```
 
-The global flag has its own `[mpm] sudo` key, so a standing policy needs no flag on the command line.
+The global flag has its own `[mpm] sudo` key, which sets a standing policy.
 
 A per-manager `sudo` value wins over the global flag, so you can escalate everything with `--sudo` while keeping a single manager rootless, or the reverse.
 

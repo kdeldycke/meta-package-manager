@@ -72,7 +72,6 @@ Problems this project hit first and reported upstream, since fixed there.
 
 ### [Nuitka](https://github.com/Nuitka/Nuitka)
 
-- [Nuitka/Nuitka#3909](https://github.com/Nuitka/Nuitka/issues/3909): `--project` ignored the `[tool.nuitka]` section of `pyproject.toml`.
 - [Nuitka/Nuitka#3750](https://github.com/Nuitka/Nuitka/issues/3750): `--project` did not recognize the `uv_build` build backend.
 - [Nuitka/Nuitka#3173](https://github.com/Nuitka/Nuitka/issues/3173): the `nuitka` CLI was not found on Windows when installed with `uv`.
 - [Nuitka/Nuitka#2020](https://github.com/Nuitka/Nuitka/issues/2020): compiled binaries missed `charset_normalizer` data files, fixed by the matching pull request above.
@@ -127,18 +126,7 @@ The SPDX documents `brew` generates point their `documentNamespace` at `https://
 
 ### [Nuitka](https://github.com/Nuitka/Nuitka)
 
-- [Nuitka/Nuitka#4025](https://github.com/Nuitka/Nuitka/issues/4025): `--project` refuses to build over a `py.typed` and over a dependency's package data.
-- [Nuitka/Nuitka#4024](https://github.com/Nuitka/Nuitka/issues/4024): `--main-entry-point` whose CLI name matches its package builds a binary failing at startup.
-- [Nuitka/Nuitka#3998](https://github.com/Nuitka/Nuitka/issues/3998): `enableCcache` overwrites a user-set `CCACHE_SLOPPINESS`.
-- [Nuitka/Nuitka#3997](https://github.com/Nuitka/Nuitka/issues/3997): tool downloads are fetched and executed without integrity verification.
-- [Nuitka/Nuitka#3996](https://github.com/Nuitka/Nuitka/issues/3996): `ccache` never hits across CI machines.
-- [Nuitka/Nuitka#3994](https://github.com/Nuitka/Nuitka/issues/3994): dangling symlinks in `--include-data-dir` are silently skipped on Linux and break macOS signing.
-- [Nuitka/Nuitka#3879](https://github.com/Nuitka/Nuitka/issues/3879): `--main-entry-point` does not populate the `_main_module` internal state.
 - [Nuitka/Nuitka-website#125](https://github.com/Nuitka/Nuitka-website/issues/125): document how extras, wheel, onefile and standalone modes combine.
-
-### `uv`
-
-- [astral-sh/uv#18792](https://github.com/astral-sh/uv/issues/18792): prune stale `exclude-newer-package` entries on `uv lock`.
 
 ### `sfsu`
 

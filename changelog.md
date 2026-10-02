@@ -10,6 +10,7 @@
 - [scoop] Raise the Scoop floor to `0.6.0`, which fixes its `--version` output. Run `scoop update` to upgrade an older install.
 - [scoop] Install the requested version on `mpm install <package>@<version>` and `mpm restore`. Scoop pins such a package, so `outdated` and `upgrade` skip it.
 - [sfsu] Note on its page that upstream looks for new maintainers and now ships only fixes.
+- [composer] Record that Composer's cooldown setting merged for `2.11.0`, which is not released yet.
 - [mpm] Record `hok` as unsupported: its listing drops every app that Scoop `0.6.0` installed.
 - [mpm] Record three tools `topgrade` gained as unsupported: `adless` refreshes a hosts-file blocklist, while `antigravity-cli` and `zed` only update themselves.
 - [app-manager] Add the AppManager AppImage manager with `outdated`, `install`, `remove` and full `upgrade` support. `install` and `remove` take the AppImage's file path, and nothing lists the installed apps.

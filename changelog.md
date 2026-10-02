@@ -1,9 +1,11 @@
 # Changelog
 
-## [`8.1.0.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v8.0.2...main)
+## [`8.1.1.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v8.1.0...main)
 
 > [!WARNING]
 > This version is **not released yet** and is under active development.
+
+## [`8.1.0` (2026-10-02)](https://github.com/kdeldycke/meta-package-manager/compare/v8.0.2...v8.1.0)
 
 - [mpm] Raise the `click-extra` floor to `9.3`, the release `mpm` already needs: below it every manager call died on a `TypeError`.
 - [mpm] Raise the `extra-platforms` floor to `13.10`, whose new `shell_from_path()` resolves the login shell `--shell-env` runs, replacing `mpm`'s own PowerShell special case.

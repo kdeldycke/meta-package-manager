@@ -7,6 +7,9 @@
 
 ## [`8.1.0` (2026-10-04)](https://github.com/kdeldycke/meta-package-manager/compare/v8.0.2...v8.1.0)
 
+> [!NOTE]
+> `8.1.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/8.1.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v8.1.0).
+
 - [mpm] Close `install`, `remove`, `upgrade`, `restore` and `cleanup --orphans` on a report of every package upgraded, downgraded, installed, removed, held or still outdated, with its versions, as a table honoring `--table-format` and `--columns`.
 - [mpm] Open `mpm doctor` on a report of privilege escalation: the escalator, whether its credentials are ready, whether a password prompt would hold, and the fix.
 - [app-manager] Add the AppManager AppImage manager with `outdated`, `install`, `remove` and full `upgrade` support. `install` and `remove` take the AppImage's file path, and nothing lists the installed apps.

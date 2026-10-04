@@ -1,5 +1,10 @@
 # Changelog
 
+## [`8.1.1.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v8.1.0...main)
+
+> [!WARNING]
+> This version is **not released yet** and is under active development.
+
 ## [`8.1.0` (2026-10-04)](https://github.com/kdeldycke/meta-package-manager/compare/v8.0.2...v8.1.0)
 
 - [mpm] Close `install`, `remove`, `upgrade`, `restore` and `cleanup --orphans` on a report of every package upgraded, downgraded, installed, removed, held or still outdated, with its versions, as a table honoring `--table-format` and `--columns`.

@@ -26,6 +26,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+from extra_platforms import is_any_windows
 
 from meta_package_manager.managers.protonplus import ProtonPlus
 
@@ -48,8 +49,12 @@ ROLLING = (
 
 @pytest.fixture
 def home(tmp_path, monkeypatch):
-    """A scratch home, with the XDG base directories left to their defaults."""
-    monkeypatch.setenv("HOME", str(tmp_path))
+    """A scratch home, with the XDG base directories left to their defaults.
+
+    {meth}`pathlib.Path.home` reads `HOME` on POSIX and `USERPROFILE` on Windows.
+    """
+    for variable in ("HOME", "USERPROFILE"):
+        monkeypatch.setenv(variable, str(tmp_path))
     for variable in ("XDG_CONFIG_HOME", "XDG_DATA_HOME", "XDG_STATE_HOME"):
         monkeypatch.delenv(variable, raising=False)
     return tmp_path
@@ -76,6 +81,7 @@ def test_installed_lists_a_runner_once_at_its_newest(home):
     assert inventory() == [("lutris-system/dxvk-doitsujin", "v3.1.1")]
 
 
+@pytest.mark.skipif(is_any_windows(), reason="A symlink needs privileges on Windows.")
 def test_installed_reads_a_symlinked_launcher_once(home):
     """Each record is read once, although three launcher paths reach it.
 

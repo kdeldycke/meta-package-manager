@@ -1211,9 +1211,9 @@ def build_manager_class(definition: ManagerDefinition) -> type[ConfigDrivenManag
     adds one method (or property) per declared operation. The operations marked
     `sudo = true` make up its
     {attr}`~meta_package_manager.execution.CLIExecutor.privileged_operations`.
-    Only the declared operations
-    land in the namespace, so {func}`meta_package_manager.capabilities.implements`
-    reflects exactly what the user configured. Single- and all-package upgrades map to
+    Only the declared operations land in the namespace, so
+    {func}`meta_package_manager.capabilities.implements` reflects exactly what the
+    user configured. Single- and all-package upgrades map to
     {meth}`~meta_package_manager.manager.PackageManager.upgrade_one_cli` /
     {meth}`~meta_package_manager.manager.PackageManager.upgrade_all_cli` so the
     inherited {meth}`~meta_package_manager.manager.PackageManager.upgrade`

@@ -65,7 +65,7 @@ from typing import ClassVar, Final
 
 from boltons.iterutils import unique
 from boltons.strutils import strip_ansi
-from click_extra import echo, style
+from click_extra import Style, echo, style
 from click_extra.color import invocation_color, is_a_tty, resolve_color_env
 from click_extra.execution import (
     INDENT,
@@ -75,7 +75,7 @@ from click_extra.execution import (
     run_cli,
 )
 from click_extra.humanize import format_duration
-from click_extra.spinner import Spinner as _Spinner
+from click_extra.spinner import Spinner
 from click_extra.theme import get_current_theme as theme
 from extra_platforms import UNIX, current_platform, is_any_windows
 
@@ -87,6 +87,7 @@ from .sudo import (
     _is_permission_failure,
     _is_sudo_auth_failure,
     _resolved_sudo,
+    _running_as_root,
     _StallWatchdog,
 )
 from .version import parse_version
@@ -432,26 +433,27 @@ correctness. See `_spinner_label()`.
 def _styling_enabled() -> bool:
     """Whether the spinner label may carry ANSI attributes.
 
-    {class}`click_extra.spinner.Spinner` gates its own `style` argument on the
-    reconciled color state, but writes {attr}`~click_extra.spinner.Spinner.label`
-    to the stream verbatim: escapes embedded there reach the terminal whatever
-    `--no-color`, `NO_COLOR` or `TERM=dumb` say. Nor does
-    {func}`click_extra.style` strip them, being
-    {func}`click.style` and unconditional. So the label resolves the gate itself,
-    in the order the spinner resolves its own: the invocation's color first,
-    then the environment through {func}`~click_extra.color.resolve_color_env`,
-    then TTY detection on the stream the spinner draws to. The invocation's color
-    comes through {func}`~click_extra.color.invocation_color`, not `ctx.color`:
-    trail lines are composed on the dispatch's worker threads, which the
-    thread-local command context does not reach, so `--no-color` would otherwise
-    stop at the main thread.
+    {func}`click_extra.style` is {func}`click.style` and paints unconditionally,
+    so the label resolves the gate itself, in the order a spinner resolves its
+    own: the invocation's color first, then the environment through
+    {func}`~click_extra.color.resolve_color_env`, then TTY detection on the
+    stream the spinner draws to. The invocation's color comes through
+    {func}`~click_extra.color.invocation_color`, not `ctx.color`: trail lines are
+    composed on the dispatch's worker threads, which the thread-local command
+    context does not reach, so `--no-color` would otherwise stop at the main
+    thread.
+
+    The still-call line of `CLIExecutor._spawn` is what needs the gate.
+    {func}`click.echo` prints it, and strips escapes off a terminal alone: on a
+    worker thread it cannot read the invocation's color. A spinner frame and a
+    trail line no longer depend on it, since
+    {class}`click_extra.spinner.Spinner` and
+    {class}`click_extra.spinner.OperationTrail` drop every escape when color is
+    off, the ones embedded in a label or a trail message included.
 
     ```{todo}
-    Delete this once mpm requires the click-extra release after `9.2.0`, and
-    paint unconditionally. Its commits `48812ca9` and `3f3e5812` make `Spinner`
-    and {class}`click_extra.spinner.OperationTrail` strip every escape whenever
-    color is off, on any thread, the ones embedded in a label or a trail
-    message included. {data}`ITALIC_CAPABLE_TERMS` stays: that gate is about
+    Gate the still-call line alone, and paint the spinner label and the trail
+    lines unconditionally. {data}`ITALIC_CAPABLE_TERMS` stays: that gate is about
     the terminal, not about color.
     ```
     """
@@ -584,45 +586,18 @@ def elapsed_clock(seconds: float) -> str:
 
     The same ` (2.3s)` fragment the spinner's timer draws, faint when styling
     is allowed, so a `✓`/`✘` trail line closes on the clock its spinner was
-    counting (see {class}`Spinner`).
-    """
-    clock = f" ({format_duration(seconds)})"
-    return style(clock, dim=True) if _styling_enabled() else clock
+    counting.
 
-
-class Spinner(_Spinner):
-    """{class}`click_extra.spinner.Spinner` with a de-emphasized timer.
-
-    The elapsed time is the least important part of a spinner line, and the faint
+    The elapsed time is the least important part of the line, and the faint
     attribute (SGR `2`) says so without spending a color: every hue on this
     stream already carries a status, which is the same reason
     `_spinner_label()` leaves the command uncolored. Faint also beats
     `bright_black` for the job, that being a color rather than an attribute, and
     one this project has already been bitten by (see
     {data}`~meta_package_manager.bar_plugin_renderer.VERSION_PREFIX_COLOR`).
-
-    An override rather than the `timer` callable, because upstream composes the
-    fragment as `" ({duration})"`: the callable supplies the duration alone, so
-    it can paint the digits but never the parentheses around them, leaving the
-    brackets at full weight beside a faint number.
-
-    ```{todo}
-    Delete this subclass once mpm requires the click-extra release after `9.2.0`,
-    whose commit `48812ca9` adds `timer_style`: pass `timer_style=Style(dim=True)`
-    to the stock `Spinner` instead.
-    ```
     """
-
-    def _clock(self) -> str:
-        """Paint the whole `" (2.3s)"` fragment faint, parentheses included.
-
-        Gated on the color state `Spinner.start()` resolved on the calling
-        thread, which is the reconciled answer `--no-color`, `NO_COLOR` and a
-        dumb `TERM` all feed into. A spinner that never started reports it as
-        off, and never draws either.
-        """
-        clock = super()._clock()
-        return style(clock, dim=True) if clock and self._color_enabled else clock
+    clock = f" ({format_duration(seconds)})"
+    return style(clock, dim=True) if _styling_enabled() else clock
 
 
 class CLIExecutor:
@@ -899,11 +874,15 @@ class CLIExecutor:
     name, like
     {attr}`~meta_package_manager.manager.PackageManager.operation_notes`. An
     operation belongs here when a method implementing it passes `sudo=True` to
-    {meth}`run_cli` or {meth}`build_cli`, with the method-to-operation map of
+    {meth}`~meta_package_manager.execution.CLIExecutor.run_cli` or
+    {meth}`~meta_package_manager.execution.CLIExecutor.build_cli`, with the
+    method-to-operation map of
     {data}`~meta_package_manager.capabilities.METHOD_OPERATIONS`. Those commands
-    are the only ones the escalation policy ({attr}`sudo`, else
-    {attr}`default_sudo`) wraps in the escalator. A definition derives the set
-    from the operations it marks `sudo = true`.
+    are the only ones the escalation policy
+    ({attr}`~meta_package_manager.execution.CLIExecutor.sudo`, else
+    {attr}`~meta_package_manager.execution.CLIExecutor.default_sudo`) wraps in
+    the escalator. A definition derives the set from the operations it marks
+    `sudo = true`.
 
     {func}`~meta_package_manager.sudo.prime_sudo` reads it to prompt only for
     the managers that escalate a command of the current run. With
@@ -1467,12 +1446,15 @@ class CLIExecutor:
             `_hidden_prompt_risk`).
         """
         # Append the elapsed time so a long call (a slow `guix search`) reads as
-        # "⠙ guix.search: guix search jq (12.3s)" rather than looking stuck.
+        # "⠙ guix.search: guix search jq (12.3s)" rather than looking stuck. The
+        # timer is faint, parentheses included, like the clock closing a trail
+        # line: see elapsed_clock().
         return Spinner(
             self._call_label(cmd_args),
             delay=SPINNER_DELAY,
             live="auto" if self.progress and animate else "never",
             timer=True,
+            timer_style=Style(dim=True),
         )
 
     def _cleanup_windows_processes(self) -> None:
@@ -1900,7 +1882,7 @@ class CLIExecutor:
         if (
             self._dormant_sudo
             and _is_permission_failure(error)
-            and getattr(os, "geteuid", lambda: 1)() != 0
+            and not _running_as_root()
         ):
             logging.warning(
                 "The failed operation is marked privileged, but escalation "
@@ -1999,7 +1981,7 @@ class CLIExecutor:
             sudo
             and policy_escalates
             and escalator is not None
-            and getattr(os, "geteuid", lambda: 1)() != 0
+            and not _running_as_root()
         )
         # A privileged marker the policy left dormant, remembered for the
         # failure gate of run(): a permission error is then the marker's

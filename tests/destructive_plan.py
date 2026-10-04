@@ -304,12 +304,12 @@ PACKAGE_IDS = {
     # Zero-dependency and ships a bin: Volta manages CLI tools, so the usual
     # bin-less npm pick (ms) is out.
     "volta": "nanoid",
+    "vscode": "tamasfe.even-better-toml",
+    "vscodium": "tamasfe.even-better-toml",
     # The README's own example image, which `whalebrew search whalesay` finds. It
     # ships an `amd64` build alone, and Docker pulls it on any host all the same:
     # only running it fails elsewhere, which the round-trip never does.
     "whalebrew": "whalebrew/whalesay",
-    "vscode": "tamasfe.even-better-toml",
-    "vscodium": "tamasfe.even-better-toml",
     "winget": "sharkdp.hyperfine",
     "xbps": "sl",
     # Declares no install operation, since downloading an Xcode always

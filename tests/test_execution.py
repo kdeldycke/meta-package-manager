@@ -327,13 +327,14 @@ def test_spinner_clock_dims_the_parentheses_too(color_enabled, expected):
     """The whole fragment is faint, brackets included, or none of it is.
 
     Painting the duration alone through the `timer` callable would leave the
-    parentheses upstream adds around it at full weight, which is why this is an
-    override.
+    parentheses upstream adds around it at full weight, which is why the spinner
+    takes a `timer_style`.
     """
     spinner = FakeManager()._make_spinner()
     spinner._start_time, spinner._stop_time = 0.0, 24.2
-    spinner._color_enabled = color_enabled
-    assert spinner._clock() == expected
+    lines = spinner.frame_lines(color=color_enabled)
+    assert lines
+    assert all(line.endswith(expected) for line in lines)
 
 
 def test_spinner_clock_is_plain_before_start():

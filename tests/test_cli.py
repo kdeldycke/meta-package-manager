@@ -166,6 +166,15 @@ def report_rows(stdout: str) -> dict[str, str]:
     }
 
 
+def check_report(stdout: str, expected: dict[str, tuple[str, ...]]) -> None:
+    """Assert the change report holds exactly the `expected` rows, each carrying
+    its words."""
+    rows = report_rows(stdout)
+    assert set(rows) == set(expected)
+    for package_id, words in expected.items():
+        assert all(word in rows[package_id] for word in words), rows[package_id]
+
+
 def check_filtered_ids(result, expected_ids: set[str]) -> None:
     """Assert the serialized payload reports exactly `expected_ids`."""
     assert result.exit_code == 0

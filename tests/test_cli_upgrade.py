@@ -45,7 +45,7 @@ from .fake_manager import FakeManager
 from .test_cli import (
     assert_no_manager_selected,
     check_manager_selection,
-    report_rows,
+    check_report,
 )
 
 
@@ -421,23 +421,16 @@ def test_upgrade_all_reports_what_moved(invoke, changing_fake_pool):
     stderr = strip_ansi(result.stderr)
     assert f"✓ {mid}.upgrade_all (1 upgraded, 1 downgraded, 1 still outdated)" in stderr
     assert "✓ Upgraded 1/1 managers" in stderr
-    cells = report_rows(result.stdout)
-    assert set(cells) == {
-        "fake-pkg-alpha",
-        "fake-pkg-beta",
-        "fake-pkg-epsilon",
-        "fake-pkg-gamma",
-        "fake-pkg-zeta",
-    }
-    expected = {
-        "fake-pkg-alpha": ("1.0.0", "1.1.0", PackageOutcome.UPGRADED.label),
-        "fake-pkg-beta": ("2.5.3", "2.6.0", PackageOutcome.STILL_OUTDATED.label),
-        "fake-pkg-epsilon": ("5.2.0", PackageOutcome.REMOVED.label),
-        "fake-pkg-gamma": ("0.1.0", PackageOutcome.INSTALLED.label),
-        "fake-pkg-zeta": ("3.0.0", "2.9.0", PackageOutcome.DOWNGRADED.label),
-    }
-    for package_id, words in expected.items():
-        assert all(word in cells[package_id] for word in words), cells[package_id]
+    check_report(
+        result.stdout,
+        {
+            "fake-pkg-alpha": ("1.0.0", "1.1.0", PackageOutcome.UPGRADED.label),
+            "fake-pkg-beta": ("2.5.3", "2.6.0", PackageOutcome.STILL_OUTDATED.label),
+            "fake-pkg-epsilon": ("5.2.0", PackageOutcome.REMOVED.label),
+            "fake-pkg-gamma": ("0.1.0", PackageOutcome.INSTALLED.label),
+            "fake-pkg-zeta": ("3.0.0", "2.9.0", PackageOutcome.DOWNGRADED.label),
+        },
+    )
     # The package the upgrade never touched earns no row.
     assert "fake-pkg-delta" not in result.stdout
 
@@ -450,16 +443,15 @@ def test_upgrade_packages_reports_what_moved(invoke, changing_fake_pool):
     stderr = strip_ansi(result.stderr)
     assert f"✓ {mid}.upgrade: fake-pkg-alpha" in stderr
     assert f"✓ {mid}.upgrade: fake-pkg-beta" in stderr
-    cells = report_rows(result.stdout)
-    expected = {
-        "fake-pkg-alpha": ("1.0.0", "1.1.0", PackageOutcome.UPGRADED.label),
-        # The command succeeded, yet the pinned package did not move.
-        "fake-pkg-beta": ("2.5.3", "2.6.0", PackageOutcome.STILL_OUTDATED.label),
-        "fake-pkg-gamma": ("0.1.0", PackageOutcome.INSTALLED.label),
-    }
-    assert set(cells) == set(expected)
-    for package_id, words in expected.items():
-        assert all(word in cells[package_id] for word in words), cells[package_id]
+    check_report(
+        result.stdout,
+        {
+            "fake-pkg-alpha": ("1.0.0", "1.1.0", PackageOutcome.UPGRADED.label),
+            # The command succeeded, yet the pinned package did not move.
+            "fake-pkg-beta": ("2.5.3", "2.6.0", PackageOutcome.STILL_OUTDATED.label),
+            "fake-pkg-gamma": ("0.1.0", PackageOutcome.INSTALLED.label),
+        },
+    )
 
 
 def test_upgrade_all_report_serialized(invoke, changing_fake_pool):

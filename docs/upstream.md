@@ -120,7 +120,7 @@ GNOME Shell raises a `TypeError` when a submenu opens or closes in a `PopupMenuS
 
 ### [Homebrew](https://github.com/Homebrew/brew)
 
-The SPDX documents `brew` generates point their `documentNamespace` at `https://formulae.brew.sh/spdx/...` URLs that 404, and publishing the missing files was declined ([Homebrew/brew#22741](https://github.com/Homebrew/brew/issues/22741)). `mpm`'s SPDX aggregation copies the value through verbatim, keeping the merged document consistent with its sources.
+The SPDX documents [`brew`](managers/brew.md) generates point their `documentNamespace` at `https://formulae.brew.sh/spdx/...` URLs that 404, and publishing the missing files was declined ([Homebrew/brew#22741](https://github.com/Homebrew/brew/issues/22741)). `mpm`'s SPDX aggregation copies the value through verbatim, keeping the merged document consistent with its sources.
 
 ## Open upstream
 
@@ -150,7 +150,7 @@ The SPDX documents `brew` generates point their `documentNamespace` at `https://
 
 Reports filed while vetting tools for the [benchmark's queue](benchmark.md):
 
-- [marwanhawari/stew#91](https://github.com/marwanhawari/stew/issues/91): a non-interactive mode is the blocker for wrapping `stew`.
+- [marwanhawari/stew#91](https://github.com/marwanhawari/stew/issues/91): `stew install` stops on three interactive prompts, so [`stew`](managers/stew.md) cannot install a package unattended.
 - [lucasgelfond/zerobrew#404](https://github.com/lucasgelfond/zerobrew/issues/404): the `openssl@3` build breaks. An earlier report of Python package install failures ([lucasgelfond/zerobrew#336](https://github.com/lucasgelfond/zerobrew/issues/336)) was fixed within days.
 
 ### CI infrastructure

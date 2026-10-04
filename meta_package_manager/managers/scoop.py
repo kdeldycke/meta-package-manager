@@ -76,10 +76,11 @@ class Scoop(PackageManager):
 
     platforms = WINDOWS
 
-    # `0.6.0` fixed `scoop --version`, which printed the raw `git log` line of
-    # the checkout instead of a clean version:
-    # https://github.com/ScoopInstaller/Scoop/issues/6457.
     requirement = ">=0.6.0"
+    """The release fixing `scoop --version`, which printed the raw `git log` line of
+    the checkout instead of a clean version:
+    [ScoopInstaller/Scoop#6457](https://github.com/ScoopInstaller/Scoop/issues/6457).
+    """
 
     _LIST_REGEXP = re.compile(
         r"""

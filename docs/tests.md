@@ -46,6 +46,7 @@
    tests.test_manager_definition
    tests.test_manager_dnf
    tests.test_manager_fwupd
+   tests.test_manager_guix
    tests.test_manager_homebrew
    tests.test_manager_mas
    tests.test_manager_microdnf
@@ -53,7 +54,10 @@
    tests.test_manager_overrides
    tests.test_manager_pip
    tests.test_manager_pipx
+   tests.test_manager_protonplus
    tests.test_manager_pwsh_gallery
+   tests.test_manager_scoop
+   tests.test_manager_tazpkg
    tests.test_manager_uv
    tests.test_manager_winget
    tests.test_manager_yarn

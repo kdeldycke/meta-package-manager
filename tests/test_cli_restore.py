@@ -29,7 +29,7 @@ from .destructive_plan import destructive_group
 from .test_cli import (
     assert_no_manager_selected,
     check_manager_selection,
-    report_rows,
+    check_report,
 )
 
 
@@ -208,11 +208,10 @@ def test_restore_reports_what_moved(invoke, create_config, changing_fake_pool):
     )
     result = invoke("restore", str(toml_path))
     assert result.exit_code == 0
-    rows = report_rows(result.stdout)
-    expected = {
-        "fake-pkg-gamma": ("0.1.0", PackageOutcome.INSTALLED.label),
-        "fake-pkg-theta": ("2.0.0", PackageOutcome.INSTALLED.label),
-    }
-    assert set(rows) == set(expected)
-    for package_id, words in expected.items():
-        assert all(word in rows[package_id] for word in words), rows[package_id]
+    check_report(
+        result.stdout,
+        {
+            "fake-pkg-gamma": ("0.1.0", PackageOutcome.INSTALLED.label),
+            "fake-pkg-theta": ("2.0.0", PackageOutcome.INSTALLED.label),
+        },
+    )

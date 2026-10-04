@@ -773,7 +773,7 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         answer: no `installed` at all, or a listing whose CLI failed. A diff
         against an empty reading would report every package as removed, so a
         caller must tell "no answer" from "nothing installed". See
-        {meth}`_read_inventory` for how a failed listing is detected.
+        `_read_inventory` for how a failed listing is detected.
         """
         if not self._defines("installed"):
             return None
@@ -1167,7 +1167,8 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         See for example the case of
         {meth}`meta_package_manager.managers.pip.Pip.upgrade_one_cli`.
 
-        An active probe-backed cooldown (see {meth}`cooldown_hold_reason`)
+        An active probe-backed cooldown (see
+        {meth}`~meta_package_manager.manager.PackageManager.cooldown_hold_reason`)
         routes through `_upgrade_all_with_cooldown` instead of the plain
         one-shot command, so individual too-fresh releases can be held back
         while the rest of the upgrade proceeds.
@@ -1175,9 +1176,9 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         `outdated_ids` hands over the outdated packages the caller already
         listed, so neither path enumerating them (the one-by-one fallback and
         the cooldown hold) lists a second time: `mpm upgrade --all` passes the
-        {meth}`outdated_inventory` its report took. A single-package upgrade
-        and the native one-shot command ignore it, and a full upgrade left
-        without it lists on its own.
+        {meth}`~meta_package_manager.manager.PackageManager.outdated_inventory`
+        its report took. A single-package upgrade and the native one-shot
+        command ignore it, and a full upgrade left without it lists on its own.
         """
         if package_id:
             cli = self.upgrade_one_cli(package_id, version=version)

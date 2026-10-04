@@ -88,16 +88,6 @@ Type "help", "copyright", "credits" or "license" for more information.
 
 `mpm` is available on several popular package managers:
 
-:::{note}
-On FreeBSD, install the `sqlite3` module for your Python before any of the methods below: the base `python3XX` package ships without it, and `mpm` imports it through click-extra, so it exits with `ModuleNotFoundError: No module named '_sqlite3'` on the first run.
-
-```{code-block} shell-session
-$ sudo pkg install py311-sqlite3
-```
-
-Match the digits to your interpreter (`py314-sqlite3` for Python 3.14). Verified on FreeBSD 15.1.
-:::
-
 ``````{tab-set}
 :class: tabs-vertical
 `````{tab-item} uv
@@ -414,8 +404,8 @@ The more independent reports a vendor receives, the more likely a detection gets
 All release artifacts (Python packages and compiled binaries) are signed with [GitHub Artifact Attestations](https://docs.github.com/en/actions/security-guides/using-artifact-attestations-to-establish-provenance-for-builds) providing [SLSA v1 provenance](https://slsa.dev/spec/v1.0/). You can verify any downloaded artifact with the [GitHub CLI](https://cli.github.com):
 
 ```{code-block} shell-session
-$ gh attestation verify ./meta-package-manager-8.0.1-macos-arm64.bin --repo kdeldycke/meta-package-manager --signer-repo kdeldycke/repomatic
-Loaded digest sha256:... for file://meta-package-manager-8.0.1-macos-arm64.bin
+$ gh attestation verify ./meta-package-manager-8.0.2-macos-arm64.bin --repo kdeldycke/meta-package-manager --signer-repo kdeldycke/repomatic
+Loaded digest sha256:... for file://meta-package-manager-8.0.2-macos-arm64.bin
 Loaded 1 attestation from GitHub API
 ✓ Verification succeeded!
 ```
@@ -427,7 +417,7 @@ The `--signer-repo kdeldycke/repomatic` flag is required because the release wor
 For Python packages from PyPI:
 
 ```{code-block} shell-session
-$ gh attestation verify ./meta_package_manager-8.0.1-py3-none-any.whl --repo kdeldycke/meta-package-manager --signer-repo kdeldycke/repomatic
+$ gh attestation verify ./meta_package_manager-8.0.2-py3-none-any.whl --repo kdeldycke/meta-package-manager --signer-repo kdeldycke/repomatic
 ```
 
 Attestation bundles are also attached to each [GitHub release](https://github.com/kdeldycke/meta-package-manager/releases) for offline verification.
@@ -456,7 +446,7 @@ $ chmod +x ./meta-package-manager-macos-x64.bin
 
 ```{code-block} shell-session
 $ ./meta-package-manager-macos-x64.bin --version
-mpm, version 8.0.1
+mpm, version 8.0.2
 ```
 
 Then let `mpm` discovers which package managers are available on your machine and choose the one providing a path to `mpm` installation:
@@ -476,11 +466,11 @@ warning: pip does not implement search operation.
 meta-package-manager existence unconfirmed, try to directly install it...
 Install meta-package-manager package with pip...
 Collecting meta-package-manager
-  Downloading meta_package_manager-8.0.1-py3-none-any.whl (827 kB)
+  Downloading meta_package_manager-8.0.2-py3-none-any.whl (827 kB)
      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 827.2/827.2 kB 494.7 kB/s eta 0:00:00
 (...)
 Installing collected packages: (...) meta-package-manager
-Successfully installed (...) meta-package-manager-8.0.1
+Successfully installed (...) meta-package-manager-8.0.2
 ```
 
 And now you can remove the local binary and enjoy the system-wide `mpm` that was installed by itself:
@@ -496,7 +486,7 @@ $ which mpm
 
 ```{code-block} shell-session
 $ mpm --version
-mpm, version 8.0.1
+mpm, version 8.0.2
 ```
 
 ````{tip}
@@ -569,7 +559,7 @@ Anywhere else, and in a pipe, it prints the same facts as two plain lines:
 
 ```{code-block} shell-session
 $ mpm --version
-mpm, version 8.0.1
+mpm, version 8.0.2
 Python 3.14.7, macOS ARM64 (AArch64)
 ```
 

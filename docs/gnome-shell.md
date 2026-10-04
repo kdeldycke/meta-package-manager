@@ -138,7 +138,7 @@ The *About* group at the foot of the window names two versions. The first is the
 
 ## The `PATH` the extension sees
 
-GNOME Shell starts the extension with the environment of the session, which the systemd user manager builds from `environment.d` and, on some distributions, `~/.profile`: it never reads `.bashrc` or `.zshrc`. A manager installed under the home directory, or a `PATH` entry exported from those files, is then invisible to `mpm`, and so is the global bin directory of `pnpm`, without which `pnpm` refuses its global commands.
+GNOME Shell starts the extension with the environment of the session, which the systemd user manager builds from `environment.d` and, on some distributions, `~/.profile`: it never reads `.bashrc` or `.zshrc`. A manager installed under the home directory, or a `PATH` entry exported from those files, is then invisible to `mpm`, and so is the global bin directory of [`pnpm`](managers/pnpm.md), without which `pnpm` refuses its global commands.
 
 The extension therefore passes `--shell-env` to any `mpm` from `8.0.0` on, for the checks and for the upgrade actions alike. `mpm` runs the login shell once, as an interactive login shell, adopts the environment it exports, and only then looks for managers. The shell has ten seconds to answer, past which `mpm` keeps the environment it started with. Add `--no-shell-env` to `mpm-options` to opt out.
 

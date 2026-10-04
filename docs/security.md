@@ -17,14 +17,14 @@ pre_cmds = ["sudo"]                  # prepended to every invocation
 
 Defining a {ref}`brand-new manager <define-a-new-manager>` makes this capability explicit rather than more powerful: a definition spells out the commands to run, but choosing the binary (`cli_names` + `cli_search_path`) already permitted running anything. The ceiling is the same either way: configuration is code.
 
-## What is safe by default
+## Where the configuration comes from
 
-`mpm` only reads configuration from a location you control:
+`mpm` reads configuration from two places, and layers them key by key (see {doc}`configuration`):
 
-- By default it loads a single file from the per-user application directory (`~/.config/mpm/` on Linux, `~/Library/Application Support/mpm/` on macOS, the roaming app data folder on Windows).
-- It does **not** scan the current working directory, and it does **not** auto-discover a `pyproject.toml` from a project you happen to be standing in. A `[tool.mpm]` block in a `pyproject.toml` is only read when you explicitly point `mpm` at it with `--config ./pyproject.toml`.
+- A single file in the per-user application directory (`~/.config/mpm/` on Linux, `~/Library/Application Support/mpm/` on macOS, the roaming app data folder on Windows).
+- The `[tool.mpm]` table of a `pyproject.toml`, searched from the working directory upward to the nearest VCS root. It wins over the per-user file where both set the same key.
 
-So cloning a hostile repository and running `mpm outdated` inside it does not load that repository's configuration.
+The second place follows the directory you stand in. Cloning a repository you do not trust and running `mpm outdated` inside it reads the `[tool.mpm]` table of that repository, overrides and manager definitions included. A cloned file belongs to you, so it passes the permission check of the guardrails below. Pass `--no-config` to ignore every configuration file, or `--config` to read one file and nothing else.
 
 ## No shell, no injection
 
@@ -49,6 +49,7 @@ These guardrails govern definitions read from a *configuration file*. `mpm` also
 ## Recommendations
 
 - Keep your configuration file in the default per-user directory and make sure it is not group- or world-writable.
+- Pass `--no-config` when you run `mpm` inside a repository you did not write: its `pyproject.toml` is read otherwise.
 - Be deliberate about `--config`: pointing it at a file you did not write (a downloaded snippet, a repository's `pyproject.toml`) loads whatever that file says, including commands.
 - Prefer [contributing a manager upstream](add-new-manager.md) over a private definition when the manager could be useful to others: an upstreamed manager is reviewed, tested, and shared, rather than living as executable configuration on one machine.
 

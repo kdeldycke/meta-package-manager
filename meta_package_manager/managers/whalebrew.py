@@ -55,9 +55,9 @@ class Whalebrew(PackageManager):
     # Whalebrew keys its two mutating verbs on different things: `install` takes an
     # image, while `uninstall` finds the package by its command or its image and
     # then deletes a file named after its argument, so an image fails with "no such
-    # file or directory". The fix, whalebrew/whalebrew#323, has waited since
-    # 2025-03. Packages are keyed on the image, the one identifier `search`,
-    # `install` and the listing share, and `remove` looks the command up first.
+    # file or directory". Packages are keyed on the image, the one identifier
+    # `search`, `install` and the listing share, and `remove` looks the command up
+    # first.
     #
     # `outdated` and `upgrade`: the README upgrades a package by pulling its image
     # with `docker pull`, a Docker verb rather than a Whalebrew one, and nothing
@@ -166,6 +166,13 @@ class Whalebrew(PackageManager):
         ```{code-block} shell-session
 
         $ whalebrew uninstall --assume-yes wget
+        ```
+
+        ```{todo}
+        Pass the image to `uninstall` and drop the command lookup once the
+        `requirement` floor reaches a release carrying
+        [whalebrew/whalebrew#323](https://github.com/whalebrew/whalebrew/pull/323),
+        which makes `uninstall` accept an image.
         ```
         """
         with self.acting_as("installed"):

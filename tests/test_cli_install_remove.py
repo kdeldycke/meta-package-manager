@@ -41,7 +41,7 @@ from .destructive_plan import (
 from .test_cli import (
     assert_no_manager_selected,
     check_manager_selection,
-    report_rows,
+    check_report,
 )
 
 
@@ -140,15 +140,6 @@ def test_remove_with_manager_lacking_inventory(invoke, create_config, tmp_path):
     )
     assert result.exit_code == 0
     assert "✓ sheldon.remove: zsh-autosuggestions" in strip_ansi(result.stderr)
-
-
-def check_report(stdout: str, expected: dict[str, tuple[str, ...]]) -> None:
-    """Assert the change report holds exactly the `expected` rows, each carrying
-    its words."""
-    rows = report_rows(stdout)
-    assert set(rows) == set(expected)
-    for package_id, words in expected.items():
-        assert all(word in rows[package_id] for word in words), rows[package_id]
 
 
 def test_install_reports_what_moved(invoke, changing_fake_pool):
@@ -328,13 +319,15 @@ def test_single_manager_install_and_remove(invoke, manager_id, package_id):
             )
             continue
 
-        # These installs read a live registry (crates.io, the Anaconda channels,
-        # CPAN, npm, the snap store, the winget community source) and need a
-        # healthy toolchain behind it, so they regularly surface transient
-        # failures on the CI runners. conda's solver times out or fails to
-        # resolve on the Windows runner. Part of the Windows fleet ships a
-        # Strawberry Perl whose CPAN is configured for its SQLite index without
-        # DBD::SQLite installed, so every install dies on
+        # These installs read a live registry (crates.io, Packagist, the Anaconda
+        # channels, CPAN, npm, the snap store, the winget community source) and
+        # need a healthy toolchain behind it, so they regularly surface transient
+        # failures on the CI runners. A stalled Packagist holds the `composer
+        # search` an install starts with past its 120s timeout on every runner at
+        # once, and the install then reports its package as not found. conda's
+        # solver times out or fails to resolve on the Windows runner. Part of the
+        # Windows fleet ships a Strawberry Perl whose CPAN is configured for its
+        # SQLite index without DBD::SQLite installed, so every install dies on
         # "install_driver(SQLite) failed". One slow or reset answer from the npm
         # registry fails `npm`, `yarn` and `yarn-berry` alike, since all three
         # read it. And the snap store truncates a download mid-flight as
@@ -345,6 +338,7 @@ def test_single_manager_install_and_remove(invoke, manager_id, package_id):
         # manager.
         if manager_id in {
             "cargo",
+            "composer",
             "conda",
             "cpan",
             "npm",

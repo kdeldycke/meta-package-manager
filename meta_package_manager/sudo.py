@@ -915,6 +915,14 @@ def _resolved_sudo(manager: CLIExecutor) -> bool:
     return manager.sudo if manager.sudo is not None else manager.default_sudo
 
 
+def _running_as_root() -> bool:
+    """Whether `mpm` runs as root, where no command needs an escalator.
+
+    Windows has no `os.geteuid`, and never counts as root.
+    """
+    return getattr(os, "geteuid", lambda: 1)() == 0
+
+
 def _escalates_in(manager: CLIExecutor, operations: frozenset[str]) -> bool:
     """Whether `manager` escalates a command of a run over `operations`.
 
@@ -1387,13 +1395,16 @@ def prime_sudo(
     # a stock run there returns on the empty selection below instead, no
     # manager escalating by default on Windows, so only `--sudo`, or a
     # `[mpm.overrides.<id>] sudo = true` entry, reaches the probe.
-    if getattr(os, "geteuid", lambda: 1)() == 0:
+    if _running_as_root():
         return
     run_operations = frozenset(operation.name for operation in operations)
     escalating_managers = [m for m in managers if _escalates_in(m, run_operations)]
     escalating = sorted({m.id for m in escalating_managers})
-    # The pronoun of the warnings below, agreeing with the managers they name.
+    # The verb and pronouns of the messages below, agreeing with the managers
+    # they name.
+    needs = "needs" if len(escalating) == 1 else "need"
     they = "it" if len(escalating) == 1 else "they"
+    their = "its" if len(escalating) == 1 else "their"
     internal = any(m.internal_sudo for m in managers)
     if not escalating and not internal:
         return
@@ -1450,10 +1461,9 @@ def prime_sudo(
         )
         return
     if escalator.probe_says_warm(probe):
-        # Cache already warm (a prior authentication, a passwordless rule):
-        # keep it fresh,
-        # silently. A CI job with pre-cached credentials thus gets the keepalive
-        # instead of the no-terminal warning.
+        # Cache already warm (a prior authentication, a passwordless rule): keep
+        # it fresh, silently. A CI job with pre-cached credentials thus gets the
+        # keepalive instead of the no-terminal warning.
         logging.info(
             f"Found the {escalator.id} credential cache warm: no password prompt "
             "needed.",
@@ -1468,20 +1478,18 @@ def prime_sudo(
     logging.debug(f"The {escalator.id} probe answered: {probe_error.strip()!r}")
     if _is_sudo_denied(probe_error):
         if escalating and escalator.probe_command:
-            their = "its" if len(escalating) == 1 else "their"
             logging.warning(
-                f"{ids} need{'s' if len(escalating) == 1 else ''} administrator "
-                f"rights, and {escalator.id} denies the "
-                f"`{escalator.probe_command}` command it is probed with: {they} "
-                f"run only where a rule permits {their} own commands with no "
-                "password.",
+                f"{ids} {needs} administrator rights, and {escalator.id} denies "
+                f"the `{escalator.probe_command}` command it is probed with: "
+                f"{they} run only where a rule permits {their} own commands with "
+                "no password.",
             )
         elif escalating:
             logging.warning(
-                f"{ids} need{'s' if len(escalating) == 1 else ''} administrator "
-                f"rights, but you are not authorized to run {escalator.id} on "
-                f"this host: {they} will fail. Drop escalation with `--no-sudo` or "
-                "a `[mpm] sudo = false` entry in your configuration file.",
+                f"{ids} {needs} administrator rights, but you are not authorized "
+                f"to run {escalator.id} on this host: {they} will fail. Drop "
+                "escalation with `--no-sudo` or a `[mpm] sudo = false` entry in "
+                "your configuration file.",
             )
         # An internal-only selection stays silent, as on the no-terminal path:
         # each manager's own sudo surfaces the denial through its error path.
@@ -1502,11 +1510,10 @@ def prime_sudo(
     if not (sys.stdin.isatty() and sys.stderr.isatty()):
         if escalating:
             logging.warning(
-                f"{ids} need{'s' if len(escalating) == 1 else ''} administrator "
-                "rights, but no terminal is available to prompt for a password: "
-                f"{they} may fail. {escalator.remedy} Or drop escalation with "
-                "`--no-sudo` or a `[mpm] sudo = false` entry in your "
-                "configuration file.",
+                f"{ids} {needs} administrator rights, but no terminal is "
+                f"available to prompt for a password: {they} may fail. "
+                f"{escalator.remedy} Or drop escalation with `--no-sudo` or a "
+                "`[mpm] sudo = false` entry in your configuration file.",
             )
         # An internal-only selection stays silent: each manager's own sudo fails
         # fast and surfaces through its error path.
@@ -1532,11 +1539,7 @@ def prime_sudo(
         logging.warning(no_retention)
         return
 
-    echo(
-        f"{ids} need{'s' if len(escalating) == 1 else ''} administrator rights to "
-        f"{ctx.command.name}.",
-        err=True,
-    )
+    echo(f"{ids} {needs} administrator rights to {ctx.command.name}.", err=True)
     prompt_cli = escalator.prompt_args
     if escalator.brands_prompt:
         # `sudo --prompt` expands %-escapes, and `%p` is the account whose password
@@ -1725,7 +1728,7 @@ def diagnose_escalation(managers: Iterable[PackageManager]) -> EscalationDiagnos
         ),
     )
     internal = tuple(sorted(m.id for m in managers if m.internal_sudo))
-    if getattr(os, "geteuid", lambda: 1)() == 0:
+    if _running_as_root():
         return EscalationDiagnosis(escalated, internal, is_root=True)
     escalator = ESCALATION.resolve()
     if escalator is None:

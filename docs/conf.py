@@ -213,12 +213,6 @@ nitpick_ignore = [
     # Neither library publishes an objects.inv, so there is nothing to link to.
     ("py:class", "packageurl.PackageURL"),
     ("py:class", "spdx_tools.spdx.model.document.Document"),
-    # Short references of click-extra's `Spinner.__init__` docstring, which
-    # `autoclass_content` concatenates onto the `execution.Spinner` subclass:
-    # they resolve in click-extra's own build and nowhere else.
-    ("py:class", "ProgressOption"),
-    ("py:meth", "ok"),
-    ("py:meth", "fail"),
 ]
 
 # Concatenates the docstrings of the class and the __init__ method.

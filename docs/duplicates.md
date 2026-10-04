@@ -25,6 +25,11 @@ $ mpm --brew install broot
 🍺  /usr/local/Cellar/broot/1.16.2: 8 files, 3.5MB
 ✓ brew.install: broot (4.3s)
 Installed 1/1 packages
+╭────────────┬──────┬─────────┬──────┬────────┬──────────────╮
+│ Package ID │ Name │ Manager │ From │ To     │ Status       │
+├────────────┼──────┼─────────┼──────┼────────┼──────────────┤
+│ broot      │      │ brew    │      │ 1.16.2 │ 🆕 installed │
+╰────────────┴──────┴─────────┴──────┴────────┴──────────────╯
 ```
 
 This pattern catches the common "I want the freshest version" decision without having to query each manager by hand.
@@ -78,6 +83,13 @@ Successfully uninstalled blah-0.0.2
 Successfully uninstalled blah-5.2.1
 ✓ npm.remove: blah (2.4s)
 Removed 3/3 packages
+╭────────────┬──────┬─────────┬───────┬────┬────────────╮
+│ Package ID │ Name │ Manager │ From  │ To │ Status     │
+├────────────┼──────┼─────────┼───────┼────┼────────────┤
+│ blah       │      │ cargo   │ 0.0.0 │    │ 🗑️  removed │
+│ blah       │      │ gem     │ 0.0.2 │    │ 🗑️  removed │
+│ blah       │      │ npm     │ 5.2.1 │    │ 🗑️  removed │
+╰────────────┴──────┴─────────┴───────┴────┴────────────╯
 ```
 
 Or target a specific duplicate by routing through one manager:

@@ -204,13 +204,16 @@ jobs:
           # Drain the image's pending upgrades, so the destructive
           # `upgrade --all` round-trip finds nothing to install and returns in
           # seconds. Left pending, a big backlog runs past mpm's 500s
-          # state-change timeout, whose kill reaches `sudo` alone and orphans
-          # `apt` still holding /var/lib/dpkg/lock-frontend: the `apt` and
-          # `aptitude` install round-trips on the same worker then wait out
-          # their own lock timeout and fail. The two variables keep conffile
-          # and service-restart prompts from blocking the unattended run.
+          # state-change timeout, whose kill cannot signal the root-owned `apt`
+          # still holding /var/lib/dpkg/lock-frontend: the `apt` and `aptitude`
+          # install round-trips on the same worker then wait out their own lock
+          # timeout and fail. `--with-new-pkgs` drains what `apt upgrade` and
+          # `aptitude safe-upgrade` would install: without it, `apt-get` keeps
+          # back the kernel meta packages, whose upgrade pulls in a new kernel.
+          # The two variables keep conffile and service-restart prompts from
+          # blocking the unattended run.
           sudo env DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a \
-            apt-get --quiet --yes upgrade
+            apt-get --quiet --yes --with-new-pkgs upgrade
 
       # Aptitude
       - name: Aptitude - Linux install

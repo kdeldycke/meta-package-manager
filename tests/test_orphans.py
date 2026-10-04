@@ -47,7 +47,7 @@ from meta_package_manager.tables import PackageOutcome
 from meta_package_manager.version import parse_version
 
 from .fake_manager import FakeManager
-from .test_cli import report_rows
+from .test_cli import check_report
 
 
 def _capture_run_cli(monkeypatch, manager_id, call):
@@ -715,9 +715,7 @@ def test_cleanup_orphans_reports_the_sweep(invoke, changing_fake_pool):
     assert result.exit_code == 0
     mid = changing_fake_pool.id
     assert f"✓ {mid}.cleanup (orphans: 1 removed)" in strip_ansi(result.stderr)
-    rows = report_rows(result.stdout)
-    assert set(rows) == {"fake-pkg-epsilon"}
-    assert PackageOutcome.REMOVED.label in rows["fake-pkg-epsilon"]
+    check_report(result.stdout, {"fake-pkg-epsilon": (PackageOutcome.REMOVED.label,)})
 
 
 def test_cleanup_without_flags_runs_default_categories(invoke, patch_pool_with):

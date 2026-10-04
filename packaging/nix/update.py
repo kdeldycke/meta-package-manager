@@ -10,6 +10,7 @@ Requires Nix to be installed for hash computation.
 from __future__ import annotations
 
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -46,8 +47,16 @@ PACKAGE_NIX = Path(__file__).parent / "package.nix"
 
 
 def fetch_json(url: str) -> dict[str, Any]:
-    """Fetch JSON from a URL."""
-    request = urllib.request.Request(url, headers={"Accept": "application/json"})
+    """Fetch JSON from a URL.
+
+    Authenticates with `GH_TOKEN` or `GITHUB_TOKEN` when either is set, since
+    anonymous `api.github.com` calls from shared runner IPs trip the rate limit.
+    """
+    headers = {"Accept": "application/json"}
+    token = os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    request = urllib.request.Request(url, headers=headers)
     with urllib.request.urlopen(request) as response:
         result: dict[str, Any] = json.loads(response.read())
         return result

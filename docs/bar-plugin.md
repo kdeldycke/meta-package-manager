@@ -315,7 +315,7 @@ $ python3 "$(mpm --bar-plugin-path)" --search-mpm
 
 ## The `PATH` the menu sees
 
-A menu bar app starts its plugins outside a terminal, so the `PATH` they get is not the one a terminal builds. SwiftBar runs each plugin through the user's login shell, as `$SHELL -l -c`: `.zprofile` is read, `.zshrc` is not. Xbar runs the plugin directly, with the `PATH` of the desktop session, which is `/usr/bin:/bin:/usr/sbin:/sbin`. A manager installed under the home directory is then invisible to `mpm`, and `pnpm` refuses its global commands until its bin directory is on that `PATH`.
+A menu bar app starts its plugins outside a terminal, so the `PATH` they get is not the one a terminal builds. SwiftBar runs each plugin through the user's login shell, as `$SHELL -l -c`: `.zprofile` is read, `.zshrc` is not. Xbar runs the plugin directly, with the `PATH` of the desktop session, which is `/usr/bin:/bin:/usr/sbin:/sbin`. A manager installed under the home directory is then invisible to `mpm`, and [`pnpm`](managers/pnpm.md) refuses its global commands until its bin directory is on that `PATH`.
 
 The plugin therefore passes `--shell-env` to any `mpm` from `8.0.0` on. `mpm` runs the login shell once more, as an interactive login shell this time, adopts the environment it exports, and only then looks for managers: the menu lists what a terminal would. The shell has ten seconds to answer, past which `mpm` keeps the `PATH` it started with and says so at the `WARNING` level. Set `VAR_MPM_OPTIONS` to `--no-shell-env` to opt out.
 

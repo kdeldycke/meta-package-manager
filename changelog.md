@@ -5,49 +5,49 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
-- [mpm] Raise the `click-extra` floor to `9.3`, the release `mpm` already needs: below it every manager call died on a `TypeError`.
-- [mpm] Raise the `extra-platforms` floor to `13.10`, whose new `shell_from_path()` resolves the login shell `--shell-env` runs, replacing `mpm`'s own PowerShell special case.
-- [scoop] Raise the Scoop floor to `0.6.0`, which fixes its `--version` output. Run `scoop update` to upgrade an older install.
-- [scoop] Install the requested version on `mpm install <package>@<version>` and `mpm restore`. Scoop pins such a package, so `outdated` and `upgrade` skip it.
-- [sfsu] Note on its page that upstream looks for new maintainers and now ships only fixes.
-- [composer] Record that Composer's cooldown setting merged for `2.11.0`, which is not released yet.
-- [mpm] Record `hok` as unsupported: its listing drops every app that Scoop `0.6.0` installed.
-- [mpm] Record three tools `topgrade` gained as unsupported: `adless` refreshes a hosts-file blocklist, while `antigravity-cli` and `zed` only update themselves.
+- [mpm] Close `install`, `remove`, `upgrade`, `restore` and `cleanup --orphans` on a report of every package upgraded, downgraded, installed, removed, held or still outdated, with its versions, as a table honoring `--table-format` and `--columns`.
+- [mpm] Open `mpm doctor` on a report of privilege escalation: the escalator, whether its credentials are ready, whether a password prompt would hold, and the fix.
 - [app-manager] Add the AppManager AppImage manager with `outdated`, `install`, `remove` and full `upgrade` support. `install` and `remove` take the AppImage's file path, and nothing lists the installed apps.
 - [antigravity-cli-plugins] Add the plugin manager of the Antigravity CLI, `agy`, with `installed`, `install` and `remove` support.
 - [whalebrew] Add Whalebrew, which installs Docker images as commands, with `installed`, `search`, `install` and `remove` support. Packages are keyed on their image.
 - [protonplus] Add ProtonPlus, which installs Proton, Wine, DXVK and VKD3D builds into game launchers, with `installed`, `install`, `upgrade` and `remove` support.
-- [mpm,sheldon,zeroinstall] Fix `remove` exiting on "No manager selected" when the only manager selected keeps no inventory: that manager now gets the package as is.
-- [mpm] Drop `upt` from the benchmark comparison: its last commit dates from 2024-10, and its owner has answered nothing since 2024-12.
-- [mpm] Refresh the benchmark against `topgrade` `17.12.2`, `pacaptr` `0.23.2`, `metapac` `0.10.2` and Homebrew `7.0.7`, citing evidence for every competitor cell: four new `topgrade` steps, Homebrew's `vulns` scan and its dropped parallel installs.
-- [mpm] Link each `mpm` glyph of the benchmark's support table to the manager's page instead of its source code.
-- [mpm] List every manager queued for a wrap, with what it waits on, on the managers page and the todo list.
-- [bar-plugin] Fix the preview screenshot Xbar's website shows for the plugin, which named a renamed file.
-- [mpm] Close `install`, `remove`, `upgrade`, `restore` and `cleanup --orphans` on a report of every package upgraded, downgraded, installed, removed, held or still outdated, with its versions, as a table honoring `--table-format` and `--columns`.
-- [mpm] List the privileged operations of every manager on its page, not only those of the bundled definitions.
+- [scoop] Install the requested version on `mpm install <package>@<version>` and `mpm restore`. Scoop pins such a package, so `outdated` and `upgrade` skip it.
+- [guix] List a package output other than `out` as a package of its own, like `glib:bin`, which `install` and `remove` take back.
 - [mpm] Ask for the `sudo` password up front only for managers whose commands in the run need root: a `gem` forced to escalate no longer prompts on `sync`.
 - [mpm] Run privileged commands directly when `mpm` runs as root, instead of through `sudo`, `doas`, `run0` or `pkexec`: as root on SliTaz 5.0, every one failed.
-- [tazpkg] Fix `search` listing an installed package twice.
-- [tazpkg] Fail `install` and `upgrade` when TazPkg refuses to install anything until it upgrades itself, instead of reporting success.
+- [mpm] Skip the `pkexec` or `run0` password prompt when polkit would keep nothing of it, as `run0` over SSH, warning with the fix instead.
+- [mpm] Warn after the password prompt when the escalator keeps no authorization for later commands, naming the fix: `persist` for `doas`, a polkit grant for `pkexec` or `run0`.
+- [mpm] Warn when `--sudo-command` names a stand-in for that escalator, like SliTaz's `su` wrapper named `sudo`, and stop its probes from waiting on a password.
+- [mpm] Name the escalator and what its policy needs in the warning of a failed escalation, instead of always pointing at `sudo` and `--sudo`.
+- [mpm] Point to `--plan` when `--dry-run` cannot tell which manager provides a package to `install`, `remove` or `upgrade`, instead of reporting it not found.
+- [mpm] Raise the `click-extra` floor to `9.3`, the release `mpm` already needs: below it every manager call died on a `TypeError`.
+- [mpm] Raise the `extra-platforms` floor to `13.10`, whose new `shell_from_path()` resolves the login shell `--shell-env` runs, replacing `mpm`'s own PowerShell special case.
+- [scoop] Raise the Scoop floor to `0.6.0`, which fixes its `--version` output. Run `scoop update` to upgrade an older install.
+- [mpm,sheldon,zeroinstall] Fix `remove` exiting on "No manager selected" when the only manager selected keeps no inventory: that manager now gets the package as is.
 - [mpm] Fix every command hanging for a non-root user in a SliTaz terminal: the `sudo` check waited on the root password prompt of SliTaz's `su` wrapper.
 - [mpm] Pass `--keep-cwd` to `pkexec` only from polkit `121` on: older releases read it as the program to run, which failed every escalated command.
 - [mpm] Make a `pkexec` call that polkit does not authorize fail, instead of waiting on a password prompt inside the run.
-- [mpm] Document the `.pkla` grant for `pkexec` on polkit older than `0.106`, which reads no JavaScript rules.
-- [mpm] Name the escalator and what its policy needs in the warning of a failed escalation, instead of always pointing at `sudo` and `--sudo`.
-- [mpm] Warn when `--sudo-command` names a stand-in for that escalator, like SliTaz's `su` wrapper named `sudo`, and stop its probes from waiting on a password.
-- [mpm] Warn after the password prompt when the escalator keeps no authorization for later commands, naming the fix: `persist` for `doas`, a polkit grant for `pkexec` or `run0`.
 - [mpm] Stop claiming `doas` managers will fail when a `doas.conf` rule permits their own commands but not the `true` mpm probes with.
-- [mpm] Skip the `pkexec` or `run0` password prompt when polkit would keep nothing of it, as `run0` over SSH, warning with the fix instead.
-- [mpm] Open `mpm doctor` on a report of privilege escalation: the escalator, whether its credentials are ready, whether a password prompt would hold, and the fix.
-- [mpm] Exit `0` from `mpm doctor` when no selected manager has a diagnostic verb, instead of failing on `No manager selected` after the escalation report.
+- [mpm] Exit `0` from `mpm doctor` when no selected manager has a diagnostic verb, instead of failing on `No manager selected`.
 - [guix] Fix `outdated` reporting no package while updates are available.
 - [guix] Fix `upgrade <package>` also upgrading every installed package whose name contains `<package>`, like `glib-networking` for `glib`.
-- [guix] Fix the package IDs of `installed` ending in spaces.
-- [guix] List a package output other than `out` as a package of its own, like `glib:bin`, which `install` and `remove` take back.
 - [guix] Fix `install` crashing on a package Guix ships in several versions, like `lua`, which `search` now lists once, at its newest version.
-- [guix] Strip the trailing spaces from the descriptions of `search` results.
+- [guix] Strip the trailing spaces from the package IDs of `installed` and the descriptions of `search` results.
+- [tazpkg] Fix `search` listing an installed package twice.
+- [tazpkg] Fail `install` and `upgrade` when TazPkg refuses to install anything until it upgrades itself, instead of reporting success.
+- [bar-plugin] Fix the preview screenshot Xbar's website shows for the plugin, which named a renamed file.
+- [mpm] Refresh the benchmark against `topgrade` `17.12.2`, `pacaptr` `0.23.2`, `metapac` `0.10.2` and Homebrew `7.0.7`, citing evidence for every competitor cell: four new `topgrade` steps, Homebrew's `vulns` scan and its dropped parallel installs.
+- [mpm] Drop `upt` from the benchmark comparison: its last commit dates from 2024-10, and its owner has answered nothing since 2024-12.
+- [mpm] Link each `mpm` glyph of the benchmark's support table to the manager's page instead of its source code.
+- [mpm] List every manager queued for a wrap, with what it waits on, on the managers page and the todo list.
+- [mpm] List the privileged operations of every manager on its page, not only those of the bundled definitions.
+- [mpm] Document the `.pkla` grant for `pkexec` on polkit older than `0.106`, which reads no JavaScript rules.
+- [mpm] Correct the security page, which denied that `mpm` reads the `[tool.mpm]` table of a `pyproject.toml` found from the working directory. Pass `--no-config` in a repository you do not trust.
+- [mpm] Record `hok` as unsupported: its listing drops every app that Scoop `0.6.0` installed.
+- [mpm] Record three tools `topgrade` gained as unsupported: `adless` refreshes a hosts-file blocklist, while `antigravity-cli` and `zed` only update themselves.
 - [guix] Note on its page that a first `guix pull` outlasts the default timeout of `sync`, and how to raise it.
-- [mpm] Point to `--plan` when `--dry-run` cannot tell which manager provides a package to `install`, `remove` or `upgrade`, instead of reporting it not found.
+- [sfsu] Note on its page that upstream looks for new maintainers and now ships only fixes.
+- [composer] Record that Composer's cooldown setting merged for `2.11.0`, which is not released yet.
 
 ## [`8.0.2` (2026-09-28)](https://github.com/kdeldycke/meta-package-manager/compare/v8.0.1...v8.0.2)
 

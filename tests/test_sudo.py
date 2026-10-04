@@ -244,12 +244,23 @@ def _prompt_argv(run):
     raise AssertionError(f"no branded prompt among {run.call_args_list}")
 
 
+class _EscalatingFakeManager(FakeManager):
+    """A fake manager marking its `install` privileged.
+
+    The set is a class attribute on every real manager, so it is declared here
+    rather than assigned to an instance. The ID stays the parent's, which the
+    notice and prompt assertions read.
+    """
+
+    id = FakeManager.id
+    privileged_operations = frozenset({Operations.install.name})
+
+
 def _escalating_manager() -> FakeManager:
     """A fake manager whose policy escalates its `install`, to trip prime_sudo in
     an {data}`INSTALL_RUN`."""
-    manager = FakeManager()
+    manager = _EscalatingFakeManager()
     manager.sudo = True
-    manager.privileged_operations = frozenset({Operations.install.name})
     return manager
 
 

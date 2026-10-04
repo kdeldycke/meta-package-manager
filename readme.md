@@ -43,6 +43,7 @@
 - [Diagnose the health of package managers](https://mpm.run/cli-parameters/#mpm-doctor).
 - [Upgrade all outdated packages](https://mpm.run/cli-parameters/#mpm-upgrade) from every manager at once, the primary use case of `mpm` and the main reason I built it, since [70% of vulnerabilities lie in outdated libraries](https://developers.slashdot.org/story/20/05/23/2330244/open-source-security-report-finds-library-induced-flaws-in-70-of-applications). A manager that fails is marked `✘` and named in a closing summary, while the others carry on:
   ![Every manager upgraded, in one command](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-upgrade-cli.svg)
+- Get a [report of what each command changed](https://mpm.run/augmentations/#a-report-of-what-each-command-changed) at the end of `install`, `remove`, `upgrade`, `restore` and `cleanup --orphans`: every package upgraded, downgraded, installed, removed, held or still outdated, with its versions.
 - [Mitigate supply-chain attacks](https://mpm.run/cooldown/) with a release-age cooldown that refuses any version published more recently than a threshold. A manager that cannot enforce the window is skipped, rather than run unguarded:
   ![Upgrading under a release-age cooldown](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-upgrade-cooldown-cli.svg)
 - [Software Bill of Materials](https://mpm.run/cli-parameters/#mpm-sbom): export installed packages to [SPDX](https://spdx.dev) and [CycloneDX](https://cyclonedx.org) SBOM files.

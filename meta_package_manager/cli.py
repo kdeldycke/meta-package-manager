@@ -568,13 +568,6 @@ class SourcedParamsOption(ShowParamsOption):
     It earns the width: mpm layers a user-wide configuration under a project's own
     (see {func}`group_params`), so `Source` saying `CONFIGURATION` leaves the reader
     asking *which* file, and this column is the answer.
-
-    ```{todo}
-    Inert on click-extra `9.1` and below, which renders the table from the base
-    class's column set rather than the running option's, so this override never
-    reaches it. The one-line fix is proposed upstream; drop this paragraph once a
-    release carrying it becomes the floor.
-    ```
     """
 
     @classmethod

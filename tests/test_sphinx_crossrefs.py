@@ -17,11 +17,11 @@
 """Render tests for Sphinx cross-references in the built documentation.
 
 Build the docs once and assert against the real HTML that the generated summary
-tables deep-link to the sections they describe, and that intersphinx references
-to Click resolve to the upstream site. This catches drift the moment a
-`{click:config}` or `{click:tree}` directive stops wiring its anchors, or an
-`intersphinx_mapping` URL goes stale, neither of which a mock-based test would
-notice.
+tables deep-link to the sections they describe, that each changelog release is
+anchored on its version, and that intersphinx references to Click resolve to
+the upstream site. This catches drift the moment a `{click:config}` or
+`{click:tree}` directive stops wiring its anchors, or an `intersphinx_mapping`
+URL goes stale, neither of which a mock-based test would notice.
 """
 
 from __future__ import annotations
@@ -32,6 +32,8 @@ import sys
 from pathlib import Path
 
 import pytest
+
+from meta_package_manager import _docs
 
 # The `docs` group declares `requires-python = ">= 3.14"` (see [tool.uv]), so it
 # resolves nowhere else: below that, `uv run --group docs` installs nothing and
@@ -92,6 +94,23 @@ def read_html(built_docs: Path, filename: str) -> str:
     html_path = built_docs / filename
     assert html_path.exists(), f"HTML file not found: {html_path}"
     return html_path.read_text(encoding="utf-8")
+
+
+def test_changelog_releases_are_anchored_on_their_version(built_docs):
+    """Each release of the changelog has an anchor made from its version.
+
+    docutils reduces a release heading to nothing and numbers its section from
+    a per-page counter, so `#id94` names another release after each new one.
+    `ReleaseAnchors` of `docs/conf.py` gives that section `#v3-6-0` instead,
+    and the release in preparation the anchor it ships with.
+    """
+    html = read_html(built_docs, "changelog.html")
+    missing = [
+        version
+        for version in _docs.changelog_releases()
+        if f'<section id="v{version.replace(".", "-")}">' not in html
+    ]
+    assert not missing, f"changelog releases with no version anchor: {missing}"
 
 
 @pytest.mark.parametrize(

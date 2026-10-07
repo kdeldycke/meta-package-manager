@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import os
+import re
 from datetime import date, datetime, timezone
 from pathlib import Path
 
 import tomllib  # type: ignore[import-not-found]  # stdlib >=3.11; docs require >=3.12.
 from docutils import nodes
+from docutils.transforms import Transform
+from docutils.transforms.references import PropagateTargets
 
 from meta_package_manager._docs import changelog_releases
 
@@ -97,7 +100,8 @@ myst_fence_as_directive = ["mermaid"]
 # Sphinx the authority for internal anchors. The slug function is pinned to
 # docutils' `make_id` so MyST anchors match the section IDs docutils already
 # emits, keeping existing anchor URLs stable. Mirrors the upstream repomatic
-# docs configuration.
+# docs configuration. `make_id` leaves nothing of a changelog release heading:
+# `ReleaseAnchors` below gives each one an anchor made from its version.
 myst_heading_anchors = 6
 myst_heading_slug_func = "docutils.nodes.make_id"
 
@@ -505,9 +509,7 @@ def mpm_release_role(name, rawtext, text, lineno, inliner, options=None, content
     The same shape `scope_changelog()` gives each release it lists, so a version
     reads the same wherever the documentation states one.
 
-    The target is the comparison URL of the release heading, not the heading
-    itself: a changelog heading holds no letter, so `docutils.nodes.make_id`
-    reduces it to the empty string and it has no anchor to link to.
+    The target is the comparison URL the release heading carries.
 
     Both halves are resolved at build time. A date written into a page starts
     ageing immediately, and the release in preparation has none to write yet.
@@ -555,6 +557,63 @@ def prune_build_artifacts(app, exception):
         sources.rmdir()
 
 
+RELEASE_HEADING = re.compile(r"(?P<version>\d+\.\d+\.\d+)(?:\.\w+)? \([^)]+\)")
+"""Rendered title of a changelog release: `8.1.0 (2026-10-04)`.
+
+The release in preparation carries a `.devN` suffix, and the `unreleased` label
+in place of a date: `8.1.1.dev0 (unreleased)`.
+"""
+
+
+class ReleaseAnchors(Transform):
+    """Anchor each release of the changelog on its version, like `#v8-1-0`.
+
+    docutils builds a section ID from the title, minus its leading digits and
+    hyphens. That leaves nothing of `8.1.0 (2026-10-04)`, so the section takes
+    the next value of a per-page counter: `#id1` for the newest release. The
+    next release then moves every older one, and a saved `#id94` link shows a
+    different release.
+
+    The version ID replaces that ID on the section, and in the table myst-parser
+    resolves a `[text](changelog.md#v8-1-0)` link against. The `.devN` suffix of
+    the release in preparation is left out, so its anchor does not change the
+    day it ships.
+
+    Runs right before `PropagateTargets`: the section then holds only the ID
+    docutils gave it, and nothing has read that ID yet.
+    """
+
+    default_priority = PropagateTargets.default_priority - 1
+
+    def apply(self, **kwargs: object) -> None:
+        renamed: dict[str, str] = {}
+        for release in self.document.findall(nodes.section):
+            match = RELEASE_HEADING.fullmatch(release[0].astext())
+            if not match:
+                continue
+            anchor = "v" + match["version"].replace(".", "-")
+            # Makes a second pass, or a second heading of that version, a no-op.
+            if anchor in self.document.ids:
+                continue
+            docutils_id = release["ids"][0]
+            release["ids"][0] = anchor
+            del self.document.ids[docutils_id]
+            self.document.ids[anchor] = release
+            for name in release["names"]:
+                self.document.nameids[name] = anchor
+            renamed[docutils_id] = anchor
+
+        # The same object as `env.metadata[docname]["myst_slugs"]`, which is why
+        # it is updated in place.
+        slugs = getattr(self.document, "myst_slugs", {})
+        for slug, (line, section_id, title) in list(slugs.items()):
+            if section_id in renamed:
+                del slugs[slug]
+                anchor = renamed[section_id]
+                slugs[anchor] = (line, anchor, title)
+
+
 def setup(app):
     app.add_role("mpm-release", mpm_release_role)
+    app.add_transform(ReleaseAnchors)
     app.connect("build-finished", prune_build_artifacts)

@@ -2603,11 +2603,8 @@ def changelog_releases() -> dict[str, tuple[str, str]]:
     Keyed on the bare version, so the `.devN` suffix of the development heading
     comes off and a page naming the release in preparation resolves to it.
 
-    The URL is the comparison link the heading carries, because a release
-    heading has no anchor to link to instead. `myst_heading_slug_func` is
-    `docutils.nodes.make_id`, which strips a heading holding no letter down to
-    the empty string, so `` `7.6.0` (2026-08-10) `` yields nothing at all. That
-    is what {func}`scope_changelog` links each of its releases by, and what the
+    The URL is the comparison link the heading carries. That is what
+    {func}`scope_changelog` links each of its releases by, and what the
     `mpm-release` role of `docs/conf.py` renders a {data}`DECLINE_STAMP` as.
     """
     changelog = (PROJECT_ROOT / "changelog.md").read_text(encoding="UTF-8")
@@ -2773,12 +2770,9 @@ def scope_changelog(scope: str) -> str:
     ```
 
     ```{note}
-    Released headings are not linkable: `myst_heading_slug_func` is
-    `docutils.nodes.make_id`, which strips a heading holding no letter down to
-    the empty string, so `` `7.5.0` (2026-08-03) `` yields no anchor at all.
-    Each version therefore links to the comparison URL its own heading
-    carries, which is parsed rather than guessed, exists for every release, and
-    costs `linkcheck` nothing since the changelog page already cites it.
+    Each version links to the comparison URL its own heading carries, which is
+    parsed rather than guessed, exists for every release, and costs `linkcheck`
+    nothing since the changelog page already cites it.
     ```
     """
     entries = _changelog_entries().get(scope, ())

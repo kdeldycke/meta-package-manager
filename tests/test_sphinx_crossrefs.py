@@ -35,6 +35,8 @@ import pytest
 
 from meta_package_manager import _docs
 
+PROJECT_ROOT = Path(__file__).parent.parent
+
 # The `docs` group declares `requires-python = ">= 3.14"` (see [tool.uv]), so it
 # resolves nowhere else: below that, `uv run --group docs` installs nothing and
 # `sphinx-build` is not on PATH. Building once on the newest supported Python
@@ -52,13 +54,18 @@ pytestmark = [
         shutil.which("uv") is None,
         reason="needs uv to build the docs",
     ),
+    # The build installs the docs group as `uv.lock` pins it. The source
+    # distribution ships no lockfile, so a packager running the suite from it
+    # has nothing to build from.
+    pytest.mark.skipif(
+        not PROJECT_ROOT.joinpath("uv.lock").is_file(),
+        reason="needs the lockfile of a repository checkout",
+    ),
     # Sphinx crashes with a FileNotFoundError on searchindex.js.tmp when
     # concurrent builds share the same output directory (sphinx-doc/sphinx#13702).
     # Force all tests in this module onto a single xdist worker.
     pytest.mark.xdist_group("sphinx"),
 ]
-
-PROJECT_ROOT = Path(__file__).parent.parent
 
 
 @pytest.fixture(scope="module")

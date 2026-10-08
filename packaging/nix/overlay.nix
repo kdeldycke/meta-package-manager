@@ -49,4 +49,16 @@ self: super: {
   });
 
   extra-platforms = self.callPackage ./extra-platforms.nix { };
+
+  # The click override above rebuilds the HTTP stack behind mpm's check inputs,
+  # and with it their own test suites. On a loaded macOS runner their timing
+  # tests fail at random: `test_h2_timeout_during_response` of httpcore2 on one
+  # run, `TestReceive.test_receive_timeout` of httpx2 on another. Both suites
+  # pass on nixpkgs' own builders, so skip them on the one platform they flake.
+  httpcore2 = super.httpcore2.overridePythonAttrs (_: {
+    doCheck = !pkgs.stdenv.hostPlatform.isDarwin;
+  });
+  httpx2 = super.httpx2.overridePythonAttrs (_: {
+    doCheck = !pkgs.stdenv.hostPlatform.isDarwin;
+  });
 }

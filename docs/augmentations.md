@@ -204,18 +204,18 @@ $ mpm --brew upgrade --all
 
 The table follows on stdout, one row per package with its `From` and `To` versions and its `Status`:
 
-| Status            | Meaning                                                                                                      |
-| :---------------- | :----------------------------------------------------------------------------------------------------------- |
-| 🆙 upgraded       | The installed version moved to a newer one.                                                                  |
-| ⏪ downgraded     | The installed version moved back to an older one.                                                            |
-| 🆕 installed      | A package the command installed, or a dependency it pulled in.                                               |
-| 🗑️ removed        | A package the command removed, or one it dropped along the way.                                              |
-| ⏸️ held           | Still outdated: the [cooldown](cooldown.md) holds it back.                                                   |
-| ⏳ still outdated | Still outdated for another reason: a failed build, a pinned package, or one the native command leaves alone. |
+| Status              | Meaning                                                                                                      |
+| :------------------ | :----------------------------------------------------------------------------------------------------------- |
+| 🆙 upgraded         | The installed version moved to a newer one.                                                                  |
+| ⏪ downgraded       | The installed version moved back to an older one.                                                            |
+| 🆕 installed        | A package the command installed, or a dependency it pulled in.                                               |
+| 🗑️ removed          | A package the command removed, or one it dropped along the way.                                              |
+| ⏸️ held by cooldown | Still outdated: the [cooldown](cooldown.md) holds it back.                                                   |
+| ⏳ still outdated   | Still outdated for another reason: a failed build, a pinned package, or one the native command leaves alone. |
 
-Only an upgrade names the packages it expects to move, so only an upgrade reports `held` and `still outdated` rows.
+Only an upgrade names the packages it expects to move, so only an upgrade reports `held by cooldown` and `still outdated` rows.
 
-A `held` row dates the version in its `To` column. `Released` is the day that version was published, and `Eligible` is the day it clears the cooldown window, both in UTC. The table shows the two columns when a row carries a date, and `--columns` selects them in any report. A package held because its release has no readable date leaves both empty.
+A `held by cooldown` row dates the version in its `To` column. `Released` is the day that version was published, and `Eligible` is the day it clears the cooldown window, both in UTC. The table shows the two columns when a row carries a date, and `--columns` selects them in any report. A package held because its release has no readable date leaves both empty.
 
 The table takes the format `--table-format` selects and the columns `--columns` keeps. A serialized format like JSON carries the bare status words, for a script to match, and the two dates as ISO 8601 timestamps. The report costs one `installed` listing on each side of the command, plus one `outdated` listing before an upgrade. A manager whose listing carries no versions gets no report, and neither does a `--dry-run` or `--plan` run, which moves nothing.
 

@@ -77,8 +77,8 @@ class PackageOutcome(StrEnum):
     Classified by {func}`meta_package_manager.cli.package_outcomes` from the
     inventory a manager reports before and after the command changes it. The
     values are the words the serialized payload carries and the trail line
-    counts (`1 upgraded, 2 held`), so a member reads as a word rather than as an
-    identifier. The table shows each one as its {attr}`label`.
+    counts (`1 upgraded, 2 held by cooldown`), so a member reads as words rather
+    than as an identifier. The table shows each one as its {attr}`label`.
     """
 
     UPGRADED = "upgraded"
@@ -95,8 +95,11 @@ class PackageOutcome(StrEnum):
     REMOVED = "removed"
     """Present before the command, gone after it."""
 
-    HELD = "held"
-    """Still outdated because the release-age cooldown holds it back."""
+    HELD = "held by cooldown"
+    """Still outdated because the release-age cooldown holds it back.
+
+    The value names the cooldown, so the status reads as an effect of that gate
+    in the table, on the trail line and in the serialized payload."""
 
     STILL_OUTDATED = "still outdated"
     """Still outdated for any other reason: a failed build, a pinned package, or
@@ -336,9 +339,9 @@ COOLDOWN_COLUMNS: tuple[TColumn, ...] = (
 {data}`CHANGE_REPORT_COLUMNS`.
 
 Named after the columns of repomatic's `Held back by cooldown` table, for the
-reason {data}`PACKAGE_OUTCOME_GLYPHS` borrows its legend. Only a `held` row whose
-release could be dated fills them, so they join the default selection of a
-report when one of its rows does: see
+reason {data}`PACKAGE_OUTCOME_GLYPHS` borrows its legend. Only a
+`held by cooldown` row whose release could be dated fills them, so they join the
+default selection of a report when one of its rows does: see
 {func}`meta_package_manager.cli.print_change_report`. `--columns` selects them
 whatever the rows carry.
 """

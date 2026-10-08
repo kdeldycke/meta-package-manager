@@ -655,6 +655,85 @@ def test_run_cache_collapses_dry_run(caplog):
     assert len(cache) == 1
 
 
+@pytest.mark.parametrize(
+    ("plan", "runs"),
+    (
+        pytest.param(False, "rmr", id="ran-for-real"),
+        # A captured command changed nothing: the read still holds.
+        pytest.param(True, "r", id="captured-by-plan"),
+    ),
+)
+def test_run_cache_drops_reads_once_the_lane_changes_state(tmp_path, plan, runs):
+    """A read cached before a state-changing command spawns again after it."""
+    PLAN_RECORDER.reset()
+    marker = tmp_path / "runs.log"
+    read = _append_script(marker, "r")
+    manager = FakeManager()
+    manager.run_cache = {}
+    manager.plan = plan
+
+    with manager.acting_as("installed"):
+        manager.run_cli("-c", read)
+        # Nothing changed yet: the identical read is a replay.
+        manager.run_cli("-c", read)
+    with manager.acting_as("upgrade_all"):
+        manager.run_cli("-c", _append_script(marker, "m"))
+    with manager.acting_as("installed"):
+        manager.run_cli("-c", read)
+
+    assert marker.read_text() == runs
+
+
+def test_run_cache_drops_reads_when_the_state_change_times_out(tmp_path):
+    """A command killed on its timeout may have changed the system all the same."""
+    marker = tmp_path / "runs.log"
+    read = _append_script(marker, "r")
+    manager = FakeManager()
+    manager.run_cache = {}
+    manager.timeout = 1
+
+    with manager.acting_as("installed"):
+        manager.run_cli("-c", read)
+    with manager.acting_as("upgrade_all"):
+        manager.run_cli(
+            "-c", _append_script(marker, "m", tail="import time; time.sleep(30)")
+        )
+    with manager.acting_as("installed"):
+        manager.run_cli("-c", read)
+
+    assert "Timed out" in manager.cli_errors[0].error
+    assert marker.read_text() == "rmr"
+
+
+def test_run_cache_keeps_state_changes_for_the_peers(tmp_path):
+    """A state-changing result outlives the next one, so a peer replays both."""
+    marker = tmp_path / "runs.log"
+    first, second = FakeManager(), FakeManager()
+    first.run_cache = second.run_cache = {}
+
+    for manager in (first, second):
+        with manager.acting_as("cleanup"):
+            manager.run_cli("-c", _append_script(marker, "a"))
+            manager.run_cli("-c", _append_script(marker, "b"))
+
+    assert marker.read_text() == "ab"
+
+
+def test_run_cache_never_serves_a_read_from_a_state_change(tmp_path):
+    """A read sharing the command line of a state change still runs on its own."""
+    marker = tmp_path / "runs.log"
+    script = _append_script(marker)
+    manager = FakeManager()
+    manager.run_cache = {}
+
+    with manager.acting_as("sync"):
+        manager.run_cli("-c", script)
+    with manager.acting_as("outdated"):
+        manager.run_cli("-c", script)
+
+    assert marker.read_text() == "xx"
+
+
 def test_format_plan_command_shell_quotes_env_and_args():
     """A captured plan command renders as a plain, shell-quoted, runnable line."""
     line = format_plan_command(

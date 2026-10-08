@@ -6,6 +6,7 @@
 > This version is **not released yet** and is under active development.
 
 - [mpm] Give each release of the changelog page a stable anchor made from its version, like `https://mpm.run/changelog/#v8-1-0`. The numbered `#id94` anchors, which moved with each release, are removed.
+- [mpm] Fix the report of what a command changed listing upgraded packages as `still outdated` when two managers sharing a lock run together, like `brew` and `cask`.
 
 ## [`8.1.0` (2026-10-04)](https://github.com/kdeldycke/meta-package-manager/compare/v8.0.2...v8.1.0)
 

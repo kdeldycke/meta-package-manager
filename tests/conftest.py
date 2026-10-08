@@ -372,7 +372,7 @@ def patch_pool_with(monkeypatch, request):
     """Return a function installing a fake manager into the pool for one test.
 
     The function replaces `pool.select_managers` with a generator yielding its
-    `fake` alone, mirroring the runtime knobs (timeout, stop_on_error, dry_run,
+    `fake`, mirroring the runtime knobs (timeout, stop_on_error, dry_run,
     ignore_auto_updates) that `_select_managers` would forward, so the CLI
     exercises the same code path it does against real managers. It also registers
     the fake in the pool, for the code paths re-resolving a manager from its ID
@@ -382,22 +382,30 @@ def patch_pool_with(monkeypatch, request):
     {meth}`~meta_package_manager.pool.ManagerPool.remove_manager`, which evict the
     pool's cached ID lists: a fake left in `all_manager_ids` after its test
     crashes the next test recomputing `maintained_manager_ids` from it.
+
+    Any `peers` handed after the fake are selected and registered with it, in
+    that order, for a test that needs several managers in one run. The function
+    still returns the first fake.
     """
 
-    def install(fake):
+    def install(fake, *peers):
+        fakes = (fake, *peers)
+
         def fake_select_managers(*args, **kwargs):
-            for option in ManagerPool.ALLOWED_EXTRA_OPTION:
-                if option in kwargs:
-                    setattr(fake, option, kwargs[option])
             # Mirror the per-operation stamping done by the real _select_managers
             # so CLI tests resolve timeouts the same way production does.
             op = kwargs.get("implements_operation")
-            fake._active_operation = op.name if op else None
-            yield fake
+            for selected in fakes:
+                for option in ManagerPool.ALLOWED_EXTRA_OPTION:
+                    if option in kwargs:
+                        setattr(selected, option, kwargs[option])
+                selected._active_operation = op.name if op else None
+                yield selected
 
         monkeypatch.setattr(pool, "select_managers", fake_select_managers)
-        pool.add_manager(fake)
-        request.addfinalizer(partial(pool.remove_manager, fake.id))
+        for registered in fakes:
+            pool.add_manager(registered)
+            request.addfinalizer(partial(pool.remove_manager, registered.id))
         return fake
 
     return install

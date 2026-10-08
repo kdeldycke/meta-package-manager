@@ -34,6 +34,7 @@ from boltons.strutils import strip_ansi
 from meta_package_manager.capabilities import Operations
 from meta_package_manager.cli import outcome_detail, package_outcomes
 from meta_package_manager.cli_maintenance import SWEEP_RESULTS, UPGRADE_RESULTS
+from meta_package_manager.dispatch import _LOCK_FAMILY_BY_MANAGER, LockFamily
 from meta_package_manager.execution import CLIError
 from meta_package_manager.package import Package
 from meta_package_manager.pool import pool
@@ -41,7 +42,7 @@ from meta_package_manager.tables import PACKAGE_OUTCOME_GLYPHS, PackageOutcome
 
 from .conftest import default_manager_ids
 from .destructive_plan import SHORT_FAILURE_TIMEOUT, upgrade_all_blocked
-from .fake_manager import FakeManager
+from .fake_manager import ChangingFakeManager, FakeManager
 from .test_cli import (
     assert_no_manager_selected,
     check_manager_selection,
@@ -515,3 +516,105 @@ def test_upgrade_all_simulation_skips_the_report(invoke, changing_fake_pool, mod
     assert f"✓ {mid}.upgrade_all (" in stderr
     assert "upgraded" not in stderr
     assert "fake-pkg-" not in result.stdout
+
+
+class ListedFakeManager(ChangingFakeManager):
+    """Variant that lists and upgrades its packages the way a real manager does.
+
+    The `installed` listing is what a command printed: the content of
+    {attr}`store`, refreshed from the inventory before each call. The command
+    line stays the same from one listing to the next, and only its output
+    changes.
+
+    Each upgrade command ends on the manager's ID, which the interpreter
+    ignores. Two of these managers then tell their commands apart, like `brew`
+    and `cask` do with `--formula` and `--cask`: a lane replays the command a
+    peer already ran, and a replayed command changes nothing.
+    """
+
+    def __init__(self, store):
+        super().__init__()
+        self.store = store
+        """The file the `installed` command prints."""
+
+    @property
+    def installed(self):
+        self.store.write_text(
+            "".join(
+                f"{package_id} {version}\n"
+                for package_id, version in sorted(self.inventory.items())
+            ),
+            encoding="UTF-8",
+        )
+        script = f"print(open({str(self.store)!r}, encoding='UTF-8').read())"
+        for line in self.run(str(self.cli_path), "-c", script).splitlines():
+            package_id, version = line.split()
+            yield self.package(id=package_id, installed_version=version)
+
+    def upgrade_all_cli(self):
+        return (*super().upgrade_all_cli(), self.id)
+
+    def upgrade_one_cli(self, package_id, version=None):
+        return (*super().upgrade_one_cli(package_id, version), self.id)
+
+
+class ListedPeerFakeManager(ListedFakeManager):
+    """A second manager, for the lock family the first one cannot form alone."""
+
+
+@pytest.fixture
+def lock_family_pool(patch_pool_with, monkeypatch, tmp_path):
+    """Yield two managers of one lock family, like `brew` and `cask`.
+
+    Their mutating operations share one lane, and with it the command cache of
+    {attr}`~meta_package_manager.execution.CLIExecutor.run_cache`.
+    """
+    fakes = (
+        ListedFakeManager(tmp_path / "first.txt"),
+        ListedPeerFakeManager(tmp_path / "peer.txt"),
+    )
+    family = LockFamily(
+        "fake inventory",
+        frozenset(fake.id for fake in fakes),
+        "they are the two fakes of one test",
+    )
+    for fake in fakes:
+        monkeypatch.setitem(_LOCK_FAMILY_BY_MANAGER, fake.id, family)
+    patch_pool_with(*fakes)
+    return fakes
+
+
+@pytest.mark.parametrize(
+    ("packages", "statuses"),
+    (
+        pytest.param(
+            ("--all",),
+            {
+                "fake-pkg-alpha": "upgraded",
+                "fake-pkg-beta": "still outdated",
+                "fake-pkg-epsilon": "removed",
+                "fake-pkg-gamma": "installed",
+                "fake-pkg-zeta": "downgraded",
+            },
+            id="all",
+        ),
+        pytest.param(
+            ("fake-pkg-alpha",),
+            {"fake-pkg-alpha": "upgraded", "fake-pkg-gamma": "installed"},
+            id="one-package",
+        ),
+    ),
+)
+def test_upgrade_reports_each_member_of_a_lock_family(
+    invoke, lock_family_pool, packages, statuses
+):
+    """A lane shared by a lock family never serves a manager the listing it took
+    before its upgrade: each member reports what its own upgrade moved."""
+    result = invoke("--table-format", "json", "upgrade", *packages)
+    assert result.exit_code == 0
+    report = json.loads(result.stdout)
+    assert set(report) == {fake.id for fake in lock_family_pool}
+    for fake in lock_family_pool:
+        assert {
+            package["id"]: package["status"] for package in report[fake.id]["packages"]
+        } == statuses, fake.id

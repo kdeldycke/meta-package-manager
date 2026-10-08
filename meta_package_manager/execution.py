@@ -221,6 +221,9 @@ string. A helper whose result the command cannot be built without therefore
 passes `force_exec=True` (`Ports._resolve_origin`), or runs under
 {meth}`CLIExecutor.acting_as` re-stamped with the read it performs (the
 `install` flow does this around its candidate search).
+
+The same match tells {meth}`CLIExecutor.run` which calls outdate the reads of a
+shared {attr}`CLIExecutor.run_cache`.
 """
 
 VERSION_PROBE: Final = "version"
@@ -984,8 +987,19 @@ class CLIExecutor:
       `cask` both probing `brew --version` spawn it once too.
 
     The replay still walks {meth}`~meta_package_manager.execution.CLIExecutor.run`'s logging and failure gate, so a failed shared
-    command is attributed to every member. Keyed on the resolved command line and its
-    environment, so only genuinely identical invocations collapse.
+    command is attributed to every member. Keyed on the resolved command line, its
+    environment and whether the operation in flight changes the system (see
+    `_MUTATING_OPERATIONS`), so only genuinely identical invocations collapse.
+
+    A cached read holds until the lane changes the system. A state-changing command
+    that runs for real first drops every read its lane cached, so the next one
+    spawns again and observes what the command did. The two readings of
+    {class}`~meta_package_manager.cli.ChangeReport` depend on it: both run one
+    command line, and a second reading replayed from the first reports that
+    nothing moved. The results of state-changing commands stay for the whole
+    lane, their replay being the purpose of the cache, and are never served to a
+    read. A command that `mpm --plan` captures or `mpm --dry-run` simulates changes
+    nothing, and drops nothing.
 
     ```{caution}
     Not thread-safe, and it does not need to be: both callers bind a cache to a lane,
@@ -1589,9 +1603,17 @@ class CLIExecutor:
         # Within a lane sharing a cache, key this run on its resolved command line and
         # environment so a peer that already ran the identical command serves it from
         # cache instead of spawning a redundant (and lock-contending) subprocess.
+        # The key ends on whether the operation in flight changes the system: a
+        # read is then never served the result of a state change, and the spawn
+        # branch below can tell the reads it has to drop.
         # See CLIExecutor.run_cache for the two lane kinds that install one.
         cache = self.run_cache
-        cache_key = (tuple(clean_args), tuple(sorted((extra_env or {}).items())))
+        mutating = self._active_operation in _MUTATING_OPERATIONS
+        cache_key = (
+            tuple(clean_args),
+            tuple(sorted((extra_env or {}).items())),
+            mutating,
+        )
         cached = cache.get(cache_key) if cache is not None else None
 
         if cached is not None:
@@ -1605,7 +1627,7 @@ class CLIExecutor:
                 f"Reuse peer result: {cli_msg}",
                 extra={"label": self.subject},
             )
-        elif self.plan and self._active_operation in _MUTATING_OPERATIONS:
+        elif self.plan and mutating:
             # Plan mode: record the state-changing command for inspection instead
             # of running it. A read dispatched as its own operation (and any
             # force_exec call, which patches plan off) falls through to real
@@ -1618,6 +1640,16 @@ class CLIExecutor:
         elif self.dry_run and not self.plan:
             logging.warning(f"Dry-run: {cli_msg}", extra={"label": self.subject})
         else:
+            # A state-changing command is about to run for real, so what the
+            # lane's reads observed stops being true: drop them, and the next
+            # identical read spawns again. Done ahead of the spawn because a
+            # timeout or an interrupt returns below with no result, from a command
+            # that may have changed the system all the same. The results of
+            # state-changing commands stay: replaying them to the lane's peers is
+            # what the cache is for.
+            if cache is not None and mutating:
+                for stale_key in [key for key in cache if not key[-1]]:
+                    del cache[stale_key]
             spawned = self._spawn(
                 clean_args,
                 extra_env,

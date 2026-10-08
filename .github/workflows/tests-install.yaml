@@ -260,8 +260,18 @@ jobs:
   # installing. Heavyweight (the pull can build for a while) and Linux-only,
   # but it gates: it reports what a Guix user can install today, so a red run
   # is the cue to fix the package upstream rather than something to wave past.
+  # https://packages.guix.gnu.org/packages/meta-package-manager/
+  # https://codeberg.org/guix/guix/src/branch/master/gnu/packages/package-management.scm
+  #
+  # Does not gate while Guix ships mpm 7.6.1: that build leaves out the
+  # `yay_cooldown.lua` data file, so every `mpm` call dies on import with a
+  # `FileNotFoundError`. mpm 8.0.2 fixed its setuptools package data, and needs
+  # click-extra 9.3 and extra-platforms 13.10, where Guix has 8.8.1 and 13.6.0.
+  # Nothing in this repository can change that: the three packages have to be
+  # updated in Guix together. Promote this job the day they are.
   guix:
-    name: ✅ guix
+    name: ⁉️ guix
+    continue-on-error: true
     runs-on: ubuntu-26.04
     timeout-minutes: 60
     steps:
@@ -322,6 +332,10 @@ jobs:
   # hides the real cause. Fixing it means either a git that tolerates EACCES
   # again, or switching the definition from git-fetch to url-fetch on the tag
   # tarball, which drops the git dependency entirely.
+  #
+  # A second blocker waits behind that one: the definition is at mpm 8.1.0,
+  # which needs click-extra 9.3 and extra-platforms 13.10, and the Guix channel
+  # it builds against has 8.8.1 and 13.6.0.
   guix-source:
     name: ⁉️ guix-source
     continue-on-error: true
@@ -394,14 +408,6 @@ jobs:
   # (darwin_any), so the buildbot publishes a single archive that serves every
   # runner and `port install` fetches it in seconds instead of compiling from
   # source.
-  #
-  # Failing on both architectures since 2026-09, and not on anything this
-  # repository owns: MacPorts' own py314-wcwidth port builds with
-  # `--no-isolation` and declares no setuptools build dependency, so it dies on
-  # `ModuleNotFoundError: No module named 'setuptools'` and takes mpm's whole
-  # dependency closure with it. No upstream ticket found, though their Trac
-  # refuses automated search, so check https://trac.macports.org by hand before
-  # filing one.
   macports:
     name: "✅ macports (${{ matrix.os }})"
     strategy:
@@ -520,7 +526,10 @@ jobs:
       - uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31.11.1
         with:
           nix_path: nixpkgs=channel:nixos-unstable
-      - run: nix-env --install --attr nixpkgs.meta-package-manager
+      # `--attr nixpkgs.…` reads the user's `nixpkgs` channel, and the action sets
+      # `NIX_PATH` only: that spelling stops on "attribute 'nixpkgs' not found"
+      # whether nixpkgs ships the package or not.
+      - run: nix-env --file '<nixpkgs>' --install --attr meta-package-manager
       - run: mpm --version
 
   # https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/nix
@@ -561,31 +570,30 @@ jobs:
       - run: nix build --no-link --print-build-logs ./packaging/nix
 
   # AUR builds from source with full test suites, so a failure in any transitive
-  # dependency cascades to mpm. It gates all the same: it reports what an Arch
-  # user can install today, and red is the cue to carry a fix upstream. See:
+  # dependency cascades to mpm. It gates whenever every recipe builds: it reports
+  # what an Arch user can install today, and red is the cue to carry a fix
+  # upstream. See:
   # https://aur.archlinux.org/packages/meta-package-manager#comment-1065663
   # https://aur.archlinux.org/packages/python-boltons#comment-1065664
   # https://aur.archlinux.org/packages/python-beartype#comment-1065661
   #
-  # Blocked on beartype since 2026-04. First cause was test non-idempotence,
-  # tripped only when aur-install retries a layer. Fixed upstream in ee167cf294cf
-  # but still unreleased: 0.22.9 predates it, 0.23.0rc0 (2026-08-08) is the first
-  # artifact carrying it. https://github.com/beartype/beartype/issues/631
+  # Does not gate while two recipes this repository does not own are broken:
   #
-  # Current cause has moved on again, and no longer involves beartype at all:
-  # python-click-extra requires `python-click>=8.4.1` while Arch's `extra` still
-  # ships 8.3.3, so dependency resolution fails before any build starts. Nothing
-  # to report: python-click 8.5.0 has been in `extra-testing` since 2026-09-11
-  # (https://archlinux.org/packages/extra-testing/any/python-click/), so these
-  # three go green on their own once it reaches `extra`. The same
-  # click floor blocks Ubuntu and forced the nixpkgs override in
-  # packaging/nix/overlay.nix: one constraint, three ecosystems, and each has
-  # to ship click 8.4.1 on its own.
+  # - python-click-extra 9.4.1 fails its check(). The recipe deselects the
+  #   `network` tests, and the docs render tests of click-extra download their
+  #   environment without that marker. That environment also lacks `tomlkit`, so
+  #   a TOML example of docs/config.md asserts and the build stops. A click-extra
+  #   release after 9.4.1 has to fix both.
+  # - meta-package-manager 8.1.0-1 names the 8.0.0 source archive in `source`,
+  #   with its checksum, so build() looks for a directory that is not there.
+  #
+  # Promote the three cells once both recipes build.
 
   # https://aur.archlinux.org/packages/meta-package-manager
   # https://aur.archlinux.org/packages/meta-package-manager-bin
   aur:
-    name: "✅ ${{ matrix.helper }}"
+    name: "⁉️ ${{ matrix.helper }}"
+    continue-on-error: true
     runs-on: ubuntu-26.04
     timeout-minutes: 30
     strategy:
@@ -605,6 +613,17 @@ jobs:
         run: |
           pacman-key --init
           pacman --noconfirm -Syu
+      # Arch keeps `pod2man` and its siblings in directories that only a login
+      # shell adds to the `PATH`, through /etc/profile.d/perlbin.sh. The steps
+      # here run in a plain shell, where the build of `auracle-git`, which pacaur
+      # depends on, stops on "Program 'pod2man' not found".
+      - name: Expose the Perl tools
+        run: |
+          {
+            echo "/usr/bin/site_perl"
+            echo "/usr/bin/vendor_perl"
+            echo "/usr/bin/core_perl"
+          } >> "$GITHUB_PATH"
       - name: Install pacaur
         if: matrix.helper == 'pacaur'
         run: aur-install pacaur
@@ -858,11 +877,11 @@ jobs:
 
   # https://github.com/lucasgelfond/zerobrew
   #
-  # Every cell gates: each reports what a ZeroBrew user can install today, so a
-  # red one is the cue to carry a fix upstream.
+  # Every cell gates but macos-15-intel: each reports what a ZeroBrew user can
+  # install today, so a red one is the cue to carry a fix upstream.
   #
-  # macos-15-intel is the one that fails, and only it, because no prebuilt
-  # archive exists for that architecture, so it alone falls back to a source
+  # macos-15-intel is the one that fails, and only it, because Homebrew builds no
+  # archive of mpm for that architecture, so it alone falls back to a source
   # build and dies in ZeroBrew's formula shim. The failure has moved: it was
   # `undefined method 'which' for an instance of OpensslAT3`
   # (https://github.com/lucasgelfond/zerobrew/issues/404), and is now
@@ -871,7 +890,8 @@ jobs:
   # https://github.com/lucasgelfond/zerobrew/issues/339, which asks for the
   # shim layer itself. ZeroBrew's own error says to use Homebrew instead, after
   # printing the raw Ruby backtrace three times, which is
-  # https://github.com/lucasgelfond/zerobrew/issues/348.
+  # https://github.com/lucasgelfond/zerobrew/issues/348. Nothing here can make
+  # that cell pass, so it does not gate: promote it once issue 339 closes.
   zerobrew:
     name: "${{ matrix.mark }} zerobrew (${{ matrix.os }}, ${{ matrix.asset }})"
     continue-on-error: ${{ matrix.unstable }}
@@ -889,8 +909,8 @@ jobs:
             unstable: false
           - os: macos-15-intel
             asset: zb-darwin-x64
-            mark: "✅"
-            unstable: false
+            mark: "⁉️"
+            unstable: true
           - os: macos-26
             asset: zb-darwin-arm64
             mark: "✅"

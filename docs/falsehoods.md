@@ -28,8 +28,7 @@ Implementing `mpm` exposed me to many edge-cases and pitfalls of package managem
 04. Only
     [one instance of a package manager exist on the system](https://github.com/kdeldycke/meta-package-manager/blob/v2.2.0/meta_package_manager/managers/gem.py#L47-L51).
 05. You can downgrade packages.
-06. A package manager
-    [can update itself](https://twitter.com/kdeldycke/status/772832404960636928).
+06. A package manager can update itself.
 07. A package is found under the same name in different package managers.
 08. Package managers
     [can resolve dependencies](https://github.com/pypa/pip/issues/988).

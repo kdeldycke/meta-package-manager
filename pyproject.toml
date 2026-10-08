@@ -638,6 +638,12 @@ default.extend-ignore-re = [
   # write, so the whole `fix-typos` job dies on it instead of opening a pull
   # request. Anchored on the leading dash, which keeps a standalone `ba` checked.
   "-ba\\b",
+  # `gir1.2-` prefixes Debian's GObject introspection packages, like the two the
+  # GNOME capture of docs-screenshots.yaml installs. typos reads `gir` as a
+  # misspelling of `git` and rewrites it unprompted, into package names that do
+  # not exist. Anchored on the whole prefix, which keeps a standalone `gir`
+  # checked.
+  "\\bgir1\\.2-",
 ]
 default.extend-ignore-identifiers-re = [
   # error: `ba` should be `by`, `be`

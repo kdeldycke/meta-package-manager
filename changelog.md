@@ -1,9 +1,6 @@
 # Changelog
 
-## [`8.1.1.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v8.1.0...main)
-
-> [!WARNING]
-> This version is **not released yet** and is under active development.
+## [`8.1.1` (2026-10-08)](https://github.com/kdeldycke/meta-package-manager/compare/v8.1.0...v8.1.1)
 
 - **Breaking:** [mpm] Rename the `held` status of the report of what a command changed to `held by cooldown`, in the table, on the trail line and in the serialized `status` value.
 - [mpm] Add `Released` and `Eligible` columns to the report of what a command changed, dating each package the cooldown holds back.

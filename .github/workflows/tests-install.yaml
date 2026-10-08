@@ -616,14 +616,15 @@ jobs:
       # Arch keeps `pod2man` and its siblings in directories that only a login
       # shell adds to the `PATH`, through /etc/profile.d/perlbin.sh. The steps
       # here run in a plain shell, where the build of `auracle-git`, which pacaur
-      # depends on, stops on "Program 'pod2man' not found".
+      # depends on, stops on "Program 'pod2man' not found". `aur-install` builds
+      # through `sudo`, which replaces the `PATH` with its `secure_path`, so that
+      # list gets the same three directories.
       - name: Expose the Perl tools
         run: |
-          {
-            echo "/usr/bin/site_perl"
-            echo "/usr/bin/vendor_perl"
-            echo "/usr/bin/core_perl"
-          } >> "$GITHUB_PATH"
+          PERL_TOOLS="/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl"
+          echo "${PERL_TOOLS}" | tr ':' '\n' >> "$GITHUB_PATH"
+          echo "Defaults secure_path=\"/usr/local/sbin:/usr/local/bin:/usr/bin:${PERL_TOOLS}\"" \
+            > /etc/sudoers.d/perl-tools
       - name: Install pacaur
         if: matrix.helper == 'pacaur'
         run: aur-install pacaur

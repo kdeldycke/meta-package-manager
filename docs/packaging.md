@@ -97,7 +97,7 @@ Where `mpm` stands on each distribution channel whose packaging is maintained fr
 | openSUSE         | [`packaging/opensuse/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/opensuse)                | [building in a home project](https://build.opensuse.org/package/show/home:kdeldycke/meta-package-manager) | `check-opensuse-spec`                                                                | manual       |
 | Ubuntu (PPA)     | [`packaging/ppa/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/ppa)                          | [published](https://launchpad.net/~kdeldycke/+archive/ubuntu/mpm)                                         | `ppa-source`                                                                         | manual       |
 | Ubuntu (deb-get) | [definition](https://github.com/kdeldycke/deb-get/blob/add-meta-package-manager/01-main/packages/meta-package-manager) | [pending review](https://github.com/wimpysworld/deb-get/pull/2036)                                        | —                                                                                    | n/a          |
-| Void Linux       | [`void-packages` fork](https://github.com/kdeldycke/void-packages/tree/mpm)                                            | [pending review](https://github.com/void-linux/void-packages/pull/60532)                                  | —                                                                                    | manual       |
+| Void Linux       | [void-linux/void-packages#60532](https://github.com/void-linux/void-packages/pull/60532/files)                         | [closed: needs a contributor](#void-linux)                                                                | `check-void-deps`                                                                    | manual       |
 
 The `*-source` jobs of [`tests-install.yaml`](https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/tests-install.yaml) build and install each in-repo spec on every change to it and on a weekly schedule. Automated bumps are performed by `release.yaml` jobs right after each release (see [releasing](releasing.md)); manual specs pin the released version and its source checksums, refreshed by hand at each release.
 
@@ -280,17 +280,19 @@ Each release is uploaded by hand, once per series, so the PPA can trail the newe
 
 ### Void Linux
 
-Void ships no `mpm` package, so build and install it from my fork's [`mpm` branch](https://github.com/kdeldycke/void-packages/tree/mpm):
+Void ships no `mpm` package, so build and install it from the templates of [void-linux/void-packages#60532](https://github.com/void-linux/void-packages/pull/60532/files). GitHub serves them under the ref of that pull request, and `xbps-src` names its repository after the local branch, here `mpm`:
 
 ```{code-block} shell-session
-$ git clone --depth 1 --branch mpm https://github.com/kdeldycke/void-packages.git
+$ git init ./void-packages
 $ cd ./void-packages
+$ git fetch --depth 1 https://github.com/void-linux/void-packages.git pull/60532/head:mpm
+$ git checkout mpm
 $ ./xbps-src binary-bootstrap
 $ ./xbps-src pkg mpm
 $ sudo xbps-install --repository=./hostdir/binpkgs/mpm mpm
 ```
 
-`./xbps-src pkg mpm` cascades through and builds the five new Python packages the branch introduces, plus an in-place bump of `python3-boltons` from `20.2.1` to `25.0.0`. The four templates I did not author are proposed to Void on their own in [void-linux/void-packages#62477](https://github.com/void-linux/void-packages/pull/62477).
+`./xbps-src pkg mpm` cascades through and builds the five new Python packages the pull request introduces, plus an in-place bump of `python3-boltons` from `20.2.1` to `25.0.0`. The four templates I did not author are proposed to Void on their own in [void-linux/void-packages#62477](https://github.com/void-linux/void-packages/pull/62477).
 
 ````{admonition} Void Linux needs a contributor
 :class: important

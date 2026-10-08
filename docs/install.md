@@ -314,17 +314,19 @@ You can help move it forward by showing your support on [the pull request](https
 `````
 
 `````{tab-item} Void Linux
-Build and install from the [`mpm` branch of my `void-packages` fork](https://github.com/kdeldycke/void-packages/tree/mpm):
+Build and install from the templates of [void-linux/void-packages#60532](https://github.com/void-linux/void-packages/pull/60532/files), which GitHub serves under the ref of that pull request:
 
 ```{code-block} shell-session
-$ git clone --depth 1 --branch mpm https://github.com/kdeldycke/void-packages.git
+$ git init ./void-packages
 $ cd ./void-packages
+$ git fetch --depth 1 https://github.com/void-linux/void-packages.git pull/60532/head:mpm
+$ git checkout mpm
 $ ./xbps-src binary-bootstrap
 $ ./xbps-src pkg mpm
 $ sudo xbps-install --repository=./hostdir/binpkgs/mpm mpm
 ```
 
-The `pkg` step cascades through the five new Python packages the branch introduces, plus an in-place bump of `python3-boltons` from `20.2.1` to `25.0.0`, as detailed on [the packaging page](packaging.md#void-linux).
+The `pkg` step cascades through the five new Python packages the pull request introduces, plus an in-place bump of `python3-boltons` from `20.2.1` to `25.0.0`, as detailed on [the packaging page](packaging.md#void-linux).
 
 ````{admonition} Void Linux needs a contributor
 :class: important

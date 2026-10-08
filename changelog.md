@@ -10,6 +10,7 @@
 - [mpm] Reuse the cooldown verdict of each package in the report of what a command changed, which probed its release date a second time.
 - [mpm] Fix the report of what a command changed listing upgraded packages as `still outdated` when two managers sharing a lock run together, like `brew` and `cask`. Closes [#2156](https://github.com/kdeldycke/meta-package-manager/issues/2156).
 - [mpm] Give each release of the changelog page a stable anchor made from its version, like `https://mpm.run/changelog/#v8-1-0`. The numbered `#id94` anchors, which moved with each release, are removed.
+- [mpm] Fix the Void Linux build steps of the installation and packaging pages, which cloned a fork branch that is gone: they fetch the templates from the closed pull request instead.
 
 ## [`8.1.0` (2026-10-04)](https://github.com/kdeldycke/meta-package-manager/compare/v8.0.2...v8.1.0)
 

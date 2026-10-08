@@ -4,17 +4,24 @@ name: 🧪 Validate Void Linux packages
   workflow_dispatch:
 
 # Temporary workflow that builds the Void Linux templates for mpm and its
-# transitive dependencies from the `mpm` branch of kdeldycke/void-packages
-# using xbps-src inside the official Void glibc container. Each package is
-# built in dependency order; results are summarised per-package in the step
-# summary so failures surface independently.
+# transitive dependencies using xbps-src inside the official Void glibc
+# container. Each package is built in dependency order; results are summarised
+# per-package in the step summary so failures surface independently.
 #
-# Delete after the upstream PR to void-linux/void-packages is merged.
+# The templates come from the head of void-linux/void-packages#60532. Void
+# closed that pull request because it bars a package submitted by the author of
+# the software, and GitHub keeps serving its commits under the pull request's
+# own ref. These are the steps docs/packaging.md gives a Void user.
+#
+# Delete once a Void contributor lands the templates in void-linux/void-packages.
 
 permissions: {}
 
 env:
-  VOID_FORK: kdeldycke/void-packages
+  VOID_REPOSITORY: void-linux/void-packages
+  VOID_PULL_REQUEST: "60532"
+  # Local branch the pull request head is fetched into. xbps-src names its
+  # binary repository after it.
   VOID_BRANCH: mpm
   # Build sequence, leaves first. Must match the commit order on the branch.
   # `python3-boltons` is an existing Void package being bumped (20.2.1 →
@@ -54,7 +61,7 @@ jobs:
             > /etc/xbps.d/00-repository-main.conf
           xbps-install --sync --yes xbps
           # xbps-src lives inside the void-packages tree itself; we only
-          # need git (to clone the branch), sudo (to drop root for
+          # need git (to fetch the templates), sudo (to drop root for
           # xbps-src, which refuses to run as root), and xtools.
           xbps-install --yes \
             base-devel \
@@ -76,17 +83,17 @@ jobs:
           # Allow the runner step's `sudo -Eu builder ...` without prompts.
           echo 'builder ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builder
 
-      - name: Clone fork branch
+      - name: Fetch the pull request head
         timeout-minutes: 5
         run: |
           set -eux
-          git clone \
-            --branch "${VOID_BRANCH}" \
-            --depth 1 \
-            "https://github.com/${VOID_FORK}" \
-            /void-packages
+          git init /void-packages
+          git -C /void-packages fetch --depth 1 \
+            "https://github.com/${VOID_REPOSITORY}" \
+            "pull/${VOID_PULL_REQUEST}/head:${VOID_BRANCH}"
+          git -C /void-packages checkout "${VOID_BRANCH}"
           chown --recursive builder:builder /void-packages
-          # Confirm the cloned commit. Must run as builder since the chown
+          # Confirm the fetched commit. Must run as builder since the chown
           # above would trigger git's "dubious ownership" check otherwise.
           sudo -Eu builder git -C /void-packages log --oneline -1
 

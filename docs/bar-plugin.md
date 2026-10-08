@@ -334,13 +334,14 @@ xcode-select: note: no developer tools were found at '/Applications/Xcode.app', 
 
 The version that answers therefore tracks the Command Line Tools, not the macOS release:
 
-| macOS           | Released   | Security updates until[^1] | Command Line Tools | `python3`[^2] |
-| --------------- | ---------- | -------------------------- | ------------------ | ------------- |
-| 26.x - Tahoe    | 2025-09-15 | current                    | 26                 | 3.9.6         |
-| 15.x - Sequoia  | 2024-09-16 | current                    | 16                 | 3.9.6         |
-| 14.x - Sonoma   | 2023-09-26 | current                    | 15                 | 3.9.6         |
-| 13.x - Ventura  | 2022-10-24 | 2025-09-15                 | 14                 | 3.9.6         |
-| 12.x - Monterey | 2021-10-25 | 2024-09-16                 | 13                 | 3.8.9         |
+| macOS              | Released   | Security updates until[^1] | Command Line Tools | `python3`[^2] |
+| ------------------ | ---------- | -------------------------- | ------------------ | ------------- |
+| 27.x - Golden Gate | 2026-09-14 | current                    | 27                 | 3.9.6         |
+| 26.x - Tahoe       | 2025-09-15 | current                    | 26                 | 3.9.6         |
+| 15.x - Sequoia     | 2024-09-16 | current                    | 16                 | 3.9.6         |
+| 14.x - Sonoma      | 2023-09-26 | 2026-09-14                 | 15                 | 3.9.6         |
+| 13.x - Ventura     | 2022-10-24 | 2025-09-15                 | 14                 | 3.9.6         |
+| 12.x - Monterey    | 2021-10-25 | 2024-09-16                 | 13                 | 3.8.9         |
 
 Every macOS still receiving security updates answers `3.9.6`. Monterey is the only release below the requirement, and it stopped receiving updates in 2024.
 
@@ -366,14 +367,14 @@ If the plugin has been changed between releases, a [copy of the plugin is pushed
 3. Create a new branch and switch to it:
 
    ```shell-session
-   $ git branch "meta-package-manager-v8.0.2"
-   $ git checkout "meta-package-manager-v8.0.2"
+   $ git branch "meta-package-manager-v8.1.0"
+   $ git checkout "meta-package-manager-v8.1.0"
    ```
 
 4. Replace existing copy of the plugin with the latest tagged version:
 
    ```shell-session
-   $ wget https://raw.githubusercontent.com/kdeldycke/meta-package-manager/v8.0.2/meta_package_manager/bar_plugin.py
+   $ wget https://raw.githubusercontent.com/kdeldycke/meta-package-manager/v8.1.0/meta_package_manager/bar_plugin.py
    $ mv ./bar_plugin.py ./Dev/meta_package_manager.7h.py
    $ chmod 755 ./Dev/meta_package_manager.7h.py
    ```
@@ -382,13 +383,13 @@ If the plugin has been changed between releases, a [copy of the plugin is pushed
 
    ```shell-session
    $ git add ./Dev/meta_package_manager.7h.py
-   $ git commit -m "Upgrade to Meta Package Manager plugin v8.0.2"
+   $ git commit -m "Upgrade to Meta Package Manager plugin v8.1.0"
    ```
 
 6. Push new branch:
 
    ```shell-session
-   $ git push --set-upstream origin "meta-package-manager-v8.0.2"
+   $ git push --set-upstream origin "meta-package-manager-v8.1.0"
    ```
 
 7. [Create a pull-request](https://help.github.com/articles/creating-a-pull-request/) in the original repository.

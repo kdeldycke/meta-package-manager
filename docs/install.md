@@ -30,7 +30,7 @@ You can try Meta Package Manager right now in your terminal, without installing 
 `````{tab-item} Latest version
 ```shell-session
 $ uvx meta-package-manager
-Installed 21 packages in 42ms
+Installed 14 packages in 29ms
 Usage: mpm [OPTIONS] COMMAND [ARGS]...
 ```
 `````
@@ -38,7 +38,7 @@ Usage: mpm [OPTIONS] COMMAND [ARGS]...
 `````{tab-item} Specific version
 ```shell-session
 $ uvx meta-package-manager@8.1.0
-Installed 21 packages in 42ms
+Installed 14 packages in 29ms
 Usage: mpm [OPTIONS] COMMAND [ARGS]...
 ```
 `````
@@ -64,7 +64,7 @@ You can also try the library itself in an interactive Python shell without insta
 
 ```{code-block} shell-session
 $ uvx --with meta-package-manager python
-Installed 21 packages in 42ms
+Installed 14 packages in 29ms
 Python 3.13.2 (main, Feb  4 2025, 14:51:09) [Clang 16.0.0 (clang-1600.0.26.6)] on darwin
 Type "help", "copyright", "credits" or "license" for more information.
 >>> from meta_package_manager.pool import pool
@@ -404,8 +404,8 @@ The more independent reports a vendor receives, the more likely a detection gets
 All release artifacts (Python packages and compiled binaries) are signed with [GitHub Artifact Attestations](https://docs.github.com/en/actions/security-guides/using-artifact-attestations-to-establish-provenance-for-builds) providing [SLSA v1 provenance](https://slsa.dev/spec/v1.0/). You can verify any downloaded artifact with the [GitHub CLI](https://cli.github.com):
 
 ```{code-block} shell-session
-$ gh attestation verify ./meta-package-manager-8.0.2-macos-arm64.bin --repo kdeldycke/meta-package-manager --signer-repo kdeldycke/repomatic
-Loaded digest sha256:... for file://meta-package-manager-8.0.2-macos-arm64.bin
+$ gh attestation verify ./meta-package-manager-8.1.0-macos-arm64.bin --repo kdeldycke/meta-package-manager --signer-repo kdeldycke/repomatic
+Loaded digest sha256:... for file://meta-package-manager-8.1.0-macos-arm64.bin
 Loaded 1 attestation from GitHub API
 ✓ Verification succeeded!
 ```
@@ -417,7 +417,7 @@ The `--signer-repo kdeldycke/repomatic` flag is required because the release wor
 For Python packages from PyPI:
 
 ```{code-block} shell-session
-$ gh attestation verify ./meta_package_manager-8.0.2-py3-none-any.whl --repo kdeldycke/meta-package-manager --signer-repo kdeldycke/repomatic
+$ gh attestation verify ./meta_package_manager-8.1.0-py3-none-any.whl --repo kdeldycke/meta-package-manager --signer-repo kdeldycke/repomatic
 ```
 
 Attestation bundles are also attached to each [GitHub release](https://github.com/kdeldycke/meta-package-manager/releases) for offline verification.
@@ -446,7 +446,7 @@ $ chmod +x ./meta-package-manager-macos-x64.bin
 
 ```{code-block} shell-session
 $ ./meta-package-manager-macos-x64.bin --version
-mpm, version 8.0.2
+mpm, version 8.1.0
 ```
 
 Then let `mpm` discovers which package managers are available on your machine and choose the one providing a path to `mpm` installation:
@@ -466,11 +466,11 @@ warning: pip does not implement search operation.
 meta-package-manager existence unconfirmed, try to directly install it...
 Install meta-package-manager package with pip...
 Collecting meta-package-manager
-  Downloading meta_package_manager-8.0.2-py3-none-any.whl (827 kB)
-     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 827.2/827.2 kB 494.7 kB/s eta 0:00:00
+  Downloading meta_package_manager-8.1.0-py3-none-any.whl (873 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 873.0/873.0 kB 494.7 kB/s eta 0:00:00
 (...)
 Installing collected packages: (...) meta-package-manager
-Successfully installed (...) meta-package-manager-8.0.2
+Successfully installed (...) meta-package-manager-8.1.0
 ```
 
 And now you can remove the local binary and enjoy the system-wide `mpm` that was installed by itself:
@@ -486,7 +486,7 @@ $ which mpm
 
 ```{code-block} shell-session
 $ mpm --version
-mpm, version 8.0.2
+mpm, version 8.1.0
 ```
 
 ````{tip}
@@ -559,7 +559,7 @@ Anywhere else, and in a pipe, it prints the same facts as two plain lines:
 
 ```{code-block} shell-session
 $ mpm --version
-mpm, version 8.0.2
+mpm, version 8.1.0
 Python 3.14.7, macOS ARM64 (AArch64)
 ```
 
@@ -653,7 +653,7 @@ $ _MPM_COMPLETE=zsh_source mpm > ~/.mpm-complete.zsh
 Then source it from ``~/.zshrc``:
 
 ```{code-block} zsh
-. ~/.mpm.zsh
+. ~/.mpm-complete.zsh
 ```
 `````
 

@@ -466,7 +466,11 @@ jobs:
           gem update --quiet --system
       - name: Ruby & Gem - macOS
         if: runner.os == 'macOS'
-        run: sudo gem update --quiet --system
+        # No sudo: `gem` is Homebrew's Ruby here, and the runner user owns its whole tree. As root, RubyGems creates
+        # each gem subdirectory it finds missing with root as owner, and `brew cleanup` prunes the empty ones. The
+        # unprivileged `gem install` of the test suite then fails there, because RubyGems falls back to a user
+        # install only when the gem directory itself is not writable.
+        run: gem update --quiet --system
       - name: Ruby & Gem - Ubuntu
         # As of Ubuntu 21.04, RubyGems is exclusively managed by APT; "gem update --system" is unsupported.
         if: runner.os == 'Linux'

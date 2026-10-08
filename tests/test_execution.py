@@ -569,7 +569,7 @@ def test_version_probe_incomplete_run_stays_an_error():
 
 def _append_script(marker, payload="x", tail=""):
     """A one-liner that appends `payload` to `marker`, then runs `tail`."""
-    return f"open({str(marker)!r}, 'a').write({payload!r}); {tail}"
+    return f"open({str(marker)!r}, 'a', encoding='UTF-8').write({payload!r}); {tail}"
 
 
 def test_run_cache_replays_identical_command(tmp_path):
@@ -584,7 +584,7 @@ def test_run_cache_replays_identical_command(tmp_path):
     out_second = second.run_cli("-c", script)
 
     # The subprocess ran exactly once; the peer was served from the shared cache.
-    assert marker.read_text() == "x"
+    assert marker.read_text(encoding="UTF-8") == "x"
     assert out_first == out_second == ""
 
 
@@ -598,7 +598,7 @@ def test_run_cache_disabled_by_default(tmp_path):
     manager.run_cli("-c", script)
     manager.run_cli("-c", script)
 
-    assert marker.read_text() == "xx"
+    assert marker.read_text(encoding="UTF-8") == "xx"
 
 
 def test_run_cache_replays_failure_to_every_member(tmp_path):
@@ -616,7 +616,7 @@ def test_run_cache_replays_failure_to_every_member(tmp_path):
     second.run_cli("-c", script)
 
     # One real execution, but both managers recorded the failure for the trail.
-    assert marker.read_text() == "x"
+    assert marker.read_text(encoding="UTF-8") == "x"
     assert [error.code for error in first.cli_errors] == [8]
     assert [error.code for error in second.cli_errors] == [8]
 
@@ -630,7 +630,7 @@ def test_run_cache_keeps_distinct_commands_apart(tmp_path):
     manager.run_cli("-c", _append_script(marker, "a"))
     manager.run_cli("-c", _append_script(marker, "b"))
 
-    assert marker.read_text() == "ab"
+    assert marker.read_text(encoding="UTF-8") == "ab"
 
 
 def test_run_cache_collapses_dry_run(caplog):
@@ -681,7 +681,7 @@ def test_run_cache_drops_reads_once_the_lane_changes_state(tmp_path, plan, runs)
     with manager.acting_as("installed"):
         manager.run_cli("-c", read)
 
-    assert marker.read_text() == runs
+    assert marker.read_text(encoding="UTF-8") == runs
 
 
 def test_run_cache_drops_reads_when_the_state_change_times_out(tmp_path):
@@ -690,19 +690,24 @@ def test_run_cache_drops_reads_when_the_state_change_times_out(tmp_path):
     read = _append_script(marker, "r")
     manager = FakeManager()
     manager.run_cache = {}
-    manager.timeout = 1
 
     with manager.acting_as("installed"):
         manager.run_cli("-c", read)
+    # The short timeout covers the state change alone: a read it killed on a loaded
+    # runner would fail the test for a reason the cache has no part in.
+    manager.timeout = 1
     with manager.acting_as("upgrade_all"):
         manager.run_cli(
             "-c", _append_script(marker, "m", tail="import time; time.sleep(30)")
         )
+    manager.timeout = None
     with manager.acting_as("installed"):
         manager.run_cli("-c", read)
 
+    assert len(manager.cli_errors) == 1
     assert "Timed out" in manager.cli_errors[0].error
-    assert marker.read_text() == "rmr"
+    # The read spawned twice. A child killed before its first write leaves no `m`.
+    assert marker.read_text(encoding="UTF-8") in {"rmr", "rr"}
 
 
 def test_run_cache_keeps_state_changes_for_the_peers(tmp_path):
@@ -716,7 +721,7 @@ def test_run_cache_keeps_state_changes_for_the_peers(tmp_path):
             manager.run_cli("-c", _append_script(marker, "a"))
             manager.run_cli("-c", _append_script(marker, "b"))
 
-    assert marker.read_text() == "ab"
+    assert marker.read_text(encoding="UTF-8") == "ab"
 
 
 def test_run_cache_never_serves_a_read_from_a_state_change(tmp_path):
@@ -731,7 +736,7 @@ def test_run_cache_never_serves_a_read_from_a_state_change(tmp_path):
     with manager.acting_as("outdated"):
         manager.run_cli("-c", script)
 
-    assert marker.read_text() == "xx"
+    assert marker.read_text(encoding="UTF-8") == "xx"
 
 
 def test_format_plan_command_shell_quotes_env_and_args():
@@ -777,7 +782,7 @@ def test_plan_runs_read_only_operations(tmp_path):
     manager.run_cli("-c", script)
 
     # The read ran for real, and nothing was captured as a mutation.
-    assert marker.read_text() == "x"
+    assert marker.read_text(encoding="UTF-8") == "x"
     assert PLAN_RECORDER.render() == ()
 
 
@@ -838,7 +843,7 @@ def test_plan_ignores_force_exec(tmp_path):
 
     manager.run_cli("-c", script, force_exec=True)
 
-    assert marker.read_text() == "x"
+    assert marker.read_text(encoding="UTF-8") == "x"
     assert PLAN_RECORDER.render() == ()
 
 
@@ -1227,7 +1232,7 @@ def test_mutating_subcommands_prime_sudo(invoke, fake_pool, args):
 def test_restore_primes_sudo(invoke, fake_pool, tmp_path):
     """`restore` fans installs out too, so it also primes sudo up front."""
     toml_file = tmp_path / "backup.toml"
-    toml_file.write_text("")
+    toml_file.write_text("", encoding="UTF-8")
     with patch("meta_package_manager.cli_snapshots.prime_sudo") as prime:
         invoke("--dry-run", "restore", str(toml_file))
     assert prime.called

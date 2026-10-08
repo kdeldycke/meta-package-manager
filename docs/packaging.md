@@ -259,8 +259,8 @@ To build one series by hand instead, with [`uv`](https://docs.astral.sh/uv/) on 
 $ sudo apt-get install --no-install-recommends build-essential debhelper dh-python dpkg-dev fakeroot git
 $ git clone https://github.com/kdeldycke/meta-package-manager.git
 $ cd ./meta-package-manager
-$ ./packaging/ppa/build-source.py --mpm-version 8.0.2 --series noble --output ./dist
-$ cd ./dist/meta-package-manager-8.0.2ppa1~noble1
+$ ./packaging/ppa/build-source.py --mpm-version 8.1.0 --series noble --output ./dist
+$ cd ./dist/meta-package-manager-8.1.0ppa1~noble1
 $ dpkg-buildpackage --build=binary --no-sign
 $ sudo apt-get install ../meta-package-manager_*.deb
 ```
@@ -269,7 +269,7 @@ Uploading signs the source package instead, once per series:
 
 ```{code-block} shell-session
 $ debuild -S -sa
-$ dput ppa:kdeldycke/mpm ../meta-package-manager_8.0.2ppa1~noble1_source.changes
+$ dput ppa:kdeldycke/mpm ../meta-package-manager_8.1.0ppa1~noble1_source.changes
 ```
 
 The `~{series}` suffixes sort in release order, the Ubuntu codenames happening to be alphabetical, so a machine upgrading from one series to the next picks the newer build up on its own. The targets are `jammy`, `noble`, `resolute` and `stonking`; `questing` reached its end of life in July 2026.

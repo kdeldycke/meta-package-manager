@@ -144,7 +144,7 @@ from .cooldown import (
 from .dispatch import trail_label
 from .execution import PLAN_RECORDER, CLIError, operation_subject
 from .logo import env_summary, version_screen_params
-from .manager import INVENTORY_CACHES, PackageManager
+from .manager import INVOCATION_CACHES, PackageManager
 from .package import Package
 from .pool import pool
 from .shell_env import import_shell_env
@@ -1023,16 +1023,16 @@ def mpm(
 
     ctx.call_on_close(summarize_cli_errors)
 
-    def drop_inventory_caches():
-        """Forget the inventory snapshots this invocation cached on each manager.
+    def drop_invocation_caches():
+        """Forget what this invocation memoized on each manager.
 
-        See {data}`~meta_package_manager.manager.INVENTORY_CACHES`.
+        See {data}`~meta_package_manager.manager.INVOCATION_CACHES`.
         """
         for manager in pool.values():
-            for cache in INVENTORY_CACHES:
+            for cache in INVOCATION_CACHES:
                 manager.__dict__.pop(cache, None)
 
-    ctx.call_on_close(drop_inventory_caches)
+    ctx.call_on_close(drop_invocation_caches)
 
     # Normalize to None if no manager selectors have been used. This prevent the
     # pool.select_managers() method to iterate over an empty population of managers to

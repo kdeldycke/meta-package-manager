@@ -499,6 +499,33 @@ def test_hold_naive_datetime_read_as_utc(monkeypatch):
     assert hold.released == fresh_naive.replace(tzinfo=timezone.utc)
 
 
+def test_hold_probes_each_package_once(monkeypatch):
+    """A verdict is reused whatever it says: held, cleared or undatable."""
+    fresh = datetime.now(tz=timezone.utc) - timedelta(days=1)
+    dates = {
+        "org.example.Fig": fresh - timedelta(days=30),
+        "org.example.Kiwi": fresh,
+    }
+    probed = []
+
+    def probe(package_id):
+        probed.append(package_id)
+        return dates.get(package_id)
+
+    manager = Flatpak()
+    manager.cooldown = timedelta(days=7)
+    monkeypatch.setattr(manager, "release_date", probe)
+    package_ids = ("org.example.Fig", "org.example.Kiwi", "org.example.Plum")
+    verdicts = [manager.cooldown_hold(package_id) for package_id in package_ids]
+    assert verdicts == [
+        None,
+        CooldownHold(released=fresh, eligible=fresh + timedelta(days=7)),
+        CooldownHold(),
+    ]
+    assert [manager.cooldown_hold(package_id) for package_id in package_ids] == verdicts
+    assert probed == list(package_ids)
+
+
 def test_synthesized_gate_reroutes_upgrade_all(monkeypatch):
     """An active probe-backed cooldown swaps the native one-shot upgrade for the
     per-package path: eligible packages upgrade, too-fresh ones are held."""

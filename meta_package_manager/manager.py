@@ -78,9 +78,22 @@ bare `datetime.min` would read as a bug.
 INVENTORY_CACHES = ("installed_ids", "installed_version_map")
 """Inventory snapshots {class}`PackageManager` caches for one invocation.
 
-An install or a removal makes them stale. The CLI drops them when each
-invocation closes, so the next invocation in the same process reads the system
-again: the test suite chains many invocations on the pooled manager instances.
+An install or a removal makes them stale, so
+{meth}`PackageManager.installed_inventory` drops them after each fresh reading.
+They are also among the {data}`INVOCATION_CACHES`.
+"""
+
+
+INVOCATION_CACHES = (*INVENTORY_CACHES, "_cooldown_holds")
+"""Everything {class}`PackageManager` memoizes for the duration of one invocation.
+
+The CLI drops them when each invocation closes, so the next invocation in the
+same process starts from nothing: the test suite chains many invocations on the
+pooled manager instances.
+
+The cooldown verdicts outlast a fresh reading of the inventory, unlike the
+{data}`INVENTORY_CACHES`: the report closing a command reads the verdicts that
+command reached.
 """
 
 
@@ -994,6 +1007,10 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         (probe failure, or a registry carrying no date) holds the package
         under the default `enforce` posture, and only a `best-effort` policy
         lets it through, unguarded.
+
+        A package is probed once per invocation, and its verdict reused after
+        that: the command that acts on a verdict and the report that closes it
+        read the same one, whatever the clock did in between.
         """
         if not self._cooldown_probe_engaged:
             return None
@@ -1002,6 +1019,23 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         # proceed. --plan takes precedence and executes reads for real.
         if self.dry_run and not self.plan:
             return None
+        if package_id not in self._cooldown_holds:
+            self._cooldown_holds[package_id] = self._probe_cooldown_hold(package_id)
+        return self._cooldown_holds[package_id]
+
+    @cached_property
+    def _cooldown_holds(self) -> dict[str, CooldownHold | None]:
+        """The verdicts {meth}`cooldown_hold` reached so far, keyed by package ID.
+
+        One of the {data}`INVOCATION_CACHES`.
+        """
+        return {}
+
+    def _probe_cooldown_hold(self, package_id: str) -> CooldownHold | None:
+        """Probe the latest release of a package and decide whether to hold it.
+
+        The half of {meth}`cooldown_hold` that costs a query.
+        """
         published = None
         try:
             # The probe is a read-only query: stamp it as such so it resolves

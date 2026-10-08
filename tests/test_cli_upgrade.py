@@ -580,8 +580,11 @@ class ProbedFakeManager(ChangingFakeManager):
         super().__init__()
         self.pinned_release = datetime.now(tz=timezone.utc) - timedelta(days=1)
         """When the latest release of the pinned package was published."""
+        self.probed: list[str] = []
+        """The package of each probe, in the order they ran."""
 
     def release_date(self, package_id):
+        self.probed.append(package_id)
         if package_id == self.PINNED:
             return self.pinned_release
         return self.pinned_release - timedelta(days=30)
@@ -646,6 +649,30 @@ def test_upgrade_all_dates_a_held_package_serialized(invoke, probed_fake_pool):
         "fake-pkg-gamma": (None, None),
         "fake-pkg-zeta": (None, None),
     }
+
+
+@pytest.mark.parametrize(
+    "packages",
+    (
+        pytest.param(("--all",), id="all"),
+        pytest.param(("fake-pkg-alpha", "fake-pkg-beta"), id="packages"),
+    ),
+)
+def test_upgrade_probes_each_release_once(invoke, probed_fake_pool, packages):
+    """The report reads the verdict the upgrade reached: it probes no package a
+    second time."""
+    result = invoke("--cooldown", "7 days", "upgrade", *packages)
+    assert result.exit_code == 0
+    assert sorted(probed_fake_pool.probed) == ["fake-pkg-alpha", "fake-pkg-beta"]
+
+
+def test_cooldown_verdicts_last_one_invocation(invoke, probed_fake_pool):
+    """Each invocation probes a release again: a verdict never outlives the
+    invocation that reached it."""
+    for _ in range(2):
+        result = invoke("--cooldown", "7 days", "upgrade", "fake-pkg-beta")
+        assert result.exit_code == 0
+    assert probed_fake_pool.probed == ["fake-pkg-beta", "fake-pkg-beta"]
 
 
 class ListedFakeManager(ChangingFakeManager):

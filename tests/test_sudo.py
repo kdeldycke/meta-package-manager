@@ -153,6 +153,7 @@ def test_internal_sudo_matches_internal_escalators():
         "pacstall",
         "paru",
         "pikaur",
+        "shelly",
         "topgrade",
         "trizen",
         "yay",

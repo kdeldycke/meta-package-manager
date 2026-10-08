@@ -48,6 +48,8 @@ logo = "archlinux"
 # it links against the `libalpm` that `pacman` provides.
 platforms = ["arch", "cachyos", "endeavouros", "manjaro"]
 cli_names = ["shelly"]
+# Shelly self-escalates through its own `sudo` calls: see the caution above.
+internal_sudo = true
 # 3.0.0+9 answers `list`, `list-updates` and `search` with the same JSON as
 # 3.1.1, both driven here. The 2.x series numbered releases on four parts and
 # is not covered.

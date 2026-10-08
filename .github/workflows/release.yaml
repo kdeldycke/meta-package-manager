@@ -44,7 +44,7 @@ concurrency:
 # minimum-release-age`. repomatic's own test suite enforces that upstream; a
 # synced copy is kept in step by hand. Deliberate bypasses are per-package CLI
 # flags (`--exclude-newer-package`, `--min-release-age-exclude`).
-# See claude.md for the rationale.
+# See https://repomatic.net/workflows#install-time-cooldown for the rationale.
 env:
   NPM_CONFIG_MIN_RELEASE_AGE: 7
   UV_EXCLUDE_NEWER: "1 week"
@@ -52,7 +52,7 @@ env:
 jobs:
 
   build:
-    uses: kdeldycke/repomatic/.github/workflows/_release-build.yaml@35cc8a45d65954faebaf8b4bb9960b525d446554 # v7.16.2
+    uses: kdeldycke/repomatic/.github/workflows/_release-build.yaml@504998fb9b230dfd2405d6dc352366e2d08923ad # v7.17.1
     permissions:
       id-token: write
       issues: write
@@ -81,12 +81,12 @@ jobs:
       # create-release job, so this lane needs no write access to the repo.
       id-token: write
     steps:
-      - uses: kdeldycke/repomatic/.github/actions/publish-pypi@35cc8a45d65954faebaf8b4bb9960b525d446554 # v7.16.2
+      - uses: kdeldycke/repomatic/.github/actions/publish-pypi@504998fb9b230dfd2405d6dc352366e2d08923ad # v7.17.1
         with:
           artifact-name: ${{ github.event.repository.name }}-${{ matrix.short_sha }}
 
   release:
-    uses: kdeldycke/repomatic/.github/workflows/_release-engine.yaml@35cc8a45d65954faebaf8b4bb9960b525d446554 # v7.16.2
+    uses: kdeldycke/repomatic/.github/workflows/_release-engine.yaml@504998fb9b230dfd2405d6dc352366e2d08923ad # v7.17.1
     needs:
       - build
       - build-gnome-extension
@@ -228,7 +228,7 @@ jobs:
         env:
           VERSION: ${{ steps.check.outputs.version }}
         run: >
-          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.16.2' pr-body
+          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.17.1' pr-body
           --template-file .github/pr-templates/update-package-spec.md
           --template-arg channel=Guix
           --template-arg version="${VERSION}"
@@ -363,7 +363,7 @@ jobs:
         env:
           VERSION: ${{ steps.check.outputs.version }}
         run: >
-          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.16.2' pr-body
+          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.17.1' pr-body
           --template-file .github/pr-templates/update-package-spec.md
           --template-arg channel=Nix
           --template-arg version="${VERSION}"

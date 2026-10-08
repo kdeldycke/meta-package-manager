@@ -13,7 +13,7 @@ body:
         > avoid splitting the discussion in multiple places.
 
 
-        Before filling this bug report, try to isolate the issue by targetting only one manager, by running `mpm` with
+        Before filling this bug report, try to isolate the issue by targeting only one manager, by running `mpm` with
         a single `--<manager_id>`/`--manager <manager_id>` option.
 
 

@@ -608,6 +608,10 @@ jobs:
             image_tag: yay
     container:
       image: greyltc/archlinux-aur:${{ matrix.image_tag }}
+    env:
+      # pacaur refuses to start with no editor to show a PKGBUILD in, and the
+      # image sets none. `--noconfirm` then leaves this one unused.
+      EDITOR: "true"
     steps:
       - name: Refresh mirrors
         run: |

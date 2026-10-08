@@ -37,7 +37,7 @@ across all of them, and renders the aggregated, multi-manager result.
 gated by `--verbosity`, and each call belongs to one tier:
 
 - `WARNING`, the default view, holds problems only: a failure with no other
-  signal on screen, the diagnosis tail of a failed command, a safety notice
+  signal on screen, the capped diagnosis of a failed command, a safety notice
   (cooldown safeguard skipped, file about to be overwritten, silent call that
   may hide a `sudo` prompt), the end-of-run error summary and timeouts.
   `critical` is for fatal conditions. Keep this tier sparse.

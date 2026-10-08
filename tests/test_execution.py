@@ -40,6 +40,7 @@ from meta_package_manager.execution import (
     _DIAGNOSIS_EXEMPT_OPERATIONS,
     _MUTATING_OPERATIONS,
     DEFAULT_TIMEOUT,
+    DIAGNOSIS_HEAD_LINES,
     DIAGNOSIS_TAIL_LINES,
     MUTATING_TIMEOUT,
     OPERATION_TIMEOUTS,
@@ -430,6 +431,14 @@ def test_run_failure_gate_drops_stderr_noise_from_the_diagnosis(monkeypatch):
 # signal (issue 1968). Successful chatter, tolerated exits, DEBUG-level runs and
 # exempt operations stay silent.
 
+DIAGNOSIS_CAP = DIAGNOSIS_HEAD_LINES + DIAGNOSIS_TAIL_LINES
+"""Longest report `CLIError.diagnosis` relays whole."""
+
+
+def _numbered_lines(stop, start=0):
+    """Lines `line-{start}` up to `line-{stop - 1}`, one per row."""
+    return "\n".join(f"line-{i}" for i in range(start, stop))
+
 
 @pytest.mark.parametrize(
     ("error", "output", "expected"),
@@ -438,31 +447,48 @@ def test_run_failure_gate_drops_stderr_noise_from_the_diagnosis(monkeypatch):
         pytest.param("", "boom-out", "boom-out", id="stdout-fallback"),
         pytest.param(" \n ", "", "Exited 8 with no output.", id="silent-death"),
         pytest.param(
-            "\n".join(f"line-{i}" for i in range(DIAGNOSIS_TAIL_LINES)),
+            _numbered_lines(DIAGNOSIS_CAP),
             "",
-            "\n".join(f"line-{i}" for i in range(DIAGNOSIS_TAIL_LINES)),
+            _numbered_lines(DIAGNOSIS_CAP),
             id="cap-boundary-untouched",
         ),
         pytest.param(
-            "\n".join(f"line-{i}" for i in range(DIAGNOSIS_TAIL_LINES + 1)),
+            _numbered_lines(DIAGNOSIS_CAP + 1),
             "",
-            "(...) 1 earlier line truncated.\n"
-            + "\n".join(f"line-{i}" for i in range(1, DIAGNOSIS_TAIL_LINES + 1)),
-            id="cap-overflow-tail",
+            _numbered_lines(DIAGNOSIS_HEAD_LINES)
+            + "\n(...) 1 line truncated.\n"
+            + _numbered_lines(DIAGNOSIS_CAP + 1, start=DIAGNOSIS_HEAD_LINES + 1),
+            id="cap-overflow-singular",
         ),
         pytest.param(
-            "\n".join(f"line-{i}" for i in range(DIAGNOSIS_TAIL_LINES + 2)),
+            _numbered_lines(DIAGNOSIS_CAP + 2),
             "",
-            "(...) 2 earlier lines truncated.\n"
-            + "\n".join(f"line-{i}" for i in range(2, DIAGNOSIS_TAIL_LINES + 2)),
+            _numbered_lines(DIAGNOSIS_HEAD_LINES)
+            + "\n(...) 2 lines truncated.\n"
+            + _numbered_lines(DIAGNOSIS_CAP + 2, start=DIAGNOSIS_HEAD_LINES + 2),
             id="cap-overflow-plural",
         ),
     ),
 )
 def test_cli_error_diagnosis(error, output, expected):
     """`CLIError.diagnosis` prefers `<stderr>`, falls back on `<stdout>`, states a
-    silent death, and tail-caps with a truncation counter."""
+    silent death, and keeps the head and the tail around a truncation counter."""
     assert CLIError(8, output, error).diagnosis == expected
+
+
+def test_cli_error_diagnosis_keeps_an_opening_error():
+    """A report that opens with its error and trails a backtrace keeps the error.
+
+    The tail alone would hold frames and no reason.
+    """
+    report = "\n".join((
+        "ERROR: the orchard gate is locked",
+        *(f"\tframe-{i}" for i in range(DIAGNOSIS_CAP * 2)),
+    ))
+    diagnosis = CLIError(1, "", report).diagnosis.splitlines()
+    assert diagnosis[0] == "ERROR: the orchard gate is locked"
+    assert diagnosis[-1] == f"\tframe-{DIAGNOSIS_CAP * 2 - 1}"
+    assert len(diagnosis) == DIAGNOSIS_CAP + 1
 
 
 @pytest.mark.parametrize(

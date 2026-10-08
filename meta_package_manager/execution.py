@@ -103,10 +103,19 @@ if TYPE_CHECKING:
     from .sudo import Escalator
     from .version import TokenizedString
 
+DIAGNOSIS_HEAD_LINES: Final = 3
+"""Leading lines of a failed command's report relayed at `WARNING`.
+
+Some CLIs open with their error and print a backtrace after it: RubyGems names
+the exception and its message first, then every frame. A tail alone then holds
+frames and no reason. The head stays short, since it is noise for the CLIs that
+conclude with their error.
+"""
+
 DIAGNOSIS_TAIL_LINES: Final = 10
 """Trailing lines of a failed command's report relayed at `WARNING`.
 
-CLIs conclude with their actual error, so the tail is where the diagnosis
+Most CLIs conclude with their actual error, so the tail is where the diagnosis
 lives; the cap keeps a verbose failure (a source build's compiler spew) from
 flooding the default view. The raw streams are always available in full, live,
 at `DEBUG`.
@@ -188,18 +197,20 @@ class CLIError(Exception):
         Prefers `<stderr>`, the conventional stream for error reporting, and
         falls back on `<stdout>` for the tools that report failures there
         (steamcmd); a command that died silently is reduced to its exit code.
-        Only the last {data}`DIAGNOSIS_TAIL_LINES` lines are kept, behind a
-        counter of the truncated ones: errors conclude streams.
+        Only the first {data}`DIAGNOSIS_HEAD_LINES` and the last
+        {data}`DIAGNOSIS_TAIL_LINES` lines are kept, around a counter of the
+        truncated ones: an error either concludes a stream or opens it.
         """
         report = self.error.strip() or self.output.strip()
         if not report:
             return f"Exited {self.code} with no output."
         lines = report.splitlines()
-        hidden = len(lines) - DIAGNOSIS_TAIL_LINES
+        hidden = len(lines) - DIAGNOSIS_HEAD_LINES - DIAGNOSIS_TAIL_LINES
         if hidden > 0:
             plural = "lines" if hidden > 1 else "line"
             lines = [
-                f"(...) {hidden} earlier {plural} truncated.",
+                *lines[:DIAGNOSIS_HEAD_LINES],
+                f"(...) {hidden} {plural} truncated.",
                 *lines[-DIAGNOSIS_TAIL_LINES:],
             ]
         return "\n".join(lines)

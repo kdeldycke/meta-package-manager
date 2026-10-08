@@ -366,10 +366,10 @@ def _attempt_install(manager: PackageManager, spec: Specifier) -> str:
     back by the per-package release-age probe: `✘` on the trail, but never a
     recorded failure, so it cannot force a non-zero exit on its own.
     """
-    hold = manager.cooldown_hold_reason(spec.package_id)
+    hold = manager.cooldown_hold(spec.package_id)
     if hold:
         logging.warning(
-            f"Hold {package_label(spec)}: {hold}.",
+            f"Hold {package_label(spec)}: {hold.reason}.",
             extra={"label": manager.subject},
         )
         return "cooldown"

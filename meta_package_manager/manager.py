@@ -34,6 +34,7 @@ from __future__ import annotations
 import json
 import logging
 import re
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
 from functools import cached_property
@@ -68,7 +69,7 @@ A hybrid manager can serve two registries with different threat models: an AUR
 helper resolves the live, self-published AUR next to Arch's official
 repositories, whose archive stages releases on its own (see the N/A rows of
 `docs/cooldown.md`). The out-of-scope half reads as infinitely aged, so the
-hold logic of {meth}`PackageManager.cooldown_hold_reason` lets it through
+hold logic of {meth}`PackageManager.cooldown_hold` lets it through
 untouched, and the constant's name keeps the probe's intent readable where a
 bare `datetime.min` would read as a bug.
 """
@@ -131,6 +132,36 @@ def _json_field(item: dict, selector: str) -> Any:
         return None
     position = int(index)
     return value[position] if position < len(value) else None
+
+
+@dataclass(frozen=True)
+class CooldownHold:
+    """A package the release-age cooldown holds back, as
+    {meth}`PackageManager.cooldown_hold` reports it.
+
+    Both timestamps are `None` for a release the probe could not date, which
+    the gate holds fail-closed.
+    """
+
+    released: datetime | None = None
+    """Publication timestamp of the latest release, as the
+    {meth}`PackageManager.release_date` probe read it."""
+
+    eligible: datetime | None = None
+    """Instant that release clears the cooldown window: {attr}`released` plus
+    the window."""
+
+    @property
+    def reason(self) -> str:
+        """Why the package is held, as the clause closing a `Hold {package}:`
+        message."""
+        if self.released is None:
+            return "its latest release cannot be dated (fail-closed)"
+        return (
+            "its latest release was published "
+            f"{self.released.isoformat(sep=' ', timespec='seconds')}, "
+            "within the cooldown window"
+        )
 
 
 class ManagerScope(Enum):
@@ -898,7 +929,7 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         """Publication timestamp of the latest release of a package.
 
         The probe behind the synthesized per-package cooldown gate (see
-        {meth}`cooldown_hold_reason`): a manager without a native
+        {meth}`cooldown_hold`): a manager without a native
         {attr}`~meta_package_manager.execution.CLIExecutor.cooldown_env_var`
         that implements this method becomes gateable, package by package.
 
@@ -947,7 +978,7 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
             and self._probes_release_date()
         )
 
-    def cooldown_hold_reason(self, package_id: str) -> str | None:
+    def cooldown_hold(self, package_id: str) -> CooldownHold | None:
         """Decide whether the release-age cooldown holds back one package.
 
         The per-package half of the gate, for managers that implement the
@@ -955,8 +986,9 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         {attr}`~meta_package_manager.execution.CLIExecutor.cooldown_env_var`.
         Returns `None` when the package may proceed: no active probe-backed
         cooldown, or a publication old enough to clear the window. Returns a
-        human-readable hold reason otherwise, which the caller renders in its
-        trail and logs.
+        {class}`CooldownHold` otherwise: the caller logs its
+        {attr}`~CooldownHold.reason`, and the change report reads its two
+        timestamps.
 
         The probe is fail-closed: a publication date that cannot be read
         (probe failure, or a registry carrying no date) holds the package
@@ -989,7 +1021,7 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
                     extra={"label": self.subject},
                 )
                 return None
-            return "its latest release cannot be dated (fail-closed)"
+            return CooldownHold()
         # The contract wants an aware datetime; absorb a naive one as UTC
         # rather than crash the comparison below on a misimplemented probe.
         if published.tzinfo is None:
@@ -997,11 +1029,7 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         cutoff = datetime.now(tz=timezone.utc) - self.cooldown
         if published <= cutoff:
             return None
-        return (
-            "its latest release was published "
-            f"{published.isoformat(sep=' ', timespec='seconds')}, "
-            "within the cooldown window"
-        )
+        return CooldownHold(released=published, eligible=published + self.cooldown)
 
     @property
     def orphans(self) -> Iterator[Package]:
@@ -1168,7 +1196,7 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         {meth}`meta_package_manager.managers.pip.Pip.upgrade_one_cli`.
 
         An active probe-backed cooldown (see
-        {meth}`~meta_package_manager.manager.PackageManager.cooldown_hold_reason`)
+        {meth}`~meta_package_manager.manager.PackageManager.cooldown_hold`)
         routes through `_upgrade_all_with_cooldown` instead of the plain
         one-shot command, so individual too-fresh releases can be held back
         while the rest of the upgrade proceeds.
@@ -1209,7 +1237,7 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         """Upgrade all outdated packages, holding back the too-fresh ones.
 
         The full-upgrade path of an active probe-backed cooldown: each
-        outdated package is checked against {meth}`cooldown_hold_reason` and
+        outdated package is checked against {meth}`cooldown_hold` and
         held back, with a `WARNING` naming the reason, rather than upgraded.
 
         A manager implementing {meth}`upgrade_all_cli_excluding` keeps its
@@ -1229,10 +1257,10 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         if outdated_ids is None:
             outdated_ids = self._outdated_ids()
         for package_id in outdated_ids:
-            hold = self.cooldown_hold_reason(package_id)
+            hold = self.cooldown_hold(package_id)
             if hold:
                 logging.warning(
-                    f"Hold {package_id}: {hold}.",
+                    f"Hold {package_id}: {hold.reason}.",
                     extra={"label": self.subject},
                 )
                 held.append(package_id)

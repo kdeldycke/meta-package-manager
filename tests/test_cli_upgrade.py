@@ -26,6 +26,7 @@ from __future__ import annotations
 import json
 import logging
 import re
+from datetime import datetime, timedelta, timezone
 from functools import partial
 
 import pytest
@@ -36,6 +37,7 @@ from meta_package_manager.cli import outcome_detail, package_outcomes
 from meta_package_manager.cli_maintenance import SWEEP_RESULTS, UPGRADE_RESULTS
 from meta_package_manager.dispatch import _LOCK_FAMILY_BY_MANAGER, LockFamily
 from meta_package_manager.execution import CLIError
+from meta_package_manager.manager import CooldownHold
 from meta_package_manager.package import Package
 from meta_package_manager.pool import pool
 from meta_package_manager.tables import PACKAGE_OUTCOME_GLYPHS, PackageOutcome
@@ -320,11 +322,13 @@ def test_upgrade_outcomes_classification():
             _package("grape", "8.0", "9.0"),
         )
     }
+    released = datetime(2020, 3, 18, 19, 39, 23, tzinfo=timezone(timedelta(hours=2)))
+    held = CooldownHold(released=released, eligible=released + timedelta(days=7))
     rows = package_outcomes(
         before,
         after,
         expected,
-        hold_reason=lambda package_id: "fresh" if package_id == "banana" else None,
+        hold=lambda package_id: held if package_id == "banana" else None,
     )
     assert [
         (r["id"], str(r["from_version"] or ""), str(r["to_version"] or ""), r["status"])
@@ -338,6 +342,27 @@ def test_upgrade_outcomes_classification():
     ]
     assert all(isinstance(r["status"], str) for r in rows)
     assert not any(isinstance(r["status"], PackageOutcome) for r in rows)
+    # Only the held package is dated, in UTC whatever offset the probe answered in.
+    assert {r["id"]: (r["released"], r["eligible"]) for r in rows} == {
+        "apple": (None, None),
+        "banana": ("2020-03-18T17:39:23+00:00", "2020-03-25T17:39:23+00:00"),
+        "cherry": (None, None),
+        "fig": (None, None),
+        "kiwi": (None, None),
+    }
+
+
+def test_upgrade_outcomes_undated_hold():
+    """A release held fail-closed has no date to report."""
+    rows = package_outcomes(
+        {"plum": _package("plum", "1.0")},
+        {"plum": _package("plum", "1.0")},
+        {"plum": _package("plum", "1.0", "1.1")},
+        hold=lambda _: CooldownHold(),
+    )
+    assert [(r["status"], r["released"], r["eligible"]) for r in rows] == [
+        ("held", None, None)
+    ]
 
 
 @pytest.mark.parametrize(
@@ -364,7 +389,7 @@ def test_upgrade_outcomes_direction(before, after, announced, status):
         {"plum": _package("plum", before)},
         {"plum": _package("plum", after)},
         expected,
-        hold_reason=lambda _: None,
+        hold=lambda _: None,
     )
     assert [row["status"] for row in rows] == [status]
 
@@ -379,7 +404,7 @@ def test_upgrade_outcomes_without_an_outdated_listing():
     """A manager that cannot list its outdated packages still reports what moved."""
     before = {"apple": _package("apple", "1.0"), "fig": _package("fig", "5.0")}
     after = {"apple": _package("apple", "1.1"), "fig": _package("fig", "5.0")}
-    rows = package_outcomes(before, after, None, hold_reason=lambda _: None)
+    rows = package_outcomes(before, after, None, hold=lambda _: None)
     assert [(r["id"], r["status"]) for r in rows] == [("apple", "upgraded")]
 
 
@@ -434,6 +459,17 @@ def test_upgrade_all_reports_what_moved(invoke, changing_fake_pool):
     )
     # The package the upgrade never touched earns no row.
     assert "fake-pkg-delta" not in result.stdout
+    # No row is dated, so the cooldown columns stay out of the table.
+    assert "Released" not in result.stdout
+    assert "Eligible" not in result.stdout
+
+
+def test_upgrade_all_selects_the_cooldown_columns(invoke, changing_fake_pool):
+    """`--columns` reaches the cooldown columns of a report carrying no date."""
+    result = invoke("upgrade", "--all", "--columns", "package_id,eligible")
+    assert result.exit_code == 0
+    header = next(line for line in result.stdout.splitlines() if "│" in line)
+    assert header.split() == ["│", "Package", "ID", "│", "Eligible", "│"]
 
 
 def test_upgrade_packages_reports_what_moved(invoke, changing_fake_pool):
@@ -472,6 +508,8 @@ def test_upgrade_all_report_serialized(invoke, changing_fake_pool):
                     "from_version": "1.0.0",
                     "to_version": "1.1.0",
                     "status": "upgraded",
+                    "released": None,
+                    "eligible": None,
                 },
                 {
                     "id": "fake-pkg-beta",
@@ -479,6 +517,8 @@ def test_upgrade_all_report_serialized(invoke, changing_fake_pool):
                     "from_version": "2.5.3",
                     "to_version": "2.6.0",
                     "status": "still outdated",
+                    "released": None,
+                    "eligible": None,
                 },
                 {
                     "id": "fake-pkg-epsilon",
@@ -486,6 +526,8 @@ def test_upgrade_all_report_serialized(invoke, changing_fake_pool):
                     "from_version": "5.2.0",
                     "to_version": None,
                     "status": "removed",
+                    "released": None,
+                    "eligible": None,
                 },
                 {
                     "id": "fake-pkg-gamma",
@@ -493,6 +535,8 @@ def test_upgrade_all_report_serialized(invoke, changing_fake_pool):
                     "from_version": None,
                     "to_version": "0.1.0",
                     "status": "installed",
+                    "released": None,
+                    "eligible": None,
                 },
                 {
                     "id": "fake-pkg-zeta",
@@ -500,6 +544,8 @@ def test_upgrade_all_report_serialized(invoke, changing_fake_pool):
                     "from_version": "3.0.0",
                     "to_version": "2.9.0",
                     "status": "downgraded",
+                    "released": None,
+                    "eligible": None,
                 },
             ],
         }
@@ -516,6 +562,84 @@ def test_upgrade_all_simulation_skips_the_report(invoke, changing_fake_pool, mod
     assert f"✓ {mid}.upgrade_all (" in stderr
     assert "upgraded" not in stderr
     assert "fake-pkg-" not in result.stdout
+
+
+class ProbedFakeManager(ChangingFakeManager):
+    """Variant the cooldown gates package by package, through the release-date
+    probe.
+
+    The latest release of the pinned package is one day old, and every other
+    one a month older.
+    """
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.pinned_release = datetime.now(tz=timezone.utc) - timedelta(days=1)
+        """When the latest release of the pinned package was published."""
+
+    def release_date(self, package_id):
+        if package_id == self.PINNED:
+            return self.pinned_release
+        return self.pinned_release - timedelta(days=30)
+
+
+@pytest.fixture
+def probed_fake_pool(patch_pool_with):
+    """Yield a {class}`ProbedFakeManager`, whose pinned package a week of
+    cooldown holds back."""
+    return patch_pool_with(ProbedFakeManager())
+
+
+def test_upgrade_all_dates_a_held_package(invoke, probed_fake_pool):
+    """A package the cooldown holds reports when its release was published and
+    when it clears the window."""
+    result = invoke("--cooldown", "7 days", "upgrade", "--all")
+    assert result.exit_code == 0
+    mid = probed_fake_pool.id
+    stderr = strip_ansi(result.stderr)
+    assert f"✓ {mid}.upgrade_all (1 upgraded, 1 downgraded, 1 held)" in stderr
+    fresh = probed_fake_pool.pinned_release
+    released = fresh.date().isoformat()
+    eligible = (fresh + timedelta(days=7)).date().isoformat()
+    check_report(
+        result.stdout,
+        {
+            "fake-pkg-alpha": ("1.0.0", "1.1.0", PackageOutcome.UPGRADED.label),
+            "fake-pkg-beta": (
+                "2.5.3",
+                "2.6.0",
+                f"{PackageOutcome.HELD.label} │ {released} │ {eligible} │",
+            ),
+            "fake-pkg-epsilon": ("5.2.0", PackageOutcome.REMOVED.label),
+            "fake-pkg-gamma": ("0.1.0", PackageOutcome.INSTALLED.label),
+            "fake-pkg-zeta": ("3.0.0", "2.9.0", PackageOutcome.DOWNGRADED.label),
+        },
+    )
+    header = next(line for line in result.stdout.splitlines() if "│" in line)
+    assert header.split()[-6:] == ["Status", "│", "Released", "│", "Eligible", "│"]
+
+
+def test_upgrade_all_dates_a_held_package_serialized(invoke, probed_fake_pool):
+    """The serialized report carries both dates as timestamps."""
+    result = invoke(
+        "--table-format", "json", "--cooldown", "7 days", "upgrade", "--all"
+    )
+    assert result.exit_code == 0
+    fresh = probed_fake_pool.pinned_release
+    dates = {
+        package["id"]: (package["released"], package["eligible"])
+        for package in json.loads(result.stdout)[probed_fake_pool.id]["packages"]
+    }
+    assert dates == {
+        "fake-pkg-alpha": (None, None),
+        "fake-pkg-beta": (
+            fresh.isoformat(timespec="seconds"),
+            (fresh + timedelta(days=7)).isoformat(timespec="seconds"),
+        ),
+        "fake-pkg-epsilon": (None, None),
+        "fake-pkg-gamma": (None, None),
+        "fake-pkg-zeta": (None, None),
+    }
 
 
 class ListedFakeManager(ChangingFakeManager):

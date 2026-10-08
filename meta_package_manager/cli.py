@@ -86,6 +86,7 @@ import threading
 from collections import Counter
 from collections.abc import Iterable
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from functools import partial
 from pathlib import Path
 from textwrap import dedent
@@ -151,8 +152,10 @@ from .specifier import VERSION_SEP, Specifier
 from .sudo import ESCALATION, ESCALATORS
 from .tables import (
     CHANGE_REPORT_COLUMNS,
+    COOLDOWN_COLUMNS,
     PackageOutcome,
     SortableField,
+    column_specs,
     print_projected_table,
     print_serialized,
 )
@@ -166,6 +169,8 @@ if TYPE_CHECKING:
 
     import click
     from click_extra import ColumnSpec, Context, Parameter
+
+    from .manager import CooldownHold
 
 
 # Subcommand sections.
@@ -292,8 +297,8 @@ cooldown support to a manager surfaces it here automatically.
 RELEASE_INTRODUCING_OPERATIONS = frozenset(("install", "upgrade"))
 """Operation names that bring new package versions onto the system.
 
-The per-package cooldown hold of {meth}`cooldown_hold_reason
-<meta_package_manager.manager.PackageManager.cooldown_hold_reason>` only
+The per-package cooldown hold of {meth}`cooldown_hold
+<meta_package_manager.manager.PackageManager.cooldown_hold>` only
 applies to these: `remove` introduces nothing, and read-only queries are never
 blocked. `restore` rides the `install` operation name, so it is covered.
 """
@@ -1317,9 +1322,11 @@ def package_task(
         # A held package is ✘ but never recorded as a failure, matching the
         # manager-level cooldown skip: it must not force a non-zero exit.
         if operation in RELEASE_INTRODUCING_OPERATIONS:
-            hold = manager.cooldown_hold_reason(spec.package_id)
+            hold = manager.cooldown_hold(spec.package_id)
             if hold:
-                logging.warning(f"Hold {item}: {hold}.", extra={"label": subject})
+                logging.warning(
+                    f"Hold {item}: {hold.reason}.", extra={"label": subject}
+                )
                 return False, trail_label(subject, item, "cooldown")
         if run_manager_action(
             manager, spec, action=action, verb=verb, operation=operation
@@ -1375,17 +1382,38 @@ def _versioned(inventory: Mapping[str, Package]) -> bool:
     )
 
 
+def _instant(moment: datetime | None) -> str | None:
+    """A timestamp as the change report carries it: ISO 8601, in UTC, to the
+    second."""
+    if moment is None:
+        return None
+    return moment.astimezone(timezone.utc).isoformat(timespec="seconds")
+
+
+def _day(instant: object) -> str:
+    """The date of a change report timestamp, for its table cell.
+
+    Reads back what {func}`_instant` wrote. Empty for a row carrying none.
+    """
+    if not instant:
+        return ""
+    return datetime.fromisoformat(str(instant)).date().isoformat()
+
+
 def _outcome_row(
     package: Package,
     from_version: TokenizedString | str | None,
     to_version: TokenizedString | str | None,
     status: PackageOutcome,
+    hold: CooldownHold | None = None,
 ) -> dict[str, object]:
     """One row of the change report, in the field vocabulary of
     {data}`~meta_package_manager.tables.CHANGE_REPORT_COLUMNS`.
 
     The status travels as its bare string, the payload being serialized by
-    encoders that do not all accept a `str` subclass.
+    encoders that do not all accept a `str` subclass. The two timestamps of a
+    `hold` travel as strings too: not every encoder accepts a
+    {class}`~datetime.datetime`.
     """
     return {
         "id": package.id,
@@ -1393,6 +1421,8 @@ def _outcome_row(
         "from_version": from_version,
         "to_version": to_version,
         "status": status.value,
+        "released": _instant(hold.released) if hold else None,
+        "eligible": _instant(hold.eligible) if hold else None,
     }
 
 
@@ -1427,7 +1457,7 @@ def package_outcomes(
     before: Mapping[str, Package],
     after: Mapping[str, Package],
     expected: Mapping[str, Package] | None,
-    hold_reason: Callable[[str], str | None],
+    hold: Callable[[str], CooldownHold | None],
 ) -> list[dict[str, object]]:
     """Classify every package a command moved, or should have.
 
@@ -1436,8 +1466,8 @@ def package_outcomes(
     readings framing a manager's part of the command. `expected` is the
     {meth}`~meta_package_manager.manager.PackageManager.outdated_inventory` an
     upgrade takes before it runs, and `None` for a command that expects no
-    package to move in particular. `hold_reason` is the manager's
-    {meth}`~meta_package_manager.manager.PackageManager.cooldown_hold_reason`.
+    package to move in particular. `hold` is the manager's
+    {meth}`~meta_package_manager.manager.PackageManager.cooldown_hold`.
     Each row names the package and its versions and carries one
     {class}`~meta_package_manager.tables.PackageOutcome` as `status`:
 
@@ -1450,7 +1480,9 @@ def package_outcomes(
     - an expected package whose version did not move is `held` when the
       cooldown still holds it back, `still outdated` otherwise: a failed build,
       a pinned package, or one the native command leaves alone. Its
-      `to_version` is the one still available.
+      `to_version` is the one still available. A `held` row also dates that
+      version when the hold could: `released` is its publication, `eligible`
+      the instant it clears the cooldown window.
 
     An expected package neither reading lists cannot be told moved from
     unmoved, so it gets no row rather than a guess. Rows come sorted by package
@@ -1480,17 +1512,14 @@ def package_outcomes(
                 _outcome_row(new, old.installed_version, new.installed_version, status)
             )
         elif expected is not None and package_id in expected:
-            status = (
-                PackageOutcome.HELD
-                if hold_reason(package_id)
-                else PackageOutcome.STILL_OUTDATED
-            )
+            held = hold(package_id)
             rows.append(
                 _outcome_row(
                     new,
                     new.installed_version,
                     expected[package_id].latest_version,
-                    status,
+                    PackageOutcome.HELD if held else PackageOutcome.STILL_OUTDATED,
+                    held,
                 )
             )
     return rows
@@ -1529,6 +1558,11 @@ def print_change_report(ctx: Context, report: Mapping[str, dict]) -> None:
     of a package colored the way `mpm outdated` colors it, and its status shown
     as its {attr}`~meta_package_manager.tables.PackageOutcome.label`. An empty
     table prints nothing: the trail already said nothing moved.
+
+    The two {data}`~meta_package_manager.tables.COOLDOWN_COLUMNS` show each
+    timestamp as its date in UTC. They join the default selection when a row
+    carries one, so a report where the cooldown dated nothing does not grow two
+    empty columns.
     """
     if print_serialized(ctx, report):
         return
@@ -1546,9 +1580,23 @@ def print_change_report(ctx: Context, report: Mapping[str, dict]) -> None:
                 "from_version": from_version,
                 "to_version": to_version,
                 "status": PackageOutcome(row["status"]).label,
+                "released": _day(row["released"]),
+                "eligible": _day(row["eligible"]),
             })
     if table:
-        print_projected_table(ctx, CHANGE_REPORT_COLUMNS, table)
+        hidden = (
+            ()
+            if any(row["released"] for row in table)
+            else column_specs(COOLDOWN_COLUMNS)
+        )
+        default_ids = tuple(
+            spec.id
+            for spec in column_specs(CHANGE_REPORT_COLUMNS)
+            if spec not in hidden
+        )
+        print_projected_table(
+            ctx, CHANGE_REPORT_COLUMNS, table, default_ids=default_ids
+        )
 
 
 class ChangeReport:
@@ -1636,7 +1684,7 @@ class ChangeReport:
         after = manager.installed_inventory()
         if after is None or not _versioned(before) or not _versioned(after):
             return None
-        rows = package_outcomes(before, after, expected, manager.cooldown_hold_reason)
+        rows = package_outcomes(before, after, expected, manager.cooldown_hold)
         with self._lock:
             self._payloads[manager.id] = {
                 "id": manager.id,

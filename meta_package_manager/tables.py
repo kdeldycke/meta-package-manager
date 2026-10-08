@@ -314,6 +314,35 @@ and version columns share that treatment, and `package_id` is exempt from it,
 per the width policy documented on {data}`PACKAGE_ID_COLUMN`.
 """
 
+COOLDOWN_COLUMNS: tuple[TColumn, ...] = (
+    (
+        ColumnSpec(
+            "released",
+            "Released",
+            "Publication date of the release the cooldown holds back.",
+        ),
+        None,
+    ),
+    (
+        ColumnSpec(
+            "eligible",
+            "Eligible",
+            "Date that release clears the cooldown window.",
+        ),
+        None,
+    ),
+)
+"""The two columns dating a package the release-age cooldown holds back, closing
+{data}`CHANGE_REPORT_COLUMNS`.
+
+Named after the columns of repomatic's `Held back by cooldown` table, for the
+reason {data}`PACKAGE_OUTCOME_GLYPHS` borrows its legend. Only a `held` row whose
+release could be dated fills them, so they join the default selection of a
+report when one of its rows does: see
+{func}`meta_package_manager.cli.print_change_report`. `--columns` selects them
+whatever the rows carry.
+"""
+
 CHANGE_REPORT_COLUMNS: tuple[TColumn, ...] = (
     PACKAGE_ID_COLUMN,
     PACKAGE_NAME_COLUMN,
@@ -348,6 +377,7 @@ CHANGE_REPORT_COLUMNS: tuple[TColumn, ...] = (
         ),
         None,
     ),
+    *COOLDOWN_COLUMNS,
 )
 """Columns of the change report closing every command that changes the installed
 inventory: `install`, `remove`, `upgrade`, `restore` and `cleanup --orphans`.
@@ -356,7 +386,8 @@ One row per package the command moved or should have, each carrying one
 {class}`PackageOutcome`; see {func}`meta_package_manager.cli.package_outcomes`
 for how a row is classified. The version columns wrap like every other table's,
 and `package_id` does not, per {data}`PACKAGE_ID_COLUMN`. Neither version column
-drives `--sort-by`: a report sorts by what moved, not by how far.
+drives `--sort-by`: a report sorts by what moved, not by how far. The two
+{data}`COOLDOWN_COLUMNS` close the registry.
 """
 
 WHICH_COLUMNS: tuple[TColumn, ...] = (

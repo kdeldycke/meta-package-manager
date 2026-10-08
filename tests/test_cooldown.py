@@ -37,7 +37,7 @@ from meta_package_manager.cooldown import (
     resolve_cooldown,
 )
 from meta_package_manager.execution import CLIError
-from meta_package_manager.manager import COOLDOWN_EXEMPT
+from meta_package_manager.manager import COOLDOWN_EXEMPT, CooldownHold
 from meta_package_manager.managers.flatpak import Flatpak
 from meta_package_manager.managers.gem import Gem
 from meta_package_manager.managers.homebrew import Homebrew
@@ -415,37 +415,38 @@ def test_cooldown_permits_probe_backed_manager():
     assert cooldown_permits(manager) is True
 
 
-def test_hold_reason_inactive_without_cooldown(monkeypatch):
+def test_hold_inactive_without_cooldown(monkeypatch):
     manager = Flatpak()
     monkeypatch.setattr(
         manager,
         "release_date",
         lambda package_id: pytest.fail("probe must not run without a cooldown"),
     )
-    assert manager.cooldown_hold_reason("org.example.Fig") is None
+    assert manager.cooldown_hold("org.example.Fig") is None
 
 
-def test_hold_reason_passes_aged_release(monkeypatch):
+def test_hold_passes_aged_release(monkeypatch):
     aged = datetime.now(tz=timezone.utc) - timedelta(days=30)
     manager = _probed_flatpak(monkeypatch, {"org.example.Fig": aged})
-    assert manager.cooldown_hold_reason("org.example.Fig") is None
+    assert manager.cooldown_hold("org.example.Fig") is None
 
 
-def test_hold_reason_holds_fresh_release(monkeypatch):
+def test_hold_dates_fresh_release(monkeypatch):
     fresh = datetime.now(tz=timezone.utc) - timedelta(days=1)
     manager = _probed_flatpak(monkeypatch, {"org.example.Kiwi": fresh})
-    reason = manager.cooldown_hold_reason("org.example.Kiwi")
-    assert reason is not None
-    assert "within the cooldown window" in reason
+    hold = manager.cooldown_hold("org.example.Kiwi")
+    assert hold == CooldownHold(released=fresh, eligible=fresh + timedelta(days=7))
+    assert "within the cooldown window" in hold.reason
 
 
-def test_hold_reason_fail_closed_on_unknown_date(monkeypatch):
+def test_hold_fail_closed_on_unknown_date(monkeypatch):
     manager = _probed_flatpak(monkeypatch, {})
-    reason = manager.cooldown_hold_reason("org.example.Plum")
-    assert reason == "its latest release cannot be dated (fail-closed)"
+    hold = manager.cooldown_hold("org.example.Plum")
+    assert hold == CooldownHold(released=None, eligible=None)
+    assert hold.reason == "its latest release cannot be dated (fail-closed)"
 
 
-def test_hold_reason_fail_closed_on_probe_error(monkeypatch):
+def test_hold_fail_closed_on_probe_error(monkeypatch):
     manager = Flatpak()
     manager.cooldown = timedelta(days=7)
 
@@ -453,19 +454,20 @@ def test_hold_reason_fail_closed_on_probe_error(monkeypatch):
         raise CLIError(1, "", "error: nothing matches org.example.Plum")
 
     monkeypatch.setattr(manager, "release_date", broken_probe)
-    reason = manager.cooldown_hold_reason("org.example.Plum")
-    assert reason == "its latest release cannot be dated (fail-closed)"
+    hold = manager.cooldown_hold("org.example.Plum")
+    assert hold is not None
+    assert hold.reason == "its latest release cannot be dated (fail-closed)"
 
 
-def test_hold_reason_best_effort_waives_unknown_date(monkeypatch, caplog):
+def test_hold_best_effort_waives_unknown_date(monkeypatch, caplog):
     caplog.set_level(logging.INFO)
     manager = _probed_flatpak(monkeypatch, {})
     manager.cooldown_policy = CooldownPolicy.best_effort
-    assert manager.cooldown_hold_reason("org.example.Plum") is None
+    assert manager.cooldown_hold("org.example.Plum") is None
     assert "without the supply-chain safeguard" in caplog.text
 
 
-def test_hold_reason_off_policy_skips_probe(monkeypatch):
+def test_hold_off_policy_skips_probe(monkeypatch):
     manager = Flatpak()
     manager.cooldown = timedelta(days=7)
     manager.cooldown_policy = CooldownPolicy.off
@@ -474,10 +476,10 @@ def test_hold_reason_off_policy_skips_probe(monkeypatch):
         "release_date",
         lambda package_id: pytest.fail("probe must not run under an off policy"),
     )
-    assert manager.cooldown_hold_reason("org.example.Fig") is None
+    assert manager.cooldown_hold("org.example.Fig") is None
 
 
-def test_hold_reason_dry_run_skips_probe(monkeypatch):
+def test_hold_dry_run_skips_probe(monkeypatch):
     manager = Flatpak()
     manager.cooldown = timedelta(days=7)
     manager.dry_run = True
@@ -486,13 +488,15 @@ def test_hold_reason_dry_run_skips_probe(monkeypatch):
         "release_date",
         lambda package_id: pytest.fail("probe must not run under --dry-run"),
     )
-    assert manager.cooldown_hold_reason("org.example.Fig") is None
+    assert manager.cooldown_hold("org.example.Fig") is None
 
 
-def test_hold_reason_naive_datetime_read_as_utc(monkeypatch):
+def test_hold_naive_datetime_read_as_utc(monkeypatch):
     fresh_naive = datetime.now(tz=timezone.utc).replace(tzinfo=None) - timedelta(days=1)
     manager = _probed_flatpak(monkeypatch, {"org.example.Kiwi": fresh_naive})
-    assert manager.cooldown_hold_reason("org.example.Kiwi") is not None
+    hold = manager.cooldown_hold("org.example.Kiwi")
+    assert hold is not None
+    assert hold.released == fresh_naive.replace(tzinfo=timezone.utc)
 
 
 def test_synthesized_gate_reroutes_upgrade_all(monkeypatch):
@@ -644,9 +648,9 @@ def test_paru_release_date_none_without_fields(monkeypatch):
     assert manager.release_date("paru") is None
 
 
-def test_hold_reason_passes_exempt_sentinel(monkeypatch):
+def test_hold_passes_exempt_sentinel(monkeypatch):
     manager = _probed_flatpak(monkeypatch, {"org.example.Fig": COOLDOWN_EXEMPT})
-    assert manager.cooldown_hold_reason("org.example.Fig") is None
+    assert manager.cooldown_hold("org.example.Fig") is None
 
 
 def test_paru_gated_upgrade_all_rides_the_ignore_flag(monkeypatch):

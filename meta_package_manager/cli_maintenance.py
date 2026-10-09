@@ -91,7 +91,7 @@ if TYPE_CHECKING:
 UPGRADE_RESULTS = (
     PackageOutcome.UPGRADED,
     PackageOutcome.DOWNGRADED,
-    PackageOutcome.HELD,
+    PackageOutcome.COOLDOWN,
     PackageOutcome.STILL_OUTDATED,
 )
 """The outcomes a full upgrade counts on each manager's trail line, the upgrades

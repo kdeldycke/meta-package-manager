@@ -335,7 +335,7 @@ def test_upgrade_outcomes_classification():
         for r in rows
     ] == [
         ("apple", "1.0", "1.1", "upgraded"),
-        ("banana", "2.0", "2.5", "held by cooldown"),
+        ("banana", "2.0", "2.5", "cooldown"),
         ("cherry", "3.0", "3.5", "still outdated"),
         ("fig", "5.0", "", "removed"),
         ("kiwi", "", "0.1", "installed"),
@@ -361,7 +361,7 @@ def test_upgrade_outcomes_undated_hold():
         hold=lambda _: CooldownHold(),
     )
     assert [(r["status"], r["released"], r["eligible"]) for r in rows] == [
-        ("held by cooldown", None, None)
+        ("cooldown", None, None)
     ]
 
 
@@ -420,19 +420,15 @@ def test_upgrade_outcomes_without_an_outdated_listing():
         ),
         (
             UPGRADE_RESULTS,
-            ("held by cooldown", "still outdated", "still outdated"),
-            "nothing upgraded, 1 held by cooldown, 2 still outdated",
+            ("cooldown", "still outdated", "still outdated"),
+            "nothing upgraded, 1 cooldown, 2 still outdated",
         ),
-        (
-            UPGRADE_RESULTS,
-            ("upgraded", "held by cooldown"),
-            "1 upgraded, 1 held by cooldown",
-        ),
+        (UPGRADE_RESULTS, ("upgraded", "cooldown"), "1 upgraded, 1 cooldown"),
         (UPGRADE_RESULTS, ("downgraded",), "nothing upgraded, 1 downgraded"),
         (
             UPGRADE_RESULTS,
-            ("upgraded", "downgraded", "held by cooldown"),
-            "1 upgraded, 1 downgraded, 1 held by cooldown",
+            ("upgraded", "downgraded", "cooldown"),
+            "1 upgraded, 1 downgraded, 1 cooldown",
         ),
         (SWEEP_RESULTS, (), "nothing removed"),
         (SWEEP_RESULTS, ("removed", "removed", "upgraded"), "2 removed"),
@@ -604,9 +600,7 @@ def test_upgrade_all_dates_a_held_package(invoke, probed_fake_pool):
     assert result.exit_code == 0
     mid = probed_fake_pool.id
     stderr = strip_ansi(result.stderr)
-    assert (
-        f"✓ {mid}.upgrade_all (1 upgraded, 1 downgraded, 1 held by cooldown)" in stderr
-    )
+    assert f"✓ {mid}.upgrade_all (1 upgraded, 1 downgraded, 1 cooldown)" in stderr
     fresh = probed_fake_pool.pinned_release
     released = fresh.date().isoformat()
     eligible = (fresh + timedelta(days=7)).date().isoformat()
@@ -617,7 +611,7 @@ def test_upgrade_all_dates_a_held_package(invoke, probed_fake_pool):
             "fake-pkg-beta": (
                 "2.5.3",
                 "2.6.0",
-                f"{PackageOutcome.HELD.label} │ {released} │ {eligible} │",
+                f"{PackageOutcome.COOLDOWN.label} │ {released} │ {eligible} │",
             ),
             "fake-pkg-epsilon": ("5.2.0", PackageOutcome.REMOVED.label),
             "fake-pkg-gamma": ("0.1.0", PackageOutcome.INSTALLED.label),

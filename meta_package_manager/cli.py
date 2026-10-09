@@ -1477,12 +1477,12 @@ def package_outcomes(
     - a package only the second reading lists is `installed`: one the command
       installed, or a dependency it pulled in. One only the first lists is
       `removed`;
-    - an expected package whose version did not move is `held by cooldown`
-      when the cooldown still holds it back, `still outdated` otherwise: a
-      failed build, a pinned package, or one the native command leaves alone.
-      Its `to_version` is the one still available. A `held by cooldown` row
-      also dates that version when the hold could: `released` is its
-      publication, `eligible` the instant it clears the cooldown window.
+    - an expected package whose version did not move is `cooldown` when the
+      cooldown still holds it back, `still outdated` otherwise: a failed build,
+      a pinned package, or one the native command leaves alone. Its
+      `to_version` is the one still available. A `cooldown` row also dates
+      that version when the hold could: `released` is its publication,
+      `eligible` the instant it clears the cooldown window.
 
     An expected package neither reading lists cannot be told moved from
     unmoved, so it gets no row rather than a guess. Rows come sorted by package
@@ -1518,7 +1518,7 @@ def package_outcomes(
                     new,
                     new.installed_version,
                     expected[package_id].latest_version,
-                    PackageOutcome.HELD if held else PackageOutcome.STILL_OUTDATED,
+                    PackageOutcome.COOLDOWN if held else PackageOutcome.STILL_OUTDATED,
                     held,
                 )
             )
@@ -1530,12 +1530,12 @@ def outcome_detail(
 ) -> str:
     """Count the `results` among a manager's rows, for its trail line.
 
-    Reads `1 upgraded, 2 held by cooldown`. Always opens on the first of
-    `results`, zero included (`nothing upgraded`), so a run that changed nothing
-    says so where a run that changed something says how much. The other
-    `results` follow when there are any. An outcome left out of `results` stays
-    in the table, being a consequence rather than a result: the dependencies an
-    upgrade pulled in or dropped.
+    Reads `1 upgraded, 2 cooldown`. Always opens on the first of `results`, zero
+    included (`nothing upgraded`), so a run that changed nothing says so where a
+    run that changed something says how much. The other `results` follow when
+    there are any. An outcome left out of `results` stays in the table, being a
+    consequence rather than a result: the dependencies an upgrade pulled in or
+    dropped.
     """
     counts = Counter(str(row["status"]) for row in rows)
     lead, *others = results

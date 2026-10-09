@@ -118,3 +118,8 @@ v8.1.0,meta-package-manager-8.1.0-macos-arm64.bin,0bfbf4939bcc3c61ecc8b23ca73363
 v8.1.0,meta-package-manager-8.1.0-macos-x64.bin,e7c87dfa1784b453fdd02002f67fbb45241aebb664eac118d96c9ab509d163ed,2026-10-04,0,0,62,0
 v8.1.0,meta-package-manager-8.1.0-windows-arm64.exe,11777949e1e7077a1723d57926ebab1f203473c16c1394ccad75b2ced5aba8c5,2026-10-04,1,0,68,0
 v8.1.0,meta-package-manager-8.1.0-windows-x64.exe,86312d870494b6a0e5589fe4987433b81ddbe7b2e5a6f44fe8b1627e2dec9f52,2026-10-04,13,0,58,0
+v8.1.1,meta-package-manager-8.1.1-linux-arm64.bin,cdf51988423fcbe265a732f74c13caa1201c327a4a9129dfec0653d7e8cc632e,2026-10-09,0,0,63,0
+v8.1.1,meta-package-manager-8.1.1-linux-x64.bin,dffa60746b1087a0f536e97668c65dbc561daff165d78befe39b7d902e3781ae,2026-10-09,0,0,64,0
+v8.1.1,meta-package-manager-8.1.1-macos-arm64.bin,3618ce8de75e76c180399b83a8d2283085f9dc5a55acd7b5e70fcf7329fecc92,2026-10-09,0,0,59,0
+v8.1.1,meta-package-manager-8.1.1-macos-x64.bin,b4a42a018fbcb0d158e6210a9357064fbcf6032dbf4cdb16bb7ac972b787043b,2026-10-09,0,0,61,0
+v8.1.1,meta-package-manager-8.1.1-windows-arm64.exe,96a9b9b6ea7f1c7fa5322062e7c782cff5dc051a4aacc812ba78ca48de9dcab9,2026-10-09,1,0,67,0

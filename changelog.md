@@ -1,5 +1,10 @@
 # Changelog
 
+## [`8.1.3.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v8.1.2...main)
+
+> [!WARNING]
+> This version is **not released yet** and is under active development.
+
 ## [`8.1.2` (2026-10-09)](https://github.com/kdeldycke/meta-package-manager/compare/v8.1.1...v8.1.2)
 
 - **Breaking:** [mpm] Rename the `held by cooldown` status of the report of what a command changed to `cooldown`, in the table, on the trail line and in the serialized `status` value.

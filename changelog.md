@@ -1,6 +1,6 @@
 # Changelog
 
-## [`8.1.2.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v8.1.1...main)
+## [`9.0.0.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v8.1.1...main)
 
 > [!WARNING]
 > This version is **not released yet** and is under active development.

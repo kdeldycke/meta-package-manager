@@ -1238,7 +1238,8 @@ def test_escalated_calls_keep_the_controlling_terminal(escalate):
     ("internal_sudo", "resets", "operation", "warm", "detached"),
     (
         pytest.param(True, False, "install", True, False, id="spends-the-cache"),
-        pytest.param(True, False, "sync", True, False, id="any-mutating-call"),
+        pytest.param(True, False, "sync", True, False, id="sync-spends-it-too"),
+        pytest.param(True, False, "cleanup", True, True, id="never-escalating-call"),
         pytest.param(True, False, "installed", True, True, id="read-only-call"),
         pytest.param(True, False, "install", False, True, id="cold-cache"),
         pytest.param(False, False, "install", True, True, id="no-internal-sudo"),
@@ -1246,20 +1247,26 @@ def test_escalated_calls_keep_the_controlling_terminal(escalate):
     ),
 )
 def test_internal_escalator_spends_a_warm_cache_in_the_terminal_session(
-    internal_sudo, resets, operation, warm, detached
+    monkeypatch, internal_sudo, resets, operation, warm, detached
 ):
-    """A mutating call of an internal escalator stays in the session of the
-    terminal while the credential cache is warm.
+    """A call of an internal escalator stays in the session of the terminal
+    while the credential cache is warm, in each operation where its tool may
+    run `sudo`.
 
     `sudo` keys a ticket on the terminal and on its session. Detached, the
     tool's own `sudo` finds no ticket and no terminal to prompt on, so its
     privileged step fails on the very cache meant to serve it.
 
-    Each control changes one condition and keeps the session isolation: a
-    read-only call, a cold cache, a manager that never escalates on its own,
-    and a tool that drops the cache, which has nothing to spend.
+    Each control changes one condition and keeps the session isolation: an
+    operation in which the tool never escalates, a read-only call, a cold
+    cache, a manager that never escalates on its own, and a tool that drops
+    the cache, which has nothing to spend.
     """
     assert not _SUDO_CACHE_WARM.is_set()
+    # The tool of this manager escalates in every mutating operation but one.
+    monkeypatch.setattr(
+        FakeManager, "internal_sudo_operations", _MUTATING_OPERATIONS - {"cleanup"}
+    )
     manager = FakeManager()
     manager.internal_sudo = internal_sudo
     manager.resets_sudo_timestamp = resets

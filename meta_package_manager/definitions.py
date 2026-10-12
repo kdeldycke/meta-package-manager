@@ -295,7 +295,7 @@ manager's identity, and resolve through the usual option precedence. `unmaintain
 is reused from the override converters so a TOML-defined manager can flag its own
 upstream as abandoned (see `docs/cooldown.md` for the affected managers).
 
-Eleven fields are definition-only:
+Twelve fields are definition-only:
 
 - `brewfile_entry_type` maps the manager onto a Homebrew Bundle DSL entry so its
   installed packages join `mpm dump --brewfile` exports (see
@@ -315,6 +315,10 @@ Eleven fields are definition-only:
   run its own `sudo` (see
   {attr}`~meta_package_manager.execution.CLIExecutor.internal_sudo_operations`):
   every mutating one by default.
+- `keywords` lists the well-known names of the manager that its ID does not
+  already carry (see
+  {attr}`~meta_package_manager.manager.PackageManager.keywords`). They join the
+  PyPI keywords of the project and the content rules of the issue labeller.
 - `maintenance_note` renders a ``{note}`` admonition atop the manager's page for a
   still-maintained upstream under watch (see
   {attr}`~meta_package_manager.manager.PackageManager.maintenance_note`).

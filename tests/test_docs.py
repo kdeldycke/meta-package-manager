@@ -33,7 +33,7 @@ from extra_platforms import Group, extract_members
 from wcwidth import wcswidth
 from yaml import Loader, load, safe_load
 
-from meta_package_manager import __version__, _docs, logo
+from meta_package_manager import __version__, _docs, definitions, logo
 from meta_package_manager.capabilities import Operations
 from meta_package_manager.cli import mpm
 from meta_package_manager.dispatch import (
@@ -1683,6 +1683,27 @@ def test_configuration_section_names_no_build_host():
     home = str(Path.home())
     for manager_id in pool.all_manager_ids:
         assert home not in _docs.manager_configuration(manager_id), manager_id
+
+
+DEFINITION_ONLY_FIELDS = sorted(
+    set(definitions.DEFINITION_CLI_FIELDS) - set(definitions.OVERRIDABLE_FIELDS)
+)
+"""Fields a manager definition accepts and an override does not."""
+
+
+@pytest.mark.parametrize("field", DEFINITION_ONLY_FIELDS)
+def test_definition_only_fields_are_documented(field):
+    """Check each definition-only field is in its two reference lists.
+
+    The table of `docs/overrides.md` is the list a user reads, and the one under
+    {data}`~meta_package_manager.definitions.DEFINITION_CLI_FIELDS` the list a
+    developer reads. Both are written by hand, so a field added to the mapping
+    reaches neither on its own.
+    """
+    page = PROJECT_ROOT.joinpath("docs", "overrides.md").read_text(encoding="UTF-8")
+    assert f"| `{field}` " in page
+    source = Path(definitions.__file__).read_text(encoding="UTF-8")
+    assert f"\n- `{field}` " in source
 
 
 DOCSTRING_FENCE = re.compile(

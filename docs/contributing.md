@@ -42,7 +42,7 @@ After the steps above, you are free to play with the bleeding edge version of `m
 ```shell-session
 $ uv run -- mpm --version
 (...)
-mpm, version 8.1.1.dev0+e9033b34
+mpm, version 8.1.2.dev0+a13cd0ff
 ```
 
 ### Unit-tests

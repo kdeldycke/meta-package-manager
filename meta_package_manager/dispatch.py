@@ -792,8 +792,8 @@ def collect_from_managers(
     subprocess and error list, so the call is thread-safe per manager). A truthy
     `data["errors"]` (or `data["failed"]`) marks that manager's trail line `✘`;
     an optional `data["detail"]` suffixes its subject in parentheses (`cleanup`
-    passes its categories, `upgrade --all` the cooldown that held a manager, or
-    what moved and what the upgrade died of).
+    passes its categories, `upgrade --all` the cooldown that held a manager or
+    what moved, and each maintenance command closes on what it died of).
 
     :param report_state: maintenance commands set it (the trail is their output,
         which `upgrade --all` and `cleanup --orphans` follow with a change report on

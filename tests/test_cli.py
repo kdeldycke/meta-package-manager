@@ -54,10 +54,13 @@ from extra_platforms import is_any_windows
 
 from meta_package_manager import __version__
 from meta_package_manager.cli import _debug_rerun_command
+from meta_package_manager.execution import CLIError
 from meta_package_manager.package import Package
 from meta_package_manager.pool import pool
+from meta_package_manager.sudo import UNANSWERED_PROMPT_DETAIL
 
 from .conftest import default_manager_ids
+from .fake_manager import FakeManager
 
 TEST_CONF_FILE = """\
 # Comment
@@ -266,6 +269,53 @@ def test_timeout(invoke, slow_fake_pool):
     assert result.exit_code == 0
     assert result.exception is None
     assert "Timed out after 1s." in result.stderr
+
+
+@pytest.mark.parametrize(
+    ("command", "method", "detail", "expected"),
+    (
+        pytest.param(
+            "sync",
+            "sync",
+            UNANSWERED_PROMPT_DETAIL,
+            "sync (no password)",
+            id="sync-known-cause",
+        ),
+        pytest.param("sync", "sync", None, "sync", id="sync-plain-failure"),
+        pytest.param(
+            "cleanup",
+            "cleanup_cache",
+            UNANSWERED_PROMPT_DETAIL,
+            "cleanup (cache, no password)",
+            id="cleanup-known-cause",
+        ),
+        pytest.param(
+            "cleanup",
+            "cleanup_cache",
+            None,
+            "cleanup (cache)",
+            id="cleanup-plain-failure",
+        ),
+    ),
+)
+def test_failed_maintenance_names_its_cause_on_the_trail(
+    invoke, fake_pool, monkeypatch, command, method, detail, expected
+):
+    """The `✘` line of a failed `sync` or `cleanup` closes on the cause its error
+    carries, after the details of the command. A failure with no known cause
+    keeps those details alone.
+    """
+
+    def failing(manager):
+        # Recorded and not raised, as the failure gate of `run()` does for a
+        # maintenance operation.
+        manager.cli_errors.append(CLIError(None, "", "Timed out after 500s.", detail))
+
+    monkeypatch.setattr(FakeManager, method, failing)
+    result = invoke(command)
+    stderr = strip_ansi(result.stderr)
+    assert f"✘ {fake_pool.id}.{expected} " in stderr
+    assert (UNANSWERED_PROMPT_DETAIL in stderr) is bool(detail)
 
 
 @pytest.mark.parametrize(

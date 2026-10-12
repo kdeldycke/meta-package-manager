@@ -120,7 +120,7 @@ A per-manager `sudo` value wins over the global flag, so you can escalate everyt
 
 ## One prompt, up front
 
-`mpm` [runs managers concurrently](concurrency.md) with their output muted behind a progress bar, so a `sudo` password prompt raised mid-run is easy to miss and can stall the whole command. Before a state-changing command (`install`, `upgrade`, `remove`, `sync`, `cleanup`, `restore`) that involves escalation, `mpm` therefore probes the credential cache without prompting. A manager counts only when the command reaches one of its privileged operations, which its page lists: with `sudo = true` forced on [`gem`](managers/gem.md), `mpm sync` asks for no password, because `gem` syncs without root. A manager that runs `sudo` itself counts on its policy alone. A cache found warm (a prior `sudo --validate`, a `NOPASSWD` rule, a recent privileged command) is silently kept fresh for the rest of the run, and every escalated call spends it: no prompt at all. While that keepalive runs, the terminal holds live `sudo` credentials, so anyone at the keyboard can interrupt `mpm` and reuse them until they expire: the same exposure as any pre-authenticated `sudo` session, worth knowing before walking away from a long run.
+`mpm` [runs managers concurrently](concurrency.md) with their output muted behind a progress bar, so a `sudo` password prompt raised mid-run is easy to miss and can stall the whole command. Before a state-changing command (`install`, `upgrade`, `remove`, `sync`, `cleanup`, `restore`) that involves escalation, `mpm` therefore probes the credential cache without prompting. A manager counts only when the command reaches one of its privileged operations, which its page lists: with `sudo = true` forced on [`gem`](managers/gem.md), `mpm sync` asks for no password, because `gem` syncs without root. A manager that runs `sudo` itself counts on its policy alone. [`cask`](managers/cask.md) is the exception: Homebrew drops the cached credentials before its own `sudo`, so a password typed up front cannot serve it, and it never counts. A cache found warm (a prior `sudo --validate`, a `NOPASSWD` rule, a recent privileged command) is silently kept fresh for the rest of the run, and every escalated call spends it: no prompt at all. While that keepalive runs, the terminal holds live `sudo` credentials, so anyone at the keyboard can interrupt `mpm` and reuse them until they expire: the same exposure as any pre-authenticated `sudo` session, worth knowing before walking away from a long run.
 
 The decision path, from the up-front probe to the end of the run:
 
@@ -223,7 +223,7 @@ warning:cask.install: Timed out after 500s on an unanswered password prompt. Run
 
 `mpm` then gives the terminal its echo back, which the killed prompt had turned off.
 
-That is the case on macOS, whose `sudo` has no prompt timeout. A `sudo` built with the upstream default gives up after 5 minutes. The manager then fails with its own message, and `mpm` adds the same advice and the same `no password` detail.
+On macOS, whose `sudo` has no prompt timeout, an unanswered prompt ends this way. A `sudo` built with the upstream default gives up after 5 minutes. The manager then fails with its own message, and `mpm` adds the same advice and the same `no password` detail.
 
 To authenticate up front instead, opt the manager in with a scoped `sudo = true` override:
 

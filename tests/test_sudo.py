@@ -634,9 +634,9 @@ def _wait_for(predicate: Callable[[], bool], timeout: float = 5.0) -> bool:
 
 
 def test_keepalive_drop_warns_once_and_rearms(monkeypatch, caplog):
-    """A refresh finding the credentials gone (Homebrew resets them on every
-    command) clears the warm flag, with one warning per drop, and a later
-    successful refresh sets the flag back, saying so at INFO."""
+    """A refresh finding the credentials gone (Homebrew resets them on purpose)
+    clears the warm flag, with one warning per drop, and a later successful
+    refresh sets the flag back, saying so at INFO."""
     monkeypatch.setattr("meta_package_manager.sudo._SUDO_KEEPALIVE_INTERVAL", 0.01)
     ctx = click.Context(click.Command("mpm"))
     refresh_rc = [0]
@@ -2082,9 +2082,9 @@ def test_diagnose_escalation_tells_unrunnable_from_stand_in():
     assert "Credentials: doas could not run." in lines
 
 
-# Stall watchdog: a mutating call of an internal escalator (cask, fink) that goes
-# silent on a cold credential cache may be blocked on a hidden sudo password
-# prompt. run() arms _StallWatchdog around the spawn to flag the silence.
+# Stall watchdog: a call of an internal escalator (cask, fink) that goes silent
+# may be blocked on a hidden sudo password prompt. run() arms _StallWatchdog
+# around the spawn to flag the silence.
 
 
 def _stalling_script(line: str, sleep: float) -> str:

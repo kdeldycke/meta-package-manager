@@ -897,7 +897,9 @@ class CLIExecutor:
 
     Forcing `sudo = true` on such a manager (config key or `--sudo`) still
     never wraps its commands, but does promote it into the up-front prompt path of
-    {func}`~meta_package_manager.sudo.prime_sudo`.
+    {func}`~meta_package_manager.sudo.prime_sudo`, unless the tool drops the
+    cached credentials itself
+    ({attr}`~meta_package_manager.execution.CLIExecutor.resets_sudo_timestamp`).
     """
 
     internal_sudo_operations: ClassVar[frozenset[str]] = _MUTATING_OPERATIONS
@@ -909,13 +911,16 @@ class CLIExecutor:
     databases. (`restore` stamps `"install"`, so it is covered.) A manager
     narrows the set when some of its commands never escalate, like `cask`.
 
-    Matched against {attr}`_active_operation` by `_hidden_prompt_risk`. On a
-    terminal with a cold credential cache, a call in one of these operations
-    runs last, without a spinner and under the stall watchdog, so the prompt of
-    the tool's own `sudo` is answerable. Detached like any other call, that
-    `sudo` [has no terminal to ask
+    Matched against `_active_operation` by `_hidden_prompt_risk` and
+    `_spends_warm_cache`. On a terminal with a cold credential cache, a call in
+    one of these operations runs last, without a spinner and under the stall
+    watchdog, so the prompt of the tool's own `sudo` is answerable. Detached
+    like any other call, that `sudo` [has no terminal to ask
     on](https://github.com/sudo-project/sudo/blob/f2f340938e51f9f12b29b72507d9edca8cb98abc/src/tgetpass.c#L128-L146)
-    and gives up at once.
+    and gives up at once. On a warm cache, the call stays in the session of the
+    terminal, where that `sudo` can spend the cached credentials. `mpm` handles
+    a tool that drops them itself ({attr}`resets_sudo_timestamp`) as on a cold
+    cache.
 
     Only read on a manager marked {attr}`internal_sudo`.
     """
@@ -926,10 +931,12 @@ class CLIExecutor:
     Homebrew runs `sudo --reset-timestamp` on purpose, [when a command first
     needs `sudo`](https://github.com/Homebrew/brew/blob/357e0b1b4e2b30a8e67fcee28058ef2b9057384d/Library/Homebrew/system_command.rb#L145-L155),
     and at the start of every command before `7.0.8`. A warm cache therefore
-    never spares the prompt of its own `sudo`. So
-    `_hidden_prompt_risk` holds for such a manager whatever the cache holds:
-    a call that can prompt still runs last, without a spinner and under the
-    stall watchdog.
+    never spares the prompt of its own `sudo`. So `_hidden_prompt_risk` holds
+    for such a manager whatever the cache holds: a call that can prompt still
+    runs last, without a spinner and under the stall watchdog. A forced
+    `sudo = true` asks no password up front for it either:
+    {func}`~meta_package_manager.sudo.prime_sudo` warns that the policy does
+    nothing.
 
     Only read on a manager marked {attr}`internal_sudo`.
     """
@@ -1568,10 +1575,9 @@ class CLIExecutor:
             line with forced environment variables) and streaming the raw output
             live to `DEBUG`, prefixed with the manager ID, via
             {func}`click_extra.execution.run_cli`
-          * flagging, on a terminal, the mutating call of an internal escalator
-            that goes silent on a cold credential cache and may be blocked on a
-            hidden password prompt (see
-            `_StallWatchdog`)
+          * flagging, on a terminal, the call of an internal escalator that
+            goes silent while it may be blocked on a hidden password prompt (see
+            `_hidden_prompt_risk` and `_StallWatchdog`)
           * detaching every other call into its own POSIX session and process
             group, so a timeout or Ctrl+C reaps the whole process tree and a
             wedged grandchild cannot linger as an orphan; the flagged call
@@ -1585,18 +1591,18 @@ class CLIExecutor:
             expected effect on execution
 
         The exception above has two more members, which both spend the
-        credential cache: a call mpm escalates itself, and the mutating call of
-        an internal escalator on a warm cache (see `_spends_warm_cache`).
-        `sudo` keys that cache to the terminal and to its session, which a
-        session of its own would hide.
+        credential cache: a call mpm escalates itself, and the call of an
+        internal escalator that may run its own `sudo` on a warm cache (see
+        `_spends_warm_cache`). `sudo` keys that cache to the terminal and to its
+        session, which a session of its own would hide.
 
         A call mpm escalates itself leads no process group of its own, so its
         timeout kill reaches the `sudo` process alone. `sudo` runs the command
-        under a monitor process whenever
-        `use_pty` is on, its upstream default since `1.9.14`, so the manager
-        binary survives the kill: an `apt upgrade` outlasting the state-change
-        timeout keeps `/var/lib/dpkg/lock-frontend`, and the next `apt` or
-        `aptitude` call fails on a lock mpm already declared finished.
+        under a monitor process whenever `use_pty` is on, its upstream default
+        since `1.9.14`, so the manager binary survives the kill: an `apt upgrade`
+        outlasting the state-change timeout keeps `/var/lib/dpkg/lock-frontend`,
+        and the next `apt` or `aptitude` call fails on a lock mpm already
+        declared finished.
 
         ```{todo}
         Delete the paragraph above once the click-extra floor reaches the
@@ -1814,14 +1820,12 @@ class CLIExecutor:
         """
         subject = self.subject
         effective_timeout = self._resolve_timeout()
-        # A mutating command of an internal escalator (cask, fink) may block
-        # on a hidden `sudo` password prompt when prime_sudo() found no warm
-        # credential cache to keep alive, or when the keepalive has since
-        # found the cache dropped (Homebrew resets it on purpose). Two
-        # things follow, and both must hold for the prompt to be answerable:
-        # the spinner stays still, leaving the terminal line the tool writes
-        # its prompt on, and the stall watchdog flags the silence for a
-        # prompt that never appears.
+        # A call of an internal escalator (cask, fink) may block on a hidden
+        # `sudo` password prompt: _hidden_prompt_risk() holds the conditions.
+        # Two things follow, and both must hold for the prompt to be
+        # answerable: the spinner stays still, leaving the terminal line the
+        # tool writes its prompt on, and the stall watchdog flags the silence
+        # for a prompt that never appears.
         hidden_prompt = _hidden_prompt_risk(self, self._active_operation)
         spinner = self._make_spinner(clean_args, animate=not hidden_prompt)
         if hidden_prompt and self.progress:
@@ -1875,15 +1879,13 @@ class CLIExecutor:
                         # the credential cache, which sudo keys per terminal
                         # and per session (tty_tickets), so a session of its
                         # own hides the very cache prime_sudo() just probed:
-                        # mpm's own escalations, and the mutating call of an
-                        # internal escalator on a warm cache. No-op on
-                        # Windows.
+                        # mpm's own escalations, and the call of an internal
+                        # escalator that may run its own sudo on a warm cache.
+                        # No-op on Windows.
                         start_new_session=not (
                             is_escalation
                             or watchdog is not None
-                            or _spends_warm_cache(
-                                self, self._active_operation in _MUTATING_OPERATIONS
-                            )
+                            or _spends_warm_cache(self, self._active_operation)
                         ),
                         # The tee routes each streamed record through the
                         # armed watchdog before the root logger. `None` is

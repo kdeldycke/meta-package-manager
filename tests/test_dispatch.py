@@ -88,9 +88,8 @@ class StubManager:
     `internal_sudo_operations` to every mutating operation, as they do on a real
     manager: `dispatch` reads them on every lane to decide which are held back to
     the sequential tail, so a stub without them would be a manager no scheduler
-    could place. `_active_operation`
-    defaults to `None` for the same reason, that being the class-level default of
-    `CLIExecutor._active_operation`, and
+    could place. `_active_operation` defaults to `None` for the same reason, that
+    being the class-level default of `CLIExecutor._active_operation`, and
     `subject` mirrors the property the trail reads to name each line.
     """
 
@@ -107,9 +106,7 @@ class StubManager:
         progress: bool = False,
         internal_sudo: bool = False,
         resets_sudo_timestamp: bool = False,
-        internal_sudo_operations: frozenset[str] = (
-            CLIExecutor.internal_sudo_operations
-        ),
+        internal_sudo_operations: frozenset[str] = ALL_OPERATIONS,
     ) -> None:
         self.id = manager_id
         self.progress = progress

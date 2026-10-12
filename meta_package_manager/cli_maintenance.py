@@ -183,19 +183,36 @@ def _maintenance_work(
 
     Logs `message` at the `announce` level, labeled with the manager's subject
     (rendered into the level prefix, `info:brew.sync:`), runs `operation(manager)`,
-    and returns
-    ``(id, {"errors": <CLI errors raised during the run>})`` so a manager that grows
-    its error list is marked `✘` in the trail. Shared by `sync` and `cleanup`,
-    whose work differs only in the message and the manager method.
+    and returns the manager ID with the `_trail_data` of the CLI errors raised
+    during the run, so a manager that grows its error list is marked `✘`
+    in the trail. `sync` uses it as is, and `cleanup` and `upgrade --all` each
+    build a variant with the details of their own.
     """
 
     def work(manager: PackageManager) -> tuple[str, dict]:
         logging.log(announce, message, extra={"label": manager.subject})
         with manager.new_errors() as errors:
             operation(manager)
-        return manager.id, {"errors": errors}
+        return manager.id, _trail_data(errors)
 
     return work
+
+
+def _trail_data(errors: list[CLIError], *details: str) -> dict:
+    """Build the `data` a maintenance fan-out hands back for one manager.
+
+    {func}`~meta_package_manager.dispatch.collect_from_managers` reads it: the
+    `errors` mark the trail line of the manager `✘`, and the detail suffixes it
+    in parentheses. The `details` of the command come first, then what the
+    operation died of when {func}`~meta_package_manager.cli.failure_detail`
+    knows it. A line with nothing to say gets no detail.
+    """
+    data: dict = {"errors": errors}
+    cause = failure_detail(errors)
+    parts = [*details, cause] if cause else details
+    if parts:
+        data["detail"] = ", ".join(parts)
+    return data
 
 
 def _dispatch_sourced_operation(
@@ -764,16 +781,10 @@ def upgrade(ctx, all, packages_specs):
                 )
             if output:
                 logging.info(output, extra={"label": manager.subject})
-            data: dict = {"errors": errors}
             rows = report.close(manager)
             # What moved, then what the upgrade died of when mpm knows it.
-            details = [] if rows is None else [outcome_detail(rows, UPGRADE_RESULTS)]
-            cause = failure_detail(errors)
-            if cause:
-                details.append(cause)
-            if details:
-                data["detail"] = ", ".join(details)
-            return manager.id, data
+            moved = () if rows is None else (outcome_detail(rows, UPGRADE_RESULTS),)
+            return manager.id, _trail_data(errors, *moved)
 
         # Full upgrade is independent per manager, so fan out concurrently with a
         # ✓/✘ trail and a success-count finisher (see collect_from_managers).
@@ -1070,7 +1081,7 @@ def cleanup(ctx, orphans, cache, repair):
                 categories[categories.index("orphans")] = (
                     f"orphans: {outcome_detail(rows, SWEEP_RESULTS)}"
                 )
-        return manager.id, {"errors": errors, "detail": ", ".join(categories)}
+        return manager.id, _trail_data(errors, *categories)
 
     # Cleanup is independent per manager, so fan out concurrently with a ✓/✘ trail
     # and a success-count finisher (see collect_from_managers).

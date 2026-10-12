@@ -134,23 +134,23 @@ if TYPE_CHECKING:
 
 
 UNANSWERED_PROMPT_DETAIL: Final = "no password"
-"""How a `✘` trail line words a call that timed out on a password prompt.
+"""How a `✘` trail line words a call that ended on an unanswered password prompt.
 
 {meth}`CLIExecutor.run <meta_package_manager.execution.CLIExecutor.run>` files it
-as the {attr}`~meta_package_manager.execution.CLIError.detail` of that timeout,
-when `_StallWatchdog` still finds the prompt on the terminal.
+as the {attr}`~meta_package_manager.execution.CLIError.detail` of two failures:
+its own timeout, when `_StallWatchdog` still finds the prompt on the terminal,
+and the failure of a tool whose own `sudo` gave up on the prompt
+(`_is_prompt_timeout`).
 """
 
 _STALL_NOTICE_DELAY: Final = 30
 """Seconds of child silence before an armed stall watchdog raises its notice.
 
-Counted on a terminal, during a mutating call of a manager that runs `sudo`
-internally ({attr}`CLIExecutor.internal_sudo
-<meta_package_manager.execution.CLIExecutor.internal_sudo>`). Long enough that
-ordinary quiet stretches (dependency resolution, download lulls that still tick
-progress lines) rarely trip it, yet far below
-{data}`~meta_package_manager.execution.MUTATING_TIMEOUT`, so the user gets the
-hint while the hidden password prompt can still be answered. See
+Counted during a call that may hide a `sudo` password prompt
+(`_hidden_prompt_risk`). Long enough that ordinary quiet stretches (dependency
+resolution, download lulls that still tick progress lines) rarely trip it, yet
+far below {data}`~meta_package_manager.execution.MUTATING_TIMEOUT`, so the user
+gets the hint while the hidden password prompt can still be answered. See
 `_StallWatchdog`.
 """
 
@@ -1252,8 +1252,8 @@ def _start_sudo_keepalive(ctx: Context, escalator: Escalator) -> None:
     fan-out does not outlast sudo's timestamp and re-prompt mid-flight. Output is
     captured so a failed refresh cannot smear the aggregate spinner drawing on
     stderr. Sets {data}`_SUDO_CACHE_WARM` for the run, and keeps it honest: a
-    refresh finding the credentials gone (a manager reset them, Homebrew does on
-    every command, or a strict `sudoers` policy expired them) clears the flag and
+    refresh finding the credentials gone (a manager reset them, as Homebrew does
+    on purpose, or a strict `sudoers` policy expired them) clears the flag and
     warns, once per drop, so the stall watchdog re-arms for later spawns; a
     refresh succeeding again, after the user re-authenticates in this terminal,
     sets it back. The refresh never re-prompts by design: only a command that
@@ -1841,9 +1841,8 @@ def _hidden_prompt_risk(manager: CLIExecutor, operation: str | None) -> bool:
     ({attr}`CLIExecutor.internal_sudo_operations
     <meta_package_manager.execution.CLIExecutor.internal_sudo_operations>`),
     made on a terminal while the credential cache is cold. Those are the
-    conditions under
-    which the tool's own `sudo` prompts for a password nothing has primed. A
-    manager that drops the cache itself
+    conditions under which the tool's own `sudo` prompts for a password nothing
+    has primed. A manager that drops the cache itself
     ({attr}`CLIExecutor.resets_sudo_timestamp
     <meta_package_manager.execution.CLIExecutor.resets_sudo_timestamp>`)
     meets them whatever the cache holds.
@@ -1876,13 +1875,16 @@ def _hidden_prompt_risk(manager: CLIExecutor, operation: str | None) -> bool:
     )
 
 
-def _spends_warm_cache(manager: CLIExecutor, mutating: bool) -> bool:
+def _spends_warm_cache(manager: CLIExecutor, operation: str | None) -> bool:
     """Whether a call may run the manager's own `sudo` on the cache mpm keeps warm.
 
-    True for a `mutating` call of a manager that escalates internally, while
-    the cache is warm.
+    True for a call of a manager that escalates internally, in an operation
+    where its tool may run `sudo`
+    ({attr}`CLIExecutor.internal_sudo_operations
+    <meta_package_manager.execution.CLIExecutor.internal_sudo_operations>`),
+    while the cache is warm.
     {meth}`CLIExecutor.run <meta_package_manager.execution.CLIExecutor.run>` then
-    keeps the call in the session of the terminal, where every other call gets
+    keeps the call in the session of the terminal, where a call otherwise gets
     a session of its own.
 
     `sudo` keys a ticket on the terminal [and on its
@@ -1900,7 +1902,7 @@ def _spends_warm_cache(manager: CLIExecutor, mutating: bool) -> bool:
     return (
         manager.internal_sudo
         and not manager.resets_sudo_timestamp
-        and mutating
+        and operation in manager.internal_sudo_operations
         and _SUDO_CACHE_WARM.is_set()
     )
 
@@ -1949,8 +1951,8 @@ def _restore_terminal_modes(modes: list[Any]) -> None:
         os.close(fd)
 
 
-def _terminal_echo() -> bool | None:
-    """Whether the controlling terminal echoes the keys the user types.
+def _terminal_echo(modes: list[Any] | None) -> bool | None:
+    """Whether a terminal in these `modes` echoes the keys the user types.
 
     `sudo` turns the echo off on `/dev/tty` [before it writes its password
     prompt](https://github.com/sudo-project/sudo/blob/f2f340938e51f9f12b29b72507d9edca8cb98abc/src/tgetpass.c#L179-L229),
@@ -1959,12 +1961,12 @@ def _terminal_echo() -> bool | None:
     `_StallWatchdog` reads it for. Measured on macOS 27 with the system `sudo`:
     `stty -a` reports `-echo` while `Password:` waits.
 
-    :return: `None` when `_terminal_modes` has no answer.
+    :param modes: what `_terminal_modes` read.
+    :return: `None` when `_terminal_modes` had no answer.
     """
-    if sys.platform == "win32":
+    if sys.platform == "win32" or modes is None:
         return None
-    modes = _terminal_modes()
-    return None if modes is None else bool(modes[3] & termios.ECHO)
+    return bool(modes[3] & termios.ECHO)
 
 
 class _StallWatchdog(logging.Handler):
@@ -1976,8 +1978,8 @@ class _StallWatchdog(logging.Handler):
     `/dev/null` and its output streams to `DEBUG` logs, so on a cold
     credential cache the prompt lands invisibly on `/dev/tty`: the run looks
     stuck until the mutating timeout kills it. When {func}`prime_sudo` left the
-    cache cold, or the keepalive later found it dropped mid-run,
-    {meth}`CLIExecutor.run
+    cache cold, the keepalive later found it dropped mid-run, or the tool drops
+    it before its own `sudo`, {meth}`CLIExecutor.run
     <meta_package_manager.execution.CLIExecutor.run>` arms this watchdog around
     the spawn: once {data}`_STALL_NOTICE_DELAY` seconds pass without a fresh
     output line, a daemon thread logs one `WARNING` naming the manager and
@@ -2082,10 +2084,10 @@ class _StallWatchdog(logging.Handler):
         # once. Touched by the notice thread only.
         self._noticed: float | None = None
         # Modes of the terminal before the child starts. Only an echo found on
-        # can go off under a prompt, see prompt_on_screen(), and stop() gives
+        # can go off under a prompt, see _prompt_on_screen(), and stop() gives
         # these modes back when a killed prompt left its own behind.
         self._modes = _terminal_modes()
-        self._echoed = bool(self._modes and self._modes[3] & termios.ECHO)
+        self._echoed = _terminal_echo(self._modes) is True
         self.prompt_unanswered = False
         # Whether a prompt held a notice back, for the DEBUG line of stop().
         self._prompt_seen = False
@@ -2124,13 +2126,13 @@ class _StallWatchdog(logging.Handler):
         except Exception:  # noqa: BLE001
             self.handleError(record)
 
-    def prompt_on_screen(self) -> bool:
+    def _prompt_on_screen(self) -> bool:
         """Whether a program holds the terminal echo off to read a password.
 
         Read against the echo found when the call started: a terminal whose echo
         was already off then, or that cannot answer, proves nothing about a prompt.
         """
-        return self._echoed and _terminal_echo() is False
+        return self._echoed and _terminal_echo(_terminal_modes()) is False
 
     def _watch(self) -> None:
         """Notice-thread body: warn once per silence episode.
@@ -2145,7 +2147,7 @@ class _StallWatchdog(logging.Handler):
             last_stamp, last_line = self._activity
             if self._noticed == last_stamp:
                 continue
-            if self.prompt_on_screen():
+            if self._prompt_on_screen():
                 # The prompt is the notice of this episode. Nothing is written,
                 # not even at DEBUG: any line here moves the cursor away from it.
                 self._noticed = last_stamp
@@ -2165,7 +2167,7 @@ class _StallWatchdog(logging.Handler):
             # Break the line a prompt may be sitting on, so the notice starts on
             # a fresh one instead of running on from "Password:". The tool's
             # prompt goes to `/dev/tty` without a trailing newline and never
-            # reaches the pipe mpm reads. prompt_on_screen() rules a prompt out
+            # reaches the pipe mpm reads. _prompt_on_screen() rules a prompt out
             # only where the terminal answers, and never one that echoes its
             # answer: the watchdog is armed only when a prompt is possible
             # (`_hidden_prompt_risk`), which is what makes an unconditional break
@@ -2207,7 +2209,7 @@ class _StallWatchdog(logging.Handler):
         self._stop.set()
         self._thread.join()
         self.close()
-        self.prompt_unanswered = self.prompt_on_screen()
+        self.prompt_unanswered = self._prompt_on_screen()
         if self.prompt_unanswered and self._modes is not None:
             _restore_terminal_modes(self._modes)
         if self._prompt_seen:

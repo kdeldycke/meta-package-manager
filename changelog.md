@@ -7,6 +7,9 @@
 
 ## [`8.1.2` (2026-10-12)](https://github.com/kdeldycke/meta-package-manager/compare/v8.1.1...v8.1.2)
 
+> [!NOTE]
+> `8.1.2` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/8.1.2/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v8.1.2).
+
 - **Breaking:** [mpm] Rename the `held by cooldown` status of the report of what a command changed to `cooldown`, in the table, on the trail line and in the serialized `status` value.
 - [mpm] Name the unanswered password prompt a command timed out on: its warning says what to do next, and its `✘` trail line reads `no password`.
 - [mpm] Add the `internal_sudo_operations` and `resets_sudo_timestamp` fields to manager definitions: the operations that run the tool's own `sudo`, and whether the tool resets the cached credentials.

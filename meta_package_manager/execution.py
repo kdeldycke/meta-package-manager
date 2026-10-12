@@ -86,6 +86,7 @@ from .sudo import (
     UNANSWERED_PROMPT_DETAIL,
     _hidden_prompt_risk,
     _is_permission_failure,
+    _is_prompt_timeout,
     _is_sudo_auth_failure,
     _resolved_sudo,
     _running_as_root,
@@ -1736,6 +1737,10 @@ class CLIExecutor:
         failed = bool(code) if strict else bool(code and error)
         if failed:
             exception = CLIError(code, output, error)
+            # The tool's own `sudo` stopped waiting for a password: the same
+            # cause as a timeout of mpm on that prompt, under the same name.
+            if _is_prompt_timeout(f"{error}\n{output}"):
+                exception.detail = UNANSWERED_PROMPT_DETAIL
             self._relay_failure(exception, escalator=escalator)
             # Accumulate before deciding whether to raise: the error is recorded
             # whether or not it also propagates. A rejected version probe is the
@@ -1773,7 +1778,7 @@ class CLIExecutor:
         # A mutating command of an internal escalator (cask, fink) may block
         # on a hidden `sudo` password prompt when prime_sudo() found no warm
         # credential cache to keep alive, or when the keepalive has since
-        # found the cache dropped (every Homebrew command resets it). Two
+        # found the cache dropped (Homebrew resets it on purpose). Two
         # things follow, and both must hold for the prompt to be answerable:
         # the spinner stays still, leaving the terminal line the tool writes
         # its prompt on, and the stall watchdog flags the silence for a
@@ -1875,7 +1880,7 @@ class CLIExecutor:
             self._cleanup_windows_processes()
             msg = f"Timed out after {effective_timeout}s."
             detail = None
-            if watchdog is not None and watchdog.prompt_on_screen():
+            if watchdog is not None and watchdog.prompt_unanswered:
                 # The prompt still holds the terminal line, with no line break
                 # after it: end that line, so the warning starts on its own.
                 echo(err=True)
@@ -1908,10 +1913,11 @@ class CLIExecutor:
     ) -> None:
         """Log what a failed run has to say, the moment it happened.
 
-        Three notices, each gated on what the failure looks like: the credential
+        Four notices, each gated on what the failure looks like: the credential
         hint of an escalation that could not authenticate, the command's own
-        diagnosis otherwise, and the opt-in hint when a dormant privileged
-        marker meets a permission refusal.
+        diagnosis otherwise, what to do about a password prompt its `sudo`
+        gave up on, and the opt-in hint when a dormant privileged marker meets
+        a permission refusal.
 
         `escalator` is the one mpm wrapped the command in, or `None` for a
         command it ran as is.
@@ -1945,6 +1951,14 @@ class CLIExecutor:
             and logging.getLogger().getEffectiveLevel() > logging.DEBUG
         ):
             logging.warning(exception.diagnosis, extra={"label": self.subject})
+        # The relay above quotes the tool on the prompt its own `sudo` gave up
+        # on. This adds what to do, as the timeout of that prompt words it.
+        if exception.detail == UNANSWERED_PROMPT_DETAIL:
+            logging.warning(
+                "Failed on an unanswered password prompt. Run the command again "
+                "and answer the prompt.",
+                extra={"label": self.subject},
+            )
         # A dormant privileged marker meeting a permission refusal: the
         # marker predicted exactly this failure, so name the opt-in. On top
         # of the relay above, which carries the tool's own account, usually

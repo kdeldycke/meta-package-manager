@@ -102,6 +102,7 @@ import logging
 import os
 import re
 import shutil
+import signal
 import subprocess
 import sys
 import threading
@@ -122,6 +123,7 @@ TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
     from pathlib import Path
+    from typing import Any
 
     from click import Context
 
@@ -179,8 +181,9 @@ silent-call stall watchdog skips arming while this flag is set.
 The keepalive keeps the flag honest mid-run: a refresh that finds the
 credentials gone clears it, with one warning per drop, so later spawns arm the
 watchdog again, and a refresh that succeeds after a re-authentication sets it
-back. Homebrew is the known cache killer: every `brew` command resets the
-`sudo` timestamp at startup, on purpose (see `docs/sudo.md`).
+back. Homebrew is the known cache killer: it resets the `sudo` timestamp on
+purpose, at the start of every command before `7.0.8` and when a command first
+needs `sudo` since (see `docs/sudo.md`).
 
 ```{note}
 
@@ -1031,6 +1034,21 @@ def _is_sudo_auth_failure(error: str) -> bool:
     )
 
 
+def _is_prompt_timeout(error: str) -> bool:
+    """Whether a `sudo` gave up on a password prompt nobody answered.
+
+    A tool that escalates on its own relays the line when its `sudo` stops
+    waiting: `sudo: timed out reading password` from the original, whose
+    prompt lasts [5 minutes by
+    default](https://github.com/sudo-project/sudo/blob/f2f340938e51f9f12b29b72507d9edca8cb98abc/configure.ac#L198),
+    and `sudo: timed out` from `sudo-rs`, which words it [as its PAM
+    error](https://github.com/trifectatechfoundation/sudo-rs/blob/c42055954861eb6cba42b5286682689fb15d8f30/src/pam/error.rs#L241).
+    The stock `sudo` of macOS has no prompt timeout, so it never prints it: see
+    `_StallWatchdog.prompt_unanswered` for the path its prompt takes.
+    """
+    return "sudo: timed out" in error.lower()
+
+
 def _is_sudo_denied(error: str) -> bool:
     """Whether `error` is `sudo` reporting the user is not authorized to run it.
 
@@ -1268,7 +1286,7 @@ def _start_sudo_keepalive(ctx: Context, escalator: Escalator) -> None:
                 _SUDO_CACHE_WARM.clear()
                 logging.warning(
                     "The sudo credentials primed for this run are gone: a "
-                    "manager reset them (every Homebrew command does) or the "
+                    "manager reset them (Homebrew does, on purpose) or the "
                     "sudoers policy expired them. Managers needing root may "
                     "prompt or fail.",
                 )
@@ -1838,15 +1856,8 @@ def _hidden_prompt_risk(internal_sudo: bool, operation: str | None) -> bool:
     )
 
 
-def _terminal_echo() -> bool | None:
-    """Whether the controlling terminal echoes the keys the user types.
-
-    `sudo` turns the echo off on `/dev/tty` [before it writes its password
-    prompt](https://github.com/sudo-project/sudo/blob/f2f340938e51f9f12b29b72507d9edca8cb98abc/src/tgetpass.c#L179-L229),
-    and restores it once it has the answer. An echo that goes off during a call
-    therefore means a prompt is on screen and waits at the cursor, which is what
-    `_StallWatchdog` reads it for. Measured on macOS 27 with the system `sudo`:
-    `stty -a` reports `-echo` while `Password:` waits.
+def _terminal_modes() -> list[Any] | None:
+    """The modes of the controlling terminal, as `termios.tcgetattr` reads them.
 
     :return: `None` when the terminal cannot answer: on Windows, which has no
         `termios`, and in a process with no controlling terminal.
@@ -1858,11 +1869,53 @@ def _terminal_echo() -> bool | None:
     except OSError:
         return None
     try:
-        return bool(termios.tcgetattr(fd)[3] & termios.ECHO)
+        return termios.tcgetattr(fd)
     except termios.error:
         return None
     finally:
         os.close(fd)
+
+
+def _restore_terminal_modes(modes: list[Any]) -> None:
+    """Give the controlling terminal back the `modes` `_terminal_modes` read.
+
+    Best effort: a terminal that is gone has nothing to get back.
+    """
+    if sys.platform == "win32":
+        return
+    try:
+        fd = os.open(os.ctermid(), os.O_RDWR | os.O_NOCTTY)
+    except OSError:
+        return
+    # A process outside the foreground group that sets the modes of its
+    # terminal is sent SIGTTOU, which stops it, unless its thread blocks that
+    # signal.
+    blocked = signal.pthread_sigmask(signal.SIG_BLOCK, {signal.SIGTTOU})
+    try:
+        termios.tcsetattr(fd, termios.TCSANOW, modes)
+    except termios.error:
+        pass
+    finally:
+        signal.pthread_sigmask(signal.SIG_SETMASK, blocked)
+        os.close(fd)
+
+
+def _terminal_echo() -> bool | None:
+    """Whether the controlling terminal echoes the keys the user types.
+
+    `sudo` turns the echo off on `/dev/tty` [before it writes its password
+    prompt](https://github.com/sudo-project/sudo/blob/f2f340938e51f9f12b29b72507d9edca8cb98abc/src/tgetpass.c#L179-L229),
+    and restores it once it has the answer. An echo that goes off during a call
+    therefore means a prompt is on screen and waits at the cursor, which is what
+    `_StallWatchdog` reads it for. Measured on macOS 27 with the system `sudo`:
+    `stty -a` reports `-echo` while `Password:` waits.
+
+    :return: `None` when `_terminal_modes` has no answer.
+    """
+    if sys.platform == "win32":
+        return None
+    modes = _terminal_modes()
+    return None if modes is None else bool(modes[3] & termios.ECHO)
 
 
 class _StallWatchdog(logging.Handler):
@@ -1946,6 +1999,25 @@ class _StallWatchdog(logging.Handler):
     every record reach {meth}`emit`: dropping is the root logger's decision.
     """
 
+    prompt_unanswered: bool
+    """Whether the call ended while a password prompt still held the terminal.
+
+    Set by {meth}`stop`.
+    {meth}`CLIExecutor.run <meta_package_manager.execution.CLIExecutor.run>`
+    reads it when the call times out, to name the prompt in its warning.
+
+    ```{note}
+    That is how an unanswered prompt ends on macOS, whose `sudo` is built
+    [with no prompt
+    timeout](https://github.com/apple-oss-distributions/sudo/blob/9d15835617972783e565818fae7ea047626b1e5c/sudo/config.h#L1233).
+    Upstream [defaults to 5
+    minutes](https://github.com/sudo-project/sudo/blob/f2f340938e51f9f12b29b72507d9edca8cb98abc/configure.ac#L198),
+    well under {data}`~meta_package_manager.execution.MUTATING_TIMEOUT`:
+    such a `sudo` gives up first, and the tool then fails with an account of
+    it that `_is_prompt_timeout` recognizes.
+    ```
+    """
+
     def __init__(self, label: str) -> None:
         """Arm the watchdog for one CLI call, its notices labeled with `label`."""
         super().__init__()
@@ -1960,9 +2032,12 @@ class _StallWatchdog(logging.Handler):
         # or by a prompt seen on the terminal, so each episode warns at most
         # once. Touched by the notice thread only.
         self._noticed: float | None = None
-        # Echo of the terminal before the child starts: only an echo found on
-        # can go off under a prompt. See prompt_on_screen().
-        self._echoed = _terminal_echo()
+        # Modes of the terminal before the child starts. Only an echo found on
+        # can go off under a prompt, see prompt_on_screen(), and stop() gives
+        # these modes back when a killed prompt left its own behind.
+        self._modes = _terminal_modes()
+        self._echoed = bool(self._modes and self._modes[3] & termios.ECHO)
+        self.prompt_unanswered = False
         # Whether a prompt held a notice back, for the DEBUG line of stop().
         self._prompt_seen = False
         # Instantiated directly, not via getLogger: the tee must stay out of the
@@ -2005,25 +2080,8 @@ class _StallWatchdog(logging.Handler):
 
         Read against the echo found when the call started: a terminal whose echo
         was already off then, or that cannot answer, proves nothing about a prompt.
-
-        {meth}`CLIExecutor.run <meta_package_manager.execution.CLIExecutor.run>`
-        asks once more when the call times out. The kill is a `SIGKILL`, which
-        leaves the prompting program no chance to restore the echo: an echo
-        still off then means the call died on a prompt nobody answered, and the
-        warning of the timeout says so.
-
-        ```{note}
-        That is how an unanswered prompt ends on macOS, whose `sudo` is built
-        [with no prompt
-        timeout](https://github.com/apple-oss-distributions/sudo/blob/9d15835617972783e565818fae7ea047626b1e5c/sudo/config.h#L1233).
-        Upstream [defaults to 5
-        minutes](https://github.com/sudo-project/sudo/blob/f2f340938e51f9f12b29b72507d9edca8cb98abc/configure.ac#L198),
-        well under {data}`~meta_package_manager.execution.MUTATING_TIMEOUT`:
-        such a `sudo` gives up first, and the tool then fails with its own
-        account of it.
-        ```
         """
-        return bool(self._echoed) and _terminal_echo() is False
+        return self._echoed and _terminal_echo() is False
 
     def _watch(self) -> None:
         """Notice-thread body: warn once per silence episode.
@@ -2080,10 +2138,29 @@ class _StallWatchdog(logging.Handler):
 
         The call is over, so no prompt waits at the cursor: this is where a
         notice held back for a prompt gets its `DEBUG` record.
+
+        A prompt that still holds the terminal belongs to a program the call
+        took down with it, on a timeout or an interrupt. That kill is a
+        `SIGKILL`, which leaves the program no chance to restore the echo it
+        turned off. So {attr}`prompt_unanswered` records the prompt, and the
+        terminal gets back the modes it had when the call started.
+
+        ```{note}
+        The restored echo shows no password, because the kill reaches a
+        `sudo` at its prompt. Read in the sources, not measured: `sudo`
+        asks the password under [the credentials it started
+        with](https://github.com/apple-oss-distributions/sudo/blob/9d15835617972783e565818fae7ea047626b1e5c/sudo/plugins/sudoers/set_perms.c#L890-L902),
+        its real UID still the caller's, and the kernel [lets a process
+        signal](https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/bsd/kern/kern_sig.c#L343-L352)
+        another whose real UID is its own.
+        ```
         """
         self._stop.set()
         self._thread.join()
         self.close()
+        self.prompt_unanswered = self.prompt_on_screen()
+        if self.prompt_unanswered and self._modes is not None:
+            _restore_terminal_modes(self._modes)
         if self._prompt_seen:
             logging.debug(
                 "Held the stall notice back: a password prompt was on screen.",

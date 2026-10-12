@@ -56,7 +56,12 @@ from meta_package_manager.execution import (
     format_plan_command,
 )
 from meta_package_manager.pool import pool
-from meta_package_manager.sudo import _STALL_NOTICE_OPERATIONS, ESCALATORS, Escalator
+from meta_package_manager.sudo import (
+    _STALL_NOTICE_OPERATIONS,
+    ESCALATORS,
+    UNANSWERED_PROMPT_DETAIL,
+    Escalator,
+)
 
 from .fake_manager import FakeManager
 from .test_sudo import only_escalator
@@ -1107,6 +1112,38 @@ def test_dormant_marker_hint_negative_gates(caplog, marker, stderr, euid):
     ):
         manager.run_cli("-c", script, sudo=marker)
     assert not any("marked privileged" in r.getMessage() for r in caplog.records)
+
+
+@pytest.mark.parametrize(
+    ("stderr", "named"),
+    (
+        pytest.param("sudo: timed out reading password", True, id="sudo"),
+        pytest.param("sudo: timed out", True, id="sudo-rs"),
+        pytest.param("installer: timed out reading password", False, id="unsigned"),
+        pytest.param("sudo: a password is required", False, id="other-refusal"),
+    ),
+)
+def test_failed_run_names_a_prompt_its_sudo_gave_up_on(caplog, stderr, named):
+    """A tool whose own `sudo` stopped waiting for a password fails like a
+    timeout of mpm on that prompt: the same advice, after the tool's own
+    account, and the same cause for the trail line.
+
+    The two controls keep the plain relay: a line no `sudo` signed, and a
+    `sudo` that refuses for another reason.
+    """
+    manager = FakeManager()
+    script = f"import sys; sys.stderr.write({stderr!r}); sys.exit(1)"
+    with caplog.at_level(logging.WARNING):
+        manager.run_cli("-c", script)
+    advice = (
+        "Failed on an unanswered password prompt. "
+        "Run the command again and answer the prompt."
+    )
+    messages = [record.getMessage() for record in caplog.records]
+    assert messages[0] == stderr
+    assert (advice in messages[1:]) is named
+    detail = UNANSWERED_PROMPT_DETAIL if named else None
+    assert manager.cli_errors[0].detail == detail
 
 
 @pytest.mark.skipif(is_any_windows(), reason="escalation is UNIX-only")

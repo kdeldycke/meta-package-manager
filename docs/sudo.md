@@ -144,7 +144,7 @@ flowchart TD
     reprobe -->|"yes"| keepalive
     reprobe -->|"no: doas without persist,<br/>polkit under auth_admin"| nokeep
     prompt -->|"refused"| failed["One warning:<br/>escalations may fail"]
-    keepalive -->|"credentials dropped mid-run:<br/>every Homebrew command resets them"| dropped["One warning:<br/>stall notices re-arm"]
+    keepalive -->|"credentials dropped mid-run:<br/>Homebrew resets them on purpose"| dropped["One warning:<br/>stall notices re-arm"]
     dropped -->|"a new sudo authentication<br/>in the same terminal"| keepalive
 ```
 
@@ -171,7 +171,7 @@ $ echo '%wheel ALL=(ALL:ALL) NOPASSWD: ALL' | sudo EDITOR='tee -a' visudo
 
 Append it to `/etc/sudoers` rather than dropping it into `/etc/sudoers.d`, or check afterwards that it took effect. Order decides which rule wins, and `sudoers(5)` states it plainly: "*Where there are multiple matches, the last match is used (which is not necessarily the most specific match)*". An `@includedir /etc/sudoers.d` splices each drop-in in at the position of that directive, so a stock `%wheel ALL=(ALL:ALL) ALL` sitting after it silently restores the password prompt and the drop-in reads as if it were never written. `sudo --list` reports what actually applies, which is the question `mpm` itself asks.
 
-One tool undoes the priming from inside the run: every Homebrew command [resets the `sudo` timestamp at startup](https://github.com/Homebrew/brew/blob/6bf9a47106220bc907579a9aa7c47faac070ea40/Library/Homebrew/brew.sh#L651-L655), on purpose, so a run mixing [`brew`](managers/brew.md) or [`cask`](managers/cask.md) with escalating managers can lose its credentials mid-flight. `mpm` warns when its background refresh finds them gone, and the managers escalating internally regain their hidden-prompt notice. A `NOPASSWD` rule is immune to the reset.
+One tool undoes the priming from inside the run. Homebrew resets the `sudo` timestamp on purpose: [at the start of every command](https://github.com/Homebrew/brew/blob/6bf9a47106220bc907579a9aa7c47faac070ea40/Library/Homebrew/brew.sh#L651-L655) before `7.0.8`, and [when a command first needs `sudo`](https://github.com/Homebrew/brew/blob/357e0b1b4e2b30a8e67fcee28058ef2b9057384d/Library/Homebrew/system_command.rb#L145-L155) since. So a run mixing [`brew`](managers/brew.md) or [`cask`](managers/cask.md) with escalating managers can lose its credentials mid-flight. `mpm` warns when its background refresh finds them gone, and the managers escalating internally regain their hidden-prompt notice. A `NOPASSWD` rule is immune to the reset.
 
 The probe also reads `sudo`'s answer: a user the `sudoers` policy does not authorize at all gets one warning and no password prompt, since a password could not change the answer.
 
@@ -221,16 +221,20 @@ warning:cask.install: Timed out after 500s on an unanswered password prompt. Run
 ✘ cask.install: macfuse (no password) (8:20)
 ```
 
-That is the case on macOS, whose `sudo` has no prompt timeout. A `sudo` built with the upstream default gives up after 5 minutes, and the manager then reports its own failure.
+`mpm` then gives the terminal its echo back, which the killed prompt had turned off.
 
-For a guaranteed one-prompt experience, opt the manager into up-front authentication with a scoped `sudo = true` override:
+That is the case on macOS, whose `sudo` has no prompt timeout. A `sudo` built with the upstream default gives up after 5 minutes. The manager then fails with its own message, and `mpm` adds the same advice and the same `no password` detail.
+
+To authenticate up front instead, opt the manager in with a scoped `sudo = true` override:
 
 ```toml
-[mpm.overrides.cask]
-sudo = true # Authenticate up front before any privileged cask payload.
+[mpm.overrides.fink]
+sudo = true # Authenticate up front, before any privileged command.
 ```
 
-or scope the global flag to the manager: `mpm --cask --sudo upgrade`. Prefer these to a bare `mpm --sudo upgrade`, which is broader than it looks: the global flag covers every selected manager, and also activates dormant privileged markers like those of [`pip`](managers/pip.md), [`npm`](managers/npm.md), [`gem`](managers/gem.md) and [`cpan`](managers/cpan.md), wrapping their system-scope installs in `sudo`. Left dormant, those markers still pay off on failure: an operation carrying one that dies on a permission error (a root-owned npm prefix, a system Ruby) draws a warning naming this scoped opt-in, right after the tool's own account of the refusal.
+or scope the global flag to the manager: `mpm --fink --sudo upgrade`. Prefer these to a bare `mpm --sudo upgrade`, which is broader than it looks: the global flag covers every selected manager, and also activates dormant privileged markers like those of [`pip`](managers/pip.md), [`npm`](managers/npm.md), [`gem`](managers/gem.md) and [`cpan`](managers/cpan.md), wrapping their system-scope installs in `sudo`. Left dormant, those markers still pay off on failure: an operation carrying one that dies on a permission error (a root-owned npm prefix, a system Ruby) draws a warning naming this scoped opt-in, right after the tool's own account of the refusal.
+
+A password typed up front does not hold for [`brew`](managers/brew.md) and [`cask`](managers/cask.md): Homebrew drops the cached credentials before its own `sudo`, so its prompt still comes mid-run. Only a `NOPASSWD` rule spares that prompt.
 
 ## Running `mpm` itself as root
 

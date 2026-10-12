@@ -653,7 +653,7 @@ def dispatch(
     # continues on that same line, leaving the prompt unreadable and the run stalled
     # until the mutating timeout. Running last hands the prompt a terminal nothing
     # else is writing to. The risk is read once, here: a cache dropped mid-run
-    # (every Homebrew command resets it) re-arms the per-call notice of
+    # (Homebrew resets it on purpose) re-arms the per-call notice of
     # _StallWatchdog, never this scheduling.
     #
     # A whole lane is held back on one such manager, since a lock family cannot be

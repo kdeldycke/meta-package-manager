@@ -2091,6 +2091,15 @@ def terminal(monkeypatch):
     os.close(slave)
 
 
+def _echo(terminal: str) -> bool:
+    """Whether `terminal` echoes the keys typed on it."""
+    descriptor = os.open(terminal, os.O_RDONLY | os.O_NOCTTY)
+    try:
+        return bool(termios.tcgetattr(descriptor)[3] & termios.ECHO)
+    finally:
+        os.close(descriptor)
+
+
 def _set_echo(terminal: str, echo: bool) -> None:
     """Turn the echo of `terminal` on or off, the flag a password read holds off."""
     descriptor = os.open(terminal, os.O_RDWR | os.O_NOCTTY)
@@ -2193,7 +2202,8 @@ def test_timeout_names_an_unanswered_password_prompt(
     prompt from the terminal the way the watchdog does. The prompt also holds
     the terminal line with no line break after it: the call ends that line, so
     the warning does not run on from `Password:`. The `✘` trail line of the
-    attempt names the cause too.
+    attempt names the cause too. The killed child could not turn the echo back
+    on, so the call does: it leaves the terminal as it found it.
 
     The two controls time out the same way and keep the plain wording: a child
     that never touches the echo, and one that finds it off already.
@@ -2236,6 +2246,7 @@ def test_timeout_names_an_unanswered_password_prompt(
     assert capsys.readouterr().err.startswith("\n") is named
     detail = UNANSWERED_PROMPT_DETAIL if named else None
     assert manager.cli_errors[0].detail == detail
+    assert _echo(terminal) is echo_at_start
     assert label.endswith(f"mango ({detail})" if named else "mango")
 
 

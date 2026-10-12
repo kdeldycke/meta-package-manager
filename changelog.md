@@ -10,6 +10,9 @@
 - [mpm] Stop writing the silent-call warning below a password prompt the terminal shows: it moved the cursor away from `Password:`.
 - [mpm] Name the unanswered password prompt in the warning of a command that times out on it, with what to do next.
 - [mpm] Tag the `✘` trail line of a command that timed out on an unanswered password prompt with `no password`.
+- [mpm] Recognize a `sudo` that gave up on its own password prompt: the failed command gets the same advice and the `no password` detail.
+- [mpm] Give the terminal its echo back after a command is killed at its password prompt.
+- [brew,cask] Document that a password typed up front does not hold for Homebrew, which resets the cached `sudo` credentials before its own `sudo`.
 
 ## [`8.1.1` (2026-10-08)](https://github.com/kdeldycke/meta-package-manager/compare/v8.1.0...v8.1.1)
 

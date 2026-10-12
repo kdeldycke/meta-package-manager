@@ -80,9 +80,10 @@ class FakeContext:
 class StubManager:
     """Minimal stand-in exposing what `dispatch` reads off a manager.
 
-    `internal_sudo` defaults off, as it does on a real manager: `dispatch` reads it
-    on every lane to decide which are held back to the sequential tail, so a stub
-    without it would be a manager no scheduler could place. `_active_operation`
+    `internal_sudo` and `resets_sudo_timestamp` default off, as they do on a real
+    manager: `dispatch` reads them on every lane to decide which are held back to
+    the sequential tail, so a stub without them would be a manager no scheduler
+    could place. `_active_operation`
     defaults to `None` for the same reason, that being the class-level default of
     `CLIExecutor._active_operation`, and
     `subject` mirrors the property the trail reads to name each line.
@@ -100,10 +101,12 @@ class StubManager:
         manager_id: str,
         progress: bool = False,
         internal_sudo: bool = False,
+        resets_sudo_timestamp: bool = False,
     ) -> None:
         self.id = manager_id
         self.progress = progress
         self.internal_sudo = internal_sudo
+        self.resets_sudo_timestamp = resets_sudo_timestamp
 
 
 class TTYStringIO(io.StringIO):
@@ -702,28 +705,37 @@ def test_lock_family_lane_shares_a_run_cache():
 
 
 @pytest.mark.parametrize(
-    ("operation", "held_back"),
+    ("operation", "warm", "resets", "held_back"),
     (
-        pytest.param("upgrade_all", True, id="prompting-operation-is-held-back"),
-        pytest.param("sync", False, id="non-prompting-operation-stays-concurrent"),
+        pytest.param(
+            "upgrade_all", False, False, True, id="prompting-operation-is-held-back"
+        ),
+        pytest.param(
+            "sync", False, False, False, id="non-prompting-operation-stays-concurrent"
+        ),
+        pytest.param(
+            "upgrade_all", True, False, False, id="warm-cache-serves-the-escalation"
+        ),
+        pytest.param("upgrade_all", True, True, True, id="tool-drops-the-warm-cache"),
     ),
 )
 def test_internal_escalator_runs_in_a_sequential_tail(
-    monkeypatch, operation, held_back
+    monkeypatch, operation, warm, resets, held_back
 ):
     """A manager escalating internally is held back and run once the concurrent batch
     is done, so its hidden `sudo` prompt lands on a terminal nothing else writes to.
 
     The tail runs at `jobs=1`, which `run_lanes` executes inline, so the held-back
     manager is the one that ran on the calling thread. An operation that cannot
-    prompt keeps every manager in the concurrent phase, on a pool worker.
+    prompt keeps every manager in the concurrent phase, on a pool worker. So does
+    a warm credential cache, unless the tool drops it before its own `sudo`.
     """
     assert not _SUDO_CACHE_WARM.is_set()
     monkeypatch.setattr("sys.stderr", TTYStringIO())
 
     ctx = FakeContext(jobs=4)
     managers = [
-        StubManager("cask", internal_sudo=True),
+        StubManager("cask", internal_sudo=True, resets_sudo_timestamp=resets),
         StubManager("gem"),
         StubManager("pip"),
     ]
@@ -735,15 +747,20 @@ def test_internal_escalator_runs_in_a_sequential_tail(
             threads[manager.id] = threading.current_thread()
         return manager.id, {}
 
-    collect_from_managers(
-        "Upgrading",
-        "Upgraded",
-        managers,  # type: ignore[arg-type]
-        work,
-        report_state=True,
-        operation=operation,
-        ctx=ctx,  # type: ignore[arg-type]
-    )
+    if warm:
+        _SUDO_CACHE_WARM.set()
+    try:
+        collect_from_managers(
+            "Upgrading",
+            "Upgraded",
+            managers,  # type: ignore[arg-type]
+            work,
+            report_state=True,
+            operation=operation,
+            ctx=ctx,  # type: ignore[arg-type]
+        )
+    finally:
+        _SUDO_CACHE_WARM.clear()
 
     assert set(threads) == {"cask", "gem", "pip"}
     assert (threads["cask"] is threading.current_thread()) is held_back

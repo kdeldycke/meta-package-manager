@@ -168,6 +168,18 @@ def test_internal_sudo_matches_internal_escalators():
         assert pool[mid].default_sudo is False
 
 
+def test_resets_sudo_timestamp_matches_the_tools_dropping_the_cache():
+    """Exactly the managers whose CLI drops the cached credentials before its own
+    `sudo` are marked, and each one is an internal escalator: the marker
+    qualifies that escalation and is read nowhere else."""
+    resetting = {
+        mid for mid, manager in pool.items() if type(manager).resets_sudo_timestamp
+    }
+    assert resetting == {"cask"}
+    for mid in sorted(resetting):
+        assert pool[mid].internal_sudo is True
+
+
 # Sudo priming: probe the credential cache non-interactively first, prompt once up
 # front only for the managers mpm itself escalates, then keep the cache warm so a
 # password prompt never stalls the concurrent fan-out.
@@ -2284,21 +2296,31 @@ def test_stall_watchdog_negative_gates(
 
 
 @pytest.mark.parametrize(
-    ("internal_sudo", "expected_live"),
+    ("internal_sudo", "warm", "resets", "expected_live"),
     (
-        pytest.param(True, "never", id="armed-call-stays-still"),
-        pytest.param(False, "auto", id="ordinary-call-animates"),
+        pytest.param(True, False, False, "never", id="armed-call-stays-still"),
+        pytest.param(False, False, False, "auto", id="ordinary-call-animates"),
+        pytest.param(True, True, False, "auto", id="warm-cache-serves-the-call"),
+        pytest.param(True, True, True, "never", id="tool-drops-the-warm-cache"),
     ),
 )
-def test_hidden_prompt_risk_holds_the_spinner_still(internal_sudo, expected_live):
+def test_hidden_prompt_risk_holds_the_spinner_still(
+    internal_sudo, warm, resets, expected_live
+):
     """A call that may hide a `sudo` prompt builds its spinner disabled, leaving
     the terminal line the tool writes that prompt on: an animation repainting it
     erases the prompt and leaves the run to die at the mutating timeout. The
     control differs by the `internal_sudo` gate alone, and keeps `live="auto"`,
     the auto-detected animation of an ordinary call.
+
+    A warm cache animates the call again, since the tool's own `sudo` spends it
+    without a prompt. A tool that drops the cache before that `sudo` prompts
+    whatever the cache holds, so its call stays still.
     """
+    assert not _SUDO_CACHE_WARM.is_set()
     manager = FakeManager()
     manager.internal_sudo = internal_sudo
+    manager.resets_sudo_timestamp = resets
     manager._active_operation = "install"
     manager.progress = True
     built: list[str] = []
@@ -2308,11 +2330,16 @@ def test_hidden_prompt_risk_holds_the_spinner_still(internal_sudo, expected_live
             built.append(kwargs["live"])
             super().__init__(*args, **kwargs)
 
-    with (
-        patch("sys.stderr.isatty", return_value=True),
-        patch("meta_package_manager.execution.Spinner", RecordingSpinner),
-    ):
-        manager.run_cli("-c", "print('quick call')")
+    if warm:
+        _SUDO_CACHE_WARM.set()
+    try:
+        with (
+            patch("sys.stderr.isatty", return_value=True),
+            patch("meta_package_manager.execution.Spinner", RecordingSpinner),
+        ):
+            manager.run_cli("-c", "print('quick call')")
+    finally:
+        _SUDO_CACHE_WARM.clear()
     assert built == [expected_live]
 
 

@@ -2335,7 +2335,16 @@ def manager_sudo(manager_id: str) -> str:
     by name.
     """
     m = pool[manager_id]
-    if m.internal_sudo:
+    if m.internal_sudo and m.resets_sudo_timestamp:
+        policy = (
+            f"{m.name} runs `sudo` from inside its own commands, once it has "
+            "dropped the cached credentials: `mpm` never wraps it, and no "
+            "password typed up front spares its prompt. On a terminal, its "
+            "installs, upgrades and removals run last and without a spinner, "
+            "so that prompt stays answerable, and draw a warning when they go "
+            "silent with no prompt on screen."
+        )
+    elif m.internal_sudo:
         policy = (
             f"{m.name} runs `sudo` from inside its own commands: `mpm` never "
             "wraps it, keeps an already-warm credential cache alive for those "

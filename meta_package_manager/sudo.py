@@ -175,8 +175,12 @@ _SUDO_CACHE_WARM: Final = threading.Event()
 
 Armed by `_start_sudo_keepalive` and cleared when the context closes. A warm
 cache serves internal escalations ({attr}`CLIExecutor.internal_sudo
-<meta_package_manager.execution.CLIExecutor.internal_sudo>`) silently, so the
-silent-call stall watchdog skips arming while this flag is set.
+<meta_package_manager.execution.CLIExecutor.internal_sudo>`) silently, as
+long as their call stays in the session of the terminal (`_spends_warm_cache`).
+So the silent-call stall watchdog skips arming while this flag is set, except
+for a manager that drops the cache itself
+({attr}`CLIExecutor.resets_sudo_timestamp
+<meta_package_manager.execution.CLIExecutor.resets_sudo_timestamp>`).
 
 The keepalive keeps the flag honest mid-run: a refresh that finds the
 credentials gone clears it, with one warning per drop, so later spawns arm the
@@ -1819,14 +1823,18 @@ def diagnose_escalation(managers: Iterable[PackageManager]) -> EscalationDiagnos
     )
 
 
-def _hidden_prompt_risk(internal_sudo: bool, operation: str | None) -> bool:
+def _hidden_prompt_risk(manager: CLIExecutor, operation: str | None) -> bool:
     """Whether a call may block on a `sudo` password prompt the user cannot see.
 
     True for a mutating call of a manager that escalates internally
     ({attr}`CLIExecutor.internal_sudo
     <meta_package_manager.execution.CLIExecutor.internal_sudo>`), made on a
     terminal while the credential cache is cold. Those are the conditions under
-    which the tool's own `sudo` prompts for a password nothing has primed.
+    which the tool's own `sudo` prompts for a password nothing has primed. A
+    manager that drops the cache itself
+    ({attr}`CLIExecutor.resets_sudo_timestamp
+    <meta_package_manager.execution.CLIExecutor.resets_sudo_timestamp>`)
+    meets them whatever the cache holds.
 
     {meth}`CLIExecutor.run <meta_package_manager.execution.CLIExecutor.run>`
     reads it once per call and spends it on every response, so they cannot drift
@@ -1849,10 +1857,39 @@ def _hidden_prompt_risk(internal_sudo: bool, operation: str | None) -> bool:
     and its indicator, are done.
     """
     return (
-        internal_sudo
+        manager.internal_sudo
         and operation in _STALL_NOTICE_OPERATIONS
         and sys.stderr.isatty()
-        and not _SUDO_CACHE_WARM.is_set()
+        and (manager.resets_sudo_timestamp or not _SUDO_CACHE_WARM.is_set())
+    )
+
+
+def _spends_warm_cache(manager: CLIExecutor, mutating: bool) -> bool:
+    """Whether a call may run the manager's own `sudo` on the cache mpm keeps warm.
+
+    True for a `mutating` call of a manager that escalates internally, while
+    the cache is warm.
+    {meth}`CLIExecutor.run <meta_package_manager.execution.CLIExecutor.run>` then
+    keeps the call in the session of the terminal, where every other call gets
+    a session of its own.
+
+    `sudo` keys a ticket on the terminal [and on its
+    session](https://github.com/apple-oss-distributions/sudo/blob/9d15835617972783e565818fae7ea047626b1e5c/sudo/plugins/sudoers/timestamp.c#L887-L892),
+    and falls back on its parent process [when it has no
+    terminal](https://github.com/apple-oss-distributions/sudo/blob/9d15835617972783e565818fae7ea047626b1e5c/sudo/plugins/sudoers/timestamp.c#L404-L420).
+    A detached child therefore finds no ticket, and no terminal to prompt on:
+    its privileged step fails on the very cache meant to serve it. Measured on
+    macOS 27: right after `sudo --validate`, `sudo --non-interactive true`
+    answers `a password is required` from a new session.
+
+    A manager that drops the cache itself has nothing to spend:
+    `_hidden_prompt_risk` covers its prompt.
+    """
+    return (
+        manager.internal_sudo
+        and not manager.resets_sudo_timestamp
+        and mutating
+        and _SUDO_CACHE_WARM.is_set()
     )
 
 

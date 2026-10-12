@@ -142,7 +142,7 @@ A few managers run `sudo` from inside their own commands: [`cask`](managers/cask
 
 The prompt is the reason. A tool writes it straight to the terminal, wherever the cursor sits, and gives it no line of its own. Raised in the middle of a concurrent batch, it lands mid-line between two other managers' outputs, or behind the progress bar. Nobody can read it there, so nobody answers it, and the run waits until the operation times out. Held to the end, the prompt gets a terminal no other manager is writing to.
 
-Everything else keeps its concurrency and its progress bar: only the last stretch is sequential. Nothing is held back on a read-only query, which never escalates, nor when the credential cache is already warm, which serves the escalation silently. See {doc}`sudo` for the probe that decides.
+Everything else keeps its concurrency and its progress bar: only the last stretch is sequential. Nothing is held back on a read-only query, which never escalates, nor when the credential cache is already warm, which serves the escalation silently. [`cask`](managers/cask.md) is still held back then, because Homebrew drops the cache before its own `sudo`. See {doc}`sudo` for the probe that decides.
 
 ## See also
 

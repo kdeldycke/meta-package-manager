@@ -90,6 +90,7 @@ from .sudo import (
     _is_sudo_auth_failure,
     _resolved_sudo,
     _running_as_root,
+    _spends_warm_cache,
     _StallWatchdog,
 )
 from .version import parse_version
@@ -899,6 +900,20 @@ class CLIExecutor:
     {func}`~meta_package_manager.sudo.prime_sudo`.
     """
 
+    resets_sudo_timestamp: bool = False
+    """Marks an internal escalator whose CLI drops the cached credentials itself.
+
+    Homebrew runs `sudo --reset-timestamp` on purpose, [when a command first
+    needs `sudo`](https://github.com/Homebrew/brew/blob/357e0b1b4e2b30a8e67fcee28058ef2b9057384d/Library/Homebrew/system_command.rb#L145-L155),
+    and at the start of every command before `7.0.8`. A warm cache therefore
+    never spares the prompt of its own `sudo`. So
+    `_hidden_prompt_risk` holds for such a manager whatever the cache holds:
+    a call that can prompt still runs last, without a spinner and under the
+    stall watchdog.
+
+    Only read on a manager marked {attr}`internal_sudo`.
+    """
+
     privileged_operations: ClassVar[frozenset[str]] = frozenset()
     """Operations with at least one command this manager marks privileged.
 
@@ -1549,11 +1564,15 @@ class CLIExecutor:
           * letting `mpm --dry-run` and `mpm --stop-on-error` have
             expected effect on execution
 
-        The exception above has a second member: a call mpm escalates itself
-        keeps the controlling terminal too, because `sudo` keys its credential
-        cache to the terminal a session would hide. Such a call leads no
-        process group of its own, so its timeout kill reaches the `sudo`
-        process alone. `sudo` runs the command under a monitor process whenever
+        The exception above has two more members, which both spend the
+        credential cache: a call mpm escalates itself, and the mutating call of
+        an internal escalator on a warm cache (see `_spends_warm_cache`).
+        `sudo` keys that cache to the terminal and to its session, which a
+        session of its own would hide.
+
+        A call mpm escalates itself leads no process group of its own, so its
+        timeout kill reaches the `sudo` process alone. `sudo` runs the command
+        under a monitor process whenever
         `use_pty` is on, its upstream default since `1.9.14`, so the manager
         binary survives the kill: an `apt upgrade` outlasting the state-change
         timeout keeps `/var/lib/dpkg/lock-frontend`, and the next `apt` or
@@ -1783,7 +1802,7 @@ class CLIExecutor:
         # the spinner stays still, leaving the terminal line the tool writes
         # its prompt on, and the stall watchdog flags the silence for a
         # prompt that never appears.
-        hidden_prompt = _hidden_prompt_risk(self.internal_sudo, self._active_operation)
+        hidden_prompt = _hidden_prompt_risk(self, self._active_operation)
         spinner = self._make_spinner(clean_args, animate=not hidden_prompt)
         if hidden_prompt and self.progress:
             # A still spinner leaves the terminal blank for as long as the call
@@ -1829,15 +1848,23 @@ class CLIExecutor:
                         # Detach the child into its own POSIX session and
                         # process group, so timeout and Ctrl+C kill the
                         # whole tree and a wedged grandchild (mas) cannot
-                        # linger as an orphan. Two kinds of call keep the
-                        # controlling terminal instead: the one the armed
+                        # linger as an orphan. Three kinds of call keep the
+                        # controlling terminal instead. The one the armed
                         # watchdog marks, whose internal sudo could not
-                        # otherwise reach /dev/tty, and mpm's own
-                        # escalations, because sudo keys its credential
-                        # cache per terminal (tty_tickets) and a session of
-                        # its own hides the very cache prime_sudo() just
-                        # probed. No-op on Windows.
-                        start_new_session=watchdog is None and not is_escalation,
+                        # otherwise reach /dev/tty. Then the two that spend
+                        # the credential cache, which sudo keys per terminal
+                        # and per session (tty_tickets), so a session of its
+                        # own hides the very cache prime_sudo() just probed:
+                        # mpm's own escalations, and the mutating call of an
+                        # internal escalator on a warm cache. No-op on
+                        # Windows.
+                        start_new_session=not (
+                            is_escalation
+                            or watchdog is not None
+                            or _spends_warm_cache(
+                                self, self._active_operation in _MUTATING_OPERATIONS
+                            )
+                        ),
                         # The tee routes each streamed record through the
                         # armed watchdog before the root logger. `None` is
                         # run_cli's default, the untouched root-logger path.

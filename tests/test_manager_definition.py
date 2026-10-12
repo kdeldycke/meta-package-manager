@@ -534,6 +534,26 @@ def test_parse_definition_internal_sudo():
     klass = build_manager_class(definition)
     assert klass.internal_sudo is True
     assert klass.default_sudo is False
+    assert klass.resets_sudo_timestamp is False
+
+
+def test_parse_definition_resets_sudo_timestamp():
+    """A definition can mark its tool as dropping the cached `sudo` credentials
+    itself (like Homebrew), beside the internal escalation it qualifies."""
+    definition = parse_manager_definition(
+        "brewlike",
+        {
+            "platforms": ["macos"],
+            "internal_sudo": True,
+            "resets_sudo_timestamp": True,
+            "operations": {
+                "install": {"args": ["install", "{package_id}"]},
+            },
+        },
+    )
+    assert definition.cli_fields["resets_sudo_timestamp"] is True
+    klass = build_manager_class(definition)
+    assert klass.resets_sudo_timestamp is True
 
 
 # Section routing: built-in override vs new-manager definition.

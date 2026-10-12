@@ -262,6 +262,7 @@ DEFINITION_CLI_FIELDS: Final[Mapping[str, Callable[[Any], Any]]] = {
     "keywords": _to_str_tuple,
     "maintenance_note": _to_str,
     "operation_notes": _to_operation_notes,
+    "resets_sudo_timestamp": _to_bool,
     "unmaintained_message": _to_str,
     "version_cli": _to_str,
     "version_from_stderr": _to_bool,
@@ -275,7 +276,7 @@ manager's identity, and resolve through the usual option precedence. `unmaintain
 is reused from the override converters so a TOML-defined manager can flag its own
 upstream as abandoned (see `docs/cooldown.md` for the affected managers).
 
-Nine fields are definition-only:
+Ten fields are definition-only:
 
 - `brewfile_entry_type` maps the manager onto a Homebrew Bundle DSL entry so its
   installed packages join `mpm dump --brewfile` exports (see
@@ -298,6 +299,10 @@ Nine fields are definition-only:
   table with one-sentence hints (see
   {attr}`~meta_package_manager.manager.PackageManager.operation_notes`): why an
   operation is missing, or what makes a declared one partial.
+- `resets_sudo_timestamp` marks an internal escalator whose CLI drops the cached
+  `sudo` credentials itself (see
+  {attr}`~meta_package_manager.execution.CLIExecutor.resets_sudo_timestamp`), so
+  a warm cache never spares its prompt.
 - `unmaintained_message` documents an abandoned upstream, rendering a ``{warning}``
   admonition and the `⚠️` table markers (see
   {attr}`~meta_package_manager.manager.PackageManager.unmaintained_message`).

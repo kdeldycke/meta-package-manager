@@ -870,6 +870,7 @@ CANONICAL_ATTRS = (
     "sudo",
     "default_sudo",
     "internal_sudo",
+    "resets_sudo_timestamp",
     "privileged_operations",
     # Version gate and native cooldown marker.
     "requirement",

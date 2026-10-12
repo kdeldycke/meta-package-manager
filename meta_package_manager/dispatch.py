@@ -660,10 +660,7 @@ def dispatch(
     # split across the two phases without losing the serialization it exists for:
     # `cask` therefore takes `brew` with it, both being the same lane.
     held_back = [
-        any(
-            _hidden_prompt_risk(manager.internal_sudo, operation)
-            for manager in lane_managers
-        )
+        any(_hidden_prompt_risk(manager, operation) for manager in lane_managers)
         for lane_managers, _tasks in lanes
     ]
     main_lanes = [lane for lane, tail in zip(lanes, held_back, strict=True) if not tail]

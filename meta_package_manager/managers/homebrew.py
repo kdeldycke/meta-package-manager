@@ -1089,6 +1089,10 @@ class Cask(Homebrew):
     """Cask artifacts (`.pkg` installers, kernel extensions) run `sudo` from
     inside `brew`."""
 
+    resets_sudo_timestamp = True
+    """`brew` drops the cached credentials before the `sudo` of an artifact, so
+    that `sudo` asks its password even on a warm cache."""
+
     cli_names = ("brew",)
 
     post_args = ("--cask",)

@@ -934,6 +934,11 @@ site.deploy = "cloudflare-pages"
 # generator. `docs/conf.py` keeps the former paths alive as redirect stubs, and
 # `docs/infrastructure.md` carries the edge side of the move.
 sphinx.builder = "dirhtml"
+# `check-void-deps.yaml` stays on `ubuntu-22.04` on purpose, for the reason its
+# job comment gives: later images restrict unprivileged user namespaces, which
+# blocks the chroot helper of `xbps-src`. Without this entry the scheduled
+# `sync-runner-images` job proposes `ubuntu-26.04` for it on every run.
+sync-runner-images.ignore = [ "ubuntu-22.04" ]
 # Source paths for workflow trigger filters.
 workflow.source-paths = [ "meta_package_manager" ]
 # Wholesale replacement of tests.yaml's `paths:` filter (this override is

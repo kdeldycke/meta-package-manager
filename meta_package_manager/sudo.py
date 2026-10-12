@@ -114,6 +114,10 @@ from click_extra import echo
 
 from .version import parse_version
 
+# Windows has no `termios`: `_terminal_echo` answers `None` there.
+if sys.platform != "win32":
+    import termios
+
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
@@ -1826,6 +1830,33 @@ def _hidden_prompt_risk(internal_sudo: bool, operation: str | None) -> bool:
     )
 
 
+def _terminal_echo() -> bool | None:
+    """Whether the controlling terminal echoes the keys the user types.
+
+    `sudo` turns the echo off on `/dev/tty` [before it writes its password
+    prompt](https://github.com/sudo-project/sudo/blob/f2f340938e51f9f12b29b72507d9edca8cb98abc/src/tgetpass.c#L179-L229),
+    and restores it once it has the answer. An echo that goes off during a call
+    therefore means a prompt is on screen and waits at the cursor, which is what
+    `_StallWatchdog` reads it for. Measured on macOS 27 with the system `sudo`:
+    `stty -a` reports `-echo` while `Password:` waits.
+
+    :return: `None` when the terminal cannot answer: on Windows, which has no
+        `termios`, and in a process with no controlling terminal.
+    """
+    if sys.platform == "win32":
+        return None
+    try:
+        fd = os.open(os.ctermid(), os.O_RDONLY | os.O_NOCTTY)
+    except OSError:
+        return None
+    try:
+        return bool(termios.tcgetattr(fd)[3] & termios.ECHO)
+    except termios.error:
+        return None
+    finally:
+        os.close(fd)
+
+
 class _StallWatchdog(logging.Handler):
     """Warn when a CLI call that may hide a `sudo` password prompt goes silent.
 
@@ -1848,6 +1879,17 @@ class _StallWatchdog(logging.Handler):
     `_hidden_prompt_risk` arms both for the same call, so a prompt the tool
     prints stays on screen to be answered. A notice raised while an animation
     erases that prompt names the stall but cannot end it.
+
+    A prompt the terminal shows gets no notice. A program that reads a password
+    holds the terminal echo off for as long as it waits (see `_terminal_echo`),
+    so an echo that went off during the call means the prompt is on screen, with
+    the cursor right after it. A notice written then moves the cursor below the
+    warning, away from the prompt the user has to answer. The prompt settles its
+    silence episode instead, the way a notice does, so the silence after the
+    answer draws no warning either: the tool is assumed to run what it asked the
+    password for. Where the terminal cannot answer, or its echo was already off
+    when the call started, the notice fires as it does for a prompt nothing
+    shows.
 
     The watchdog doubles as the sole handler of {attr}`tee`, the logger
     {meth}`CLIExecutor.run <meta_package_manager.execution.CLIExecutor.run>`
@@ -1906,9 +1948,15 @@ class _StallWatchdog(logging.Handler):
         # by the notice thread, so the pair stays consistent without a lock
         # (free-threading safe). Starts at arming time, with no line seen yet.
         self._activity: tuple[float, str | None] = (self._started, None)
-        # Activity timestamp of the silence episode already noticed, so each
-        # episode warns at most once. Touched by the notice thread only.
+        # Activity timestamp of the silence episode already settled, by a notice
+        # or by a prompt seen on the terminal, so each episode warns at most
+        # once. Touched by the notice thread only.
         self._noticed: float | None = None
+        # Echo of the terminal before the child starts: only an echo found on
+        # can go off under a prompt. See _prompt_on_screen().
+        self._echoed = _terminal_echo()
+        # Whether a prompt held a notice back, for the DEBUG line of stop().
+        self._prompt_seen = False
         # Instantiated directly, not via getLogger: the tee must stay out of the
         # registry (re-arming would reuse it, stacking handlers) and have no
         # parent, so this handler is its only sink and nothing double-emits.
@@ -1944,18 +1992,35 @@ class _StallWatchdog(logging.Handler):
         except Exception:  # noqa: BLE001
             self.handleError(record)
 
+    def _prompt_on_screen(self) -> bool:
+        """Whether a program holds the terminal echo off to read a password.
+
+        Read against the echo found when the call started: a terminal whose echo
+        was already off then, or that cannot answer, proves nothing about a prompt.
+        """
+        return bool(self._echoed) and _terminal_echo() is False
+
     def _watch(self) -> None:
         """Notice-thread body: warn once per silence episode.
 
         A silence episode is identified by the timestamp of the latest activity: a
         fresh output line moves it, which re-arms the notice for the next silent
         stretch. Wakes at most every second (sooner when the delay itself is
-        shorter) so a stop request is honored promptly.
+        shorter) so a stop request is honored promptly, and so a prompt is seen
+        on the terminal long before the notice is due.
         """
         while not self._stop.wait(min(1.0, _STALL_NOTICE_DELAY)):
             last_stamp, last_line = self._activity
+            if self._noticed == last_stamp:
+                continue
+            if self._prompt_on_screen():
+                # The prompt is the notice of this episode. Nothing is written,
+                # not even at DEBUG: any line here moves the cursor away from it.
+                self._noticed = last_stamp
+                self._prompt_seen = True
+                continue
             silence = time.monotonic() - last_stamp
-            if silence < _STALL_NOTICE_DELAY or self._noticed == last_stamp:
+            if silence < _STALL_NOTICE_DELAY:
                 continue
             self._noticed = last_stamp
             if last_line is None:
@@ -1965,11 +2030,12 @@ class _StallWatchdog(logging.Handler):
                 if len(last_line) > 120:
                     last_line = last_line[:119] + "…"
                 detail = f'Last output: "{last_line}"'
-            # Break the line the prompt may be sitting on, so the notice starts
-            # on a fresh one instead of running on from "Password:". The tool's
+            # Break the line a prompt may be sitting on, so the notice starts on
+            # a fresh one instead of running on from "Password:". The tool's
             # prompt goes to `/dev/tty` without a trailing newline and never
-            # reaches the pipe mpm reads, so nothing here can know whether it is
-            # there: the watchdog is armed only when one is possible
+            # reaches the pipe mpm reads. _prompt_on_screen() rules a prompt out
+            # only where the terminal answers, and never one that echoes its
+            # answer: the watchdog is armed only when a prompt is possible
             # (`_hidden_prompt_risk`), which is what makes an unconditional break
             # the right trade. The cost is a blank line on a call that stayed
             # silent without prompting.
@@ -1985,7 +2051,16 @@ class _StallWatchdog(logging.Handler):
             )
 
     def stop(self) -> None:
-        """Disarm: stop the notice thread, join it, and detach the handler."""
+        """Disarm: stop the notice thread, join it, and detach the handler.
+
+        The call is over, so no prompt waits at the cursor: this is where a
+        notice held back for a prompt gets its `DEBUG` record.
+        """
         self._stop.set()
         self._thread.join()
         self.close()
+        if self._prompt_seen:
+            logging.debug(
+                "Held the stall notice back: a password prompt was on screen.",
+                extra={"label": self._label},
+            )

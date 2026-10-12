@@ -2340,8 +2340,8 @@ def manager_sudo(manager_id: str) -> str:
             f"{m.name} runs `sudo` from inside its own commands: `mpm` never "
             "wraps it, keeps an already-warm credential cache alive for those "
             "internal escalations, and warns when a mutating call goes silent "
-            "on a terminal with a cold cache, since a password prompt may be "
-            "hiding in the stream."
+            "on a terminal with a cold cache and no prompt on screen, since a "
+            "password prompt may be hiding in the stream."
         )
     elif m.default_sudo:
         policy = (

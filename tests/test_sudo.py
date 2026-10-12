@@ -65,10 +65,12 @@ from meta_package_manager.sudo import (
 
 from .fake_manager import FakeManager
 
-# Platform-dependent import: `pwd` does not exist on Windows, where the tests
-# consuming it are skipped.
+# Platform-dependent imports: `pty`, `pwd` and `termios` do not exist on Windows,
+# where the tests consuming them are skipped.
 if not is_any_windows():
+    import pty
     import pwd
+    import termios
 
 INSTALL_RUN = (Operations.install,)
 """Operations of the run the fakes below are primed for: `install`, the one
@@ -2065,6 +2067,108 @@ def test_stall_watchdog_notice_starts_on_a_fresh_line(monkeypatch, capsys):
     captured = capsys.readouterr().err
     assert "No output for " in captured
     assert captured.startswith("\n")
+
+
+@pytest.fixture
+def terminal(monkeypatch):
+    """A pseudo-terminal that answers for the controlling one, as its path.
+
+    A test run has no terminal to hold in a password read, and under CI it has
+    none at all, so the watchdog is pointed at this one.
+    """
+    try:
+        master, slave = pty.openpty()
+    except OSError:
+        pytest.skip("This host allocates no pseudo-terminal, as a build sandbox.")
+    path = os.ttyname(slave)
+    monkeypatch.setattr("meta_package_manager.sudo.os.ctermid", lambda: path)
+    yield path
+    os.close(master)
+    os.close(slave)
+
+
+def _set_echo(terminal: str, echo: bool) -> None:
+    """Turn the echo of `terminal` on or off, the flag a password read holds off."""
+    descriptor = os.open(terminal, os.O_RDWR | os.O_NOCTTY)
+    try:
+        attributes = termios.tcgetattr(descriptor)
+        if echo:
+            attributes[3] |= termios.ECHO
+        else:
+            attributes[3] &= ~termios.ECHO
+        # TCSANOW: a drain waits forever on a terminal nobody reads the other
+        # end of.
+        termios.tcsetattr(descriptor, termios.TCSANOW, attributes)
+    finally:
+        os.close(descriptor)
+
+
+def _prompting_script(terminal: str, line: str, sleep: float) -> str:
+    """A one-liner that turns the echo of `terminal` off, prints `line`, then
+    stays silent for `sleep` seconds, mimicking a tool that waits on the password
+    prompt of its own `sudo`."""
+    return (
+        "import os, sys, termios, time; "
+        f"descriptor = os.open({terminal!r}, os.O_RDWR | os.O_NOCTTY); "
+        "attributes = termios.tcgetattr(descriptor); "
+        "attributes[3] &= ~termios.ECHO; "
+        "termios.tcsetattr(descriptor, termios.TCSANOW, attributes); "
+        f"print({line!r}); sys.stdout.flush(); time.sleep({sleep})"
+    )
+
+
+@pytest.mark.skipif(is_any_windows(), reason="A pseudo-terminal is POSIX-only.")
+@pytest.mark.parametrize(
+    ("echo_at_start", "prompts", "held_back"),
+    (
+        pytest.param(True, True, True, id="prompt-on-screen"),
+        pytest.param(True, False, False, id="silent-without-a-prompt"),
+        pytest.param(False, True, False, id="echo-already-off-at-start"),
+    ),
+)
+def test_stall_watchdog_holds_the_notice_back_for_a_prompt_on_screen(
+    monkeypatch, caplog, terminal, echo_at_start, prompts, held_back
+):
+    """A password prompt the terminal shows gets no notice written below it.
+
+    The notice ends on a newline, so it leaves the cursor on an empty line under
+    the warning, with the prompt it must answer two lines above. The watchdog
+    reads a prompt from the echo the child turned off, and stays silent.
+
+    The two controls prove the echo is what holds the notice back. A child that
+    leaves the echo on draws the notice. So does one that finds it off already,
+    since an echo that was never on proves nothing about a prompt.
+
+    A slow interpreter startup may trip a no-output-yet notice before the child
+    reaches the terminal, so the assertions read the episode that quotes its
+    line: the echo is off by the time that line is printed.
+    """
+    assert not _SUDO_CACHE_WARM.is_set()
+    manager = FakeManager()
+    manager.internal_sudo = True
+    manager._active_operation = "install"
+    monkeypatch.setattr("meta_package_manager.sudo._STALL_NOTICE_DELAY", 0.2)
+    _set_echo(terminal, echo_at_start)
+    if prompts:
+        script = _prompting_script(terminal, "installer asks", 1)
+    else:
+        script = _stalling_script("installer asks", 1)
+    with (
+        patch("sys.stderr.isatty", return_value=True),
+        caplog.at_level(logging.DEBUG),
+    ):
+        manager.run_cli("-c", script)
+    messages = [record.getMessage() for record in caplog.records]
+    quoting = [
+        message
+        for message in messages
+        if "hidden password prompt" in message
+        and 'Last output: "installer asks"' in message
+    ]
+    assert len(quoting) == (0 if held_back else 1)
+    assert (
+        "Held the stall notice back: a password prompt was on screen." in messages
+    ) is held_back
 
 
 @pytest.mark.parametrize(

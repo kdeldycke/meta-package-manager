@@ -453,6 +453,16 @@ def test_parse_definition_versionless_catalog_manager():
             id="unknown-operation-note-key",
         ),
         pytest.param(
+            {
+                "platforms": ["linux"],
+                "operations": {"sync": {"args": ["s"]}},
+                "internal_sudo": True,
+                "internal_sudo_operations": ["sync", "purge"],
+            },
+            "unknown operation 'purge'",
+            id="unknown-internal-sudo-operation",
+        ),
+        pytest.param(
             {"platforms": ["linux"]},
             "must declare 'operations'",
             id="missing-operations",
@@ -535,6 +545,8 @@ def test_parse_definition_internal_sudo():
     assert klass.internal_sudo is True
     assert klass.default_sudo is False
     assert klass.resets_sudo_timestamp is False
+    # Every mutating operation may run the tool's own `sudo` by default.
+    assert {"sync", "cleanup", "install"} <= klass.internal_sudo_operations
 
 
 def test_parse_definition_resets_sudo_timestamp():
@@ -545,6 +557,7 @@ def test_parse_definition_resets_sudo_timestamp():
         {
             "platforms": ["macos"],
             "internal_sudo": True,
+            "internal_sudo_operations": ["install", "remove"],
             "resets_sudo_timestamp": True,
             "operations": {
                 "install": {"args": ["install", "{package_id}"]},
@@ -554,6 +567,8 @@ def test_parse_definition_resets_sudo_timestamp():
     assert definition.cli_fields["resets_sudo_timestamp"] is True
     klass = build_manager_class(definition)
     assert klass.resets_sudo_timestamp is True
+    # The definition narrows the operations its tool escalates in.
+    assert klass.internal_sudo_operations == frozenset({"install", "remove"})
 
 
 # Section routing: built-in override vs new-manager definition.

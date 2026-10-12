@@ -176,6 +176,24 @@ def _to_operation_notes(value: Any) -> dict[str, str]:
     return notes
 
 
+def _to_operation_set(value: Any) -> frozenset[str]:
+    """Validate the value as a list of operation names, and freeze it.
+
+    A name outside the
+    {class}`~meta_package_manager.capabilities.Operations` vocabulary would
+    never match an operation in flight: reject it here, at parse time, where
+    the error can name it.
+    """
+    names = _to_str_tuple(value)
+    valid = {op.name for op in Operations}
+    for name in names:
+        if name not in valid:
+            raise TypeError(
+                f"unknown operation {name!r}. Allowed: {', '.join(sorted(valid))}."
+            )
+    return frozenset(names)
+
+
 def _convert(path: str, converter: Callable[[Any], Any], value: Any) -> Any:
     """Run a converter on a section value, reporting a type error at `path`.
 
@@ -259,6 +277,7 @@ DEFINITION_CLI_FIELDS: Final[Mapping[str, Callable[[Any], Any]]] = {
     "brewfile_skip_warning": _to_str,
     "default_sudo": _to_bool,
     "internal_sudo": _to_bool,
+    "internal_sudo_operations": _to_operation_set,
     "keywords": _to_str_tuple,
     "maintenance_note": _to_str,
     "operation_notes": _to_operation_notes,
@@ -276,7 +295,7 @@ manager's identity, and resolve through the usual option precedence. `unmaintain
 is reused from the override converters so a TOML-defined manager can flag its own
 upstream as abandoned (see `docs/cooldown.md` for the affected managers).
 
-Ten fields are definition-only:
+Eleven fields are definition-only:
 
 - `brewfile_entry_type` maps the manager onto a Homebrew Bundle DSL entry so its
   installed packages join `mpm dump --brewfile` exports (see
@@ -292,6 +311,10 @@ Ten fields are definition-only:
   {attr}`~meta_package_manager.execution.CLIExecutor.internal_sudo`). mpm never
   wraps its commands in `sudo`; priming instead reuses a warm credential cache
   for these internal escalations. See `docs/sudo.md`.
+- `internal_sudo_operations` lists the operations in which such a manager may
+  run its own `sudo` (see
+  {attr}`~meta_package_manager.execution.CLIExecutor.internal_sudo_operations`):
+  every mutating one by default.
 - `maintenance_note` renders a ``{note}`` admonition atop the manager's page for a
   still-maintained upstream under watch (see
   {attr}`~meta_package_manager.manager.PackageManager.maintenance_note`).

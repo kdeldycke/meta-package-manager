@@ -47,7 +47,11 @@ from extra_platforms import is_any_windows
 
 from meta_package_manager.capabilities import Operations
 from meta_package_manager.cli import package_task
-from meta_package_manager.execution import STILL_CALL_HINT, STILL_CALL_MARKER
+from meta_package_manager.execution import (
+    STILL_CALL_HINT,
+    STILL_CALL_MARKER,
+    CLIExecutor,
+)
 from meta_package_manager.pool import pool
 from meta_package_manager.specifier import Specifier
 from meta_package_manager.sudo import (
@@ -56,6 +60,7 @@ from meta_package_manager.sudo import (
     ESCALATORS,
     UNANSWERED_PROMPT_DETAIL,
     Escalator,
+    _hidden_prompt_risk,
     _installed_release,
     _is_permission_failure,
     _is_sudo_auth_failure,
@@ -178,6 +183,46 @@ def test_resets_sudo_timestamp_matches_the_tools_dropping_the_cache():
     assert resetting == {"cask"}
     for mid in sorted(resetting):
         assert pool[mid].internal_sudo is True
+
+
+def test_internal_sudo_operations_are_narrowed_by_cask_alone():
+    """An internal escalator may run its own `sudo` in every mutating operation,
+    except `cask`: `brew update` and `brew cleanup` never escalate."""
+    narrowed = {
+        mid: manager.internal_sudo_operations
+        for mid, manager in pool.items()
+        if type(manager).internal_sudo
+        and manager.internal_sudo_operations != CLIExecutor.internal_sudo_operations
+    }
+    assert narrowed == {
+        "cask": frozenset({"install", "remove", "upgrade", "upgrade_all"}),
+    }
+
+
+@pytest.mark.parametrize(
+    ("manager_id", "operation", "at_risk"),
+    (
+        pytest.param("cask", "cleanup", False, id="cask-cleanup"),
+        pytest.param("cask", "sync", False, id="cask-sync"),
+        pytest.param("cask", "upgrade_all", True, id="cask-upgrade"),
+        pytest.param("fink", "cleanup", True, id="fink-cleanup"),
+        pytest.param("fink", "installed", False, id="fink-read"),
+        pytest.param("fink", "sync", True, id="fink-sync"),
+        pytest.param("yay", "sync", True, id="yay-sync"),
+    ),
+)
+def test_hidden_prompt_risk_follows_the_operations_a_tool_escalates_in(
+    manager_id, operation, at_risk
+):
+    """On a terminal with a cold cache, a call may prompt in each operation its
+    tool escalates in, and in no other.
+
+    `fink` and the AUR helpers escalate to refresh and to clean up, like every
+    internal escalator by default. `cask` does not, and no read does.
+    """
+    assert not _SUDO_CACHE_WARM.is_set()
+    with patch("sys.stderr.isatty", return_value=True):
+        assert _hidden_prompt_risk(pool[manager_id], operation) is at_risk
 
 
 # Sudo priming: probe the credential cache non-interactively first, prompt once up
@@ -350,19 +395,44 @@ def test_prime_sudo_skips_a_run_of_unprivileged_operations():
     run.assert_not_called()
 
 
-def test_prime_sudo_counts_an_internal_escalator_on_its_policy():
+@pytest.mark.parametrize(
+    ("resets", "prompted"),
+    (
+        pytest.param(False, True, id="policy-keeps-it-in-the-prompt"),
+        pytest.param(True, False, id="tool-drops-the-cache"),
+    ),
+)
+def test_prime_sudo_counts_an_internal_escalator_on_its_policy(
+    caplog, resets, prompted
+):
     """A forced policy keeps an internal escalator in the prompt of every run.
 
     `mpm` cannot see which of its commands call `sudo` (`fink` does it on `sync`),
     so the operations of the run leave it in.
+
+    A tool that drops the cached credentials before its own `sudo` is left out:
+    the password would serve nothing, so one warning says the policy does
+    nothing for it.
     """
     ctx = click.Context(click.Command("mpm"))
     manager = _internal_manager()
     manager.sudo = True
-    with prime_sudo_env(stdin_tty=True, stderr_tty=True) as run:
+    manager.resets_sudo_timestamp = resets
+    with (
+        prime_sudo_env(stdin_tty=True, stderr_tty=True) as run,
+        caplog.at_level(logging.WARNING),
+    ):
         run.return_value = subprocess.CompletedProcess((), 1)
         prime_sudo(ctx, [manager], operations=(Operations.sync,))
-    assert any("--prompt" in call.args[0] for call in run.call_args_list)
+    asked = any("--prompt" in call.args[0] for call in run.call_args_list)
+    assert asked is prompted
+    futile = (
+        f"A forced sudo policy does nothing for {manager.id}: it drops the "
+        "cached credentials before its own sudo, so its password prompt still "
+        "comes."
+    )
+    warned = futile in [record.getMessage() for record in caplog.records]
+    assert warned is not prompted
 
 
 def test_prime_sudo_leaves_a_stock_windows_run_alone():

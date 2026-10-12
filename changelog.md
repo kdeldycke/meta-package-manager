@@ -15,6 +15,8 @@
 - [brew,cask] Document that a password typed up front does not hold for Homebrew, which resets the cached `sudo` credentials before its own `sudo`.
 - [mpm] Fix managers escalating on their own failing their privileged step on a warm `sudo` cache, which their detached command could not spend.
 - [cask] Run `cask` last and without a spinner on a warm `sudo` cache too: Homebrew resets it and asks the password anyway.
+- [am,aura,fink,pacaur,pacstall,paru,pikaur,shelly,trizen,yay] Run `sync` and `cleanup` last and without a spinner on a cold `sudo` cache, so the tool's own password prompt can be answered.
+- [cask] Ask no password up front under a forced `sudo`, which Homebrew dropped anyway, and warn that the policy does nothing for `cask`.
 
 ## [`8.1.1` (2026-10-08)](https://github.com/kdeldycke/meta-package-manager/compare/v8.1.0...v8.1.1)
 

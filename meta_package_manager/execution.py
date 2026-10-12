@@ -900,6 +900,26 @@ class CLIExecutor:
     {func}`~meta_package_manager.sudo.prime_sudo`.
     """
 
+    internal_sudo_operations: ClassVar[frozenset[str]] = _MUTATING_OPERATIONS
+    """Operations in which an internal escalator may run its own `sudo`.
+
+    Every mutating operation by default: `fink` re-execs `fink selfupdate` and
+    `fink cleanup` through `sudo` like its installs, `shelly` escalates in each
+    mutating verb, and the AUR helpers call `sudo pacman` to refresh their
+    databases. (`restore` stamps `"install"`, so it is covered.) A manager
+    narrows the set when some of its commands never escalate, like `cask`.
+
+    Matched against {attr}`_active_operation` by `_hidden_prompt_risk`. On a
+    terminal with a cold credential cache, a call in one of these operations
+    runs last, without a spinner and under the stall watchdog, so the prompt of
+    the tool's own `sudo` is answerable. Detached like any other call, that
+    `sudo` [has no terminal to ask
+    on](https://github.com/sudo-project/sudo/blob/f2f340938e51f9f12b29b72507d9edca8cb98abc/src/tgetpass.c#L128-L146)
+    and gives up at once.
+
+    Only read on a manager marked {attr}`internal_sudo`.
+    """
+
     resets_sudo_timestamp: bool = False
     """Marks an internal escalator whose CLI drops the cached credentials itself.
 

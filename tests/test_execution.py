@@ -57,7 +57,6 @@ from meta_package_manager.execution import (
 )
 from meta_package_manager.pool import pool
 from meta_package_manager.sudo import (
-    _STALL_NOTICE_OPERATIONS,
     _SUDO_CACHE_WARM,
     ESCALATORS,
     UNANSWERED_PROMPT_DETAIL,
@@ -84,14 +83,19 @@ def test_operation_timeouts_cover_all_operations():
 def test_operation_name_sets_match_enum():
     """The literal operation-name sets stay subsets of the `Operations` vocabulary.
 
-    `_MUTATING_OPERATIONS` (plan-mode capture) and `_STALL_NOTICE_OPERATIONS`
-    (watchdog arming) are spelled as string literals: renaming an `Operations`
-    member would otherwise silently desync them, stopping plan capture or
-    watchdog arming for the renamed operation.
+    `_MUTATING_OPERATIONS` (plan-mode capture) and the
+    `internal_sudo_operations` of each manager (watchdog arming) are spelled as
+    string literals: renaming an `Operations` member would otherwise silently
+    desync them, stopping plan capture or watchdog arming for the renamed
+    operation.
+
+    Only a mutating operation can run the tool's own `sudo`, so the second set
+    stays inside the first on every manager.
     """
     operation_names = {operation.name for operation in Operations}
     assert _MUTATING_OPERATIONS <= operation_names
-    assert _STALL_NOTICE_OPERATIONS <= operation_names
+    for manager in pool.values():
+        assert manager.internal_sudo_operations <= _MUTATING_OPERATIONS, manager.id
     # The timeout map covers nothing outside the enum plus the version probe.
     assert set(OPERATION_TIMEOUTS) <= operation_names | {VERSION_PROBE}
 

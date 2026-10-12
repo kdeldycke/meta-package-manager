@@ -1089,6 +1089,15 @@ class Cask(Homebrew):
     """Cask artifacts (`.pkg` installers, kernel extensions) run `sudo` from
     inside `brew`."""
 
+    internal_sudo_operations = frozenset({
+        "install",
+        "remove",
+        "upgrade",
+        "upgrade_all",
+    })
+    """`brew update` and `brew cleanup` never escalate, and their long silent
+    phases would draw a false notice of a hidden prompt."""
+
     resets_sudo_timestamp = True
     """`brew` drops the cached credentials before the `sudo` of an artifact, so
     that `sudo` asks its password even on a warm cache."""

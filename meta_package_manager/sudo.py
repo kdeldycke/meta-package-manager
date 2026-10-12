@@ -94,23 +94,6 @@ implementation has to answer both of its points: the raw password it handles,
 and the tools it never reaches (`brew` honors the variable, `fink`'s plain
 `sudo` re-exec does not).
 ```
-
-```{todo}
-Keep the terminal for the `sync` and `cleanup` calls of an internal escalator on
-a cold cache. They run detached today, so one that needs `sudo`, like `fink
-selfupdate`, fails at once: its `sudo` has no terminal to ask on. To hold them on
-a still line like the other mutating calls, first find how to spare `brew
-update` and `brew cleanup`, which never escalate (see
-`_STALL_NOTICE_OPERATIONS`).
-```
-
-```{todo}
-Leave a manager marked
-{attr}`~meta_package_manager.execution.CLIExecutor.resets_sudo_timestamp` out
-of the up-front prompt a forced `sudo = true` puts it in (see `_escalates_in`),
-and warn instead. Homebrew drops that password before its own `sudo`, so the
-user types it twice.
-```
 """
 
 from __future__ import annotations
@@ -169,24 +152,6 @@ progress lines) rarely trip it, yet far below
 {data}`~meta_package_manager.execution.MUTATING_TIMEOUT`, so the user gets the
 hint while the hidden password prompt can still be answered. See
 `_StallWatchdog`.
-"""
-
-_STALL_NOTICE_OPERATIONS: Final[frozenset[str]] = frozenset(
-    {"install", "remove", "upgrade", "upgrade_all"},
-)
-"""Operations whose commands may block on an interactive internal `sudo`.
-
-Matched against {attr}`CLIExecutor._active_operation
-<meta_package_manager.execution.CLIExecutor._active_operation>` when arming the
-stall watchdog: the mutating operations whose installers may escalate mid-flight
-(`restore` stamps `"install"`, so it is covered). `sync` and `cleanup` are
-excluded on purpose, to avoid false notices on `brew update`/`brew cleanup`,
-whose long silent phases never escalate. The trade-off is a known gap: `fink`
-does re-exec `fink selfupdate`/`fink cleanup` through `sudo`. On a cold cache
-such a call runs detached from the terminal, where `sudo` [has no terminal to
-ask
-on](https://github.com/sudo-project/sudo/blob/f2f340938e51f9f12b29b72507d9edca8cb98abc/src/tgetpass.c#L128-L146)
-and gives up at once.
 """
 
 _SUDO_CACHE_WARM: Final = threading.Event()
@@ -974,11 +939,16 @@ def _escalates_in(manager: CLIExecutor, operations: frozenset[str]) -> bool:
     its commands call `sudo`, and `fink` does it on `sync` and `cleanup` too. A
     forced `sudo = true` on one keeps it in the up-front prompt of every run (see
     {attr}`~meta_package_manager.execution.CLIExecutor.internal_sudo`).
+
+    A manager that drops the cached credentials itself
+    ({attr}`~meta_package_manager.execution.CLIExecutor.resets_sudo_timestamp`)
+    is the exception. A password typed up front cannot serve its own `sudo`, so
+    a forced policy leaves it out, and {func}`prime_sudo` says so.
     """
     if not _resolved_sudo(manager):
         return False
     if manager.internal_sudo:
-        return True
+        return not manager.resets_sudo_timestamp
     return not operations.isdisjoint(manager.privileged_operations)
 
 
@@ -1428,6 +1398,9 @@ def prime_sudo(
       internally,
     - a dry run or a plan run (no state-changing CLI is executed),
     - already primed once this invocation (idempotent),
+    - a forced policy names a manager that drops the cached credentials itself:
+      one warning says the policy does nothing for it, and the manager stays
+      out of the prompt,
     - no escalator is on `PATH`, or `sudo_command` names an unknown one (one
       warning is logged),
     - the probe finds the cache already warm (keepalive only, fully silent),
@@ -1466,6 +1439,22 @@ def prime_sudo(
     if ctx.meta.get(_SUDO_PRIMED):
         return
     ctx.meta[_SUDO_PRIMED] = True
+
+    # A forced policy cannot serve a tool that drops the cached credentials
+    # before its own sudo: say so, where the up-front prompt would have been.
+    futile = sorted(
+        m.id
+        for m in managers
+        if m.internal_sudo and m.resets_sudo_timestamp and _resolved_sudo(m)
+    )
+    if futile:
+        one = len(futile) == 1
+        logging.warning(
+            f"A forced sudo policy does nothing for {', '.join(futile)}: "
+            f"{'it drops' if one else 'they drop'} the cached credentials before "
+            f"{'its' if one else 'their'} own sudo, so "
+            f"{'its' if one else 'their'} password prompt still comes.",
+        )
 
     escalator = ESCALATION.resolve()
     if escalator is None:
@@ -1845,10 +1834,14 @@ def diagnose_escalation(managers: Iterable[PackageManager]) -> EscalationDiagnos
 def _hidden_prompt_risk(manager: CLIExecutor, operation: str | None) -> bool:
     """Whether a call may block on a `sudo` password prompt the user cannot see.
 
-    True for a mutating call of a manager that escalates internally
+    True for a call of a manager that escalates internally
     ({attr}`CLIExecutor.internal_sudo
-    <meta_package_manager.execution.CLIExecutor.internal_sudo>`), made on a
-    terminal while the credential cache is cold. Those are the conditions under
+    <meta_package_manager.execution.CLIExecutor.internal_sudo>`), in an
+    operation where its tool may run `sudo`
+    ({attr}`CLIExecutor.internal_sudo_operations
+    <meta_package_manager.execution.CLIExecutor.internal_sudo_operations>`),
+    made on a terminal while the credential cache is cold. Those are the
+    conditions under
     which the tool's own `sudo` prompts for a password nothing has primed. A
     manager that drops the cache itself
     ({attr}`CLIExecutor.resets_sudo_timestamp
@@ -1877,7 +1870,7 @@ def _hidden_prompt_risk(manager: CLIExecutor, operation: str | None) -> bool:
     """
     return (
         manager.internal_sudo
-        and operation in _STALL_NOTICE_OPERATIONS
+        and operation in manager.internal_sudo_operations
         and sys.stderr.isatty()
         and (manager.resets_sudo_timestamp or not _SUDO_CACHE_WARM.is_set())
     )

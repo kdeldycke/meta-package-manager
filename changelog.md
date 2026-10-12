@@ -18,7 +18,10 @@
 - [am,aura,fink,pacaur,pacstall,paru,pikaur,shelly,trizen,yay] Run `sync` and `cleanup` last and without a spinner on a cold `sudo` cache, so the tool's own password prompt can be answered.
 - [cask] Ask no password up front under a forced `sudo`, which Homebrew dropped anyway, and warn that the policy does nothing for `cask`.
 
-## [`8.1.1` (2026-10-08)](https://github.com/kdeldycke/meta-package-manager/compare/v8.1.0...v8.1.1)
+## [`8.1.1` (2026-10-09)](https://github.com/kdeldycke/meta-package-manager/compare/v8.1.0...v8.1.1)
+
+> [!NOTE]
+> `8.1.1` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/8.1.1/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v8.1.1).
 
 - **Breaking:** [mpm] Rename the `held` status of the report of what a command changed to `held by cooldown`, in the table, on the trail line and in the serialized `status` value.
 - [mpm] Add `Released` and `Eligible` columns to the report of what a command changed, dating each package the cooldown holds back.

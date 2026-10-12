@@ -94,6 +94,23 @@ implementation has to answer both of its points: the raw password it handles,
 and the tools it never reaches (`brew` honors the variable, `fink`'s plain
 `sudo` re-exec does not).
 ```
+
+```{todo}
+Keep the terminal for the `sync` and `cleanup` calls of an internal escalator on
+a cold cache. They run detached today, so one that needs `sudo`, like `fink
+selfupdate`, fails at once: its `sudo` has no terminal to ask on. To hold them on
+a still line like the other mutating calls, first find how to spare `brew
+update` and `brew cleanup`, which never escalate (see
+`_STALL_NOTICE_OPERATIONS`).
+```
+
+```{todo}
+Leave a manager marked
+{attr}`~meta_package_manager.execution.CLIExecutor.resets_sudo_timestamp` out
+of the up-front prompt a forced `sudo = true` puts it in (see `_escalates_in`),
+and warn instead. Homebrew drops that password before its own `sudo`, so the
+user types it twice.
+```
 """
 
 from __future__ import annotations
@@ -165,9 +182,11 @@ stall watchdog: the mutating operations whose installers may escalate mid-flight
 (`restore` stamps `"install"`, so it is covered). `sync` and `cleanup` are
 excluded on purpose, to avoid false notices on `brew update`/`brew cleanup`,
 whose long silent phases never escalate. The trade-off is a known gap: `fink`
-does re-exec `fink selfupdate`/`fink cleanup` through `sudo`, so a cold-cache
-`mpm sync`/`mpm cleanup` of `fink` can still stall unflagged on a hidden
-prompt.
+does re-exec `fink selfupdate`/`fink cleanup` through `sudo`. On a cold cache
+such a call runs detached from the terminal, where `sudo` [has no terminal to
+ask
+on](https://github.com/sudo-project/sudo/blob/f2f340938e51f9f12b29b72507d9edca8cb98abc/src/tgetpass.c#L128-L146)
+and gives up at once.
 """
 
 _SUDO_CACHE_WARM: Final = threading.Event()

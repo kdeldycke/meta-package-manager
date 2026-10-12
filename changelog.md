@@ -8,6 +8,7 @@
 - **Breaking:** [mpm] Rename the `held by cooldown` status of the report of what a command changed to `cooldown`, in the table, on the trail line and in the serialized `status` value.
 - [composer] Record that Composer `2.11.0`, which is not released yet, applies its cooldown setting to `outdated` too.
 - [mpm] Stop writing the silent-call warning below a password prompt the terminal shows: it moved the cursor away from `Password:`.
+- [mpm] Name the unanswered password prompt in the warning of a command that times out on it, with what to do next.
 
 ## [`8.1.1` (2026-10-08)](https://github.com/kdeldycke/meta-package-manager/compare/v8.1.0...v8.1.1)
 

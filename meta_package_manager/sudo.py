@@ -1953,7 +1953,7 @@ class _StallWatchdog(logging.Handler):
         # once. Touched by the notice thread only.
         self._noticed: float | None = None
         # Echo of the terminal before the child starts: only an echo found on
-        # can go off under a prompt. See _prompt_on_screen().
+        # can go off under a prompt. See prompt_on_screen().
         self._echoed = _terminal_echo()
         # Whether a prompt held a notice back, for the DEBUG line of stop().
         self._prompt_seen = False
@@ -1992,11 +1992,28 @@ class _StallWatchdog(logging.Handler):
         except Exception:  # noqa: BLE001
             self.handleError(record)
 
-    def _prompt_on_screen(self) -> bool:
+    def prompt_on_screen(self) -> bool:
         """Whether a program holds the terminal echo off to read a password.
 
         Read against the echo found when the call started: a terminal whose echo
         was already off then, or that cannot answer, proves nothing about a prompt.
+
+        {meth}`CLIExecutor.run <meta_package_manager.execution.CLIExecutor.run>`
+        asks once more when the call times out. The kill is a `SIGKILL`, which
+        leaves the prompting program no chance to restore the echo: an echo
+        still off then means the call died on a prompt nobody answered, and the
+        warning of the timeout says so.
+
+        ```{note}
+        That is how an unanswered prompt ends on macOS, whose `sudo` is built
+        [with no prompt
+        timeout](https://github.com/apple-oss-distributions/sudo/blob/9d15835617972783e565818fae7ea047626b1e5c/sudo/config.h#L1233).
+        Upstream [defaults to 5
+        minutes](https://github.com/sudo-project/sudo/blob/f2f340938e51f9f12b29b72507d9edca8cb98abc/configure.ac#L198),
+        well under {data}`~meta_package_manager.execution.MUTATING_TIMEOUT`:
+        such a `sudo` gives up first, and the tool then fails with its own
+        account of it.
+        ```
         """
         return bool(self._echoed) and _terminal_echo() is False
 
@@ -2013,7 +2030,7 @@ class _StallWatchdog(logging.Handler):
             last_stamp, last_line = self._activity
             if self._noticed == last_stamp:
                 continue
-            if self._prompt_on_screen():
+            if self.prompt_on_screen():
                 # The prompt is the notice of this episode. Nothing is written,
                 # not even at DEBUG: any line here moves the cursor away from it.
                 self._noticed = last_stamp
@@ -2033,7 +2050,7 @@ class _StallWatchdog(logging.Handler):
             # Break the line a prompt may be sitting on, so the notice starts on
             # a fresh one instead of running on from "Password:". The tool's
             # prompt goes to `/dev/tty` without a trailing newline and never
-            # reaches the pipe mpm reads. _prompt_on_screen() rules a prompt out
+            # reaches the pipe mpm reads. prompt_on_screen() rules a prompt out
             # only where the terminal answers, and never one that echoes its
             # answer: the watchdog is armed only when a prompt is possible
             # (`_hidden_prompt_risk`), which is what makes an unconditional break

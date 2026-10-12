@@ -1857,6 +1857,14 @@ class CLIExecutor:
             # detached into its own session, its whole tree on Windows.
             self._cleanup_windows_processes()
             msg = f"Timed out after {effective_timeout}s."
+            if watchdog is not None and watchdog.prompt_on_screen():
+                # The prompt still holds the terminal line, with no line break
+                # after it: end that line, so the warning starts on its own.
+                echo(err=True)
+                msg = (
+                    f"Timed out after {effective_timeout}s on an unanswered "
+                    "password prompt. Run the command again and answer the prompt."
+                )
             logging.warning(msg, extra={"label": subject})
             exception = CLIError(None, "", msg)
             self.cli_errors.append(exception)

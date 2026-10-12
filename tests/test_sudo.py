@@ -2171,6 +2171,55 @@ def test_stall_watchdog_holds_the_notice_back_for_a_prompt_on_screen(
     ) is held_back
 
 
+@pytest.mark.skipif(is_any_windows(), reason="A pseudo-terminal is POSIX-only.")
+@pytest.mark.parametrize(
+    ("echo_at_start", "prompts", "named"),
+    (
+        pytest.param(True, True, True, id="prompt-left-unanswered"),
+        pytest.param(True, False, False, id="silent-without-a-prompt"),
+        pytest.param(False, True, False, id="echo-already-off-at-start"),
+    ),
+)
+def test_timeout_names_an_unanswered_password_prompt(
+    caplog, capsys, terminal, echo_at_start, prompts, named
+):
+    """A call that times out on a password prompt says so, and how to go on.
+
+    The kill leaves the echo as the child held it, so the timeout reads the
+    prompt from the terminal the way the watchdog does. The prompt also holds
+    the terminal line with no line break after it: the call ends that line, so
+    the warning does not run on from `Password:`.
+
+    The two controls time out the same way and keep the plain wording: a child
+    that never touches the echo, and one that finds it off already.
+    """
+    assert not _SUDO_CACHE_WARM.is_set()
+    manager = FakeManager()
+    manager.internal_sudo = True
+    manager._active_operation = "install"
+    # Two seconds leave the child the time to start and to reach the terminal.
+    manager.timeout = 2
+    _set_echo(terminal, echo_at_start)
+    if prompts:
+        script = _prompting_script(terminal, "installer asks", 30)
+    else:
+        script = _stalling_script("installer asks", 30)
+    with (
+        patch("sys.stderr.isatty", return_value=True),
+        caplog.at_level(logging.WARNING),
+    ):
+        manager.run_cli("-c", script)
+    message = "Timed out after 2s."
+    if named:
+        message = (
+            "Timed out after 2s on an unanswered password prompt. "
+            "Run the command again and answer the prompt."
+        )
+    assert [error.error for error in manager.cli_errors] == [message]
+    assert message in [record.getMessage() for record in caplog.records]
+    assert capsys.readouterr().err.startswith("\n") is named
+
+
 @pytest.mark.parametrize(
     ("active_operation", "internal_sudo", "warm_cache", "tty"),
     (

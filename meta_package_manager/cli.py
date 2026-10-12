@@ -1139,6 +1139,17 @@ def serialized_errors(manager: PackageManager) -> list[str]:
     return list({expt.error for expt in manager.cli_errors})
 
 
+def failure_detail(errors: Iterable[CLIError]) -> str | None:
+    """The cause a failed attempt shows on its `✘` trail line, if `mpm` knows it.
+
+    The first {attr}`~meta_package_manager.execution.CLIError.detail` among
+    the `errors` of the attempt, which
+    {meth}`~meta_package_manager.execution.CLIExecutor.new_errors` collects.
+    A plain failure carries none: the glyph already says the attempt failed.
+    """
+    return next((error.detail for error in errors if error.detail), None)
+
+
 def snapshot_installed(
     manager: PackageManager,
     query: str | None,
@@ -1328,13 +1339,15 @@ def package_task(
                     f"Hold {item}: {hold.reason}.", extra={"label": subject}
                 )
                 return False, trail_label(subject, item, "cooldown")
-        if run_manager_action(
-            manager, spec, action=action, verb=verb, operation=operation
-        ):
+        with manager.new_errors() as errors:
+            succeeded = run_manager_action(
+                manager, spec, action=action, verb=verb, operation=operation
+            )
+        if succeeded:
             return True, trail_label(subject, item)
         with lock:
             record_failure(spec)
-        return False, trail_label(subject, item)
+        return False, trail_label(subject, item, failure_detail(errors))
 
     return task
 

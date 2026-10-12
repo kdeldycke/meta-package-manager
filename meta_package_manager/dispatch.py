@@ -559,7 +559,9 @@ def trail_label(
     per-call spinner showed, painted the same way, then the package it acted on
     for a package-keyed line, then a parenthesized detail when the outcome needs
     one (`cache`, `cooldown`, `not found`). The glyph already says whether the
-    operation succeeded, so a plain failure carries no detail.
+    operation succeeded, so a plain failure carries no detail. A failure whose
+    cause `mpm` knows names it there (`no password`, see
+    {func}`~meta_package_manager.cli.failure_detail`).
     """
     text = theme().invoked_command(subject) if _styling_enabled() else subject
     if item:
@@ -793,7 +795,8 @@ def collect_from_managers(
     subprocess and error list, so the call is thread-safe per manager). A truthy
     `data["errors"]` (or `data["failed"]`) marks that manager's trail line `✘`;
     an optional `data["detail"]` suffixes its subject in parentheses (`cleanup`
-    passes its categories, `upgrade --all` the cooldown that held a manager).
+    passes its categories, `upgrade --all` the cooldown that held a manager, or
+    what moved and what the upgrade died of).
 
     :param report_state: maintenance commands set it (the trail is their output,
         which `upgrade --all` and `cleanup --orphans` follow with a change report on

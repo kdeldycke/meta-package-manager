@@ -131,6 +131,14 @@ if TYPE_CHECKING:
     from .version import TokenizedString
 
 
+UNANSWERED_PROMPT_DETAIL: Final = "no password"
+"""How a `✘` trail line words a call that timed out on a password prompt.
+
+{meth}`CLIExecutor.run <meta_package_manager.execution.CLIExecutor.run>` files it
+as the {attr}`~meta_package_manager.execution.CLIError.detail` of that timeout,
+when `_StallWatchdog` still finds the prompt on the terminal.
+"""
+
 _STALL_NOTICE_DELAY: Final = 30
 """Seconds of child silence before an armed stall watchdog raises its notice.
 

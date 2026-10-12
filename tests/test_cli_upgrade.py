@@ -40,6 +40,7 @@ from meta_package_manager.execution import CLIError
 from meta_package_manager.manager import CooldownHold
 from meta_package_manager.package import Package
 from meta_package_manager.pool import pool
+from meta_package_manager.sudo import UNANSWERED_PROMPT_DETAIL
 from meta_package_manager.tables import PACKAGE_OUTCOME_GLYPHS, PackageOutcome
 
 from .conftest import default_manager_ids
@@ -462,6 +463,36 @@ def test_upgrade_all_reports_what_moved(invoke, changing_fake_pool):
     # No row is dated, so the cooldown columns stay out of the table.
     assert "Released" not in result.stdout
     assert "Eligible" not in result.stdout
+
+
+@pytest.mark.parametrize(
+    ("detail", "expected"),
+    (
+        pytest.param(
+            UNANSWERED_PROMPT_DETAIL,
+            "nothing upgraded, 2 still outdated, no password",
+            id="known-cause",
+        ),
+        pytest.param(None, "nothing upgraded, 2 still outdated", id="plain-failure"),
+    ),
+)
+def test_failed_upgrade_all_names_its_cause_on_the_trail(
+    invoke, changing_fake_pool, monkeypatch, detail, expected
+):
+    """The `✘` line of a failed full upgrade closes on the cause its error
+    carries, after the count of what moved. A failure with no known cause
+    keeps the count alone.
+    """
+
+    def failing_upgrade(manager, package_id=None, version=None, outdated_ids=None):
+        # Recorded and not raised, as the failure gate of `run()` does for a
+        # full upgrade.
+        manager.cli_errors.append(CLIError(None, "", "Timed out after 500s.", detail))
+
+    monkeypatch.setattr(ChangingFakeManager, "upgrade", failing_upgrade)
+    result = invoke("upgrade", "--all")
+    mid = changing_fake_pool.id
+    assert f"✘ {mid}.upgrade_all ({expected}) " in strip_ansi(result.stderr)
 
 
 def test_upgrade_all_selects_the_cooldown_columns(invoke, changing_fake_pool):

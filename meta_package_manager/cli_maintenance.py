@@ -58,6 +58,7 @@ from .cli import (
     ChangeReport,
     exit_on_failures,
     fail_unless_zero_exit,
+    failure_detail,
     install_action,
     mpm,
     outcome_detail,
@@ -541,18 +542,26 @@ def install(ctx, packages_specs):
         installed_count += ok
         op.mark(ok, text)
 
-    def trail(spec: Specifier, manager_id: str, status: str, seconds: float) -> None:
+    def trail(
+        spec: Specifier,
+        manager_id: str,
+        status: str,
+        seconds: float,
+        cause: str | None = None,
+    ) -> None:
         """Map an install attempt to a `✓`/`✘` ledger line through `op`.
 
         `status` is `installed` (✓), or `not_found` / `simulated` / `failed` /
         `cooldown` (✘). `seconds` is how long the attempt took, closing the line
-        the way every other trail line closes.
+        the way every other trail line closes. `cause` is what a `failed`
+        attempt died of, when {func}`~meta_package_manager.cli.failure_detail`
+        knows it.
         """
         detail = {
             "not_found": "not found",
             "simulated": "dry-run",
             "cooldown": "cooldown",
-        }.get(status)
+        }.get(status, cause)
         subject = operation_subject(manager_id, Operations.install.name)
         text = trail_label(subject, package_label(spec), detail)
         op.mark(status == "installed", f"{text}{elapsed_clock(seconds)}")
@@ -620,7 +629,8 @@ def install(ctx, packages_specs):
                     raise ValueError(msg)
 
             report.open(manager)
-            status = _attempt_install(manager, spec)
+            with manager.new_errors() as errors:
+                status = _attempt_install(manager, spec)
             # A package held by the cooldown ends the search: the highest-
             # priority manager providing it has answered, and falling through
             # to another ecosystem would sidestep the safeguard.
@@ -630,7 +640,13 @@ def install(ctx, packages_specs):
                 break
             # On a failed install, fall through to the next manager in priority order.
             if status == "failed":
-                trail(spec, manager.id, "failed", time.monotonic() - start)
+                trail(
+                    spec,
+                    manager.id,
+                    "failed",
+                    time.monotonic() - start,
+                    failure_detail(errors),
+                )
                 continue
             # Stop at the first (highest-priority) manager that provides the package.
             installed = True
@@ -750,8 +766,13 @@ def upgrade(ctx, all, packages_specs):
                 logging.info(output, extra={"label": manager.subject})
             data: dict = {"errors": errors}
             rows = report.close(manager)
-            if rows is not None:
-                data["detail"] = outcome_detail(rows, UPGRADE_RESULTS)
+            # What moved, then what the upgrade died of when mpm knows it.
+            details = [] if rows is None else [outcome_detail(rows, UPGRADE_RESULTS)]
+            cause = failure_detail(errors)
+            if cause:
+                details.append(cause)
+            if details:
+                data["detail"] = ", ".join(details)
             return manager.id, data
 
         # Full upgrade is independent per manager, so fan out concurrently with a

@@ -83,6 +83,7 @@ from .cooldown import CooldownPolicy
 from .sudo import (
     ESCALATION,
     ESCALATORS,
+    UNANSWERED_PROMPT_DETAIL,
     _hidden_prompt_risk,
     _is_permission_failure,
     _is_sudo_auth_failure,
@@ -159,12 +160,28 @@ a named test failure rather than as a Windows-only crash.
 class CLIError(Exception):
     """An error occurred when running package manager CLI."""
 
-    def __init__(self, code: int | None, output: str, error: str) -> None:
+    detail: str | None
+    """The cause in a word or two, as the `✘` trail line of the failed attempt
+    shows it in parentheses.
+
+    It stays `None` for a failure whose cause `mpm` does not know: the glyph
+    already says the attempt failed. See
+    {func}`~meta_package_manager.cli.failure_detail`.
+    """
+
+    def __init__(
+        self,
+        code: int | None,
+        output: str,
+        error: str,
+        detail: str | None = None,
+    ) -> None:
         """The exception internally keeps the result of CLI execution."""
         super().__init__()
         self.code = code
         self.output = output
         self.error = error
+        self.detail = detail
 
     def __str__(self) -> str:
         """Human-readable error."""
@@ -1857,6 +1874,7 @@ class CLIExecutor:
             # detached into its own session, its whole tree on Windows.
             self._cleanup_windows_processes()
             msg = f"Timed out after {effective_timeout}s."
+            detail = None
             if watchdog is not None and watchdog.prompt_on_screen():
                 # The prompt still holds the terminal line, with no line break
                 # after it: end that line, so the warning starts on its own.
@@ -1865,8 +1883,9 @@ class CLIExecutor:
                     f"Timed out after {effective_timeout}s on an unanswered "
                     "password prompt. Run the command again and answer the prompt."
                 )
+                detail = UNANSWERED_PROMPT_DETAIL
             logging.warning(msg, extra={"label": subject})
-            exception = CLIError(None, "", msg)
+            exception = CLIError(None, "", msg, detail)
             self.cli_errors.append(exception)
             if must_succeed or self.stop_on_error:
                 raise exception

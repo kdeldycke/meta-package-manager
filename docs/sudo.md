@@ -214,10 +214,11 @@ $ mpm install macfuse
 warning:cask.install: No output for 30s: may be waiting on a hidden password prompt. Last output: "==> Running installer for macfuse; your password may be necessary."
 ```
 
-A prompt nobody answers ends the call at its timeout, and the warning says so:
+A prompt nobody answers ends the call at its timeout. The warning says so, and the `✘` line of the call names the cause:
 
 ```shell-session
 warning:cask.install: Timed out after 500s on an unanswered password prompt. Run the command again and answer the prompt.
+✘ cask.install: macfuse (no password) (8:20)
 ```
 
 That is the case on macOS, whose `sudo` has no prompt timeout. A `sudo` built with the upstream default gives up after 5 minutes, and the manager then reports its own failure.

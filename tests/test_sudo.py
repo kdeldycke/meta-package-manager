@@ -32,6 +32,7 @@ import logging
 import os
 import subprocess
 import sys
+import threading
 import time
 from collections.abc import Callable
 from contextlib import ExitStack, contextmanager
@@ -45,12 +46,15 @@ from click_extra.spinner import Spinner
 from extra_platforms import is_any_windows
 
 from meta_package_manager.capabilities import Operations
+from meta_package_manager.cli import package_task
 from meta_package_manager.execution import STILL_CALL_HINT, STILL_CALL_MARKER
 from meta_package_manager.pool import pool
+from meta_package_manager.specifier import Specifier
 from meta_package_manager.sudo import (
     _SUDO_CACHE_WARM,
     ESCALATION,
     ESCALATORS,
+    UNANSWERED_PROMPT_DETAIL,
     Escalator,
     _installed_release,
     _is_permission_failure,
@@ -2188,7 +2192,8 @@ def test_timeout_names_an_unanswered_password_prompt(
     The kill leaves the echo as the child held it, so the timeout reads the
     prompt from the terminal the way the watchdog does. The prompt also holds
     the terminal line with no line break after it: the call ends that line, so
-    the warning does not run on from `Password:`.
+    the warning does not run on from `Password:`. The `✘` trail line of the
+    attempt names the cause too.
 
     The two controls time out the same way and keep the plain wording: a child
     that never touches the echo, and one that finds it off already.
@@ -2196,7 +2201,6 @@ def test_timeout_names_an_unanswered_password_prompt(
     assert not _SUDO_CACHE_WARM.is_set()
     manager = FakeManager()
     manager.internal_sudo = True
-    manager._active_operation = "install"
     # Two seconds leave the child the time to start and to reach the terminal.
     manager.timeout = 2
     _set_echo(terminal, echo_at_start)
@@ -2204,11 +2208,23 @@ def test_timeout_names_an_unanswered_password_prompt(
         script = _prompting_script(terminal, "installer asks", 30)
     else:
         script = _stalling_script("installer asks", 30)
+    failures: list[Specifier] = []
+    task = package_task(
+        manager,
+        Specifier(raw_spec="mango", package_id="mango"),
+        threading.Lock(),
+        action=lambda m, s: m.run_cli("-c", script),
+        verb="install",
+        operation="install",
+        record_failure=failures.append,
+    )
     with (
         patch("sys.stderr.isatty", return_value=True),
         caplog.at_level(logging.WARNING),
     ):
-        manager.run_cli("-c", script)
+        succeeded, label = task()
+    assert succeeded is False
+    assert len(failures) == 1
     message = "Timed out after 2s."
     if named:
         message = (
@@ -2218,6 +2234,9 @@ def test_timeout_names_an_unanswered_password_prompt(
     assert [error.error for error in manager.cli_errors] == [message]
     assert message in [record.getMessage() for record in caplog.records]
     assert capsys.readouterr().err.startswith("\n") is named
+    detail = UNANSWERED_PROMPT_DETAIL if named else None
+    assert manager.cli_errors[0].detail == detail
+    assert label.endswith(f"mango ({detail})" if named else "mango")
 
 
 @pytest.mark.parametrize(

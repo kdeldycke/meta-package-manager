@@ -28,7 +28,9 @@ import pytest
 from boltons.strutils import strip_ansi
 from extra_platforms import is_windows
 
+from meta_package_manager.execution import CLIError
 from meta_package_manager.pool import pool
+from meta_package_manager.sudo import UNANSWERED_PROMPT_DETAIL
 from meta_package_manager.tables import PackageOutcome
 
 from . import conftest
@@ -38,6 +40,7 @@ from .destructive_plan import (
     install_remove_blocked,
     maintained_manager_ids_and_dummy_package,
 )
+from .fake_manager import ChangingFakeManager
 from .test_cli import (
     assert_no_manager_selected,
     check_manager_selection,
@@ -171,6 +174,46 @@ def test_install_untied_reports_every_attempt(invoke, changing_fake_pool):
             "fake-pkg-theta": ("1.0.0", PackageOutcome.INSTALLED.label),
         },
     )
+
+
+@pytest.mark.parametrize(
+    "detail",
+    (
+        pytest.param(UNANSWERED_PROMPT_DETAIL, id="known-cause"),
+        pytest.param(None, id="plain-failure"),
+    ),
+)
+@pytest.mark.parametrize(
+    "spec",
+    (
+        pytest.param("pkg:{mid}/fake-pkg-theta", id="tied"),
+        pytest.param("fake-pkg-theta", id="untied"),
+    ),
+)
+def test_failed_install_names_its_cause_on_the_trail(
+    invoke, changing_fake_pool, monkeypatch, spec, detail
+):
+    """The `✘` line of a failed install names the cause its error carries.
+
+    Both install paths do: the concurrent one a tied package takes, and the
+    sequential priority search of an untied one. A failure with no known cause
+    keeps a bare line, the glyph saying enough.
+    """
+    mid = changing_fake_pool.id
+
+    def failing_install(manager, package_id, version=None):
+        # Recorded then raised, as the failure gate of `run()` does.
+        error = CLIError(None, "", "Timed out after 500s.", detail)
+        manager.cli_errors.append(error)
+        raise error
+
+    monkeypatch.setattr(ChangingFakeManager, "install", failing_install)
+    result = invoke("install", spec.format(mid=mid))
+    assert result.exit_code == 1
+    stderr = strip_ansi(result.stderr)
+    line = f"✘ {mid}.install: fake-pkg-theta"
+    assert line in stderr
+    assert (f"{line} ({UNANSWERED_PROMPT_DETAIL})" in stderr) is bool(detail)
 
 
 def test_dry_run_install_names_plan(invoke, changing_fake_pool, queries_through_a_cli):

@@ -24,9 +24,9 @@ Every release ships standalone binaries compiled by Nuitka, and that lane keeps 
 
 The [bar plugin](bar-plugin.md) started its life inside the central plugin repository of BitBar, the project since reborn as Xbar:
 
-- [matryer/xbar-plugins#466](https://github.com/matryer/xbar-plugins/pull/466) is the initial submission of a generic package manager plugin, and [matryer/xbar-plugins#469](https://github.com/matryer/xbar-plugins/pull/469) extended it to Python packages. Thirteen further release-upgrade pull requests were merged after those two.
+- [matryer/xbar-plugins#466](https://github.com/matryer/xbar-plugins/pull/466) is the initial submission of a generic package manager plugin, and [matryer/xbar-plugins#469](https://github.com/matryer/xbar-plugins/pull/469) extended it to Python packages. Fifteen further release-upgrade pull requests were merged after those two.
 - When the repository went dormant, two upgrades ([matryer/xbar-plugins#1459](https://github.com/matryer/xbar-plugins/pull/1459), [matryer/xbar-plugins#1479](https://github.com/matryer/xbar-plugins/pull/1479)) sat unreviewed until they were obsolete, so [matryer/xbar-plugins#525](https://github.com/matryer/xbar-plugins/issues/525) moved the plugin into this repository, where it now ships with each `mpm` release.
-- The copy in the plugin repository is still refreshed from here, most recently by [matryer/xbar-plugins#2018](https://github.com/matryer/xbar-plugins/pull/2018).
+- The copy in the plugin repository is still refreshed from here, most recently by [matryer/xbar-plugins#2195](https://github.com/matryer/xbar-plugins/pull/2195).
 
 ### [boltons](https://github.com/mahmoud/boltons)
 

@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from pathlib import Path
 from unittest.mock import call, patch
 
@@ -208,3 +209,32 @@ def test_upstream_purls_tolerates_malformed_json(tmp_path):
     sbom_file = tmp_path / "sbom.spdx.json"
     sbom_file.write_text('{"packages": [', encoding="UTF-8")
     assert Brew._upstream_purls(sbom_file, "curl") == ()
+
+
+@pytest.mark.parametrize(
+    ("stderr", "hint"),
+    (
+        pytest.param(
+            "Error: Cask 'macwhisper' is not installed.",
+            "The Caskroom still holds a directory for macwhisper, which is not "
+            "installed. Homebrew lists no cask while that directory remains. "
+            "Remove it with `brew uninstall --cask --force macwhisper`.",
+            id="stale-caskroom-directory",
+        ),
+        pytest.param(
+            "Error: Cask 'macwhisper' is unavailable: No Cask with this name exists.",
+            None,
+            id="other-cask-error",
+        ),
+    ),
+)
+def test_installed_names_a_stale_caskroom_directory(monkeypatch, caplog, stderr, hint):
+    """A cask listing that brew aborted relays the error, plus the fix when known."""
+    caplog.set_level(logging.WARNING)
+    cask = Cask()
+    monkeypatch.setattr(cask, "cli_errors", [])
+    monkeypatch.setattr(cask, "cli_path", Path("/opt/homebrew/bin/brew"), raising=False)
+    monkeypatch.setattr(cask, "_spawn", lambda *args, **kwargs: (1, "", stderr))
+    assert list(cask.installed) == []
+    expected = [stderr] if hint is None else [stderr, hint]
+    assert [record.getMessage() for record in caplog.records] == expected

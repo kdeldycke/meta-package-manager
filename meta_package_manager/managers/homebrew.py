@@ -122,6 +122,9 @@ class Homebrew(PackageManager):
         """,
         re.VERBOSE,
     )
+    _STALE_CASK_REGEXP = re.compile(
+        r"Error: Cask '(?P<cask_id>[^']+)' is not installed\."
+    )
 
     version_regexes = (r"Homebrew\s+(?P<version>\S+)",)
     """
@@ -168,6 +171,20 @@ class Homebrew(PackageManager):
         virtualbox 5.1.8-111374 5.1.10-112026
         ```
 
+        ```{caution}
+        `brew list --cask` loads each directory of the Caskroom, and aborts on
+        the first one with no install record. Such a directory can hold only
+        the `.upgrading` backup that a cask upgrade deletes when it succeeds.
+        Homebrew then lists no cask at all, so mpm relays the error and names
+        the `brew uninstall --cask --force` command that removes the directory.
+        ```
+
+        ```{code-block} console
+
+        $ brew list --versions --cask
+        Error: Cask 'macwhisper' is not installed.
+        ```
+
         ```{todo}
 
         Use the `removed` variable to detect removed packages (which are
@@ -175,7 +192,18 @@ class Homebrew(PackageManager):
         [#17](https://github.com/kdeldycke/meta-package-manager/issues/17).
         ```
         """
+        errors_before = len(self.cli_errors)
         output = self.run_cli("list", "--quiet", "--versions")
+        for error in self.cli_errors[errors_before:]:
+            if match := self._STALE_CASK_REGEXP.search(error.error):
+                cask_id = match["cask_id"]
+                logging.warning(
+                    f"The Caskroom still holds a directory for {cask_id}, which "
+                    "is not installed. Homebrew lists no cask while that "
+                    "directory remains. Remove it with "
+                    f"`brew uninstall --cask --force {cask_id}`.",
+                    extra={"label": self.subject},
+                )
 
         for package_id, _removed, versions in map(
             methodcaller("groups"),

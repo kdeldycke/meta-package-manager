@@ -213,7 +213,7 @@ class EOPKG(PackageManager):
         Reverse Dependencies: htop-dbginfo
         ```
         """
-        output = self.run_cli("list-upgrades", "--install-info")
+        output = self.run_cli("list-upgrades", "--install-info", auto_extra_args=True)
 
         installed: dict[str, str] = {}
         for line in output.splitlines():
@@ -230,7 +230,7 @@ class EOPKG(PackageManager):
                 f"{match.group('version')}-{match.group('release')}"
             )
             for match in self._CANDIDATE_REGEXP.finditer(
-                self.run_cli("info", *installed),
+                self.run_cli("info", *installed, auto_extra_args=False),
             )
         }
 
@@ -446,6 +446,6 @@ class EOPKG(PackageManager):
         Removing cache file /var/cache/eopkg/packagedb.cache...
         ```
         """
-        self.run_cli("remove-orphans", "--yes-all", sudo=True)
-        self.run_cli("clean", sudo=True)
-        self.run_cli("delete-cache", sudo=True)
+        self.run_cli("remove-orphans", "--yes-all", sudo=True, auto_extra_args=False)
+        self.run_cli("clean", sudo=True, auto_extra_args=False)
+        self.run_cli("delete-cache", sudo=True, auto_extra_args=True)

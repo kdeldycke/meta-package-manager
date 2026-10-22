@@ -63,25 +63,60 @@ def test_trust_tap_qualified_package(manager_class, package_id, tap_id):
     with patch.object(manager, "run_cli") as run_cli:
         manager.trust_tap(package_id)
     assert run_cli.call_args_list == [
-        call("tap", tap_id, auto_post_args=False),
-        call("trust", package_id),
+        call("tap", tap_id, auto_post_args=False, auto_extra_args=False),
+        call("trust", package_id, auto_extra_args=False),
     ]
 
 
 @pytest.mark.parametrize("manager_class", (Brew, Cask))
-@pytest.mark.parametrize("ignore_auto_updates", (True, False))
-def test_upgrade_all_cli_greedy_is_cask_only(manager_class, ignore_auto_updates):
-    """--include-auto-updates adds --greedy to cask's upgrade-all command only.
-
-    `brew upgrade` rejects `--greedy` alongside `--formula` (mutually
-    exclusive options), so `brew` must never grow the flag.
-    """
+def test_no_greedy_by_default(manager_class):
+    """mpm passes no `--greedy` of its own: the user adds it per operation."""
     manager = manager_class()
-    manager.ignore_auto_updates = ignore_auto_updates
-    cli = manager.upgrade_all_cli()
-    assert "upgrade" in cli
-    expect_greedy = not ignore_auto_updates and manager_class is Cask
-    assert ("--greedy" in cli) is expect_greedy
+    assert "--greedy" not in manager.upgrade_all_cli()
+
+
+def test_extra_args_reach_their_own_command(monkeypatch):
+    """`extra_args` set per operation reach the commands of that operation alone.
+
+    A `--greedy` set through `post_args` reached `brew list`, which rejects it
+    ([#2171](https://github.com/kdeldycke/meta-package-manager/issues/2171)). Set
+    on `outdated` and `upgrade_all`, it joins `brew outdated` and `brew upgrade`,
+    before the `--cask` selector, and leaves `brew list` alone. The `brew tap`
+    and `brew trust` helpers of an install get none of the install's arguments.
+    """
+    manager = Cask()
+    manager.operation_extra_args = {
+        "install": ("--no-binaries",),
+        "outdated": ("--greedy",),
+        "upgrade_all": ("--greedy",),
+    }
+    commands: list[tuple[str, ...]] = []
+
+    def record(*args, **kwargs):
+        commands.append(tuple(map(str, args)))
+        return ""
+
+    monkeypatch.setattr(manager, "run", record)
+    list(manager.installed)
+    list(manager.outdated)
+    manager.install("homebrew/cask-versions/firefox-developer-edition")
+    upgrade_all = manager.upgrade_all_cli()
+
+    listing, outdated, tap, trust, install = commands
+    assert listing[-4:] == ("list", "--quiet", "--versions", "--cask")
+    assert outdated[-4:] == ("outdated", "--json=v2", "--greedy", "--cask")
+    assert tap[-2:] == ("tap", "homebrew/cask-versions")
+    assert trust[-3:] == (
+        "trust",
+        "homebrew/cask-versions/firefox-developer-edition",
+        "--cask",
+    )
+    assert install[-3:] == (
+        "homebrew/cask-versions/firefox-developer-edition",
+        "--no-binaries",
+        "--cask",
+    )
+    assert upgrade_all[-5:] == ("upgrade", "--quiet", "--yes", "--greedy", "--cask")
 
 
 @pytest.mark.parametrize("manager_class", (Brew, Cask))

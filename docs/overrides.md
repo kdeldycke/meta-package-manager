@@ -13,7 +13,7 @@ Each built-in manager exposes a small set of attributes that can be overridden f
 | `cooldown_policy`     | string           | Per-manager cooldown posture: `enforce`, `best-effort` or `off`, overriding the globally resolved policy. See [cooldown](cooldown.md).                                               |
 | `dry_run`             | boolean          | Simulate CLI calls without performing any action, only for this manager.                                                                                                             |
 | `extra_env`           | table of strings | Additional environment variables passed to every CLI call.                                                                                                                           |
-| `ignore_auto_updates` | boolean          | Exclude auto-updating packages from outdated/upgrade results, only for this manager.                                                                                                 |
+| `operations`          | table            | Arguments added to the commands of one operation alone, keyed by operation name. See [per-operation arguments](#per-operation-arguments).                                            |
 | `post_args`           | list of strings  | Arguments appended **after** every CLI invocation.                                                                                                                                   |
 | `pre_args`            | list of strings  | Arguments inserted **before** every CLI invocation.                                                                                                                                  |
 | `pre_cmds`            | list of strings  | Commands prepended to every CLI invocation (typically `sudo`).                                                                                                                       |
@@ -74,9 +74,27 @@ timeout = 900
 pre_args = ["--quiet", "--color", "never"]
 ```
 
+## Per-operation arguments
+
+`pre_args` and `post_args` reach every command of a manager. To add arguments to the commands of one operation alone, use the `operations` table of the override section:
+
+```toml
+[mpm.overrides.cask]
+operations.outdated.extra_args = ["--greedy"]
+operations.upgrade_all.extra_args = ["--greedy"]
+```
+
+`mpm` then runs `brew outdated --json=v2 --greedy --cask` and `brew upgrade --quiet --yes --greedy --cask`. The `brew list` command, which rejects `--greedy`, stays as it is.
+
+- Each entry has the name of an operation, as in the `operations` table of a [manager definition](#define-a-new-manager): `installed`, `outdated`, `search`, `install`, `upgrade_one`, `upgrade_all`, `remove`, `sync`, `cleanup_cache`, and so on. A manager accepts the operations whose commands it builds, and `mpm config-template <id>` lists them.
+- An entry takes one key, `extra_args`: a list of strings that `mpm` adds after the arguments of the command, before `post_args`.
+- The helper commands of an operation get none of its arguments, like the `brew tap` that runs before a `brew install`.
+- A manager with no command to upgrade all packages upgrades them one by one, with its `upgrade_one` command: it has no `upgrade_all` entry, so set `upgrade_one`.
+- Run `mpm --plan` to print the state-changing commands with their arguments, without running them.
+
 ## Validation
 
-Unknown manager IDs and unknown field names are reported as warnings on `<stderr>` and skipped: a typo will not crash `mpm`. Type mismatches (a single string passed where a list is expected) raise an error so the offending value can be corrected.
+`mpm` checks each override section when it loads the configuration. It stops with an error that names the faulty key: an unknown manager ID, an unknown field, a value of the wrong type (a single string where a list is expected), or an `operations` entry the manager does not build. Run `mpm --validate-config <file>` to check a file without running a command.
 
 (define-a-new-manager)=
 
@@ -192,7 +210,7 @@ mpm ships one such definition itself, as a worked and tested example: [`meta_pac
 
 ## Help improve detection upstream
 
-When an override targets a field that often points to an upstream detection bug, `mpm` prints a one-line invitation to file a bug report so the heuristics can be improved for everyone. The fields that trigger an invitation are: `cli_names`, `cli_search_path`, `requirement`, `version_cli_options`, and `version_regexes`. Overrides on preference fields like `timeout` or `ignore_auto_updates` never trigger an invitation.
+When an override targets a field that often points to an upstream detection bug, `mpm` prints a one-line invitation to file a bug report so the heuristics can be improved for everyone. The fields that trigger an invitation are: `cli_names`, `cli_search_path`, `requirement`, `version_cli_options`, and `version_regexes`. Overrides on preference fields like `timeout` or `operations` never trigger an invitation.
 
 The invitation is a pre-filled GitHub new-issue URL targeting the `bug-report.yml` template. Clicking it opens the bug-report form with the manager ID, field, override value, and what `mpm` detected without the override already filled in. The user only has to add the diagnostic command outputs the form requests (`mpm --params`, `mpm --verbosity DEBUG --all-managers managers`) before submitting.
 

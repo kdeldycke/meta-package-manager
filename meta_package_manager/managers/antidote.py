@@ -188,12 +188,16 @@ class Antidote(PackageManager):
         `antidote.zsh` that is present but broken still fails loudly.
 
         ```{note}
-        The `**kwargs` accepted by the base class (`auto_pre_args`, `sudo`,
-        etc.) are accepted but ignored because every invocation goes through
-        the `zsh -c` wrapper and Antidote never requires elevated privileges.
+        The user's `extra_args` for the operation in flight join the wrapped
+        command. The other `**kwargs` accepted by the base class
+        (`auto_pre_args`, `sudo`, etc.) are ignored, because every invocation
+        goes through the `zsh -c` wrapper and Antidote never requires
+        elevated privileges.
         ```
         """
-        clean_args = args_cleanup(*args)
+        clean_args = args_cleanup(
+            *args, self.active_extra_args(kwargs.get("auto_extra_args", True))
+        )
         antidote_cmd = " ".join(shlex.quote(arg) for arg in clean_args)
         source_path = shlex.quote(str(antidote_source_path()))
 

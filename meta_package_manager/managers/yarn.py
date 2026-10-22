@@ -203,7 +203,9 @@ class YarnClassic(Yarn):
         ~/.config/yarn/global
         ```
         """
-        return self.run_cli("global", "dir", force_exec=True).rstrip()
+        return self.run_cli(
+            "global", "dir", force_exec=True, auto_extra_args=False
+        ).rstrip()
 
     @property
     def outdated(self) -> Iterator[Package]:

@@ -20,8 +20,9 @@ module owns everything that turns such a description into a live
 {class}`~meta_package_manager.manager.PackageManager` subclass:
 
 - the **schema vocabulary**: which manager attributes a section may set, both on a
-  shipped manager ({data}`OVERRIDABLE_FIELDS`) and on a brand-new definition
-  ({data}`DEFINITION_CLI_FIELDS`, the operations DSL constants);
+  shipped manager ({data}`OVERRIDABLE_FIELDS`, {data}`OVERRIDE_OPERATION_KEYS`)
+  and on a brand-new definition ({data}`DEFINITION_CLI_FIELDS`, the operations DSL
+  constants);
 - the **validation and parsing** layer ({func}`parse_manager_definition`), shared
   by `--validate-config` and the runtime registration path so a config that
   survives one survives the other;
@@ -55,7 +56,7 @@ from typing import cast
 from click_extra.config import ValidationError
 from extra_platforms import ALL_GROUP_IDS, ALL_PLATFORMS, traits_from_ids
 
-from .capabilities import METHOD_OPERATIONS, Operations
+from .capabilities import METHOD_OPERATIONS, Operations, implements_method
 from .cooldown import CooldownPolicy, parse_policy_token
 from .manager import JSON_FIELD_SELECTOR_REGEX, MetaPackageManager, PackageManager
 
@@ -213,7 +214,6 @@ OVERRIDABLE_FIELDS: Final[Mapping[str, Callable[[Any], Any]]] = {
     "cooldown_policy": _to_cooldown_policy,
     "dry_run": _to_bool,
     "extra_env": _to_str_dict,
-    "ignore_auto_updates": _to_bool,
     "plan": _to_bool,
     "post_args": _to_str_tuple,
     "pre_args": _to_str_tuple,
@@ -289,8 +289,8 @@ DEFINITION_CLI_FIELDS: Final[Mapping[str, Callable[[Any], Any]]] = {
 """CLI-execution attributes a definition may set, mostly reusing the override
 converters.
 
-The runtime-preference fields (`dry_run`, `ignore_auto_updates`, `plan`,
-`stop_on_error`) are excluded: they are command-line/global concerns, not part of a
+The runtime-preference fields (`dry_run`, `plan`, `stop_on_error`) are
+excluded: they are command-line/global concerns, not part of a
 manager's identity, and resolve through the usual option precedence. `unmaintained`
 is reused from the override converters so a TOML-defined manager can flag its own
 upstream as abandoned (see `docs/cooldown.md` for the affected managers).
@@ -511,6 +511,16 @@ while `urpmi` installs). `sudo = true` marks the operation as privileged,
 mirroring the `sudo=True` flag built-in managers pass to `run_cli`: escalation
 then follows the per-manager policy (the definition's `default_sudo`, overridden
 by the user's `--sudo`/`--no-sudo`).
+"""
+
+
+OVERRIDE_OPERATION_KEYS: Final[frozenset[str]] = frozenset({"extra_args"})
+"""Keys allowed in an operation's table of an override, on a shipped manager.
+
+The operations of a shipped manager are code or a bundled definition, so an
+override cannot redefine one: no `args`, no parser. `extra_args` adds arguments
+to the commands of the operation (see
+{attr}`~meta_package_manager.execution.CLIExecutor.operation_extra_args`).
 """
 
 
@@ -987,6 +997,79 @@ def _check_parse_fields(path: str, present: set[str], required: frozenset[str]) 
             f"missing required field(s): {', '.join(sorted(missing))}.",
             code="invalid_value",
         )
+
+
+def buildable_operations(
+    manager: PackageManager | type[PackageManager],
+) -> tuple[str, ...]:
+    """Names of the operations whose commands `manager` builds, sorted.
+
+    An operation qualifies when a class of the manager's own hierarchy defines its
+    method (see {data}`OPERATION_FACTORIES`). These are the entries an override's
+    `operations` table accepts, and the entries `mpm config-template` prints.
+    """
+    return tuple(
+        sorted(
+            op_name
+            for op_name, (method_name, _) in OPERATION_FACTORIES.items()
+            if implements_method(manager, method_name)
+        )
+    )
+
+
+def parse_operation_overrides(
+    manager_id: str,
+    manager: PackageManager | type[PackageManager],
+    raw: Any,
+) -> dict[str, tuple[str, ...]]:
+    """Validate the `operations` table of an override, and return its `extra_args`.
+
+    Each entry must name an operation whose command `manager` builds: arguments for
+    any other operation reach no command. That leaves out an `upgrade_all` that mpm
+    runs one package at a time, whose commands are `upgrade_one` commands. An entry
+    takes the keys of {data}`OVERRIDE_OPERATION_KEYS` alone.
+
+    :param manager_id: the ID of the section, for the path of an error.
+    :param manager: the shipped manager the section overrides.
+    :param raw: the value of the `operations` key.
+    :return: the `extra_args` of each entry, keyed by operation name.
+    :raises click_extra.ValidationError: when an entry is malformed.
+    """
+    path = f"{manager_id}.operations"
+    if not isinstance(raw, dict):
+        raise ValidationError(
+            path, f"expected a table, got {type(raw).__name__}", code="invalid_type"
+        )
+    commands = buildable_operations(manager)
+    extra_args: dict[str, tuple[str, ...]] = {}
+    for op_name, op_section in raw.items():
+        op_path = f"{path}.{op_name}"
+        if op_name not in commands:
+            raise ValidationError(
+                op_path,
+                f"{manager_id} builds no {op_name} command to add arguments to. "
+                f"Allowed: {', '.join(commands)}.",
+                code="unknown_operation",
+            )
+        if not isinstance(op_section, dict):
+            raise ValidationError(
+                op_path,
+                f"expected a table, got {type(op_section).__name__}",
+                code="invalid_type",
+            )
+        for key in op_section:
+            if key not in OVERRIDE_OPERATION_KEYS:
+                raise ValidationError(
+                    f"{op_path}.{key}",
+                    "unknown key. Allowed: "
+                    f"{', '.join(sorted(OVERRIDE_OPERATION_KEYS))}.",
+                    code="unknown_field",
+                )
+        if "extra_args" in op_section:
+            extra_args[op_name] = _convert(
+                f"{op_path}.extra_args", _to_str_tuple, op_section["extra_args"]
+            )
+    return extra_args
 
 
 def _render_args(args: tuple[str, ...], **substitutions: str) -> list[str]:

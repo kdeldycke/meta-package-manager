@@ -92,7 +92,7 @@ The user-facing inventory of what `mpm` backfills on top of native tools is [the
 
 [`dotnet`](managers/dotnet.md) never implemented `dotnet tool list --outdated`: an SDK maintainer wrote the spec in [dotnet/sdk#22853](https://github.com/dotnet/sdk/issues/22853), which was then closed as not planned. `mpm` checks the installed tools against NuGet itself, without mutating them.
 
-[`brew`](managers/brew.md) rejects `--formula` next to `--greedy` ever since [Homebrew/brew#8229](https://github.com/Homebrew/brew/pull/8229) added the selector to `brew upgrade`, and tolerating the pair as a no-op was declined in [Homebrew/brew#16135](https://github.com/Homebrew/brew/issues/16135). `mpm` shapes its formula and cask outdated queries around the conflict.
+[`brew`](managers/brew.md) rejects `--formula` next to `--greedy` ever since [Homebrew/brew#8229](https://github.com/Homebrew/brew/pull/8229) added the selector to `brew upgrade`, and tolerating the pair as a no-op was declined in [Homebrew/brew#16135](https://github.com/Homebrew/brew/issues/16135). `mpm` passes no `--greedy` of its own, and an `operations` override adds it to the commands of [`cask`](managers/cask.md) alone.
 
 ### Concurrency
 

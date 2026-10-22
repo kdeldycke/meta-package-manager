@@ -40,6 +40,7 @@ import sys
 import urllib.parse
 from dataclasses import dataclass, field
 from pathlib import Path
+from types import MappingProxyType
 from typing import Any
 
 import tomli_w
@@ -57,9 +58,12 @@ from click_extra.theme import get_current_theme as theme
 from .cooldown import parse_cooldown_section
 from .definitions import (
     OVERRIDABLE_FIELDS,
+    OVERRIDE_OPERATION_KEYS,
     OVERRIDES_SECTION,
     build_manager_class,
+    buildable_operations,
     parse_manager_definition,
+    parse_operation_overrides,
 )
 
 TYPE_CHECKING = False
@@ -104,12 +108,6 @@ class MpmConfig:
         metadata={CONFIG_PATH_METADATA_KEY: "all_managers"},
     )
     """Force evaluation of all managers, including unsupported and unmaintained."""
-
-    ignore_auto_updates: bool = field(
-        default=True,
-        metadata={CONFIG_PATH_METADATA_KEY: "ignore_auto_updates"},
-    )
-    """Exclude auto-updating packages from outdated/upgrade results."""
 
     stop_on_error: bool = field(
         default=False,
@@ -230,9 +228,27 @@ upstream detection bug rather than a personal preference.
 
 When the user overrides one of these, mpm did not find the binary, used the wrong
 binary name, rejected a valid version, or failed to parse one. The other overridable
-fields (`timeout`, `ignore_auto_updates`, `pre_args`, etc.) are user
-preferences and do not warrant a contribution invitation.
+fields (`timeout`, `pre_args`, `operations`, etc.) are user preferences and do not
+warrant a contribution invitation.
 """
+
+
+AUTO_UPDATES_REPLACEMENT: Final[str] = (
+    '`[mpm.overrides.cask]` with `operations.outdated.extra_args = ["--greedy"]` '
+    'and `operations.upgrade_all.extra_args = ["--greedy"]`'
+)
+"""The configuration that replaces the removed auto-updates setting.
+
+The `--ignore-auto-updates/--include-auto-updates` flag, its `[mpm]` key and its
+per-manager override field had one effect: `--greedy` on the `outdated` and
+`upgrade --all` commands of `cask`. Each of the three removed spellings names this
+replacement in its error or warning.
+"""
+
+
+REMOVED_AUTO_UPDATES_KEY: Final[str] = "ignore_auto_updates"
+"""Configuration key of the removed auto-updates setting, in `[mpm]` and in
+`[mpm.overrides.<id>]`. See {data}`AUTO_UPDATES_REPLACEMENT`."""
 
 
 ISSUE_TRACKER_NEW_URL: Final[str] = (
@@ -449,8 +465,10 @@ def validate_manager_overrides_section(
     same rules.
 
     A section keyed by a built-in manager ID is validated as an *override* (its
-    fields must be a subset of {data}`~meta_package_manager.definitions.OVERRIDABLE_FIELDS`). A section keyed by any
-    other ID is validated as a brand-new manager *definition* via
+    fields must be a subset of {data}`~meta_package_manager.definitions.OVERRIDABLE_FIELDS`,
+    plus an `operations` table checked by
+    {func}`~meta_package_manager.definitions.parse_operation_overrides`). A section
+    keyed by any other ID is validated as a brand-new manager *definition* via
     {func}`~meta_package_manager.definitions.parse_manager_definition`.
 
     :raises click_extra.ValidationError: when `section` is not a mapping, an
@@ -465,15 +483,20 @@ def validate_manager_overrides_section(
         raise ValidationError("", f"expected a table, got {type(section).__name__}")
     for manager_id, fields in section.items():
         if manager_id in pool.known_manager_ids:
-            _validate_override_fields(manager_id, fields)
+            _validate_override_fields(manager_id, fields, pool.register[manager_id])
         else:
             # A section for an unknown ID that carries neither a definition's
             # required identity nor operations is most likely a typo of a built-in
             # ID rather than a new manager: report it as such for a clearer message.
+            # So is a section whose operations only add arguments, which only an
+            # override does.
             if (
                 isinstance(fields, dict)
-                and "operations" not in fields
                 and "platforms" not in fields
+                and (
+                    "operations" not in fields
+                    or _only_adds_arguments(fields["operations"])
+                )
             ):
                 raise ValidationError(
                     manager_id,
@@ -484,12 +507,34 @@ def validate_manager_overrides_section(
             parse_manager_definition(manager_id, fields)
 
 
-def _validate_override_fields(manager_id: str, fields: Any) -> None:
+def _only_adds_arguments(operations: Any) -> bool:
+    """Whether an `operations` table holds the keys of an override alone.
+
+    Such a table adds arguments to the operations of a shipped manager: a
+    definition must declare the `args` of each operation instead. See
+    {data}`~meta_package_manager.definitions.OVERRIDE_OPERATION_KEYS`.
+    """
+    return (
+        isinstance(operations, dict)
+        and bool(operations)
+        and all(
+            isinstance(entry, dict) and set(entry) <= OVERRIDE_OPERATION_KEYS
+            for entry in operations.values()
+        )
+    )
+
+
+def _validate_override_fields(
+    manager_id: str,
+    fields: Any,
+    manager: PackageManager,
+) -> None:
     """Validate one `[mpm.overrides.<built-in id>]` override section.
 
     Each field must be a known {data}`~meta_package_manager.definitions.OVERRIDABLE_FIELDS` attribute and carry a
-    value its converter accepts. Raises {class}`click_extra.ValidationError` on the
-    first problem.
+    value its converter accepts. The `operations` table must suit `manager`: see
+    {func}`~meta_package_manager.definitions.parse_operation_overrides`. Raises
+    {class}`click_extra.ValidationError` on the first problem.
     """
     if not isinstance(fields, dict):
         raise ValidationError(
@@ -498,11 +543,22 @@ def _validate_override_fields(manager_id: str, fields: Any) -> None:
             code="invalid_type",
         )
     for field_name, raw_value in fields.items():
-        converter = OVERRIDABLE_FIELDS.get(field_name)
-        if converter is None:
+        if field_name == "operations":
+            parse_operation_overrides(manager_id, manager, raw_value)
+            continue
+        if field_name == REMOVED_AUTO_UPDATES_KEY:
             raise ValidationError(
                 f"{manager_id}.{field_name}",
-                f"unknown field. Allowed: {', '.join(sorted(OVERRIDABLE_FIELDS))}",
+                "removed field. To include auto-updating casks, set "
+                f"{AUTO_UPDATES_REPLACEMENT} instead.",
+                code="unknown_field",
+            )
+        converter = OVERRIDABLE_FIELDS.get(field_name)
+        if converter is None:
+            allowed = sorted({*OVERRIDABLE_FIELDS, "operations"})
+            raise ValidationError(
+                f"{manager_id}.{field_name}",
+                f"unknown field. Allowed: {', '.join(allowed)}",
                 code="unknown_field",
             )
         try:
@@ -540,7 +596,9 @@ def apply_manager_overrides(
     `--<flag>` defaults for that manager, and the cached properties derived
     from the affected attributes are evicted so the next access recomputes
     them. List-valued fields use *replace* semantics: the override fully
-    supersedes the built-in default.
+    supersedes the built-in default. The `operations` table sets
+    {attr}`~meta_package_manager.execution.CLIExecutor.operation_extra_args`,
+    whose arguments come in addition to the manager's own.
 
     Returns a list of {class}`ContributionHint` entries, one per accepted
     override that targets a {data}`CONTRIBUTION_HINT_FIELDS` field. Each hint
@@ -561,6 +619,18 @@ def apply_manager_overrides(
             continue
         manager = pool.register[manager_id]
         for field_name, raw_value in fields.items():
+            if field_name == "operations":
+                extra_args = parse_operation_overrides(manager_id, manager, raw_value)
+                manager.operation_extra_args = MappingProxyType(extra_args)
+                pool.overridden_fields.setdefault(manager_id, set()).add(
+                    "operation_extra_args"
+                )
+                logging.debug(
+                    f"Applied override [mpm.overrides.{manager_id}].operations "
+                    f"= {extra_args!r}",
+                )
+                continue
+
             value = OVERRIDABLE_FIELDS[field_name](raw_value)
 
             # Capture mpm's pre-override detection state for the hint, before
@@ -631,9 +701,23 @@ def dump_manager_overrides(manager: PackageManager) -> dict[str, Any]:
     Every other overridable field is emitted, including ones still at the class
     default. The output is meant to be a canonical override template: paste,
     prune the rows that don't apply, and customize the rest.
+
+    The `operations` table lists one entry per operation whose commands the
+    manager builds (see
+    {func}`~meta_package_manager.definitions.buildable_operations`), each with its
+    current `extra_args`: the template thus names every operation an override can
+    reach.
     """
     result: dict[str, Any] = {}
-    for field_name in sorted(OVERRIDABLE_FIELDS):
+    for field_name in sorted({*OVERRIDABLE_FIELDS, "operations"}):
+        if field_name == "operations":
+            result[field_name] = {
+                op_name: {
+                    "extra_args": list(manager.operation_extra_args.get(op_name, ()))
+                }
+                for op_name in buildable_operations(manager)
+            }
+            continue
         value = getattr(manager, field_name)
         if value is None:
             continue
@@ -678,6 +762,27 @@ def stale_overrides_section(ctx: click.Context) -> tuple[str, ...]:
     return tuple(
         sorted(key for key, value in section.items() if isinstance(value, dict))
     )
+
+
+def removed_auto_updates_notice(ctx: click.Context) -> str | None:
+    """Name what replaces a removed `[mpm] ignore_auto_updates` key, if any.
+
+    {mod}`click_extra` drops a key no parameter answers to, so a configuration
+    still carrying the key would stop applying in silence. The check thus reads
+    {data}`~click_extra.context.CONF_FULL`, like {func}`stale_overrides_section`.
+
+    :return: the warning to log, or `None` when the configuration lacks the key.
+    """
+    value = _mpm_config_value(ctx, REMOVED_AUTO_UPDATES_KEY)
+    if value is None:
+        return None
+    notice = f"Removed configuration: `[mpm] {REMOVED_AUTO_UPDATES_KEY}` is ignored."
+    if value is False:
+        return (
+            f"{notice} To include auto-updating casks, set "
+            f"{AUTO_UPDATES_REPLACEMENT} instead."
+        )
+    return f"{notice} Remove it: auto-updating casks stay out by default."
 
 
 def apply_manager_overrides_from_context(

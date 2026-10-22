@@ -142,6 +142,7 @@ class Gem(PackageManager):
             "gemdir",
             auto_post_args=False,
             force_exec=True,
+            auto_extra_args=False,
         ).strip()
         return Path(output) if output else None
 

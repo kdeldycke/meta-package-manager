@@ -100,6 +100,7 @@ from click_extra import (
     Option,
     Section,
     ShowParamsOption,
+    UsageError,
     VersionOption,
     echo,
     group,
@@ -126,6 +127,7 @@ from click_extra.theme import get_current_theme as theme
 from . import bar_plugin
 from .capabilities import Operations, implements_method
 from .config import (
+    AUTO_UPDATES_REPLACEMENT,
     MpmConfig,
     apply_manager_overrides_from_context,
     build_cooldown_validator,
@@ -133,6 +135,7 @@ from .config import (
     cooldown_section,
     print_contribution_hints,
     register_config_managers_from_context,
+    removed_auto_updates_notice,
     stale_overrides_section,
 )
 from .cooldown import (
@@ -445,6 +448,35 @@ def single_manager_selectors():
     )
 
 
+def reject_removed_auto_updates(
+    ctx: Context, param: Parameter, value: bool | None
+) -> None:
+    """Report a use of the removed `--ignore-auto-updates/--include-auto-updates`.
+
+    The flag had one effect, `--greedy` on two commands of `cask`, which a
+    `[mpm.overrides.cask]` operations table now gives (see
+    {data}`~meta_package_manager.config.AUTO_UPDATES_REPLACEMENT`). The option
+    stays, hidden, to name that replacement instead of the bare `No such option`
+    error of Click. `--include-auto-updates` asked for the casks mpm now leaves
+    out, so it stops the run. `--ignore-auto-updates` asked for the default, so a
+    warning is enough.
+    """
+    if value is None:
+        return
+    if value:
+        logging.warning(
+            "--ignore-auto-updates was removed and has no effect: auto-updating "
+            "casks stay out by default."
+        )
+        return
+    raise UsageError(
+        "--include-auto-updates was removed. To include auto-updating casks, set "
+        f"{AUTO_UPDATES_REPLACEMENT} in your configuration file, or set "
+        "HOMEBREW_UPGRADE_GREEDY=1 for one run.",
+        ctx=ctx,
+    )
+
+
 def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
     """Print the location of the {doc}`SwiftBar/Xbar plugin <bar-plugin>`.
 
@@ -710,9 +742,12 @@ def group_params() -> list[Parameter]:
     "Manager options",
     option(
         "--ignore-auto-updates/--include-auto-updates",
-        default=True,
-        help="Report all outdated packages, including those tagged as "
-        "auto-updating. Only applies to outdated and upgrade subcommands.",
+        "removed_auto_updates",
+        default=None,
+        expose_value=False,
+        hidden=True,
+        callback=reject_removed_auto_updates,
+        help="Removed: see the [mpm.overrides.cask] operations table.",
     ),
     option(
         "--stop-on-error/--continue-on-error",
@@ -879,7 +914,6 @@ def group_params() -> list[Parameter]:
 def mpm(
     ctx,
     all_managers,
-    ignore_auto_updates,
     stop_on_error,
     sudo,
     sudo_command,
@@ -945,6 +979,9 @@ def mpm(
             "Deprecated configuration: `[mpm.managers.<id>]` moved to "
             f"`[mpm.overrides.<id>]`. These sections are ignored: {', '.join(stale)}.",
         )
+    removed_auto_updates = removed_auto_updates_notice(ctx)
+    if removed_auto_updates:
+        logging.warning(removed_auto_updates)
 
     # Register any brand-new managers defined in [mpm.overrides.<id>] sections, then
     # apply per-manager attribute overrides, both before any subcommand observes the
@@ -1081,8 +1118,6 @@ def mpm(
             keep=keep,
             drop=managers_to_remove,
             keep_unmaintained=all_managers,
-            # Should we include auto-update packages or not?
-            ignore_auto_updates=ignore_auto_updates,
             # Does the manager should raise on error or not.
             stop_on_error=stop_on_error,
             sudo=sudo,

@@ -486,7 +486,7 @@ class WinGet(PackageManager):
             # Exact search deactivates substring search.
             if exact:
                 args.append("--exact")
-            output = self.run_cli(args)
+            output = self.run_cli(args, auto_extra_args=True)
             for name, package_id, version, _, _ in self._parse_table(output):
                 results.append(self._build_package(name, package_id, version))
 
@@ -495,7 +495,11 @@ class WinGet(PackageManager):
         else:
             for field in "--id", "--name":
                 output = self.run_cli(
-                    "search", field, query, "--exact" if exact else None
+                    "search",
+                    field,
+                    query,
+                    "--exact" if exact else None,
+                    auto_extra_args=True,
                 )
                 for name, package_id, version, _ in self._parse_table(output):
                     results.append(self._build_package(name, package_id, version))

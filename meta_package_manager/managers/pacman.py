@@ -684,6 +684,7 @@ class Paru(Pacman):
             "--info",
             package_id,
             override_extra_env=self._AUR_INFO_ENV,
+            auto_extra_args=False,
         )
         repository = self._REPOSITORY_REGEXP.search(output)
         if repository and repository.group("repo") != "aur":

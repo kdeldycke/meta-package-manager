@@ -265,8 +265,8 @@ class UV(UVBase):
                 extra={"label": self.subject},
             )
             return
-        self.run_cli("cache", "clean")
-        self.run_cli("cache", "prune")
+        self.run_cli("cache", "clean", auto_extra_args=True)
+        self.run_cli("cache", "prune", auto_extra_args=True)
 
 
 class UVX(UVBase):

@@ -188,6 +188,7 @@ class Zypper(PackageManager):
             # Additional search arguments.
             *args,
             must_succeed=True,
+            auto_extra_args=True,
         )
         if not output:
             return

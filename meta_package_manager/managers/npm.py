@@ -174,7 +174,7 @@ class NPM(PackageManager):
         /usr/local
         ```
         """
-        output = self.run_cli("prefix", force_exec=True).strip()
+        output = self.run_cli("prefix", force_exec=True, auto_extra_args=False).strip()
         return Path(output) if output else None
 
     @property

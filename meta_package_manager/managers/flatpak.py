@@ -192,6 +192,7 @@ class Flatpak(PackageManager):
             "--updates",
             "--columns=name,application,version",
             "--ostree-verbose",
+            auto_extra_args=True,
         )
 
         for package in output.splitlines():
@@ -203,6 +204,7 @@ class Flatpak(PackageManager):
                     "info",
                     "--ostree-verbose",
                     package_id,
+                    auto_extra_args=False,
                 )
 
                 current_version = re.search(
@@ -271,6 +273,7 @@ class Flatpak(PackageManager):
                 "--ostree-verbose",
                 package_id,
                 override_extra_env=self._C_LOCALE_ENV,
+                auto_extra_args=False,
             )
             origin = self._ORIGIN_REGEXP.search(origin_output)
             if origin:
@@ -281,6 +284,7 @@ class Flatpak(PackageManager):
                 "--columns=name",
                 "--ostree-verbose",
                 override_extra_env=self._C_LOCALE_ENV,
+                auto_extra_args=False,
             ).split()
         for remote in remotes:
             try:
@@ -290,6 +294,7 @@ class Flatpak(PackageManager):
                     remote,
                     package_id,
                     override_extra_env=self._C_LOCALE_ENV,
+                    auto_extra_args=False,
                 )
             except CLIError:
                 # The app is not served by this remote: try the next one.
@@ -361,7 +366,12 @@ class Flatpak(PackageManager):
         ```
         """
         try:
-            output = self.run_cli("list", "--runtime", "--columns=application,branch")
+            output = self.run_cli(
+                "list",
+                "--runtime",
+                "--columns=application,branch",
+                auto_extra_args=False,
+            )
         except CLIError:
             return False
         refs: set[str] = set()

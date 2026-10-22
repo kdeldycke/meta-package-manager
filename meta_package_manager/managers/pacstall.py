@@ -120,12 +120,14 @@ class Pacstall(PackageManager):
         retrieves the installed version per package.
         ```
         """
-        output = self.run_cli("--list")
+        output = self.run_cli("--list", auto_extra_args=True)
         for line in output.splitlines():
             package_id = line.strip()
             if not package_id:
                 continue
-            version_output = self.run_cli("--cache-info", package_id, "version")
+            version_output = self.run_cli(
+                "--cache-info", package_id, "version", auto_extra_args=False
+            )
             installed_version = version_output.strip() if version_output else None
             yield self.package(
                 id=package_id,

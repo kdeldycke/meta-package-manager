@@ -444,6 +444,7 @@ class Pip(PackageManager):
                 auto_pre_args=False,
                 auto_post_args=False,
                 force_exec=True,
+                auto_extra_args=False,
             )
 
         # XXX The sentence below gets modernized with `super().version` by ruff.
@@ -469,6 +470,7 @@ class Pip(PackageManager):
             "import sysconfig; print(sysconfig.get_paths()['purelib'])",
             override_pre_args=(),
             force_exec=True,
+            auto_extra_args=False,
         ).strip()
         return Path(output) if output else None
 

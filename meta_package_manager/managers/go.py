@@ -199,10 +199,14 @@ class Go(PackageManager):
         /tmp/mpm-drive/go
         ```
         """
-        gobin = self.run_cli("env", "GOBIN", force_exec=True).strip()
+        gobin = self.run_cli(
+            "env", "GOBIN", force_exec=True, auto_extra_args=False
+        ).strip()
         if gobin:
             return gobin
-        gopath = self.run_cli("env", "GOPATH", force_exec=True).strip()
+        gopath = self.run_cli(
+            "env", "GOPATH", force_exec=True, auto_extra_args=False
+        ).strip()
         return (Path(gopath) / "bin").as_posix()
 
     def install(self, package_id: str, version: str | None = None) -> str:

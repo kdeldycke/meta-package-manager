@@ -61,6 +61,7 @@ from datetime import datetime, timezone
 from functools import cached_property
 from pathlib import Path
 from textwrap import dedent, indent, shorten
+from types import MappingProxyType
 from typing import ClassVar, Final
 
 from boltons.iterutils import unique
@@ -97,7 +98,7 @@ from .version import parse_version
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Generator, Iterable, Iterator
+    from collections.abc import Generator, Iterable, Iterator, Mapping
     from datetime import timedelta
 
     from click_extra.envvar import TEnvVars
@@ -692,6 +693,17 @@ class CLIExecutor:
     Essentially used to force silencing, low verbosity or no-color output.
     """
 
+    operation_extra_args: Mapping[str, tuple[str, ...]] = MappingProxyType({})
+    """User arguments for the commands of one operation, keyed by operation name.
+
+    Filled from the `extra_args` of each `[mpm.overrides.<id>.operations.<name>]`
+    table of the configuration. {meth}`build_cli` adds the entry of the operation in
+    flight (see `_operation_key`) after the command's own arguments, before
+    {attr}`post_args`. An entry reaches the commands of its operation alone, where
+    {attr}`post_args` reaches every call: a flag that one subcommand accepts and the
+    others reject, like `brew upgrade --greedy`, breaks nothing else.
+    """
+
     version_cli_options: tuple[str, ...] = ("--version",)
     """CLI options used to produce the version of the package manager.
 
@@ -795,6 +807,20 @@ class CLIExecutor:
     just before the manager is handed to a subcommand, and by the {attr}`version`
     probe. Consumed by {meth}`_resolve_timeout` to pick a per-operation default.
     `None` (no known operation) falls back to {data}`DEFAULT_TIMEOUT`.
+    """
+
+    _operation_key: str | None = None
+    """Name of the operation whose command the manager builds now, as the
+    `[mpm.overrides.<id>.operations]` table spells it.
+
+    Stamped by the wrapper
+    {class}`~meta_package_manager.manager.MetaPackageManager` puts around each
+    operation method (see
+    {data}`~meta_package_manager.manager.OPERATION_KEYS_BY_METHOD`), and read by
+    {meth}`active_extra_args`. It is finer than `_active_operation`: one `cleanup`
+    runs three categories, `install` also runs `mark_explicit`, and the one-by-one
+    fallback of `upgrade_all` builds `upgrade_one` commands. `None` outside the
+    operation methods.
     """
 
     _dormant_sudo: bool = False
@@ -1370,6 +1396,7 @@ class CLIExecutor:
             auto_pre_cmds=False,
             auto_pre_args=False,
             auto_post_args=False,
+            auto_extra_args=False,
             force_exec=True,
         )
         if not self.version_from_stderr:
@@ -1458,6 +1485,21 @@ class CLIExecutor:
         finally:
             self._active_operation = previous_operation
             self.stop_on_error = previous_stop
+
+    @contextmanager
+    def operation_key_scope(self, key: str) -> Iterator[None]:
+        """Stamp `_operation_key` with `key` for the duration of the block.
+
+        The previous key comes back on exit. An operation method called from inside
+        another, like an `outdated` listing that reads `installed`, thus gets its own
+        entry, and the caller gets its entry back after.
+        """
+        previous = self._operation_key
+        self._operation_key = key
+        try:
+            yield
+        finally:
+            self._operation_key = previous
 
     @contextmanager
     def new_errors(self) -> Iterator[list[CLIError]]:
@@ -2026,12 +2068,25 @@ class CLIExecutor:
                 extra={"label": self.subject},
             )
 
+    def active_extra_args(self, enabled: bool = True) -> tuple[str, ...]:
+        """The user's `extra_args` for the operation in flight.
+
+        Empty when `enabled` is `False` (a call site passing `auto_extra_args=False`),
+        outside the operation methods, or when the user set nothing for this
+        operation. {meth}`build_cli` calls it, and so does each manager that
+        overrides {meth}`build_cli` without calling the base one.
+        """
+        if not enabled or self._operation_key is None:
+            return ()
+        return self.operation_extra_args.get(self._operation_key, ())
+
     def build_cli(
         self,
         *args: TArg | TNestedArgs,
         auto_pre_cmds: bool = True,
         auto_pre_args: bool = True,
         auto_post_args: bool = True,
+        auto_extra_args: bool = True,
         override_pre_cmds: TNestedArgs | None = None,
         override_cli_path: Path | None = None,
         override_pre_args: TNestedArgs | None = None,
@@ -2049,7 +2104,7 @@ class CLIExecutor:
 
         ```{code-block} shell-session
 
-        $ [<pre_cmds>|sudo --non-interactive] <cli_path> <pre_args> <*args> <post_args>
+        $ [<pre_cmds>|sudo --non-interactive] <cli_path> <pre_args> <*args> <extra_args> <post_args>
         ```
 
         * {attr}`self.pre_cmds <meta_package_manager.execution.CLIExecutor.pre_cmds>`
@@ -2063,6 +2118,9 @@ class CLIExecutor:
           <meta_package_manager.execution.CLIExecutor.post_args>`  globals are added
           before and after the provided `*args`.
 
+        * The user's `extra_args` for the operation in flight (see
+          {meth}`active_extra_args`) come right after the provided `*args`.
+
         Each additional set of elements can be disabled with their respective flag:
 
         * `auto_pre_cmds=False`  to skip the automatic addition of
@@ -2071,6 +2129,8 @@ class CLIExecutor:
           {attr}`self.pre_args <meta_package_manager.execution.CLIExecutor.pre_args>`
         * `auto_post_args=False` to skip the automatic addition of
           {attr}`self.post_args <meta_package_manager.execution.CLIExecutor.post_args>`
+        * `auto_extra_args=False` to skip the user's `extra_args`, for a helper
+          command an operation runs besides its own (`brew tap` before an install).
 
         Each global set of elements can be locally overridden with:
 
@@ -2153,6 +2213,8 @@ class CLIExecutor:
         if args:
             params.extend(args)
 
+        params.extend(self.active_extra_args(auto_extra_args))
+
         if override_post_args:
             params.extend(override_post_args)  # type: ignore[arg-type]
         elif auto_post_args:
@@ -2167,6 +2229,7 @@ class CLIExecutor:
         auto_pre_cmds: bool = True,
         auto_pre_args: bool = True,
         auto_post_args: bool = True,
+        auto_extra_args: bool = True,
         override_extra_env: TEnvVars | None = None,
         override_pre_cmds: TNestedArgs | None = None,
         override_cli_path: Path | None = None,
@@ -2204,6 +2267,7 @@ class CLIExecutor:
             auto_pre_cmds=auto_pre_cmds,
             auto_pre_args=auto_pre_args,
             auto_post_args=auto_post_args,
+            auto_extra_args=auto_extra_args,
             override_pre_cmds=override_pre_cmds,
             override_cli_path=override_cli_path,
             override_pre_args=override_pre_args,

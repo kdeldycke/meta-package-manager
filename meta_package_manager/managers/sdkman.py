@@ -116,13 +116,16 @@ class SDKMAN(PackageManager):
         """Wrap all CLI invocations to source the SDKMAN init script in bash.
 
         ```{note}
-        The `**kwargs` accepted by the base class (`auto_pre_args`,
-        `sudo`, etc.) are accepted but ignored because every invocation
+        The user's `extra_args` for the operation in flight join the wrapped
+        command. The other `**kwargs` accepted by the base class
+        (`auto_pre_args`, `sudo`, etc.) are ignored, because every invocation
         goes through the `bash -c` wrapper and SDKMAN never requires
         elevated privileges.
         ```
         """
-        clean_args = args_cleanup(*args)
+        clean_args = args_cleanup(
+            *args, self.active_extra_args(kwargs.get("auto_extra_args", True))
+        )
         sdk_cmd = " ".join(shlex.quote(a) for a in clean_args)
         init_path = shlex.quote(str(self.cli_path))
         return ("bash", "-c", f"source {init_path} && sdk {sdk_cmd}")
@@ -169,10 +172,14 @@ class SDKMAN(PackageManager):
         ```
         """
         init_path = shlex.quote(str(self.cli_path))
+        # The pipe rules out build_cli, so the user's extra_args join here.
+        upgrade_cmd = " ".join(
+            shlex.quote(arg) for arg in ("upgrade", *self.active_extra_args())
+        )
         output = self.run(
             "bash",
             "-c",
-            f"source {init_path} && echo n | sdk upgrade",
+            f"source {init_path} && echo n | sdk {upgrade_cmd}",
             extra_env={
                 "sdkman_colour_enable": "false",
                 "sdkman_auto_answer": "false",

@@ -372,10 +372,10 @@ def patch_pool_with(monkeypatch, request):
     """Return a function installing a fake manager into the pool for one test.
 
     The function replaces `pool.select_managers` with a generator yielding its
-    `fake`, mirroring the runtime knobs (timeout, stop_on_error, dry_run,
-    ignore_auto_updates) that `_select_managers` would forward, so the CLI
-    exercises the same code path it does against real managers. It also registers
-    the fake in the pool, for the code paths re-resolving a manager from its ID
+    `fake`, mirroring the runtime knobs (timeout, stop_on_error, dry_run, plan)
+    that `_select_managers` would forward, so the CLI exercises the same code path
+    it does against real managers. It also registers the fake in the pool, for
+    the code paths re-resolving a manager from its ID
     through `pool.get()` (like the bar-plugin renderer's upgrade-CLI
     augmentation), and de-registers it at teardown. Both steps go through
     {meth}`~meta_package_manager.pool.ManagerPool.add_manager` and

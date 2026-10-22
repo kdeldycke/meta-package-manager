@@ -854,6 +854,7 @@ class Ports(PackageManager):
             auto_pre_args=False,
             auto_extra_env=False,
             force_exec=True,
+            auto_extra_args=False,
         )
         first_line = output.strip().splitlines()
         if not first_line:

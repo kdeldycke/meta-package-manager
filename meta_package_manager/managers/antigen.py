@@ -170,12 +170,16 @@ class Antigen(PackageManager):
         every host that merely has Zsh into a manager reporting errors.
 
         ```{note}
-        The `**kwargs` accepted by the base class (`auto_pre_args`, `sudo`,
-        etc.) are accepted but ignored because every invocation goes through
-        the `zsh -c` wrapper and Antigen never requires elevated privileges.
+        The user's `extra_args` for the operation in flight join the wrapped
+        command. The other `**kwargs` accepted by the base class
+        (`auto_pre_args`, `sudo`, etc.) are ignored, because every invocation
+        goes through the `zsh -c` wrapper and Antigen never requires
+        elevated privileges.
         ```
         """
-        clean_args = args_cleanup(*args)
+        clean_args = args_cleanup(
+            *args, self.active_extra_args(kwargs.get("auto_extra_args", True))
+        )
         antigen_cmd = " ".join(shlex.quote(arg) for arg in clean_args)
         source_path = shlex.quote(str(antigen_source_path()))
 

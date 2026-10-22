@@ -115,7 +115,7 @@ class ASDF(PackageManager):
         spaces are installed-but-not-current versions; lines that start
         with a space and `*` are the active version.
         """
-        output = self.run_cli("list")
+        output = self.run_cli("list", auto_extra_args=True)
         current_plugin: str | None = None
         for line in output.splitlines():
             if not line:

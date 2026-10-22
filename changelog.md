@@ -5,6 +5,9 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- **Breaking:** [cask,mpm] Remove the `--ignore-auto-updates/--include-auto-updates` option, the `[mpm] ignore_auto_updates` key and the per-manager `ignore_auto_updates` field. To include auto-updating casks, set `operations.outdated.extra_args` and `operations.upgrade_all.extra_args` to `["--greedy"]` in `[mpm.overrides.cask]`.
+- [mpm] Add an `operations` table to `[mpm.overrides.<id>]`, whose `extra_args` reach the commands of one operation alone. Closes [#2171](https://github.com/kdeldycke/meta-package-manager/issues/2171).
+- [mpm] List the operations each manager accepts in the `mpm config-template` output and on each manager page.
 - [cask] Name the cask whose leftover Caskroom directory makes Homebrew list no cask, and the `brew uninstall --cask --force` command that removes it.
 
 ## [`8.1.2` (2026-10-12)](https://github.com/kdeldycke/meta-package-manager/compare/v8.1.1...v8.1.2)

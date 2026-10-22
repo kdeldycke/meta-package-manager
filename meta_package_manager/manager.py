@@ -34,10 +34,12 @@ from __future__ import annotations
 import json
 import logging
 import re
+from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
-from functools import cached_property
+from functools import cached_property, wraps
+from types import FunctionType, MappingProxyType
 from typing import ClassVar, cast
 
 from extra_platforms import (
@@ -54,9 +56,9 @@ from .version import VersionRange
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterable, Iterator, Mapping
+    from collections.abc import Callable, Iterable, Mapping
     from pathlib import Path
-    from typing import Any
+    from typing import Any, Final
 
     from .version import TokenizedString
 
@@ -108,6 +110,47 @@ A bare `version` maps the package field to the item's `version` key. A
 nested stays out on purpose: a query needing real JSON traversal is better served
 by a custom parser. Shared by {meth}`PackageManager.parse_json_items` and the
 declarative-manager validation in {mod}`meta_package_manager.definitions`.
+"""
+
+
+OPERATION_KEYS_BY_METHOD: Final[Mapping[str, str]] = MappingProxyType({
+    "cleanup_cache": "cleanup_cache",
+    "cleanup_orphan": "cleanup_orphan",
+    "cleanup_repair": "cleanup_repair",
+    "doctor_cli": "doctor",
+    "install": "install",
+    "installed": "installed",
+    "mark_explicit": "mark_explicit",
+    "orphans": "orphans",
+    "outdated": "outdated",
+    "remove": "remove",
+    "remove_orphan": "remove_orphan",
+    "search": "search",
+    "sync": "sync",
+    "upgrade_all_cli": "upgrade_all",
+    "upgrade_all_cli_excluding": "upgrade_all",
+    "upgrade_one_cli": "upgrade_one",
+})
+"""Operation whose commands each operation method builds, keyed by method name.
+
+The values are the operation names of the `[mpm.overrides.<id>.operations]`
+table, which manager definitions and overrides share (see
+{data}`~meta_package_manager.definitions.OPERATION_FACTORIES`). A value differs
+from its method name where the method hands a command line to a base-class
+orchestrator, and `upgrade_all_cli_excluding` builds an `upgrade_all` command too.
+
+{class}`MetaPackageManager` wraps each of these methods, so that the commands it
+builds get the user's `extra_args` for its operation: see
+{meth}`~meta_package_manager.execution.CLIExecutor.active_extra_args`.
+"""
+
+
+OPERATION_KEY_MARKER: Final[str] = "mpm_operation_key"
+"""Attribute naming the operation of a method {class}`MetaPackageManager` wrapped.
+
+Set on each wrapper. A class body that reuses the method of another manager
+class gets a function that is already wrapped, and the marker keeps the
+metaclass from wrapping it a second time.
 """
 
 
@@ -196,6 +239,53 @@ class ManagerScope(Enum):
     """
 
 
+def _step_in_operation(
+    manager: PackageManager,
+    key: str,
+    iterator: Iterator[Any],
+) -> Iterator[Any]:
+    """Advance `iterator` one item at a time, each step under the `key` stamp.
+
+    A query that yields its packages runs its commands while the caller iterates,
+    after the method returned. Each step thus enters the stamp again, and leaves
+    it before the caller gets the item: what the caller runs between two items
+    keeps its own stamp.
+    """
+    try:
+        while True:
+            with manager.operation_key_scope(key):
+                try:
+                    item = next(iterator)
+                except StopIteration:
+                    return
+            yield item
+    finally:
+        close = getattr(iterator, "close", None)
+        if close is not None:
+            with manager.operation_key_scope(key):
+                close()
+
+
+def _in_operation(method: Callable[..., Any], key: str) -> Callable[..., Any]:
+    """Wrap an operation method so the commands it builds belong to `key`.
+
+    The wrapper stamps the `_operation_key` of the manager while the method runs.
+    An iterator result gets the stamp for each of its steps too: see
+    {func}`_step_in_operation`.
+    """
+
+    @wraps(method)
+    def wrapper(self: PackageManager, *args: Any, **kwargs: Any) -> Any:
+        with self.operation_key_scope(key):
+            result = method(self, *args, **kwargs)
+        if isinstance(result, Iterator):
+            return _step_in_operation(self, key, result)
+        return result
+
+    setattr(wrapper, OPERATION_KEY_MARKER, key)
+    return wrapper
+
+
 class MetaPackageManager(type):
     """Custom metaclass used as a class factory for package managers."""
 
@@ -205,6 +295,14 @@ class MetaPackageManager(type):
 
         Also normalize list of platform, by ungrouping groups, deduplicate entries and
         freeze them into a set of unique platforms.
+
+        Then wraps each operation method the class body defines (see
+        {data}`OPERATION_KEYS_BY_METHOD`), so the commands it builds get the user's
+        `extra_args` for that operation. A query property gets its getter wrapped.
+        Any other descriptor, like a
+        {class}`~meta_package_manager.capabilities.DelegatedMethod`, stays as is:
+        it calls the method of another manager class, which this metaclass already
+        wrapped.
         """
         if "id" not in dct:
             cls.id = name.lower().replace("_", "-")
@@ -233,6 +331,19 @@ class MetaPackageManager(type):
             cls.platforms = frozenset(extract_members(dct["platforms"]))
             assert all(isinstance(p, Platform) for p in cls.platforms), (
                 f"Manager {cls} has invalid entries in its platforms list."
+            )
+
+        for method_name, key in OPERATION_KEYS_BY_METHOD.items():
+            member = dct.get(method_name)
+            is_property = isinstance(member, property)
+            function = member.fget if is_property else member
+            if not isinstance(function, FunctionType) or hasattr(
+                function, OPERATION_KEY_MARKER
+            ):
+                continue
+            wrapper = _in_operation(function, key)
+            setattr(
+                cls, method_name, member.getter(wrapper) if is_property else wrapper
             )
 
 
@@ -488,10 +599,6 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     Virtual package manager are just skeleton classes used to factorize code among
     managers of the same family.
     """
-
-    ignore_auto_updates: bool = True
-    """Some managers can report or ignore packages which have their own auto-update
-    mechanism."""
 
     _NAME_VERSION_REGEXP: ClassVar[re.Pattern[str]] = re.compile(
         r"^(?P<package_id>.+)-(?P<version>\d\S*)$",

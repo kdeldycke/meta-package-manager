@@ -194,7 +194,7 @@ class MAS(PackageManager):
         {"adamID":409183694,"bundleID":"com.apple.iWork.Keynote","currentVersionReleaseDate":"2024-04-02T17:19:42Z","name":"Keynote","version":"14.0"}
         ```
         """
-        output = self.run_cli("lookup", package_id, "--json")
+        output = self.run_cli("lookup", package_id, "--json", auto_extra_args=False)
         for record in self._parse_json_stream(output):
             raw_date = record.get("currentVersionReleaseDate")
             if raw_date:

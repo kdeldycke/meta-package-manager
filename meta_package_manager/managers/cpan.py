@@ -204,7 +204,7 @@ class CPAN(PackageManager):
         """
         listed: set[str] = set()
         for package in self.parse_regex_lines(
-            self._INSTALLED_REGEXP, self.run_cli("-l")
+            self._INSTALLED_REGEXP, self.run_cli("-l", auto_extra_args=True)
         ):
             listed.add(package.id)
             yield package
@@ -223,6 +223,7 @@ class CPAN(PackageManager):
                 **self.extra_env,
                 "PERL5LIB": os.pathsep.join(search_path),
             },
+            auto_extra_args=True,
         )
         for package in self.parse_regex_lines(self._INSTALLED_REGEXP, output):
             if package.id not in listed:
@@ -335,6 +336,7 @@ class CPAN(PackageManager):
             self._INC_PROBE,
             override_cli_path=perl,
             auto_extra_env=False,
+            auto_extra_args=False,
         )
         walked: set[Path] = set()
         linked: list[Path] = []

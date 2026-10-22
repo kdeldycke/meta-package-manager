@@ -239,7 +239,11 @@ class Pipx(PackageManager):
             self.outdated_requirement
         ):
             output = self.run_cli(
-                "list", "--outdated", "--output=json", must_succeed=True
+                "list",
+                "--outdated",
+                "--output=json",
+                must_succeed=True,
+                auto_extra_args=True,
             )
             data = self.parse_json(output)
             if data:
@@ -264,6 +268,7 @@ class Pipx(PackageManager):
                 "--verbose",
                 "--quiet",
                 must_succeed=True,
+                auto_extra_args=False,
             )
 
             data = self.parse_json(output)

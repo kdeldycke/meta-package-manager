@@ -220,7 +220,9 @@ class MicroDNF(PackageManager):
         kernel-modules-core-6.12.0-211.47.1.el10_2.aarch64
         ```
         """
-        output = self.run_cli("--assumeno", "upgrade", must_succeed=True)
+        output = self.run_cli(
+            "--assumeno", "upgrade", must_succeed=True, auto_extra_args=True
+        )
 
         section = None
         last_row = None
@@ -247,7 +249,11 @@ class MicroDNF(PackageManager):
         )
         if unpaired:
             listing = self.run_cli(
-                "repoquery", "--installed", *unpaired, must_succeed=True
+                "repoquery",
+                "--installed",
+                *unpaired,
+                must_succeed=True,
+                auto_extra_args=False,
             )
             for match in self._NEVRA_REGEXP.finditer(listing):
                 installed_evr[match["name"], match["arch"]] = match["evr"]

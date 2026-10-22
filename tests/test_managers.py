@@ -25,6 +25,7 @@ import textwrap
 from functools import cached_property
 from pathlib import Path, PurePath
 from string import ascii_letters, ascii_lowercase, digits
+from typing import ClassVar
 
 import pytest
 from boltons.iterutils import unique
@@ -43,17 +44,19 @@ from meta_package_manager.capabilities import (
 )
 from meta_package_manager.cli import XKCD_MANAGER_ORDER
 from meta_package_manager.definitions import (
+    ALL_DEFINITION_OPERATIONS,
     OPERATION_FACTORIES,
     OVERRIDES_SECTION,
     ConfigDrivenManager,
 )
 from meta_package_manager.execution import CLIExecutor
-from meta_package_manager.manager import PackageManager
+from meta_package_manager.manager import OPERATION_KEYS_BY_METHOD, PackageManager
 from meta_package_manager.package import Package
 from meta_package_manager.pool import pool
 from meta_package_manager.version import TokenizedString
 
 from .conftest import PROJECT_ROOT, all_managers, manager_classes_params, tomllib
+from .fake_manager import FakeManager
 
 """ Test the structure, data and types returned by all package managers.
 
@@ -883,6 +886,7 @@ CANONICAL_ATTRS = (
     "pre_cmds",
     "pre_args",
     "post_args",
+    "operation_extra_args",
     # Version probe.
     "version_cli",
     "version_cli_options",
@@ -891,12 +895,12 @@ CANONICAL_ATTRS = (
     # Failure gate.
     "stderr_noise",
     # Behavior toggles and platform specifics.
-    "ignore_auto_updates",
     "stop_on_error",
     "dry_run",
     "plan",
     "timeout",
     "_active_operation",
+    "_operation_key",
     "_dormant_sudo",
     "progress",
     "cooldown",
@@ -1213,6 +1217,188 @@ def test_reads_inside_mutating_methods_survive_plan_mode():
         "reads issued inside a mutating method are captured by --plan and return "
         f"an empty string; exempt them with force_exec=True or acting_as: {offenders}"
     )
+
+
+def test_operation_vocabularies_agree():
+    """The method-to-operation map, the capability map and the definition schema
+    name the same methods and operations.
+
+    `OPERATION_KEYS_BY_METHOD` decides which `operations` entry a command takes its
+    `extra_args` from. A method it misses builds commands that no entry reaches, and
+    a name that differs from `OPERATION_FACTORIES` makes an override and a
+    definition disagree on what the operation is called.
+    """
+    assert set(OPERATION_KEYS_BY_METHOD) == set(METHOD_OPERATIONS)
+    for op_name, (method_name, _) in OPERATION_FACTORIES.items():
+        assert OPERATION_KEYS_BY_METHOD[method_name] == op_name
+    assert set(OPERATION_KEYS_BY_METHOD.values()) == ALL_DEFINITION_OPERATIONS
+
+
+def test_extra_args_call_sites_are_explicit():
+    """Each CLI call that may not be the command of its operation says whether it
+    takes the user's `extra_args`.
+
+    `build_cli` adds the `extra_args` of the operation in flight to every command
+    an operation method builds, the calls of the helpers it reaches included. A
+    helper command (`brew tap` before an install, a per-package `info` lookup) must
+    not get them, so an explicit `auto_extra_args` keyword is required:
+
+    - on each call in a method that is not an operation method;
+    - on each call of an operation method that holds more than one.
+
+    A direct `run()` call skips `build_cli`: the operation method holding one must
+    then splice `active_extra_args()` into its command itself. A call forwarding
+    `**kwargs` passes the caller's choice on, and the `build_cli` and `run_cli`
+    overrides are covered by {func}`test_build_cli_adds_extra_args` instead.
+    """
+    offenders = []
+    for path in sorted(Path(inspect.getfile(managers_module)).parent.glob("*.py")):
+        tree = ast.parse(path.read_text(encoding="UTF-8"))
+        for class_node in (n for n in ast.walk(tree) if isinstance(n, ast.ClassDef)):
+            for method in class_node.body:
+                if not isinstance(method, ast.FunctionDef) or method.name in {
+                    "build_cli",
+                    "run_cli",
+                }:
+                    continue
+                builds = []
+                runs_directly = False
+                for node in ast.walk(method):
+                    if not (
+                        isinstance(node, ast.Call)
+                        and isinstance(node.func, ast.Attribute)
+                    ):
+                        continue
+                    if node.func.attr in {"run_cli", "build_cli"}:
+                        builds.append(node)
+                    elif (
+                        node.func.attr == "run"
+                        and isinstance(node.func.value, ast.Name)
+                        and node.func.value.id == "self"
+                    ):
+                        runs_directly = True
+                where = f"{path.name}:{method.lineno} {class_node.name}.{method.name}"
+                is_operation = method.name in OPERATION_KEYS_BY_METHOD
+                if is_operation and runs_directly:
+                    splices = any(
+                        isinstance(n, ast.Attribute) and n.attr == "active_extra_args"
+                        for n in ast.walk(method)
+                    )
+                    if not splices:
+                        offenders.append(f"{where}: run() without active_extra_args()")
+                if is_operation and len(builds) < 2:
+                    continue
+                for call in builds:
+                    if not any(
+                        keyword.arg in {"auto_extra_args", None}
+                        for keyword in call.keywords
+                    ):
+                        offenders.append(f"{where}: line {call.lineno}")
+
+    assert not offenders, (
+        "these CLI calls do not say whether they take the user's extra_args; pass "
+        "auto_extra_args=True to the command of the operation, False to a "
+        f"helper: {offenders}"
+    )
+
+
+@all_managers
+def test_build_cli_adds_extra_args(manager, monkeypatch):
+    """Every manager's `build_cli` adds the `extra_args` of the operation in
+    flight, and leaves them out on request.
+
+    The shell-plugin managers override `build_cli` to wrap their command in a
+    `bash -c` or `fish -c` string, without calling the base one: they splice the
+    arguments in through `active_extra_args()`, so the sentinel sits inside that
+    string.
+    """
+    monkeypatch.setattr(
+        manager, "operation_extra_args", {"search": ("--mpm-sentinel",)}
+    )
+    with manager.operation_key_scope("search"):
+        with_extras = manager.build_cli("search", "lemon")
+        without_extras = manager.build_cli("search", "lemon", auto_extra_args=False)
+    assert any("--mpm-sentinel" in str(arg) for arg in with_extras), with_extras
+    assert not any("--mpm-sentinel" in str(arg) for arg in without_extras), (
+        without_extras
+    )
+    # Outside any operation method, no entry applies.
+    assert not any(
+        "--mpm-sentinel" in str(arg) for arg in manager.build_cli("search", "lemon")
+    )
+
+
+def test_operation_methods_stamp_their_own_entry(monkeypatch):
+    """A command gets the `extra_args` of the method that builds it.
+
+    Three shapes would fool a stamp keyed on the routed operation: a query that
+    runs lazily, after its property returned; a query nested in another, like an
+    `outdated` that reads `installed`; and the one-by-one fallback of a full
+    upgrade, whose commands are `upgrade_one` commands.
+    """
+
+    class Recorder(FakeManager):
+        id = "recorder"
+        recorded: ClassVar[list[tuple[str, str | None]]] = []
+
+        @property
+        def installed(self):
+            self.recorded.append(("installed", self._operation_key))
+            yield from ()
+
+        @property
+        def outdated(self):
+            self.recorded.append(("outdated", self._operation_key))
+            list(self.installed)
+            self.recorded.append(("outdated", self._operation_key))
+            yield self.package(id="lemon", installed_version="1.0")
+
+        def upgrade_all_cli(self):
+            raise NotImplementedError
+
+        def upgrade_one_cli(self, package_id, version=None):
+            self.recorded.append(("upgrade_one_cli", self._operation_key))
+            return self.build_cli("upgrade", package_id)
+
+    manager = Recorder()
+    monkeypatch.setattr(manager, "run", lambda *args, **kwargs: "")
+    outdated = manager.outdated
+    # The generator body has not run yet: no stamp recorded before iteration.
+    assert manager.recorded == []
+    assert [package.id for package in outdated] == ["lemon"]
+    manager.upgrade()
+
+    assert manager.recorded == [
+        ("outdated", "outdated"),
+        ("installed", "installed"),
+        ("outdated", "outdated"),
+        ("outdated", "outdated"),
+        ("installed", "installed"),
+        ("outdated", "outdated"),
+        ("upgrade_one_cli", "upgrade_one"),
+    ]
+    assert manager._operation_key is None
+
+
+def test_version_probe_takes_no_extra_args(monkeypatch):
+    """The version probe never gets the user's `extra_args`.
+
+    `version` is a cached property, so its probe runs wherever the manager first
+    reads it, which can be inside an operation method.
+    """
+    manager = FakeManager()
+    manager.operation_extra_args = {"installed": ("--mpm-sentinel",)}
+    commands: list[tuple[str, ...]] = []
+
+    def record(*args, **kwargs):
+        commands.append(tuple(map(str, args)))
+        return ""
+
+    monkeypatch.setattr(manager, "run", record)
+    with manager.operation_key_scope("installed"):
+        manager._probe_version()
+    assert commands
+    assert "--mpm-sentinel" not in commands[0]
 
 
 def declared_keywords(manager) -> tuple[str, ...]:

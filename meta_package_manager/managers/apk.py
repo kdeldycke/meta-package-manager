@@ -202,9 +202,10 @@ class APK(PackageManager):
                 "--format",
                 "json",
                 "*",
+                auto_extra_args=True,
             )
         else:
-            output = self.run_cli("list", "--installed")
+            output = self.run_cli("list", "--installed", auto_extra_args=True)
 
         if output.lstrip().startswith("["):
             yield from self.parse_json_items(

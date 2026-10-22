@@ -226,6 +226,7 @@ class Homebrew(PackageManager):
             output = self.run_cli(
                 "--prefix",
                 auto_post_args=False,
+                auto_extra_args=False,
                 must_succeed=True,
             )
         except Exception:  # noqa: BLE001
@@ -256,7 +257,13 @@ class Homebrew(PackageManager):
             return
 
         try:
-            output = self.run_cli("info", "--json=v2", "--installed", must_succeed=True)
+            output = self.run_cli(
+                "info",
+                "--json=v2",
+                "--installed",
+                auto_extra_args=False,
+                must_succeed=True,
+            )
         except Exception as exc:  # noqa: BLE001
             # If the bulk query fails, fall back to empty metadata for
             # every package; the renderer will emit minimal entries.
@@ -609,16 +616,10 @@ class Homebrew(PackageManager):
         `pinned` and `pinned_version` fields the note above describes.
         ```
         """
-        # Build up the list of CLI options.
-        options = ["--json=v2"]
-        # Includes auto-update packages or not.
-        if not self.ignore_auto_updates:
-            options.append("--greedy")
-
         # List available updates. Do not use --quiet here: brew treats --quiet
         # and --json as mutually exclusive. See:
         # https://github.com/kdeldycke/meta-package-manager/issues/1703
-        output = self.run_cli("outdated", options, must_succeed=True)
+        output = self.run_cli("outdated", "--json=v2", must_succeed=True)
 
         package_list = self.parse_json(output)
         if package_list:
@@ -723,7 +724,9 @@ class Homebrew(PackageManager):
 
         # Additional search on description only.
         if extended:
-            output = self.run_cli("search", "--quiet", query, "--desc")
+            output = self.run_cli(
+                "search", "--quiet", query, "--desc", auto_extra_args=True
+            )
 
             for (
                 package_id,
@@ -741,7 +744,7 @@ class Homebrew(PackageManager):
         if exact:
             query = f"/^{query}$/"
 
-        output = self.run_cli("search", "--quiet", query)
+        output = self.run_cli("search", "--quiet", query, auto_extra_args=True)
 
         for package_id in self._SEARCH_REGEXP.findall(output):
             # Deduplicate search results.
@@ -773,8 +776,10 @@ class Homebrew(PackageManager):
         if package_id.count("/") != 2:
             return
         user, tap, _ = package_id.split("/", 2)
-        self.run_cli("tap", f"{user}/{tap}", auto_post_args=False)
-        self.run_cli("trust", package_id)
+        self.run_cli(
+            "tap", f"{user}/{tap}", auto_post_args=False, auto_extra_args=False
+        )
+        self.run_cli("trust", package_id, auto_extra_args=False)
 
     @version_not_implemented
     def install(self, package_id: str, version: str | None = None) -> str:
@@ -812,8 +817,7 @@ class Homebrew(PackageManager):
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all outdated packages.
 
-        `brew` and `cask` share the same command, but `cask` overrides this
-        method to append `--greedy` when auto-updating packages are included.
+        `brew` and `cask` share the same command.
 
         ```{code-block} shell-session
 
@@ -1093,13 +1097,31 @@ class Cask(Homebrew):
 
     ```{caution}
 
-    Casks flagged `auto_updates true` or `version :latest` update
-    themselves, and `brew upgrade` skips them unless `--greedy` is
-    passed. mpm supplies `--greedy` (to `outdated` and to
-    `upgrade --all`) unless auto-updating packages are being ignored.
-    `--greedy` conflicts with `--formula`, so this handling is cask-only
-    and cannot fold into the base shared with {class}`Brew`.
+    `brew outdated` and `brew upgrade` skip the casks flagged
+    `auto_updates true` or `version :latest`, unless `--greedy` is passed.
+    mpm passes no such flag.
     ```
+
+    To include these casks, add the flag to both operations, so that
+    `mpm outdated` lists the casks `mpm upgrade --all` upgrades:
+
+    ```{code-block} toml
+
+    [mpm.overrides.cask]
+    operations.outdated.extra_args = ["--greedy"]
+    operations.upgrade_all.extra_args = ["--greedy"]
+    ```
+
+    `--greedy-latest` selects the `version :latest` casks alone, and
+    `--greedy-auto-updates` the `auto_updates true` casks alone. For one run, set
+    `HOMEBREW_UPGRADE_GREEDY=1` in the environment: `brew` reads it for both
+    commands. The flags belong to this manager alone: `brew upgrade` rejects
+    `--greedy` next to `--formula`, a conflict [present since the selector
+    was added](https://github.com/Homebrew/brew/pull/8229) and [kept on
+    purpose](https://github.com/Homebrew/brew/issues/16135).
+
+    A cask passed by name to `brew upgrade` is always evaluated greedily, so a
+    single-package `mpm upgrade` needs no flag.
     """
 
     name = "Homebrew Cask"
@@ -1133,32 +1155,3 @@ class Cask(Homebrew):
     cli_names = ("brew",)
 
     post_args = ("--cask",)
-
-    def upgrade_all_cli(self) -> tuple[str, ...]:
-        """Generates the CLI to upgrade all outdated packages.
-
-        Adds `--greedy` to the shared `brew upgrade` command when auto-updating
-        packages are included, mirroring {meth}`Homebrew.outdated`. Without it,
-        `brew upgrade` skips casks flagged `auto_updates true` or
-        `version :latest`, so `mpm --include-auto-updates upgrade --all` would
-        report them as outdated but never upgrade them.
-
-        ```{note}
-
-        This override is cask-only by necessity: `brew upgrade` declares
-        `--greedy` and `--formula` mutually exclusive, while
-        `brew outdated` accepts the pair. The conflict is intentional:
-        `--formula` has conflicted with `--greedy` ever since the selector
-        switch [was added to brew upgrade in August 2020](https://github.com/Homebrew/brew/pull/8229), and a request to
-        tolerate `--greedy` as a no-op in formula-only contexts [was declined as invalid usage](https://github.com/Homebrew/brew/issues/16135). This method can
-        therefore never fold back into the base class shared with `brew`.
-
-        A cask explicitly passed to `brew upgrade` is always evaluated
-        greedily, so {meth}`Homebrew.upgrade_one_cli` needs no counterpart.
-        ```
-        """
-        options = ["--quiet", "--yes"]
-        # Includes auto-update packages or not.
-        if not self.ignore_auto_updates:
-            options.append("--greedy")
-        return self.build_cli("upgrade", options)

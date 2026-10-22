@@ -27,6 +27,7 @@ import tomli_w
 from click_extra import ValidationError
 
 from meta_package_manager.config import (
+    AUTO_UPDATES_REPLACEMENT,
     CONTRIBUTION_HINT_FIELDS,
     INVALIDATED_CACHED_PROPS,
     MAX_ISSUE_URL_LENGTH,
@@ -38,7 +39,12 @@ from meta_package_manager.config import (
     dump_manager_overrides,
     format_contribution_hints,
 )
-from meta_package_manager.definitions import OVERRIDABLE_FIELDS, OVERRIDES_SECTION
+from meta_package_manager.definitions import (
+    OVERRIDABLE_FIELDS,
+    OVERRIDES_SECTION,
+    buildable_operations,
+    parse_operation_overrides,
+)
 from meta_package_manager.pool import pool
 
 from .conftest import all_manager_ids, tomllib
@@ -54,7 +60,7 @@ the pool is stable.
 def _clean_override_target() -> None:
     """Pop overridable fields and cached props from the override target."""
     manager = pool[OVERRIDE_TARGET]
-    for field in OVERRIDABLE_FIELDS:
+    for field in (*OVERRIDABLE_FIELDS, "operation_extra_args"):
         manager.__dict__.pop(field, None)
     for prop in INVALIDATED_CACHED_PROPS:
         manager.__dict__.pop(prop, None)
@@ -157,13 +163,13 @@ def test_str_tuple_override_rejects_non_string_entries(reset_overrides):
 
 
 def test_bool_override(reset_overrides):
-    apply_manager_overrides(pool, {OVERRIDE_TARGET: {"ignore_auto_updates": False}})
-    assert pool[OVERRIDE_TARGET].ignore_auto_updates is False
+    apply_manager_overrides(pool, {OVERRIDE_TARGET: {"stop_on_error": True}})
+    assert pool[OVERRIDE_TARGET].stop_on_error is True
 
 
 def test_bool_override_rejects_int(reset_overrides):
     with pytest.raises(ValidationError, match=r"expected a boolean"):
-        apply_manager_overrides(pool, {OVERRIDE_TARGET: {"ignore_auto_updates": 1}})
+        apply_manager_overrides(pool, {OVERRIDE_TARGET: {"stop_on_error": 1}})
 
 
 def test_int_override(reset_overrides):
@@ -213,14 +219,14 @@ def test_multiple_fields_in_one_call(reset_overrides):
             OVERRIDE_TARGET: {
                 "cli_search_path": ["/x"],
                 "timeout": 60,
-                "ignore_auto_updates": False,
+                "stop_on_error": True,
             }
         },
     )
     manager = pool[OVERRIDE_TARGET]
     assert manager.cli_search_path == ("/x",)
     assert manager.timeout == 60
-    assert manager.ignore_auto_updates is False
+    assert manager.stop_on_error is True
 
 
 def test_cached_property_evicted_on_override(reset_overrides):
@@ -293,17 +299,17 @@ def test_timeout_binds_detection_phase(
     assert recorded[OVERRIDE_TARGET] == expected
 
 
-def test_per_manager_ignore_auto_updates_beats_global_default(reset_overrides):
-    apply_manager_overrides(pool, {OVERRIDE_TARGET: {"ignore_auto_updates": False}})
+def test_per_manager_stop_on_error_beats_global_default(reset_overrides):
+    apply_manager_overrides(pool, {OVERRIDE_TARGET: {"stop_on_error": True}})
     selected = list(
         pool._select_managers(
             keep=(OVERRIDE_TARGET,),
             drop_not_found=False,
-            ignore_auto_updates=True,
+            stop_on_error=False,
         )
     )
     assert len(selected) == 1
-    assert selected[0].ignore_auto_updates is False
+    assert selected[0].stop_on_error is True
 
 
 def test_global_default_still_applies_without_override():
@@ -352,6 +358,80 @@ def test_sudo_is_a_risky_override_field():
     assert "sudo" in RISKY_OVERRIDE_FIELDS
 
 
+# Per-operation extra arguments.
+
+
+def test_operations_override_sets_extra_args(reset_overrides):
+    apply_manager_overrides(
+        pool,
+        {OVERRIDE_TARGET: {"operations": {"install": {"extra_args": ["--user"]}}}},
+    )
+    assert pool[OVERRIDE_TARGET].operation_extra_args == {"install": ("--user",)}
+    assert "operation_extra_args" in pool.overridden_fields[OVERRIDE_TARGET]
+
+
+def test_operations_override_reaches_its_command_alone(reset_overrides):
+    """The override, the stamp of the operation method and `build_cli` put the
+    arguments on the commands of their operation, and nowhere else."""
+    apply_manager_overrides(
+        pool,
+        {OVERRIDE_TARGET: {"operations": {"upgrade_one": {"extra_args": ["--user"]}}}},
+    )
+    manager = pool[OVERRIDE_TARGET]
+    assert "--user" in manager.upgrade_one_cli("lemon")
+    assert "--user" not in manager.build_cli("list")
+
+
+@pytest.mark.parametrize(
+    ("operations", "message"),
+    (
+        pytest.param("--user", r"expected a table, got str", id="not-a-table"),
+        pytest.param(
+            {"install": "--user"}, r"expected a table, got str", id="entry-not-a-table"
+        ),
+        pytest.param(
+            {"upgrade_all": {"extra_args": ["--user"]}},
+            r"builds no upgrade_all command",
+            id="one-by-one-upgrade",
+        ),
+        pytest.param(
+            {"cleanup": {"extra_args": []}},
+            r"builds no cleanup command",
+            id="unknown-operation",
+        ),
+        pytest.param(
+            {"install": {"args": ["install"]}},
+            r"unknown key\. Allowed: extra_args",
+            id="redefinition",
+        ),
+        pytest.param(
+            {"install": {"extra_args": "--user"}},
+            r"expected a list of strings",
+            id="bare-string",
+        ),
+    ),
+)
+def test_operations_override_rejects(reset_overrides, operations, message):
+    with pytest.raises(ValidationError, match=message):
+        apply_manager_overrides(pool, {OVERRIDE_TARGET: {"operations": operations}})
+
+
+def test_removed_auto_updates_field_names_replacement(reset_overrides):
+    with pytest.raises(ValidationError, match=r"removed field") as raised:
+        apply_manager_overrides(pool, {"cask": {"ignore_auto_updates": False}})
+    assert AUTO_UPDATES_REPLACEMENT in str(raised.value)
+
+
+def test_unknown_manager_with_override_operations_reads_as_typo():
+    """A section whose operations only add arguments is a mistyped override, not a
+    definition missing its platforms."""
+    with pytest.raises(ValidationError, match=r"unknown manager ID 'caks'"):
+        apply_manager_overrides(
+            pool,
+            {"caks": {"operations": {"upgrade_all": {"extra_args": ["--greedy"]}}}},
+        )
+
+
 CONFIG_TEMPLATE = dedent("""\
     [mpm.overrides.{manager_id}]
     cli_search_path = ["/integration/test/path"]
@@ -384,6 +464,38 @@ def test_cli_fails_on_unknown_manager_in_config(invoke, create_config):
     assert result.exit_code != 0
     assert "mpm.overrides.fictional-manager" in result.stderr
     assert "unknown manager ID" in result.stderr
+
+
+def test_cli_include_auto_updates_names_replacement(invoke):
+    """The removed flag that asked for auto-updating casks stops the run and names
+    the configuration that replaces it."""
+    result = invoke("--include-auto-updates", "managers")
+    assert result.exit_code == 2
+    assert "--include-auto-updates was removed" in result.stderr
+    assert AUTO_UPDATES_REPLACEMENT in result.stderr
+
+
+def test_cli_ignore_auto_updates_warns(invoke):
+    """The removed flag that asked for the default only warns."""
+    result = invoke("--ignore-auto-updates", "managers")
+    assert result.exit_code == 0
+    assert "--ignore-auto-updates was removed and has no effect" in result.stderr
+
+
+@pytest.mark.parametrize(
+    ("value", "hint"),
+    (
+        pytest.param("false", AUTO_UPDATES_REPLACEMENT, id="included"),
+        pytest.param("true", "stay out by default", id="default"),
+    ),
+)
+def test_cli_removed_auto_updates_key_warns(invoke, create_config, value, hint):
+    """click-extra drops the removed `[mpm]` key in silence, so mpm warns."""
+    conf_path = create_config("conf.toml", f"[mpm]\nignore_auto_updates = {value}\n")
+    result = invoke("--config", str(conf_path), "managers")
+    assert result.exit_code == 0
+    assert "`[mpm] ignore_auto_updates` is ignored" in result.stderr
+    assert hint in result.stderr
 
 
 # Contribution-hint feature.
@@ -644,6 +756,20 @@ def test_dump_manager_overrides_keys_are_alphabetical():
     assert list(dumped) == sorted(dumped)
 
 
+def test_dump_manager_overrides_lists_buildable_operations(reset_overrides):
+    """The template names each operation an override can reach, with its current
+    `extra_args`."""
+    apply_manager_overrides(
+        pool,
+        {OVERRIDE_TARGET: {"operations": {"install": {"extra_args": ["--user"]}}}},
+    )
+    manager = pool[OVERRIDE_TARGET]
+    operations = dump_manager_overrides(manager)["operations"]
+    assert list(operations) == list(buildable_operations(manager))
+    assert operations["install"] == {"extra_args": ["--user"]}
+    assert operations["remove"] == {"extra_args": []}
+
+
 @all_manager_ids
 def test_config_template_round_trips(manager_id):
     """For every manager, dump → tomli_w → tomllib → converter yields the same
@@ -655,9 +781,15 @@ def test_config_template_round_trips(manager_id):
     serialized = tomli_w.dumps(dumped)
     parsed = tomllib.loads(serialized)
     for field, raw_value in parsed.items():
-        converter = OVERRIDABLE_FIELDS[field]
-        reparsed = converter(raw_value)
-        original = getattr(manager, field)
+        if field == "operations":
+            reparsed = parse_operation_overrides(manager_id, manager, raw_value)
+            original = {
+                op_name: manager.operation_extra_args.get(op_name, ())
+                for op_name in buildable_operations(manager)
+            }
+        else:
+            reparsed = OVERRIDABLE_FIELDS[field](raw_value)
+            original = getattr(manager, field)
         assert reparsed == original, (
             f"{manager_id}.{field}: {reparsed!r} != {original!r}"
         )
@@ -670,8 +802,9 @@ def test_cli_config_template_one_manager(invoke):
     parsed = tomllib.loads(result.stdout)
     assert list(parsed["mpm"][OVERRIDES_SECTION]) == ["winget"]
     winget = parsed["mpm"][OVERRIDES_SECTION]["winget"]
-    # Every key present must be an overridable field.
-    assert set(winget).issubset(OVERRIDABLE_FIELDS)
+    # Every key present must be an overridable field or the operations table.
+    assert set(winget).issubset({*OVERRIDABLE_FIELDS, "operations"})
+    assert set(winget["operations"]) == set(buildable_operations(pool["winget"]))
 
 
 def test_cli_config_template_multiple_managers(invoke):

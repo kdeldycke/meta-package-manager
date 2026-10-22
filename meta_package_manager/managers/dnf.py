@@ -251,14 +251,16 @@ class DNF(PackageManager):
 
         installed_evr: dict[tuple[str, str], str] = {}
         for line_package in self.run_cli(
-            "repoquery", "--installed", "--qf", query_format
+            "repoquery", "--installed", "--qf", query_format, auto_extra_args=False
         ).splitlines():
             if not line_package:
                 continue
             name, evr, _summary, arch = line_package.split(self.DELIMITER)
             installed_evr[(name, arch)] = evr
 
-        output = self.run_cli("repoquery", "--upgrades", "--qf", query_format)
+        output = self.run_cli(
+            "repoquery", "--upgrades", "--qf", query_format, auto_extra_args=True
+        )
 
         for line_package in output.splitlines():
             # remove empty new line

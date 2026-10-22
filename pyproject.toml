@@ -609,8 +609,8 @@ include-package = [ "cyclonedx", "hjson", "json5", "jsonc", "spdx_tools", "yaml"
 # suppresses either, since the checker never sees the whole word. Any acronym
 # carrying a lowercase suffix needs its own entry here.
 default.extend-identifiers = { Github = "GitHub", IOS = "iOS", Javascript = "JavaScript", MacOS = "macOS", PATCHed = "PATCHed", PNGs = "PNGs", PyPi = "PyPI", Typescript = "TypeScript" }
-# False positives: "astroid" is a Python AST library (not "asteroid"); "oject" appears when "pyproject.toml" is split across line breaks in CLI help output; "sur" is macOS 11 Big Sur and Homebrew's big_sur bottle tag (not "sure").
-default.extend-words = { astroid = "astroid", oject = "oject", sur = "sur", mis = "mis", uncatalogued = "uncatalogued", unparseable = "unparseable" }
+# False positives: "astroid" is a Python AST library (not "asteroid"); "certifi" is the CA bundle package a dependency graph lists under requests (not "certify"); "oject" appears when "pyproject.toml" is split across line breaks in CLI help output; "sur" is macOS 11 Big Sur and Homebrew's big_sur bottle tag (not "sure").
+default.extend-words = { astroid = "astroid", certifi = "certifi", oject = "oject", sur = "sur", mis = "mis", uncatalogued = "uncatalogued", unparseable = "unparseable" }
 # Skip content between <!-- typos:off --> and <!-- typos:on --> markers.
 default.extend-ignore-re = [
   "(?s)<!-- typos:off -->.*?<!-- typos:on -->",

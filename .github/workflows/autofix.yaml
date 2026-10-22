@@ -11,7 +11,7 @@ name: 🪄 Autofix
 jobs:
 
   autofix:
-    uses: kdeldycke/repomatic/.github/workflows/autofix.yaml@504998fb9b230dfd2405d6dc352366e2d08923ad # v7.17.1
+    uses: kdeldycke/repomatic/.github/workflows/autofix.yaml@d4e5f1199c8756fe04b12d5e864c2535fd9f3739 # v7.18.0
     secrets:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_R2_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}

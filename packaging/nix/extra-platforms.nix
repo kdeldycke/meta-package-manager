@@ -8,14 +8,14 @@
 
 buildPythonPackage (finalAttrs: {
   pname = "extra-platforms";
-  version = "13.11.0";
+  version = "13.12.0";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "kdeldycke";
     repo = "extra-platforms";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-C5IahGADpYHZwv8KQCu1mrmhvquYC/MFIdJY3IFyL2s=";
+    hash = "sha256-sfo9Q2qvR1IGOIeSmKMqp9XA0T5X0EN1EZZV6R7165c=";
   };
 
   build-system = [ uv-build ];

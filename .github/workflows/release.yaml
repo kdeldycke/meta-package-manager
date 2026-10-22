@@ -157,7 +157,7 @@ jobs:
         run: >
           mv "$RUNNER_TEMP/mpm@kdeldycke.github.io.shell-extension.zip"
           "$RUNNER_TEMP/mpm-gnome-shell-extension.zip"
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: release-asset-mpm-gnome-shell-extension.zip
           path: ${{ runner.temp }}/mpm-gnome-shell-extension.zip
@@ -215,7 +215,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python3 packaging/guix/update.py
-      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         if: steps.check.outputs.needs_update == 'true'
         with:
           # Pin what CI downloads: unpinned, setup-uv installs the newest uv
@@ -306,7 +306,7 @@ jobs:
           # Full history so the redundant-PR check can compute the merge base
           # between main and the open release branch (see the reconcile step below).
           fetch-depth: 0
-      - uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31.11.1
+      - uses: cachix/install-nix-action@448cde739abec1eaf0646249e3d25bb8d9bc7702 # v31.11.2
       - name: Check for new release
         id: check
         env:
@@ -350,7 +350,7 @@ jobs:
           for definition in click-extra extra-platforms package; do
           python3 packaging/nix/update.py "packaging/nix/${definition}.nix";
           done
-      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         if: steps.check.outputs.needs_update == 'true'
         with:
           # Pin what CI downloads: unpinned, setup-uv installs the newest uv

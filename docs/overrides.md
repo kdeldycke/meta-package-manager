@@ -12,7 +12,7 @@ Each built-in manager exposes a small set of attributes that can be overridden f
 | `cli_search_path`     | list of strings  | Extra directories searched **before** `$PATH` for the binary.                                                                                                                        |
 | `cooldown_policy`     | string           | Per-manager cooldown posture: `enforce`, `best-effort` or `off`, overriding the globally resolved policy. See [cooldown](cooldown.md).                                               |
 | `dry_run`             | boolean          | Simulate CLI calls without performing any action, only for this manager.                                                                                                             |
-| `extra_env`           | table of strings | Additional environment variables passed to every CLI call.                                                                                                                           |
+| `extra_env`           | table of strings | Environment variables added to those the manager sets, on every CLI call. A variable the manager sets takes the value given here.                                                    |
 | `operations`          | table            | Arguments added to the commands of one operation alone, keyed by operation name. See [per-operation arguments](#per-operation-arguments).                                            |
 | `post_args`           | list of strings  | Arguments appended **after** every CLI invocation.                                                                                                                                   |
 | `pre_args`            | list of strings  | Arguments inserted **before** every CLI invocation.                                                                                                                                  |
@@ -26,7 +26,7 @@ Each built-in manager exposes a small set of attributes that can be overridden f
 | `version_regexes`     | list of strings  | Regular expressions tried in order to extract the version from CLI output.                                                                                                           |
 
 ```{important}
-List-valued fields use **replace** semantics: an override fully supersedes the built-in default rather than merging with it. For example, setting `cli_search_path = ["/opt/bin"]` on a manager that ships with `cli_search_path = ("/usr/local/bin",)` results in `("/opt/bin",)`, not the union of both.
+List-valued fields use **replace** semantics: an override fully supersedes the built-in default rather than merging with it. For example, setting `cli_search_path = ["/opt/bin"]` on a manager that ships with `cli_search_path = ("/usr/local/bin",)` results in `("/opt/bin",)`, not the union of both. The `extra_env` and `operations` tables add to what the manager sets instead.
 ```
 
 ## Discover the override template

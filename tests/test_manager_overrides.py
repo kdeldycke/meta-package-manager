@@ -207,6 +207,31 @@ def test_dict_override(reset_overrides):
     assert pool[OVERRIDE_TARGET].extra_env == {"PIP_INDEX_URL": "https://example.test"}
 
 
+def test_dict_override_adds_to_shipped_variables():
+    """An `extra_env` override adds its variables to those the manager ships,
+    and its value wins for a name both set. Each application starts again from
+    the shipped variables, so a name a later configuration drops is gone."""
+    manager = pool["cask"]
+    shipped = dict(type(manager).extra_env)
+    try:
+        apply_manager_overrides(
+            pool,
+            {"cask": {"extra_env": {"HOMEBREW_NO_ANALYTICS": "0", "LANG": "C"}}},
+        )
+        assert manager.extra_env == {
+            **shipped,
+            "HOMEBREW_NO_ANALYTICS": "0",
+            "LANG": "C",
+        }
+        assert manager.extra_env["HOMEBREW_NO_AUTO_UPDATE"] == "1"
+
+        apply_manager_overrides(pool, {"cask": {"extra_env": {"TZ": "UTC"}}})
+        assert manager.extra_env == {**shipped, "TZ": "UTC"}
+    finally:
+        manager.__dict__.pop("extra_env", None)
+        pool.overridden_fields.pop("cask", None)
+
+
 def test_dict_override_rejects_non_string_value(reset_overrides):
     with pytest.raises(ValidationError, match=r"expected a table of string-to-string"):
         apply_manager_overrides(pool, {OVERRIDE_TARGET: {"extra_env": {"K": 1}}})

@@ -596,7 +596,9 @@ def apply_manager_overrides(
     `--<flag>` defaults for that manager, and the cached properties derived
     from the affected attributes are evicted so the next access recomputes
     them. List-valued fields use *replace* semantics: the override fully
-    supersedes the built-in default. The `operations` table sets
+    supersedes the built-in default. The two tables add to what the manager
+    sets instead: `extra_env` adds its variables to the manager's own, a name
+    both set taking the override's value, and the `operations` table sets
     {attr}`~meta_package_manager.execution.CLIExecutor.operation_extra_args`,
     whose arguments come in addition to the manager's own.
 
@@ -632,6 +634,10 @@ def apply_manager_overrides(
                 continue
 
             value = OVERRIDABLE_FIELDS[field_name](raw_value)
+            if field_name == "extra_env":
+                # Merged onto the shipped variables, never onto the current value,
+                # so that a key a later configuration drops does not linger.
+                value = {**(type(manager).extra_env or {}), **value}
 
             # Capture mpm's pre-override detection state for the hint, before
             # the setattr below would change the binary search behavior. Reading

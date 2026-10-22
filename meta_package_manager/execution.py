@@ -671,7 +671,9 @@ class CLIExecutor:
     """Additional environment variables to add to the current context.
 
     Automatically applied on each
-    {meth}`meta_package_manager.execution.CLIExecutor.run_cli` calls.
+    {meth}`meta_package_manager.execution.CLIExecutor.run_cli` calls. An
+    `extra_env` override in `[mpm.overrides.<id>]` adds its variables to these,
+    and its value wins for a name both set.
     """
 
     pre_cmds: tuple[str, ...] = ()

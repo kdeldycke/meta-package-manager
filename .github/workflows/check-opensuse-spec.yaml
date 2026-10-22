@@ -75,7 +75,18 @@ jobs:
             python-rpm-macros \
             rpm-build \
             rpmlint \
-            tar
+            shadow \
+            tar \
+            util-linux
+      - name: Create the unprivileged build user
+        # OBS builds as the unprivileged abuild user, and so must this job: mpm
+        # escalates nothing as root, so the tests asserting a `sudo` prefix fail
+        # under a root build.
+        run: |
+          set -eux
+          useradd --create-home --user-group abuild
+          install --directory --owner=abuild --group=abuild /home/abuild/rpmbuild \
+            /home/abuild/rpmbuild/SOURCES /home/abuild/rpmbuild/SPECS
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install the spec's own build dependencies
         # Read off the spec rather than restated here, so the two cannot drift.
@@ -91,19 +102,24 @@ jobs:
       - name: Fetch the pinned source tarball
         run: |
           set -eux
-          mkdir --parents /usr/src/packages/SOURCES
           source_url="$(rpmspec --parse \
             packaging/opensuse/meta-package-manager.spec \
             | sed --quiet 's/^Source:[[:space:]]*//p')"
           curl --location --fail --silent --show-error \
-            --output "/usr/src/packages/SOURCES/${source_url##*/}" \
+            --output "/home/abuild/rpmbuild/SOURCES/${source_url##*/}" \
             "${source_url}"
+          install --owner=abuild --group=abuild --mode=644 \
+            packaging/opensuse/meta-package-manager.spec /home/abuild/rpmbuild/SPECS/
       - name: Build the binary and source RPMs
         # rpmbuild has no long-form equivalent for -ba. The %check phase runs
         # `pytest -m "not integration"`, so a green build is also a green suite.
-        run: rpmbuild -ba packaging/opensuse/meta-package-manager.spec
+        run: >
+          runuser --login
+          --command "rpmbuild --define '_topdir /home/abuild/rpmbuild'
+          -ba /home/abuild/rpmbuild/SPECS/meta-package-manager.spec"
+          abuild
       - name: Stage the built RPM for the integration job
-        run: cp /usr/src/packages/RPMS/noarch/*.rpm ./
+        run: cp /home/abuild/rpmbuild/RPMS/noarch/*.rpm ./
       - name: Lint the built RPM
         # Warnings are reported rather than gated; errors fail the job, minus
         # three checks a plain rpmbuild container structurally cannot satisfy.

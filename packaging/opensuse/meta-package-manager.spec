@@ -23,7 +23,7 @@
 %define pythons %{primary_python}
 
 Name:           meta-package-manager
-Version:        8.0.1
+Version:        8.1.2
 Release:        0
 Summary:        Wraps all package managers with a unifying CLI
 License:        GPL-2.0-or-later

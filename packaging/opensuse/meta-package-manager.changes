@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Thu Oct 22 12:00:00 UTC 2026 - Kevin Deldycke <kevin@deldycke.com>
+
+- Update to 8.1.2.
+- Run the 8.1.2 test suite, which reads the documentation files it
+  checks from the unpacked source rather than from the installed
+  module, so %check passes under %pytest again.
+
+-------------------------------------------------------------------
 Mon Sep 28 12:00:00 UTC 2026 - Kevin Deldycke <kevin@deldycke.com>
 
 - Update to 8.0.1.

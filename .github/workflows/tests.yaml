@@ -111,7 +111,11 @@ jobs:
         ${{ github.event_name != 'pull_request'
         && fromJSON(needs.metadata.outputs.metadata).test_matrix
         || fromJSON(needs.metadata.outputs.metadata).test_matrix_pr }}
-    name: "${{ matrix.state == 'stable' && '✅' || '⁉️' }} ${{ matrix.os }} / py${{ matrix.python-version }}"
+    # A cell carrying a `resolution` key appends it, which tells that cell from
+    # the twin sharing its runner and Python.
+    name: >-
+      ${{ matrix.state == 'stable' && '✅' || '⁉️' }} ${{ matrix.os }} /
+      py${{ matrix.python-version }}${{ matrix.resolution && format(' / {0}', matrix.resolution) || '' }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 180
     # We keep going when a job flagged as not stable fails.
@@ -559,14 +563,25 @@ jobs:
           PYTHON_VERSION: ${{ matrix.python-version }}
       - name: Install project
         run: uv --no-progress sync --frozen --all-extras --group test
+      - name: Resolve again (${{ matrix.resolution || 'not requested' }})
+        # A cell carrying a `resolution` key resolves the project again with it: `lowest-direct` installs every direct
+        # dependency at the floor its specifier declares, which the lockfile never does. The rewritten `uv.lock` stays
+        # in this checkout, where the `--frozen` steps below read it. A `uv run` without `--frozen` would resolve it
+        # back to the newest releases, as the lockfile no longer matches the default resolution.
+        # See https://repomatic.net/test-matrix#run-every-declared-floor-in-one-cell
+        if: matrix.resolution
+        shell: bash
+        env:
+          RESOLUTION: ${{ matrix.resolution }}
+        run: uv --no-progress sync --resolution "${RESOLUTION}" --all-extras --group test
 
       # mpm CLI runs.
       - name: Run local CLI
-        run: uv run -- mpm --version
+        run: uv --no-progress run --frozen -- mpm --version
       - name: Run CLI from module
         run: |
-          uv run        -m meta_package_manager --version
-          uv run python -m meta_package_manager --version
+          uv --no-progress run --frozen        -m meta_package_manager --version
+          uv --no-progress run --frozen python -m meta_package_manager --version
 
       # Bar plugin runs.
       - name: uv run bar_plugin.py --search-mpm

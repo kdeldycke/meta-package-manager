@@ -62,8 +62,18 @@ def _major_minor(version: str) -> tuple[int, int]:
 
 
 def _python_floor_of(matrix: dict) -> tuple[int, int]:
-    """Return the lowest `(major, minor)` Python version a matrix tests."""
-    return min(_major_minor(version) for version in matrix["python-version"])
+    """Return the lowest `(major, minor)` Python version a matrix tests.
+
+    Reads the `python-version` axis and the `include` rows alike: a matrix with
+    a `full-include` row comes as a flat list of jobs, with no axis at all.
+    """
+    versions = list(matrix.get("python-version", ()))
+    versions += [
+        row["python-version"]
+        for row in matrix.get("include", ())
+        if "python-version" in row
+    ]
+    return min(_major_minor(version) for version in versions)
 
 
 def _requires_python_floor(pyproject: dict) -> tuple[int, int]:

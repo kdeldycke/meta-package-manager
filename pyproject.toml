@@ -1033,6 +1033,15 @@ test-matrix.exclude = [
   { os = "macos-26", python-version = "3.15" },
   { os = "windows-2025", python-version = "3.15" },
 ]
+# One more cell on the floor runner and Python installs every direct dependency
+# at the lowest version its specifier allows, where the lockfile holds the
+# newest. Distribution packagers build against the releases their channel
+# ships, and a floor the code outgrew lets them build against one it cannot run
+# on. The `Resolve again` step of tests.yaml reads the `resolution` key. The PR
+# matrix ignores `full-include` rows, so pull requests do not run this cell.
+test-matrix.full-include = [
+  { os = "ubuntu-26.04-arm", python-version = "3.10", resolution = "lowest-direct" },
+]
 # Sync optional-dependencies into the build venv so the Nuitka binary ships
 # every feature gated behind try/except imports in click-extra and mpm:
 #   - sbom-offline: cyclonedx-python-lib + spdx-tools, for `mpm sbom --spdx`

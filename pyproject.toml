@@ -668,13 +668,6 @@ default.extend-ignore-identifiers-re = [
   #
   # `buildd` is the proper name of Debian's autobuilder daemon.
   "buildd",
-  # error: `certifi` should be `certify`, `certifies`, `certified`
-  #   ╭▸ ./docs/assets/dependencies.mmd:7:5
-  #   │
-  # 7 │     certifi["certifi\n2025.11.12"]
-  #   ╰╴    ━━━━━━━
-  #
-  "certifi",
   # error: `Hashi` should be `Hash`
   #     ╭▸ ./docs/unsupported.md:140:143
   #     │
@@ -720,10 +713,11 @@ warn_unused_configs = true
 # Sphinx >= 9.1 uses PEP 695 `type` statements, which mypy rejects under the
 # project's --python-version 3.10 floor. tests/test_docs.py imports
 # click_extra.sphinx.matrix (which imports sphinx), so skip following imports
-# into sphinx instead of analyzing its 3.12+ source.
+# into sphinx instead of analyzing its 3.12+ source. The entry is the one
+# repomatic's bundled `mypy.toml` carries.
 overrides = [
   { module = [ "packageurl.*" ], ignore_missing_imports = true },
-  { module = [ "sphinx.*" ], follow_imports = "skip" },
+  { module = [ "sphinx.*" ], ignore_missing_imports = true, follow_imports = "skip" },
 ]
 
 [tool.pytest]
@@ -919,6 +913,13 @@ docs/_linkcheck/
 # manifests. RPM recipes share the extension and are packaging sources, tracked
 # like every other spec under packaging/.
 !packaging/**/*.spec"""
+# Entries of the bundled `pytest.toml` that `[tool.pytest]` leaves out, each with
+# the reason `lint-repo` prints in place of its warning. tests.yaml passes the
+# coverage and xdist flags itself, so a packager's plain `pytest` runs without
+# either plugin.
+lint-repo.declined.pytest.addopts."--cov-report=term" = "tests.yaml passes it, so packagers need no pytest-cov."
+lint-repo.declined.pytest.addopts."--durations=10" = "--durations=25 replaces it, to show the tail of slow tests."
+lint-repo.declined.pytest.addopts."--numprocesses=auto" = "tests.yaml passes it, so packagers need no pytest-xdist."
 # Extension zip packed by release.yaml's build-gnome-extension job and attached
 # to every GitHub release by the engine's extra-assets job (repomatic >= 7.4.2).
 release-assets = [ "mpm-gnome-shell-extension.zip" ]

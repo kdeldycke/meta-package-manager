@@ -93,8 +93,8 @@ def main():
 
         - plain inline package call: `python -m meta_package_manager`,
         - `pyproject.toml` entry point: `mpm = 'meta_package_manager.__main__:main`,
-        - Nuitka's main module invocation requirement:
-          `python -m nuitka (...) meta_package_manager/__main__.py`
+        - Nuitka's entry point, which the release build compiles through
+          `--main-entry-point=meta-package-manager=meta_package_manager.__main__:main`
 
     That way we can deduce all three cases from the entry point.
     """

@@ -336,12 +336,11 @@ dependencies = [
   # shell_env.py resolves the login shell's family with. Below it the import
   # fails and no mpm command runs.
   "extra-platforms>=13.10",
-  # Required at runtime by meta_package_manager.package and
-  # meta_package_manager.specifier (PackageURL, from_string(), to_string()) for
-  # cross-manager package identification, independent of SBOM features. That API
-  # has been stable since 0.11; the resolver selects a newer Python-compatible
-  # release as needed.
-  "packageurl-python>=0.11",
+  # packageurl-python 0.17.6 added the normalize_purl argument of
+  # PackageURL.from_string(), which specifier.py passes to keep a pURL lossless.
+  # Below it, parsing any pURL spec raises TypeError and tests/test_specifier.py
+  # fails to collect.
+  "packageurl-python>=0.17.6",
   # tomllib is stdlib from Python 3.11; on 3.10 we parse TOML via tomli.loads()
   # (cli.py), an API stable since 2.0. The marker keeps tomli off 3.11+.
   "tomli>=2; python_version<'3.11'",

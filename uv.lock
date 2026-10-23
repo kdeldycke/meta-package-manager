@@ -12,7 +12,7 @@ exclude-newer = "0001-01-01T00:00:00Z" # This has no effect and is included for 
 exclude-newer-span = "P1W"
 
 [options.exclude-newer-package]
-certifi = { timestamp = "0001-01-01T00:00:00Z", span = "PT0S" }
+certifi = "2026-10-22T00:00:00Z"
 
 [[package]]
 name = "accessible-pygments"
@@ -1251,7 +1251,7 @@ requires-dist = [
     { name = "cyclonedx-python-lib", marker = "extra == 'sbom-offline'", specifier = ">=11.9" },
     { name = "extra-platforms", specifier = ">=13.10" },
     { name = "httpx", marker = "extra == 'sbom-online'", specifier = ">=0.27" },
-    { name = "packageurl-python", specifier = ">=0.11" },
+    { name = "packageurl-python", specifier = ">=0.17.6" },
     { name = "platformdirs", marker = "extra == 'sbom-online'", specifier = ">=4" },
     { name = "spdx-tools", marker = "extra == 'sbom-offline'", specifier = ">=0.8.2" },
     { name = "tomli", marker = "python_full_version < '3.11'", specifier = ">=2" },

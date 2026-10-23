@@ -10,6 +10,7 @@
 - [mpm] List the operations each manager accepts in the `mpm config-template` output and on each manager page.
 - [cask] Name the cask whose leftover Caskroom directory makes Homebrew list no cask, and the `brew uninstall --cask --force` command that removes it.
 - [mpm] Add the variables of an `extra_env` override to those the manager sets, instead of replacing them, as the documentation of the field says.
+- [mpm] Raise the `packageurl-python` floor to `0.17.6`: below it, parsing a pURL spec raises `TypeError`.
 
 ## [`8.1.2` (2026-10-12)](https://github.com/kdeldycke/meta-package-manager/compare/v8.1.1...v8.1.2)
 

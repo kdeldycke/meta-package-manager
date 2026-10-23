@@ -1196,7 +1196,8 @@ class CLIExecutor:
         * then in all the default places specified by the environment variable (i.e.
           `os.getenv("PATH")`).
 
-        Only returns files that exists and are not empty.
+        Only returns files that exist and are not empty. Inaccessible search paths
+        and candidates are skipped.
 
         ```{caution}
 
@@ -1243,21 +1244,23 @@ class CLIExecutor:
                     search_filenames.extend(f"{cli_name}{ext}" for ext in pathext)
         search_filenames = unique(search_filenames)
 
-        def normalize_path(path: Path) -> str:
-            """Resolves symlinks and produces a normalized absolute path string.
-
-            Additonnaly use `os.path.normcase` on Windows to exclude duplicates
-            produced by case-insensitive filesystems.
-            """
-            return os.path.normcase(path.resolve())
-
-        # Deduplicate search paths while keeping their order and original value, as the
-        # normalization process happens with the `key` lookup.
-        search_path_list: list[Path] = unique(
-            # Manager-specific search path takes precedence over default environment.
-            (Path(p) for p in (*self.cli_search_path, *os.get_exec_path(env=env))),
-            key=normalize_path,
-        )
+        # Normalize only for deduplication; keep the original paths for discovery.
+        search_path_list: list[Path] = []
+        seen_search_paths: set[str] = set()
+        # Manager-specific search path takes precedence over default environment.
+        for raw_path in (*self.cli_search_path, *os.get_exec_path(env=env)):
+            search_path = Path(raw_path)
+            try:
+                normalized_path = os.path.normcase(search_path.resolve())
+                if normalized_path in seen_search_paths:
+                    continue
+                seen_search_paths.add(normalized_path)
+                if not search_path.is_dir():
+                    continue
+            except (PermissionError, FileNotFoundError, NotADirectoryError) as error:
+                logging.debug(f"Skip CLI search path {search_path}: {error}")
+                continue
+            search_path_list.append(search_path)
 
         logging.debug(
             "Search for "
@@ -1267,15 +1270,12 @@ class CLIExecutor:
         )
 
         for search_path in search_path_list:
-            if not search_path.is_dir():
-                continue
-
             for filename in search_filenames:
                 file = search_path / filename
-                # On Windows, check for reparse points (e.g., Windows App Execution Aliases like winget).
-                # These return False for is_file() and 0 for getsize(), so we detect them separately.
-                if on_windows:
-                    try:
+                # Windows App Execution Aliases can be reparse points without
+                # a regular file's type or size, so accept them without stat().
+                try:
+                    if on_windows:
                         file_stat = file.lstat()
                         if (
                             file_stat.st_file_attributes
@@ -1286,10 +1286,15 @@ class CLIExecutor:
                             )
                             yield file
                             continue
-                    except OSError:
-                        # Permission denied or file doesn't exist; fall through to normal checks.
-                        pass
-                if not file.is_file() or not os.path.getsize(file):
+                    file_stat = file.stat()
+                except (FileNotFoundError, NotADirectoryError):
+                    continue
+                except OSError as error:
+                    # Skip any other failure, a symlink loop included, as
+                    # `shutil.which()` does.
+                    logging.debug(f"Skip CLI candidate {file}: {error}")
+                    continue
+                if not stat.S_ISREG(file_stat.st_mode) or not file_stat.st_size:
                     continue
                 logging.debug(f"CLI found at {highlight_cli_name(file, cli_names)}")
                 yield file

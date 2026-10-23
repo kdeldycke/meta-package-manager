@@ -25,6 +25,7 @@ import shutil
 import subprocess
 import threading
 import time
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -51,6 +52,7 @@ from meta_package_manager.execution import (
     VERSION_PROBE,
     WIN_DEFAULT_PATHEXT,
     CLIError,
+    CLIExecutor,
     _lean_command,
     _spinner_label,
     format_plan_command,
@@ -1427,6 +1429,125 @@ def test_untied_install_search_runs_under_read_only_stamp(
     # sequential priority search that probes each manager with refiltered_search.
     invoke("--dry-run", "install", "unmatched-name")
     assert recorded["operation"] == Operations.search.name
+
+
+@pytest.mark.parametrize("operation", ("resolve", "is_dir"))
+@pytest.mark.parametrize("error_code", (errno.EACCES, errno.ENOENT, errno.ENOTDIR))
+def test_search_all_cli_skips_inaccessible_directory(
+    tmp_path, monkeypatch, caplog, operation, error_code
+):
+    """An inaccessible PATH entry must not hide a later, usable CLI."""
+    blocked = tmp_path / "blocked"
+    usable = tmp_path / "usable"
+    blocked.mkdir()
+    usable.mkdir()
+    cli = usable / "discovery-probe"
+    cli.write_text("discovery fixture", encoding="UTF-8")
+    original = getattr(Path, operation)
+
+    def probe(path, *args, **kwargs):
+        if path == blocked:
+            raise OSError(error_code, os.strerror(error_code), str(path))
+        return original(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, operation, probe)
+    monkeypatch.setattr("meta_package_manager.execution.is_any_windows", lambda: False)
+    with caplog.at_level(logging.DEBUG):
+        found = list(
+            CLIExecutor().search_all_cli(
+                (cli.name,),
+                env={"PATH": os.pathsep.join((str(blocked), str(usable)))},
+            )
+        )
+    assert found == [cli]
+    assert any(
+        str(blocked) in r.getMessage() and os.strerror(error_code) in r.getMessage()
+        for r in caplog.records
+    )
+
+
+@pytest.mark.parametrize("on_windows", (False, True))
+@pytest.mark.parametrize(
+    "error_code", (errno.EACCES, errno.EIO, errno.ENOENT, errno.ENOTDIR)
+)
+def test_search_all_cli_skips_inaccessible_file(
+    tmp_path, monkeypatch, caplog, on_windows, error_code
+):
+    """Unreadable or vanished candidates must not abort the remaining search."""
+    blocked = tmp_path / "blocked"
+    usable = tmp_path / "usable"
+    blocked.mkdir()
+    usable.mkdir()
+    name = "discovery-probe.exe" if on_windows else "discovery-probe"
+    for directory in (blocked, usable):
+        (directory / name).write_text("discovery fixture", encoding="UTF-8")
+    operation = "lstat" if on_windows else "stat"
+    original = getattr(Path, operation)
+
+    def probe(path, *args, **kwargs):
+        if path == blocked / name:
+            raise OSError(error_code, os.strerror(error_code), str(path))
+        if on_windows and path == usable / name:
+            return SimpleNamespace(st_file_attributes=0)
+        return original(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, operation, probe)
+    monkeypatch.setattr(
+        "meta_package_manager.execution.is_any_windows", lambda: on_windows
+    )
+    monkeypatch.setenv("PATHEXT", ".EXE")
+    with caplog.at_level(logging.DEBUG):
+        found = list(
+            CLIExecutor().search_all_cli(
+                (name,),
+                env={"PATH": os.pathsep.join((str(blocked), str(usable)))},
+            )
+        )
+    assert found == [usable / name]
+    if error_code not in (errno.ENOENT, errno.ENOTDIR):
+        assert any(
+            str(blocked / name) in r.getMessage()
+            and os.strerror(error_code) in r.getMessage()
+            for r in caplog.records
+        )
+
+
+@pytest.mark.skipif(is_any_windows(), reason="A symlink needs privileges on Windows.")
+def test_search_all_cli_skips_symlink_loop(tmp_path):
+    """A candidate symlink pointing to itself must not abort the remaining search."""
+    looping = tmp_path / "looping"
+    usable = tmp_path / "usable"
+    looping.mkdir()
+    usable.mkdir()
+    (looping / "discovery-probe").symlink_to("discovery-probe")
+    cli = usable / "discovery-probe"
+    cli.write_text("discovery fixture", encoding="UTF-8")
+    found = list(
+        CLIExecutor().search_all_cli(
+            (cli.name,),
+            env={"PATH": os.pathsep.join((str(looping), str(usable)))},
+        )
+    )
+    assert found == [cli]
+
+
+@pytest.mark.parametrize("operation", ("resolve", "is_dir"))
+def test_search_all_cli_preserves_unexpected_errors(tmp_path, monkeypatch, operation):
+    """Discovery must not turn an unexpected search path failure into 'not found'."""
+    cli = tmp_path / "discovery-probe"
+    cli.write_text("discovery fixture", encoding="UTF-8")
+    original = getattr(Path, operation)
+
+    def probe(path, *args, **kwargs):
+        if path == tmp_path:
+            raise OSError(errno.EIO, os.strerror(errno.EIO), str(path))
+        return original(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, operation, probe)
+    monkeypatch.setattr("meta_package_manager.execution.is_any_windows", lambda: False)
+    with pytest.raises(OSError) as caught:
+        list(CLIExecutor().search_all_cli((cli.name,), env={"PATH": str(tmp_path)}))
+    assert caught.value.errno == errno.EIO
 
 
 def test_windows_pathext_tracks_cpython():

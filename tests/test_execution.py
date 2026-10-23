@@ -1431,8 +1431,10 @@ def test_untied_install_search_runs_under_read_only_stamp(
     assert recorded["operation"] == Operations.search.name
 
 
-@pytest.mark.parametrize("operation", ("resolve", "is_dir"))
-@pytest.mark.parametrize("error_code", (errno.EACCES, errno.ENOENT, errno.ENOTDIR))
+@pytest.mark.parametrize("operation", ("realpath", "is_dir"))
+@pytest.mark.parametrize(
+    "error_code", (errno.EACCES, errno.EIO, errno.ENOENT, errno.ENOTDIR)
+)
 def test_search_all_cli_skips_inaccessible_directory(
     tmp_path, monkeypatch, caplog, operation, error_code
 ):
@@ -1443,14 +1445,15 @@ def test_search_all_cli_skips_inaccessible_directory(
     usable.mkdir()
     cli = usable / "discovery-probe"
     cli.write_text("discovery fixture", encoding="UTF-8")
-    original = getattr(Path, operation)
+    owner = os.path if operation == "realpath" else Path
+    original = getattr(owner, operation)
 
     def probe(path, *args, **kwargs):
         if path == blocked:
             raise OSError(error_code, os.strerror(error_code), str(path))
         return original(path, *args, **kwargs)
 
-    monkeypatch.setattr(Path, operation, probe)
+    monkeypatch.setattr(owner, operation, probe)
     monkeypatch.setattr("meta_package_manager.execution.is_any_windows", lambda: False)
     with caplog.at_level(logging.DEBUG):
         found = list(
@@ -1513,15 +1516,19 @@ def test_search_all_cli_skips_inaccessible_file(
 
 
 @pytest.mark.skipif(is_any_windows(), reason="A symlink needs privileges on Windows.")
-def test_search_all_cli_skips_symlink_loop(tmp_path):
-    """A candidate symlink pointing to itself must not abort the remaining search."""
+@pytest.mark.parametrize("loop_at", ("search_path", "candidate"))
+def test_search_all_cli_skips_symlink_loop(tmp_path, loop_at):
+    """A symlink pointing to itself must not abort the remaining search."""
     looping = tmp_path / "looping"
     usable = tmp_path / "usable"
-    looping.mkdir()
     usable.mkdir()
-    (looping / "discovery-probe").symlink_to("discovery-probe")
     cli = usable / "discovery-probe"
     cli.write_text("discovery fixture", encoding="UTF-8")
+    if loop_at == "search_path":
+        looping.symlink_to(looping.name)
+    else:
+        looping.mkdir()
+        (looping / cli.name).symlink_to(cli.name)
     found = list(
         CLIExecutor().search_all_cli(
             (cli.name,),
@@ -1529,25 +1536,6 @@ def test_search_all_cli_skips_symlink_loop(tmp_path):
         )
     )
     assert found == [cli]
-
-
-@pytest.mark.parametrize("operation", ("resolve", "is_dir"))
-def test_search_all_cli_preserves_unexpected_errors(tmp_path, monkeypatch, operation):
-    """Discovery must not turn an unexpected search path failure into 'not found'."""
-    cli = tmp_path / "discovery-probe"
-    cli.write_text("discovery fixture", encoding="UTF-8")
-    original = getattr(Path, operation)
-
-    def probe(path, *args, **kwargs):
-        if path == tmp_path:
-            raise OSError(errno.EIO, os.strerror(errno.EIO), str(path))
-        return original(path, *args, **kwargs)
-
-    monkeypatch.setattr(Path, operation, probe)
-    monkeypatch.setattr("meta_package_manager.execution.is_any_windows", lambda: False)
-    with pytest.raises(OSError) as caught:
-        list(CLIExecutor().search_all_cli((cli.name,), env={"PATH": str(tmp_path)}))
-    assert caught.value.errno == errno.EIO
 
 
 def test_windows_pathext_tracks_cpython():

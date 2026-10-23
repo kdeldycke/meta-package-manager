@@ -1251,13 +1251,15 @@ class CLIExecutor:
         for raw_path in (*self.cli_search_path, *os.get_exec_path(env=env)):
             search_path = Path(raw_path)
             try:
-                normalized_path = os.path.normcase(search_path.resolve())
+                # Unlike `Path.resolve()` before Python 3.13, `os.path.realpath()`
+                # returns a symlink loop as is instead of raising `RuntimeError`.
+                normalized_path = os.path.normcase(os.path.realpath(search_path))
                 if normalized_path in seen_search_paths:
                     continue
                 seen_search_paths.add(normalized_path)
                 if not search_path.is_dir():
                     continue
-            except (PermissionError, FileNotFoundError, NotADirectoryError) as error:
+            except OSError as error:
                 logging.debug(f"Skip CLI search path {search_path}: {error}")
                 continue
             search_path_list.append(search_path)

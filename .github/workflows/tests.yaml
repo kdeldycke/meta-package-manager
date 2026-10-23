@@ -94,7 +94,7 @@ jobs:
           # Pin what CI downloads: unpinned, setup-uv installs the newest uv
           # satisfying `required-version`. `sync-workflow-pins` bumps it once a
           # uv release clears the cooldown window.
-          version: "0.12.5"
+          version: "0.13.0"
       - name: Run repomatic show-metadata
         id: metadata
         run: >
@@ -550,7 +550,7 @@ jobs:
           # Pin what CI downloads: unpinned, setup-uv installs the newest uv
           # satisfying `required-version`. `sync-workflow-pins` bumps it once a
           # uv release clears the cooldown window.
-          version: "0.12.5"
+          version: "0.13.0"
       - name: Install Python ${{ matrix.python-version }}
         # If UV cannot find the requested Python version, it exits with code 2, which let the job pass unnoticed on
         # Windows. So we force the shell to bash, even on Windows, and "set -e" to ensure any error in the install
@@ -707,7 +707,7 @@ jobs:
           # Pin what CI downloads: unpinned, setup-uv installs the newest uv
           # satisfying `required-version`. `sync-workflow-pins` bumps it once a
           # uv release clears the cooldown window.
-          version: "0.12.5"
+          version: "0.13.0"
       - name: Install Python
         run: uv --no-progress venv --python 3.14
       - name: Install project
@@ -749,7 +749,7 @@ jobs:
           # Pin what CI downloads: unpinned, setup-uv installs the newest uv
           # satisfying `required-version`. `sync-workflow-pins` bumps it once a
           # uv release clears the cooldown window.
-          version: "0.12.5"
+          version: "0.13.0"
       - name: Install Python
         run: uv --no-progress venv --python 3.14
       - name: Install project
@@ -823,7 +823,7 @@ jobs:
       - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         with:
           # Pin what CI downloads, as in `dnf5-container` above.
-          version: "0.12.5"
+          version: "0.13.0"
       - name: Install Python
         run: uv --no-progress venv --python 3.14
       - name: Install project

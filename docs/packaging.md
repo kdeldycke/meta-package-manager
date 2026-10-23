@@ -37,6 +37,10 @@ The `--skip-destructive` and `pytest -m "not destructive"` selectors exist for *
 As of mpm > `7.3.0`, the PyPI sdist ships `tests/`, `docs/` and the `.github/` workflow files the docs tests parse, so a build can run the suite straight from the sdist. Earlier releases shipped no tests: those builds must start from [the GitHub tag tarballs](https://github.com/kdeldycke/meta-package-manager/tags) instead.
 ```
 
+```{todo}
+Replace `tomlkit` with [`tomlrt`](https://dimbleby.github.io/tomlrt/) in `docs/docs_update.py` once `requires-python` reaches 3.11, the oldest Python `tomlrt` supports. Then name `tomlrt` in place of `tomlkit` in the `docs` dependency group, in the hermetic-layer imports above and in the `packaging/` recipes.
+```
+
 ## Dependencies
 
 This is a graph of the default, main dependencies of the Python package:

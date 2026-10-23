@@ -9,6 +9,7 @@
 - [mpm] Add an `operations` table to `[mpm.overrides.<id>]`, whose `extra_args` reach the commands of one operation alone. Closes [#2171](https://github.com/kdeldycke/meta-package-manager/issues/2171).
 - [mpm] List the operations each manager accepts in the `mpm config-template` output and on each manager page.
 - [cask] Name the cask whose leftover Caskroom directory makes Homebrew list no cask, and the `brew uninstall --cask --force` command that removes it.
+- [mpm] Skip a `PATH` directory or file that cannot be read during manager detection, instead of crashing on Python `3.10` to `3.13`.
 - [mpm] Add the variables of an `extra_env` override to those the manager sets, instead of replacing them, as the documentation of the field says.
 
 ## [`8.1.2` (2026-10-12)](https://github.com/kdeldycke/meta-package-manager/compare/v8.1.1...v8.1.2)

@@ -79,7 +79,12 @@ class SFSU(PackageManager):
 
     platforms = WINDOWS
 
-    requirement = ">=1.16.0"
+    requirement = ">=1.18.1"
+    """The first release to parse the `arm64` architecture that Scoop records on
+    Windows on ARM. Older releases read every app installed for it as
+    `Install failed`, and their `status` skips those apps:
+    [winpax/sfsu#1180](https://github.com/winpax/sfsu/issues/1180).
+    """
 
     post_args = ("--no-color",)
 
@@ -88,8 +93,14 @@ class SFSU(PackageManager):
     ```{code-block} pwsh-session
 
     > sfsu --version
-    sfsu 1.17.2
-    sprinkles 0.22.0 (crates.io published version)
+    sfsu 1.18.1
+    sprinkles local (local)
+    branch:
+    tag:v1.18.1
+    commit_hash:7b53e5c0
+    build_time:2026-10-04 03:24:31 +00:00
+    build_env:rustc 1.99.0 (b940084d7 2026-09-28),1.99.0-x86_64-pc-windows-msvc
+    libgit2:1.9.7
     ```
     """
 

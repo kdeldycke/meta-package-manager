@@ -13,6 +13,7 @@
 - [mpm] Skip a `PATH` directory that is a symlink loop during manager detection, instead of crashing on Python `3.10` to `3.12`.
 - [mpm] Add the variables of an `extra_env` override to those the manager sets, instead of replacing them, as the documentation of the field says.
 - [mpm] Raise the `packageurl-python` floor to `0.17.6`: below it, parsing a pURL spec raises `TypeError`.
+- [sfsu] Raise the `sfsu` floor to `1.18.1`: below it, `outdated` misses every app installed for `arm64` on Windows on ARM. Run `scoop update sfsu` to upgrade an older install.
 
 ## [`8.1.2` (2026-10-12)](https://github.com/kdeldycke/meta-package-manager/compare/v8.1.1...v8.1.2)
 

@@ -64,6 +64,10 @@ Problems this project hit first and reported upstream, since fixed there.
 
 - [ScoopInstaller/Scoop#6457](https://github.com/ScoopInstaller/Scoop/issues/6457): `scoop --version` printed the raw `git log` line of its checkout instead of a clean version, from `0.4.0` until the fix in `0.6.0`. `mpm` now requires that release for [`scoop`](managers/scoop.md), and its fallback parsing is gone.
 
+### `sfsu`
+
+- [winpax/sfsu#1180](https://github.com/winpax/sfsu/issues/1180): on Windows on ARM, [`sfsu`](managers/sfsu.md) read every app installed for `arm64` as `Install failed`, and its `status` skipped them, until the fix in `1.18.1`. `mpm` now requires that release.
+
 ### `uv`
 
 - [astral-sh/uv#19089](https://github.com/astral-sh/uv/issues/19089): a span-shaped `exclude-newer-package` value resolved to a no-op timestamp.
@@ -127,10 +131,6 @@ The SPDX documents [`brew`](managers/brew.md) generates point their `documentNam
 ### [Nuitka](https://github.com/Nuitka/Nuitka)
 
 - [Nuitka/Nuitka-website#125](https://github.com/Nuitka/Nuitka-website/issues/125): document how extras, wheel, onefile and standalone modes combine.
-
-### `sfsu`
-
-- [winpax/sfsu#1180](https://github.com/winpax/sfsu/issues/1180): on Windows on ARM, [`sfsu`](managers/sfsu.md) reads every app installed for `arm64` as `Install failed`, and its `status` skips them.
 
 ### [packageurl-python](https://github.com/package-url/packageurl-python)
 

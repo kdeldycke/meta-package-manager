@@ -488,6 +488,31 @@ def test_cli_error_diagnosis(error, output, expected):
     assert CLIError(8, output, error).diagnosis == expected
 
 
+@pytest.mark.parametrize(
+    ("code", "error", "expected"),
+    (
+        pytest.param(
+            100,
+            "E: Unable to locate package jq",
+            "<CLIError(100, 'E: Unable to locate package jq')>",
+            id="short",
+        ),
+        pytest.param(
+            1,
+            "\n".join((
+                "ERROR: the orchard gate is locked",
+                *(f"\tframe-{i}" for i in range(4)),
+            )),
+            "<CLIError(1, 'ERROR: the orchard gate is locked frame-0 frame-1(...)')>",
+            id="folded-and-shortened",
+        ),
+    ),
+)
+def test_cli_error_repr(code, error, expected):
+    """The repr folds the error onto one line, and shortens it."""
+    assert repr(CLIError(code, "", error)) == expected
+
+
 def test_cli_error_diagnosis_keeps_an_opening_error():
     """A report that opens with its error and trails a backtrace keeps the error.
 

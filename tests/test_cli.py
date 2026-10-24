@@ -43,6 +43,7 @@ import subprocess
 import sys
 from collections.abc import Callable, Collection, Iterable, Iterator
 from functools import partial
+from pathlib import Path
 from textwrap import dedent
 from types import SimpleNamespace
 
@@ -52,8 +53,8 @@ from boltons.strutils import strip_ansi
 from click_extra.table import SERIALIZATION_FORMATS, TableFormat
 from extra_platforms import is_any_windows
 
-from meta_package_manager import __version__
-from meta_package_manager.cli import _debug_rerun_command
+from meta_package_manager import __version__, bar_plugin
+from meta_package_manager.cli import XKCD_MANAGER_ORDER, _debug_rerun_command
 from meta_package_manager.execution import CLIError
 from meta_package_manager.package import Package
 from meta_package_manager.pool import pool
@@ -547,6 +548,16 @@ check_reached_selection = partial(
             id="single_exclusion",
         ),
         pytest.param(
+            ("--exclude", "uv"),
+            set(pool.default_manager_ids) - {"uv"},
+            id="deprecated_exclusion",
+        ),
+        pytest.param(
+            ("--xkcd",),
+            set(XKCD_MANAGER_ORDER) & set(pool.default_manager_ids),
+            id="xkcd_preset",
+        ),
+        pytest.param(
             ("--no-uv",) * 2,
             set(pool.default_manager_ids) - {"uv"},
             id="duplicate_exclusions",
@@ -591,6 +602,33 @@ def test_selector_precedence(invoke, args, expected):
     else:
         assert result.exit_code == 0
         check_reached_selection(result, expected)
+
+
+def test_bar_plugin_path(invoke):
+    """Away from the home folder, the plugin path prints in full."""
+    result = invoke("--bar-plugin-path")
+    assert result.exit_code == 0
+    assert Path(result.stdout.strip()) == Path(bar_plugin.__file__).resolve()
+
+
+def test_bar_plugin_path_shortens_the_home_folder(invoke):
+    """Under the home folder, the plugin path starts with `~`."""
+    plugin = Path(bar_plugin.__file__).resolve()
+    home = str(plugin.parent.parent)
+    result = invoke("--bar-plugin-path", env={"HOME": home, "USERPROFILE": home})
+    assert result.exit_code == 0
+    assert result.stdout.strip() == str(Path("~") / plugin.parent.name / plugin.name)
+
+
+def test_bar_plugin_path_needs_a_source_install(invoke, monkeypatch):
+    """A compiled binary carries no plugin file to point at."""
+    monkeypatch.setattr("meta_package_manager.cli.__compiled__", True, raising=False)
+    result = invoke("--bar-plugin-path")
+    assert result.exit_code == 2
+    assert not result.stdout
+    assert (
+        "Option --bar-plugin-path is only available for CLI installed from sources."
+    ) in result.stderr
 
 
 def check_packages_payload(

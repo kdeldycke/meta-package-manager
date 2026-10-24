@@ -29,6 +29,7 @@ from boltons.strutils import strip_ansi
 from extra_platforms import is_windows
 
 from meta_package_manager.execution import CLIError
+from meta_package_manager.manager import CooldownHold
 from meta_package_manager.pool import pool
 from meta_package_manager.sudo import UNANSWERED_PROMPT_DETAIL
 from meta_package_manager.tables import PackageOutcome
@@ -46,6 +47,27 @@ from .test_cli import (
     check_manager_selection,
     check_report,
 )
+
+
+class SearchlessFakeManager(ChangingFakeManager):
+    """A changing fake with no search operation."""
+
+    def search(self, query, extended, exact):
+        raise NotImplementedError
+
+
+class UnsearchableFakeManager(ChangingFakeManager):
+    """A changing fake whose search command fails."""
+
+    def search(self, query, extended, exact):
+        raise CLIError(1, "", "Index unreachable.")
+
+
+class HeldFakeManager(ChangingFakeManager):
+    """A changing fake whose packages the cooldown holds back."""
+
+    def cooldown_hold(self, package_id):
+        return CooldownHold()
 
 
 @pytest.fixture
@@ -254,6 +276,80 @@ def test_install_report_serialized_keeps_the_exit_code(invoke, changing_fake_poo
         ("fake-pkg-gamma", "installed"),
         ("fake-pkg-theta", "installed"),
     ]
+
+
+def test_install_ties_and_searches_in_one_run(invoke, changing_fake_pool):
+    """A run holding both kinds installs the tied package first, then searches
+    for the untied one."""
+    mid = changing_fake_pool.id
+    result = invoke("install", f"pkg:{mid}/fake-pkg-theta", "fake-pkg-iota")
+    assert result.exit_code == 0
+    stderr = strip_ansi(result.stderr)
+    assert stderr.index(f"✓ {mid}.install: fake-pkg-theta") < stderr.index(
+        f"✓ {mid}.install: fake-pkg-iota"
+    )
+    check_report(
+        result.stdout,
+        {
+            "fake-pkg-gamma": ("0.1.0", PackageOutcome.INSTALLED.label),
+            "fake-pkg-iota": ("1.0.0", PackageOutcome.INSTALLED.label),
+            "fake-pkg-theta": ("1.0.0", PackageOutcome.INSTALLED.label),
+        },
+    )
+
+
+def test_install_without_search_tries_the_package_directly(invoke, patch_pool_with):
+    """A manager with no search operation gets the install attempt anyway, and
+    the next manager never runs."""
+    patch_pool_with(SearchlessFakeManager(), ChangingFakeManager())
+    result = invoke("--verbosity", "INFO", "install", "fake-pkg-theta")
+    assert result.exit_code == 0
+    stderr = strip_ansi(result.stderr)
+    assert "fake-pkg-theta existence unconfirmed, try to directly install it..." in (
+        stderr
+    )
+    assert "✓ searchlessfakemanager.install: fake-pkg-theta" in stderr
+    assert "changingfakemanager.install" not in stderr
+
+
+def test_install_falls_through_a_failed_search(invoke, patch_pool_with):
+    """A search that fails counts as a miss: the next manager gets its turn."""
+    patch_pool_with(UnsearchableFakeManager(), ChangingFakeManager())
+    result = invoke("install", "fake-pkg-theta")
+    assert result.exit_code == 0
+    stderr = strip_ansi(result.stderr)
+    assert "✘ unsearchablefakemanager.install: fake-pkg-theta (not found)" in stderr
+    assert "✓ changingfakemanager.install: fake-pkg-theta" in stderr
+
+
+def test_install_stops_at_a_cooldown_hold(invoke, patch_pool_with):
+    """A held package ends the search at the first manager providing it: the next
+    manager would sidestep the hold. A hold is no failure, so the run exits `0`."""
+    patch_pool_with(HeldFakeManager(), ChangingFakeManager())
+    result = invoke("install", "fake-pkg-theta")
+    assert result.exit_code == 0
+    stderr = strip_ansi(result.stderr)
+    assert (
+        "Hold fake-pkg-theta: its latest release cannot be dated (fail-closed)."
+    ) in stderr
+    assert "✘ heldfakemanager.install: fake-pkg-theta (cooldown)" in stderr
+    assert "changingfakemanager.install" not in stderr
+
+
+def test_install_refuses_an_ambiguous_exact_search(
+    invoke, changing_fake_pool, monkeypatch
+):
+    """An exact search answering two packages is a bug of the manager, which the
+    install stops on rather than pick one of them."""
+
+    def search(manager, query, extended, exact):
+        yield manager.package(id=query, latest_version="1.0.0")
+        yield manager.package(id=query, latest_version="2.0.0")
+
+    monkeypatch.setattr(ChangingFakeManager, "search", search)
+    result = invoke("install", "fake-pkg-theta")
+    assert isinstance(result.exception, ValueError)
+    assert str(result.exception) == "Exact search returned multiple packages."
 
 
 @pytest.mark.parametrize(

@@ -17,10 +17,13 @@
 
 from __future__ import annotations
 
+import json
+
 import pytest
 
 from meta_package_manager.tables import INSTALLED_COLUMNS
 
+from .fake_manager import FakeManager
 from .test_cli import (
     CLIQueryTests,
     CLITableTests,
@@ -59,3 +62,45 @@ class TestInstalled(CLITableTests, CLIQueryTests):
     def test_query_filter(self, invoke, fake_pool, args, expected_ids):
         result = invoke("--table-format", "json", "installed", *args)
         check_filtered_ids(result, expected_ids)
+
+
+class OverlappingFakeManager(FakeManager):
+    """A second fake, sharing one of its two packages with
+    {class}`~tests.fake_manager.FakeManager`."""
+
+    @property
+    def installed(self):
+        yield self.package(id="fake-pkg-alpha", installed_version="1.0.0")
+        yield self.package(id="fake-pkg-gamma", installed_version="0.1.0")
+
+
+@pytest.fixture
+def overlapping_pool(patch_pool_with):
+    """Select two fakes that both list `fake-pkg-alpha`."""
+    return patch_pool_with(FakeManager(), OverlappingFakeManager())
+
+
+def test_duplicates_keep_the_shared_packages(invoke, overlapping_pool):
+    """`--duplicates` keeps the packages that more than one manager lists."""
+    result = invoke("--table-format", "json", "installed", "--duplicates")
+    assert result.exit_code == 0
+    payload = json.loads(result.stdout)
+    assert {
+        mid: [package["id"] for package in data["packages"]]
+        for mid, data in payload.items()
+    } == {
+        "fakemanager": ["fake-pkg-alpha"],
+        "overlappingfakemanager": ["fake-pkg-alpha"],
+    }
+
+
+def test_duplicates_sort_the_table_by_package(invoke, overlapping_pool):
+    """The table puts the copies of a package next to each other."""
+    result = invoke("--verbosity", "INFO", "installed", "--duplicates")
+    assert result.exit_code == 0
+    assert (
+        "Force table sorting on package ID because of --duplicates option."
+    ) in result.stderr
+    assert result.stdout.count("fake-pkg-alpha") == 2
+    assert "fake-pkg-beta" not in result.stdout
+    assert "fake-pkg-gamma" not in result.stdout

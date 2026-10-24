@@ -6,10 +6,16 @@ name: 🔬 Tests
     branches:
       - main
     paths:
+      - .claude/skills/**
+      - .github/ISSUE_TEMPLATE/**
+      - .github/workflows/release.yaml
+      - .github/workflows/tests-gnome-extension.yaml
       - .github/workflows/tests.yaml
       - changelog.md
+      - claude.md
       - docs/**
       - gnome-shell/**
+      - license
       - meta_package_manager/**
       - pyproject.toml
       - readme.md
@@ -29,10 +35,16 @@ name: 🔬 Tests
       - minor-version-increment
       - prepare-release
     paths:
+      - .claude/skills/**
+      - .github/ISSUE_TEMPLATE/**
+      - .github/workflows/release.yaml
+      - .github/workflows/tests-gnome-extension.yaml
       - .github/workflows/tests.yaml
       - changelog.md
+      - claude.md
       - docs/**
       - gnome-shell/**
+      - license
       - meta_package_manager/**
       - pyproject.toml
       - readme.md

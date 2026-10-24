@@ -944,16 +944,25 @@ sync-runner-images.ignore = [ "ubuntu-22.04" ]
 workflow.source-paths = [ "meta_package_manager" ]
 # Wholesale replacement of tests.yaml's `paths:` filter (this override is
 # authoritative and ignores source-paths). The canonical filter covers only the
-# package and tests/, but the suite also asserts on files outside both:
+# package and tests/, but the suite also asserts on files outside both.
 # test_docs.py holds changelog.md, readme.md and the whole docs/ tree to
-# byte-identity with their generators, and test_gnome_extension.py holds the
-# static invariants of gnome-shell/. Without these entries a hand-edit to any of
-# them never runs the test that guards it.
+# byte-identity with their generators, and scans claude.md, the bundled skills
+# and the new-manager issue template. test_gnome_extension.py holds the static
+# invariants of gnome-shell/, compares its license with the root one, and reads
+# the `--extra-source` lists of release.yaml and tests-gnome-extension.yaml.
+# Without these entries a hand-edit to any of them never runs the test that
+# guards it.
 workflow.paths."tests.yaml" = [
+  ".claude/skills/**",
+  ".github/ISSUE_TEMPLATE/**",
+  ".github/workflows/release.yaml",
+  ".github/workflows/tests-gnome-extension.yaml",
   ".github/workflows/tests.yaml",
   "changelog.md",
+  "claude.md",
   "docs/**",
   "gnome-shell/**",
+  "license",
   "meta_package_manager/**",
   "pyproject.toml",
   "readme.md",

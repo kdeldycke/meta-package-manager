@@ -631,6 +631,9 @@ jobs:
       # `once-tests` job below runs them on a single runner instead. They
       # import no package code beyond `__version__`, so dropping them here
       # cannot move the coverage floor.
+      #
+      # The unit tests of the bar plugin run here on every runner. Only its end-to-end `TestBarPlugin` class is
+      # deselected, for the sequential step below.
       - name: Parallel non-destructive tests
         run: >
           uv --no-progress run --frozen --
@@ -640,11 +643,11 @@ jobs:
           --cov-report=term
           --numprocesses=auto --dist=loadgroup --maxschedchunk=1
           --run-non-destructive --skip-destructive
-          --ignore=./tests/test_bar_plugin.py
+          --deselect=tests/test_bar_plugin.py::TestBarPlugin
 
-      # Bar plugin calls way too many external commands to be run in parallel.
-      # `--cov-fail-under=0` opts this slice out of the coverage ratchet: a
-      # single test module covers ~33% of the package on its own by design.
+      # The end-to-end bar plugin tests call way too many external commands to be run in parallel, and need macOS.
+      # `--cov-fail-under=0` opts this slice out of the coverage ratchet: a single test class covers a fraction of the
+      # package by design.
       - name: Sequential, bar plugin tests - macOS
         if: runner.os == 'macOS'
         run: >
@@ -654,7 +657,7 @@ jobs:
           --cov-report=term
           --cov-fail-under=0
           --numprocesses=0 --run-non-destructive --run-destructive
-          ./tests/test_bar_plugin.py
+          ./tests/test_bar_plugin.py::TestBarPlugin
 
       # Run destructive tests last, as they alter the system packages. They are
       # scheduled by lock family: conftest.py stamps every destructive test with an

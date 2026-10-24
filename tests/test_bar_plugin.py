@@ -31,6 +31,7 @@ from boltons.iterutils import flatten
 from boltons.strutils import strip_ansi
 from click_extra.color import COLOR_ENVVARS
 from click_extra.execution import args_cleanup
+from extra_platforms import is_any_windows
 from extra_platforms.pytest import unless_macos
 
 from meta_package_manager import __version__, bar_plugin
@@ -188,6 +189,7 @@ def test_mpm_cli_ignores_the_spawn_directory(tmp_path):
     assert "mpm, version" in process.stdout
 
 
+@pytest.mark.skipif(is_any_windows(), reason="A symlink needs privileges on Windows.")
 def test_search_mpm_resolves_a_symlinked_plugin(monkeypatch, tmp_path):
     """The venv walk follows the symlink both hosts are installed through.
 

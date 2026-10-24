@@ -1,9 +1,6 @@
 # Changelog
 
-## [`8.2.0.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v8.1.2...main)
-
-> [!WARNING]
-> This version is **not released yet** and is under active development.
+## [`8.2.0` (2026-10-24)](https://github.com/kdeldycke/meta-package-manager/compare/v8.1.2...v8.2.0)
 
 - **Breaking:** [cask,mpm] Remove the `--ignore-auto-updates/--include-auto-updates` option, the `[mpm] ignore_auto_updates` key and the per-manager `ignore_auto_updates` field. To include auto-updating casks, set `operations.outdated.extra_args` and `operations.upgrade_all.extra_args` to `["--greedy"]` in `[mpm.overrides.cask]`.
 - [mpm] Add an `operations` table to `[mpm.overrides.<id>]`, whose `extra_args` reach the commands of one operation alone. Closes [#2171](https://github.com/kdeldycke/meta-package-manager/issues/2171).

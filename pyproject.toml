@@ -754,11 +754,10 @@ run.branch = true
 # an explicit --cov-fail-under=0. Set the floor here and nowhere else: a
 # --cov-fail-under flag outranks this value and would silently shadow it.
 #
-# The stable matrix floor sits at 84.3%. The binding constraint is the
-# prerelease 3.15 cell at 79.4%, which skips a slice of the suite: the floor
-# stays under it so an interpreter-compat cell never reports a coverage failure.
-# Raise this to 82 once 3.15 leaves the prerelease matrix.
-report.fail_under = 78
+# The Windows cells cover the least: most managers and the POSIX-only tests do
+# not run there. The floor stays under them, so no stable cell reports a
+# coverage failure.
+report.fail_under = 88
 report.precision = 2
 
 [tool.bumpversion]

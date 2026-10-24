@@ -24,6 +24,8 @@ so an ambient proxy in the test environment cannot interfere.
 from __future__ import annotations
 
 import json
+import logging
+from datetime import datetime, timezone
 
 import pytest
 
@@ -36,6 +38,7 @@ pytest.importorskip("respx")
 import httpx
 import respx
 
+from meta_package_manager.sbom import _network
 from meta_package_manager.sbom._network import (
     NetworkClient,
     NetworkError,
@@ -46,9 +49,11 @@ from meta_package_manager.sbom.vulnerabilities import (
     OSV_VULN_ENDPOINT,
     Vulnerability,
     _extract_fixed_versions,
+    _fetch_detail,
     _normalize_osv_record,
     _normalize_severity,
     _parse_purls,
+    _parse_timestamp,
     scan_vulnerabilities,
 )
 
@@ -124,6 +129,127 @@ def test_network_client_raises_on_invalid_json(client):
         )
         with pytest.raises(NetworkError):
             client.get(f"{OSV_VULN_ENDPOINT}/GHSA-x")
+
+
+def test_network_client_needs_the_online_extra(monkeypatch, tmp_path):
+    """Without `httpx` and `platformdirs`, the client refuses to start."""
+    monkeypatch.setattr(_network, "network_support", False)
+    with pytest.raises(NetworkError, match=r"requires the \[sbom-online\] extra"):
+        NetworkClient(cache_dir=tmp_path)
+
+
+def test_network_client_defaults_to_the_user_cache(monkeypatch, tmp_path):
+    """With no folder given, the cache goes to the user cache folder of mpm."""
+    monkeypatch.setattr(
+        _network, "user_cache_dir", lambda appname: str(tmp_path / appname)
+    )
+    cache_dir = tmp_path / "meta-package-manager" / "sbom"
+    with NetworkClient(trust_env=False) as client:
+        assert client.cache_dir == cache_dir
+    assert cache_dir.is_dir()
+
+
+def test_network_client_works_without_a_cache(tmp_path):
+    """A cache folder that cannot be created turns the cache off, not the client."""
+    blocker = tmp_path / "blocker"
+    blocker.write_bytes(b"")
+    with NetworkClient(cache_dir=blocker / "sbom", trust_env=False) as client:
+        assert client.cache_dir is None
+        with respx.mock(base_url="https://api.osv.dev") as mock:
+            route = mock.get("/v1/vulns/GHSA-x").mock(
+                return_value=httpx.Response(200, json={"id": "GHSA-x"}),
+            )
+            assert client.get(f"{OSV_VULN_ENDPOINT}/GHSA-x") == {"id": "GHSA-x"}
+            assert client.get(f"{OSV_VULN_ENDPOINT}/GHSA-x") == {"id": "GHSA-x"}
+    # Nothing was cached, so both requests reached the network.
+    assert route.call_count == 2
+
+
+def test_network_client_reports_a_client_that_cannot_start(client, monkeypatch):
+    """An HTTP client that fails to build, like one behind a SOCKS proxy with no
+    `socksio`, fails as `NetworkError` rather than as the raw `ImportError`."""
+
+    def refuse(**kwargs):
+        raise ImportError("socksio")
+
+    monkeypatch.setattr(_network.httpx, "Client", refuse)
+    with pytest.raises(NetworkError, match="Could not initialize the HTTP client"):
+        client.get(f"{OSV_VULN_ENDPOINT}/GHSA-x")
+
+
+@pytest.mark.parametrize(
+    "entry",
+    (
+        pytest.param("not json", id="corrupt"),
+        pytest.param(
+            json.dumps({"ttl": 60, "body": {"id": "GHSA-x"}}), id="incomplete"
+        ),
+        pytest.param(
+            json.dumps({
+                "fetched_at": "2021-06-01T00:00:00+00:00",
+                "ttl": 60,
+                "body": {"id": "GHSA-x"},
+            }),
+            id="stale",
+        ),
+    ),
+)
+def test_network_client_refetches_an_unusable_cache_entry(client, entry):
+    """A cache entry that does not parse, or that expired, counts as a miss."""
+    url = f"{OSV_VULN_ENDPOINT}/GHSA-x"
+    cache_file = client._cache_path(client._make_cache_key("GET", url, None))
+    cache_file.write_text(entry, encoding="UTF-8")
+    with respx.mock(base_url="https://api.osv.dev") as mock:
+        route = mock.get("/v1/vulns/GHSA-x").mock(
+            return_value=httpx.Response(200, json={"id": "GHSA-x", "fresh": True}),
+        )
+        assert client.get(url) == {"id": "GHSA-x", "fresh": True}
+    assert route.call_count == 1
+    # The new answer replaces the unusable entry.
+    cached = json.loads(cache_file.read_text(encoding="UTF-8"))
+    assert cached["body"] == {"id": "GHSA-x", "fresh": True}
+
+
+def test_network_client_skips_a_body_it_cannot_cache(client, caplog):
+    """A body that JSON cannot encode is not cached, and the write never raises."""
+    with caplog.at_level(logging.DEBUG):
+        client._write_cache("GET\nkey", {"when": object()}, 60)
+    assert "Could not cache response for 'GET\\nkey'" in caplog.text
+    assert not list(client.cache_dir.glob("*.json"))
+
+
+def test_network_client_retries_a_dropped_connection(client, monkeypatch):
+    """A connection error is retried after the first backoff delay."""
+    sleeps: list[float] = []
+    monkeypatch.setattr(_network.time, "sleep", sleeps.append)
+    with respx.mock(base_url="https://api.osv.dev") as mock:
+        mock.get("/v1/vulns/GHSA-x").mock(
+            side_effect=[
+                httpx.ConnectError("Connection refused"),
+                httpx.Response(200, json={"id": "GHSA-x"}),
+            ],
+        )
+        assert client.get(f"{OSV_VULN_ENDPOINT}/GHSA-x") == {"id": "GHSA-x"}
+    assert sleeps == [1.0]
+
+
+@pytest.mark.parametrize(
+    ("attempt", "retry_after", "expected"),
+    (
+        pytest.param(0, None, 1.0, id="first-backoff"),
+        pytest.param(2, None, 4.0, id="third-backoff"),
+        pytest.param(2, "7", 7.0, id="retry-after-seconds"),
+        # RFC 9110 also allows an HTTP date, which the client does not read.
+        pytest.param(1, "Fri, 31 Dec 1999 23:59:59 GMT", 2.0, id="retry-after-date"),
+    ),
+)
+def test_sleep_backoff_honors_a_retry_after_in_seconds(
+    monkeypatch, attempt, retry_after, expected
+):
+    sleeps: list[float] = []
+    monkeypatch.setattr(_network.time, "sleep", sleeps.append)
+    NetworkClient._sleep_backoff(attempt, retry_after)
+    assert sleeps == [expected]
 
 
 @pytest.mark.parametrize(
@@ -219,6 +345,35 @@ def test_osv_ecosystems_cover_every_canonical_alias_type():
         "pypi",
     }
     assert "cpan" not in OSV_ECOSYSTEMS
+
+
+def test_parse_purls_skips_an_unparsable_purl():
+    queries = _parse_purls(["django==1.0.0", "pkg:pip/django@1.0.0"])
+    coords = [(q.ecosystem, q.name, q.version) for q in queries.values()]
+    assert coords == [("PyPI", "django", "1.0.0")]
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    (
+        (None, None),
+        ("", None),
+        ("2021-06-01T00:00:00Z", datetime(2021, 6, 1, tzinfo=timezone.utc)),
+        ("2021-06-01", datetime(2021, 6, 1)),
+        ("June 2021", None),
+    ),
+)
+def test_parse_timestamp(value, expected):
+    assert _parse_timestamp(value) == expected
+
+
+def test_fetch_detail_drops_a_record_that_is_not_an_object(client):
+    """A detail answer that is not a JSON object yields no advisory."""
+    with respx.mock(base_url="https://api.osv.dev") as mock:
+        mock.get("/v1/vulns/GHSA-x").mock(
+            return_value=httpx.Response(200, json=["GHSA-x"]),
+        )
+        assert _fetch_detail("GHSA-x", client) is None
 
 
 def test_parse_purls_dedupes_identical_coordinates():

@@ -46,11 +46,78 @@ from meta_package_manager.sbom.spdx import spdx_support
 if not (spdx_support and cyclonedx_support):
     pytest.skip("SBOM writer stack not fully importable", allow_module_level=True)
 
+from packageurl import PackageURL
+
 from meta_package_manager.capabilities import Operations
+from meta_package_manager.package import PackageMetadata
+from meta_package_manager.sbom import _network
 from meta_package_manager.sbom.base import ExportFormat
 
+from .fake_manager import FakeManager
 from .test_cli import check_manager_selection
 from .test_sbom import assert_valid_cyclonedx
+
+PROXY_VARS = (
+    "ALL_PROXY",
+    "HTTPS_PROXY",
+    "HTTP_PROXY",
+    "all_proxy",
+    "http_proxy",
+    "https_proxy",
+)
+"""Proxy variables `httpx` reads, cleared so a host proxy never reaches a test."""
+
+OSV_RECORD = {
+    "id": "GHSA-aaaa-bbbb-cccc",
+    "summary": "Cross-site scripting in Example",
+    "modified": "2021-06-01T00:00:00Z",
+}
+"""The fields of the advisory {mod}`tests.test_sbom_vulnerabilities` uses that a
+CycloneDX vulnerability entry needs."""
+
+
+class AliasedFakeManager(FakeManager):
+    """A fake recording a PyPI coordinate for each of its packages.
+
+    Homebrew does the same for the upstream registry a formula builds from: the
+    coordinate is an alias the vulnerability scan queries in place of the
+    manager's own purl, which no advisory database knows.
+    """
+
+    def package_metadata_batch(self, packages):
+        for package in packages:
+            yield (
+                package,
+                PackageMetadata(
+                    extra_purls=(
+                        PackageURL(
+                            type="pypi",
+                            name=package.id,
+                            version=str(package.installed_version),
+                        ),
+                    ),
+                ),
+            )
+
+
+class UnreadableMetadataFakeManager(FakeManager):
+    """A fake whose metadata extractor fails."""
+
+    def package_metadata_batch(self, packages):
+        raise RuntimeError("Metadata index is unreadable.")
+
+
+@pytest.fixture
+def osv(monkeypatch, tmp_path):
+    """Mock the OSV API, with no host proxy and the client cache in `tmp_path`."""
+    respx = pytest.importorskip("respx")
+    for var in PROXY_VARS:
+        monkeypatch.delenv(var, raising=False)
+    monkeypatch.setattr(
+        _network, "user_cache_dir", lambda appname: str(tmp_path / appname)
+    )
+    with respx.mock(base_url="https://api.osv.dev") as mock:
+        yield mock
 
 
 @pytest.fixture
@@ -282,3 +349,102 @@ def test_sbom_command_loads_the_deferred_libraries(invoke, fake_pool):
     result = invoke("sbom", "--minimal")
     assert result.exit_code == 0
     assert result.stdout.strip()
+
+
+def test_overwrite_is_ignored_on_stdout(invoke, fake_pool):
+    result = invoke("--verbosity", "INFO", "sbom", "--minimal", "--overwrite")
+    assert result.exit_code == 0
+    assert "Ignore the --overwrite/--force/--replace option." in result.stderr
+    assert "fake-pkg-alpha" in result.stdout
+
+
+def test_format_must_match_the_extension(invoke, fake_pool):
+    result = invoke("sbom", "--format", "xml", "export.json")
+    assert result.exit_code == 2
+    assert "Selected xml does not match file extension." in result.stderr
+    assert not Path("export.json").exists()
+
+
+@pytest.mark.parametrize(
+    ("standard", "flag", "support"),
+    (
+        ("SPDX", "--spdx", "meta_package_manager.sbom.spdx.spdx_support"),
+        (
+            "CycloneDX",
+            "--cyclonedx",
+            "meta_package_manager.sbom.cyclonedx.cyclonedx_support",
+        ),
+    ),
+)
+def test_missing_writer_stack_is_a_usage_error(
+    invoke, fake_pool, monkeypatch, standard, flag, support
+):
+    """A standard whose writer library failed to import stops the export."""
+    monkeypatch.setattr(support, False)
+    result = invoke("sbom", flag)
+    assert result.exit_code == 2
+    assert f"{standard} SBOM generation is unavailable." in result.stderr
+    assert not result.stdout
+
+
+def test_metadata_failure_falls_back_to_minimal_data(invoke, patch_pool_with):
+    """A failing metadata extractor costs the enrichment, not the export."""
+    patch_pool_with(UnreadableMetadataFakeManager())
+    result = invoke("--verbosity", "INFO", "sbom")
+    assert result.exit_code == 0
+    assert "Falling back to minimal SBOM data: Metadata index is unreadable." in (
+        result.stderr
+    )
+    assert "fake-pkg-alpha" in result.stdout
+
+
+def test_network_attaches_the_advisories_of_an_alias(invoke, patch_pool_with, osv):
+    """`--network` queries OSV with the PyPI alias of each package, and attaches
+    the advisory reported for an alias to the package behind it."""
+    patch_pool_with(AliasedFakeManager())
+    batch = osv.post("/v1/querybatch").respond(
+        json={"results": [{"vulns": [{"id": "GHSA-aaaa-bbbb-cccc"}]}, {}]},
+    )
+    osv.get("/v1/vulns/GHSA-aaaa-bbbb-cccc").respond(json=OSV_RECORD)
+
+    result = invoke("--network", "sbom", "--cyclonedx")
+
+    assert result.exit_code == 0
+    sent = json.loads(batch.calls[0].request.content)
+    assert [query["package"] for query in sent["queries"]] == [
+        {"ecosystem": "PyPI", "name": "fake-pkg-alpha"},
+        {"ecosystem": "PyPI", "name": "fake-pkg-beta"},
+    ]
+    (vulnerability,) = json.loads(result.stdout)["vulnerabilities"]
+    assert vulnerability["id"] == "GHSA-aaaa-bbbb-cccc"
+    assert [affected["ref"] for affected in vulnerability["affects"]] == [
+        "pkg:aliasedfakemanager/fake-pkg-alpha@1.0.0",
+    ]
+    assert "1 vulnerabilities found across 1 packages." in result.stderr
+
+
+def test_network_failure_keeps_the_export(invoke, patch_pool_with, osv):
+    """An OSV failure drops the vulnerability data, and the export goes on."""
+    patch_pool_with(AliasedFakeManager())
+    osv.post("/v1/querybatch").respond(status_code=400)
+
+    result = invoke("--network", "sbom", "--cyclonedx")
+
+    assert result.exit_code == 0
+    assert "Vulnerability scan failed (" in result.stderr
+    assert "the SBOM will not include vulnerability data" in result.stderr
+    document = json.loads(result.stdout)
+    assert not document.get("vulnerabilities")
+    assert "fake-pkg-alpha" in result.stdout
+
+
+def test_network_scan_needs_the_online_extra(invoke, fake_pool, monkeypatch):
+    """Without `httpx`, `--network` warns and exports the SBOM without the scan."""
+    monkeypatch.setattr(_network, "network_support", False)
+    result = invoke("--network", "sbom", "--minimal")
+    assert result.exit_code == 0
+    assert (
+        "Vulnerability scan skipped: the --network option needs the [sbom-online] "
+        "extra."
+    ) in result.stderr
+    assert "fake-pkg-alpha" in result.stdout

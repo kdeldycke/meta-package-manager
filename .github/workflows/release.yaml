@@ -222,7 +222,7 @@ jobs:
           # satisfying `required-version`, leaving the tool that enforces every
           # cooldown installed without one. `sync-workflow-pins` walks it forward
           # once a uv release clears the window.
-          version: "0.12.5"
+          version: "0.13.0"
       # `pr-sync` owns the pull request's lifecycle. It opens the pull request when
       # the definition moved, refreshes it when it moves again, and closes it,
       # branch and all, once nothing is left to propose: a direct commit or an
@@ -313,7 +313,7 @@ jobs:
           # satisfying `required-version`, leaving the tool that enforces every
           # cooldown installed without one. `sync-workflow-pins` walks it forward
           # once a uv release clears the window.
-          version: "0.12.5"
+          version: "0.13.0"
       # `pr-sync` owns the pull request's lifecycle, as in the `guix` job above. A
       # definition held back by its `update-hold:` marker changes nothing, so the
       # pull request carries only the others, and none at all closes it.

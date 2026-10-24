@@ -1607,9 +1607,7 @@ def test_resolve_escalator_keeps_sudo_on_a_sudo_rs_host():
         pytest.param(True, None, id="windows-runs-unescalated"),
     ),
 )
-def test_resolve_escalator_falls_back_to_a_lone_impostor_off_windows(
-    windows, expected
-):
+def test_resolve_escalator_falls_back_to_a_lone_impostor_off_windows(windows, expected):
     """An impostor still escalates, so it beats reporting no escalator at all,
     except on Windows.
 

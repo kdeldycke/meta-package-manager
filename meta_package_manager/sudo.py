@@ -39,10 +39,12 @@ while the hidden prompt can still be answered.
 ```{note}
 Windows reaches only a corner of this module. `gsudo` gives it an escalator to
 probe and a cache to warm, and Microsoft's own `sudo.exe` backs it up from
-`24H2`, but no manager there escalates by default, so {func}`prime_sudo`
-returns on the empty selection unless `--sudo` or a `[mpm.overrides.<id>] sudo =
-true` entry asks for it. The internal escalators stay macOS-only managers, so
-the watchdog is not armed there either.
+`24H2`. `choco` is the one manager escalating by default there, so
+{func}`prime_sudo` returns on the empty selection unless the run selects it, or
+`--sudo` or a `[mpm.overrides.<id>] sudo = true` entry asks for escalation. A
+host where no escalator passes its identity probe runs every command
+unescalated, see {func}`resolve_escalator`. The internal escalators stay
+macOS-only managers, so the watchdog is not armed there either.
 
 Neither reaches an unattended run the way a Unix escalator does. `sudo.exe`
 refuses every token whose elevation type is `Default`, which is what a network
@@ -112,6 +114,7 @@ from functools import cache
 from typing import Final
 
 from click_extra import echo
+from extra_platforms import is_any_windows
 
 from .version import parse_version
 
@@ -824,6 +827,8 @@ def resolve_escalator(override: str | None = None) -> Escalator | None:
     binary is on `PATH` and passes {meth}`~Escalator.is_genuine`, so a host
     without `sudo` still escalates through whatever it does have, and one whose
     `sudo` is a stand-in for another escalator drives that other one directly.
+    Where none passes, the first installed one is driven all the same, except on
+    Windows, which then returns `None` and runs unescalated.
     An `override` names one by its {attr}`~Escalator.id` and is honored even
     when the binary is missing, so the failure names the escalator the user
     asked for instead of silently falling back to another one.
@@ -859,7 +864,15 @@ def resolve_escalator(override: str | None = None) -> Escalator | None:
     # first one still beats reporting none: a stand-in that answers no probe
     # usually still escalates, and Alpine's `doas-sudo-shim` only reaches this
     # line on a host whose `doas` was removed from under it.
-    if installed:
+    #
+    # Windows gets no fallback. Its inbox `sudo.exe` fails both identity probes
+    # while Sudo for Windows is disabled, its default: `--help` then prints only
+    # how to enable it. Disabled, it escalates nothing whatever it is handed,
+    # and the first escalator is POSIX `sudo`, whose `--non-interactive` it
+    # rejects as an unknown argument. Measured on the `windows-11-arm` runner
+    # image. Unescalated, a command still runs in an elevated shell, and fails
+    # in another on the manager's own permission error.
+    if installed and not is_any_windows():
         logging.debug(
             f"{installed[0].id} does not identify as itself: driving it anyway.",
         )
@@ -1417,10 +1430,10 @@ def prime_sudo(
     """
     managers = list(managers)
     # Root has nothing to escalate. Windows passes this guard like any other
-    # host, since `gsudo` gives it an escalator to probe and a cache to warm:
-    # a stock run there returns on the empty selection below instead, no
-    # manager escalating by default on Windows, so only `--sudo`, or a
-    # `[mpm.overrides.<id>] sudo = true` entry, reaches the probe.
+    # host, since `gsudo` gives it an escalator to probe and a cache to warm.
+    # `choco` is the one manager escalating by default there: a run without it
+    # returns on the empty selection below, so only `choco`, `--sudo` or a
+    # `[mpm.overrides.<id>] sudo = true` entry reaches the probe.
     if _running_as_root():
         return
     run_operations = frozenset(operation.name for operation in operations)

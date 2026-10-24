@@ -1613,6 +1613,32 @@ def test_resolve_escalator_falls_back_to_a_lone_impostor():
     assert escalator.id == "sudo"
 
 
+@pytest.mark.parametrize(
+    ("windows", "expected"),
+    (
+        pytest.param(False, "sudo", id="unix-drives-the-stand-in"),
+        pytest.param(True, None, id="windows-runs-unescalated"),
+    ),
+)
+def test_resolve_escalator_never_hands_windows_sudo_to_posix_sudo(windows, expected):
+    """A disabled Sudo for Windows gets no fallback.
+
+    Disabled, Microsoft's `sudo.exe` fails both identity probes: its `--help`
+    prints only how to enable it. The fallback then drove it as POSIX `sudo`,
+    whose `--non-interactive` it rejects as an unknown argument, which failed
+    every `choco` install on the `windows-11-arm` runner image.
+    """
+    with (
+        only_escalator("sudo"),
+        patch.object(Escalator, "is_genuine", return_value=False),
+        patch("meta_package_manager.sudo.is_any_windows", return_value=windows),
+    ):
+        resolve_escalator.cache_clear()
+        escalator = resolve_escalator()
+        resolve_escalator.cache_clear()
+    assert (escalator.id if escalator else None) == expected
+
+
 def test_resolve_escalator_override_wins_over_detection():
     """An override is honored even when its binary is missing, so the failure
     names the escalator the user asked for."""

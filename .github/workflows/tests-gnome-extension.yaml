@@ -80,7 +80,7 @@ jobs:
       - name: Install gjs and GLib tooling
         run: |
           sudo apt-get update
-          sudo apt-get install --yes gjs libglib2.0-bin
+          sudo apt-get install --yes --no-install-recommends gjs libglib2.0-bin
       - name: Validate GSettings schema
         run: >
           glib-compile-schemas --strict --dry-run

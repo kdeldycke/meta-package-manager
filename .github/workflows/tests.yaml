@@ -225,7 +225,7 @@ jobs:
           sudo apt-get --quiet --yes update
           # lxml has no pre-built wheel for development Python (3.15+), so it
           # must compile from source, which needs libxml2 and libxslt headers.
-          sudo apt-get --quiet --yes install libxml2-dev libxslt-dev
+          sudo apt-get --quiet --yes install --no-install-recommends libxml2-dev libxslt-dev
           # Ubuntu's firefox deb wraps a snap: upgrading it fetches the snap and
           # its runtimes from the snap store, whose timeouts (HTTP 408) fail the
           # whole upgrade. No test drives a browser, so hold it where it is.
@@ -263,7 +263,7 @@ jobs:
       # PackageKit
       - name: PackageKit - Linux install
         if: runner.os == 'Linux'
-        run: sudo apt-get --quiet --yes install packagekit
+        run: sudo apt-get --quiet --yes install --no-install-recommends packagekit
 
       # Chocolatey
       - name: Chocolatey - Windows self-upgrade
@@ -294,7 +294,7 @@ jobs:
       - name: NPM - Linux install
         if: runner.os == 'Linux'
         run: |
-          sudo apt-get --quiet --yes install npm
+          sudo apt-get --quiet --yes install --no-install-recommends npm
           sudo npm install --global npm@12.2.1
       - name: NPM - macOS install
         if: runner.os == 'macOS'
@@ -316,7 +316,7 @@ jobs:
       - name: Cargo - Linux install
         if: runner.os == 'Linux'
         run: |
-          sudo apt-get --quiet --yes install cargo
+          sudo apt-get --quiet --yes install --no-install-recommends cargo
           cargo --version
       - name: Cargo - Windows install
         if: runner.os == 'Windows'
@@ -346,7 +346,10 @@ jobs:
       # Flatpak
       - name: Flatpak - Linux install
         if: runner.os == 'Linux'
-        run: sudo apt-get --quiet --yes install flatpak
+        # Two of flatpak's Recommends matter here, so they are named: polkitd authorizes the system helper that
+        # mpm's system-scope operations go through, and p11-kit hands the host's CA store to the sandboxes. The rest
+        # is desktop integration.
+        run: sudo apt-get --quiet --yes install --no-install-recommends flatpak p11-kit polkitd
 
       # PowerShell Gallery
       - name: PowerShell Gallery - macOS install
@@ -425,17 +428,17 @@ jobs:
       # DNF
       - name: DNF - Linux install
         if: runner.os == 'Linux'
-        run: sudo apt-get --quiet --yes install dnf
+        run: sudo apt-get --quiet --yes install --no-install-recommends dnf
 
       # Zypper
       - name: Zypper - Linux install
         if: runner.os == 'Linux'
-        run: sudo apt-get --quiet --yes install zypper
+        run: sudo apt-get --quiet --yes install --no-install-recommends zypper
 
       # Snap
       - name: Snap - Linux upgrade
         if: runner.os == 'Linux'
-        run: sudo apt-get --quiet --yes install snapd
+        run: sudo apt-get --quiet --yes install --no-install-recommends snapd
 
       # VSCode
       - name: VSCode - macOS install
@@ -506,7 +509,7 @@ jobs:
       - name: Ruby & Gem - Ubuntu
         # As of Ubuntu 21.04, RubyGems is exclusively managed by APT; "gem update --system" is unsupported.
         if: runner.os == 'Linux'
-        run: sudo apt-get --quiet --yes install ruby-rubygems
+        run: sudo apt-get --quiet --yes install --no-install-recommends ruby-rubygems
 
       # SteamCMD
       - name: SteamCMD - macOS install
@@ -526,9 +529,9 @@ jobs:
           echo steam steam/question select "I AGREE" | sudo debconf-set-selections
           echo steam steam/license note '' | sudo debconf-set-selections
           sudo debconf-show steam
-          sudo apt-get --quiet --yes install libgcc-s1:i386 libstdc++6:i386 libatomic1:i386
-          sudo apt-get --quiet --yes install steam
-          sudo apt-get --quiet --yes install steamcmd
+          sudo apt-get --quiet --yes install --no-install-recommends libgcc-s1:i386 libstdc++6:i386 libatomic1:i386
+          sudo apt-get --quiet --yes install --no-install-recommends steam
+          sudo apt-get --quiet --yes install --no-install-recommends steamcmd
       - name: SteamCMD - Windows install
         if: runner.os == 'Windows'
         run: choco install steamcmd --no-progress --yes --retry-count=3

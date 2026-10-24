@@ -23,6 +23,13 @@ concurrency:
 #
 # Upstream context: https://github.com/Jguer/yay/issues/2883
 
+# Supply-chain cooldown: no package published within the window can be resolved
+# by any command in this workflow. Held equal to `[tool.repomatic]
+# minimum-release-age`. See claude.md for the rationale.
+env:
+  NPM_CONFIG_MIN_RELEASE_AGE: 7
+  UV_EXCLUDE_NEWER: "1 week"
+
 jobs:
 
   # https://github.com/Jguer/yay/releases/latest
@@ -36,9 +43,18 @@ jobs:
       - name: Update system and install tooling
         run: >
           pacman --sync --refresh --sysupgrade --noconfirm --needed
-          base-devel curl git nodejs python sudo uv
+          base-devel curl git nodejs python sudo
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # The pinned uv rather than Arch's, which follows every upstream release.
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        id: setup-uv
+        with:
+          # Pin what CI downloads: unpinned, setup-uv installs the newest uv
+          # satisfying `required-version`. `sync-workflow-pins` bumps it once a
+          # uv release clears the cooldown window.
+          version: "0.13.0"
 
       - name: Write the integration test
         run: |
@@ -164,9 +180,11 @@ jobs:
       - name: Report yay version
         run: sudo --set-home --user builder yay --version
 
+      # `sudo` resets PATH, so uv is called by the path setup-uv reports.
       - name: Validate the cooldown overlay against real yay
         env:
           AUR_PACKAGE: downgrade
+          UV_PATH: ${{ steps.setup-uv.outputs.uv-path }}
         run: >
           sudo --set-home --user builder --preserve-env=AUR_PACKAGE
-          uv run --frozen python yay_cooldown_validate.py
+          "${UV_PATH}" --no-progress run --frozen python yay_cooldown_validate.py

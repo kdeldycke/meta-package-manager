@@ -23,6 +23,49 @@ snapshot/merge/update flows shared with the `backup` alias live in
 
 from __future__ import annotations
 
+from pathlib import Path
+
+import pytest
+
+from .fake_manager import FakeManager
+
+
+class BrewFakeManager(FakeManager):
+    """A fake whose packages map to `brew` lines of a Brewfile."""
+
+    brewfile_entry_type = "brew"
+
+
+class WarnedFakeManager(FakeManager):
+    """A fake with no Brewfile mapping, which warns about the packages it drops."""
+
+    brewfile_skip_warning = "Skipping {count} packages with no Brewfile entry type."
+
+
+class BrokenFakeManager(FakeManager):
+    """A fake with no Brewfile mapping, whose inventory command fails.
+
+    The failure goes through
+    {meth}`~meta_package_manager.execution.CLIExecutor.run`, which records it
+    in {attr}`~meta_package_manager.execution.CLIExecutor.cli_errors` the way a
+    real manager does.
+    """
+
+    @property
+    def installed(self):
+        self.run(str(self.cli_path), "-c", "import sys; sys.exit('No database.')")
+        return iter(())
+
+
+BREW_LINES = 'brew "fake-pkg-alpha"\nbrew "fake-pkg-beta"\n'
+"""The Brewfile entries of the two packages {class}`BrewFakeManager` lists."""
+
+
+@pytest.fixture
+def brewfile_pool(patch_pool_with):
+    """Select a mapped manager, a warned one and a broken one, in that order."""
+    return patch_pool_with(BrewFakeManager(), WarnedFakeManager(), BrokenFakeManager())
+
 
 def test_dump_query_filter_narrows_to_matches(invoke, fake_pool):
     """`dump --query` keeps only installed packages matching the query."""
@@ -38,3 +81,56 @@ def test_dump_without_query_lists_all(invoke, fake_pool):
     assert result.exit_code == 0
     assert "fake-pkg-alpha" in result.stdout
     assert "fake-pkg-beta" in result.stdout
+
+
+@pytest.mark.parametrize("flag", ("--merge", "--update-version"))
+def test_dump_brewfile_rejects_toml_only_flags(invoke, fake_pool, flag):
+    """`--merge` and `--update-version` edit a TOML manifest, never a Brewfile."""
+    result = invoke("dump", "--brewfile", flag, "Brewfile")
+    assert result.exit_code == 2
+    assert not result.stdout
+    assert "--merge / --update-version cannot be combined with --brewfile." in (
+        result.stderr
+    )
+    assert not Path("Brewfile").exists()
+
+
+def test_dump_brewfile_to_stdout(invoke, brewfile_pool):
+    """Only the mapped manager reaches the Brewfile, and the summary counts its
+    entries by type."""
+    result = invoke(
+        "--verbosity", "INFO", "dump", "--brewfile", "--no-header", "--overwrite"
+    )
+    assert result.exit_code == 0
+    assert result.stdout == BREW_LINES
+    assert "Ignore the --overwrite/--force/--replace option." in result.stderr
+    assert "Print Brewfile to <stdout>" in result.stderr
+    assert "2 packages total (brew: 2)." in result.stderr
+
+
+def test_dump_brewfile_header_tallies_skipped_managers(invoke, brewfile_pool):
+    """The header counts the packages of an unmapped manager, which also gets its
+    warning, and leaves out the manager whose inventory failed."""
+    result = invoke("dump", "--brewfile")
+    assert result.exit_code == 0
+    assert result.stdout.endswith(f"\n\n{BREW_LINES}")
+    assert "# Coverage: brewfakemanager=2\n" in result.stdout
+    assert "# Skipped:  warnedfakemanager=2\n" in result.stdout
+    assert "brokenfakemanager" not in result.stdout
+    assert "Skipping 2 packages with no Brewfile entry type." in result.stderr
+
+
+def test_dump_brewfile_to_file_guards_an_existing_target(invoke, brewfile_pool):
+    """A Brewfile already on disk survives a dump, unless `--overwrite` is passed."""
+    target = Path("Brewfile")
+    target.write_bytes(b'brew "wget"\n')
+
+    result = invoke("dump", "--brewfile", "--no-header", str(target))
+    assert result.exit_code == 2
+    assert "critical: Target file exist and will be overwritten." in result.stderr
+    assert target.read_bytes() == b'brew "wget"\n'
+
+    result = invoke("dump", "--brewfile", "--no-header", "--overwrite", str(target))
+    assert result.exit_code == 0
+    assert "warning: Target file exist and will be overwritten." in result.stderr
+    assert target.read_text(encoding="UTF-8") == BREW_LINES

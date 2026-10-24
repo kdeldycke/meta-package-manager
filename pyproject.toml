@@ -2127,18 +2127,6 @@ allowlist.commits = [
   "2cd5a08e24d1fbe6519c82fb1846066c3b0d446d",
 ]
 
-[tool.yamllint]
-# Restates repomatic's bundled default, plus one delta: the generated
-# docs/assets/managers/logos.yaml records each brand mark's provenance as a
-# commit-pinned upstream URL, which pushes a `source:` line past the cap with no
-# whitespace to wrap at. `allow-non-breakable-words` does not cover it, as the
-# long token sits in an inline mapping rather than alone on its line. Flagging a
-# line no edit can shorten only yields unfixable errors, and the generator would
-# re-emit one on the next long URL. Prose and comments still wrap at 120.
-rules.line-length.max = 120
-rules.line-length.allow-non-breakable-words = true
-rules.line-length.allow-non-breakable-inline-mappings = true
-
 [tool.click-extra]
 # Declarative CLI test suite for binary testing. Repomatic's test and release
 # workflows run `click-extra test-suite` against the built binary; that engine

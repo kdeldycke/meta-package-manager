@@ -177,9 +177,9 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          # Full history so the redundant-PR check can compute the merge base
-          # between main and the open release branch (see the reconcile step below).
-          fetch-depth: 0
+          # The PAT, so the branch `pr-sync` pushes starts the `guix-source` job of
+          # tests-install.yaml: a push made with `GITHUB_TOKEN` starts no workflow.
+          token: ${{ secrets.REPOMATIC_PAT || github.token }}
       - name: Check for new release
         id: check
         env:
@@ -216,77 +216,33 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python3 packaging/guix/update.py
       - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
-        if: steps.check.outputs.needs_update == 'true'
+        if: steps.check.outputs.needs_update == 'true' || steps.check.outputs.existing != ''
         with:
           # Pin what CI downloads: unpinned, setup-uv installs the newest uv
           # satisfying `required-version`, leaving the tool that enforces every
           # cooldown installed without one. `sync-workflow-pins` walks it forward
           # once a uv release clears the window.
           version: "0.12.5"
-      - name: Render PR body
-        if: steps.check.outputs.needs_update == 'true'
+      # `pr-sync` owns the pull request's lifecycle. It opens the pull request when
+      # the definition moved, refreshes it when it moves again, and closes it,
+      # branch and all, once nothing is left to propose: a direct commit or an
+      # earlier merge already put the release on `main`.
+      - name: Sync pull request
+        if: steps.check.outputs.needs_update == 'true' || steps.check.outputs.existing != ''
         env:
+          # The PAT, so the pull request it opens starts the checks a
+          # `GITHUB_TOKEN`-authored one never would.
+          GH_TOKEN: ${{ secrets.REPOMATIC_PAT || github.token }}
           VERSION: ${{ steps.check.outputs.version }}
         run: >
-          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.18.0' pr-body
-          --template-file .github/pr-templates/update-package-spec.md
+          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.18.0'
+          pr-sync --template-file .github/pr-templates/update-package-spec.md
           --template-arg channel=Guix
           --template-arg version="${VERSION}"
           --template-arg spec_path=packaging/guix/
-          --output body.md
-      - name: Open PR with updated packaging files
-        if: steps.check.outputs.needs_update == 'true'
-        env:
-          VERSION: ${{ steps.check.outputs.version }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          branch="guix/release"
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git checkout -B "${branch}"
-          git add --update packaging/guix/
-          # Nothing staged: the definition was already current.
-          if git diff --cached --quiet; then
-            echo "No Guix definition changed; nothing to propose."
-            exit 0
-          fi
-          git commit --message "Update Guix package definition to v${VERSION}"
-          git push --force --set-upstream origin "${branch}"
-          existing=$(gh pr list --head "${branch}" --state open --json number --jq '.[0].number')
-          if [ -n "${existing}" ]; then
-            gh pr edit "${existing}" \
-              --title "Update Guix package definition to v${VERSION}" \
-              --body-file body.md \
-              --add-label "📦 manager: guix"
-          else
-            gh pr create \
-              --title "Update Guix package definition to v${VERSION}" \
-              --body-file body.md \
-              --label "📦 manager: guix"
-          fi
-      # Reconcile an already-open release PR that a direct commit (or an earlier
-      # merge) has made redundant: main already carries the latest release, so the
-      # PR would change nothing. Close it, but only after proving the merge is a
-      # genuine no-op, so a still-pending PR is never discarded.
-      - name: Close the release PR when it became redundant
-        if: steps.check.outputs.needs_update != 'true' && steps.check.outputs.existing != ''
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          EXISTING: ${{ steps.check.outputs.existing }}
-          VERSION: ${{ steps.check.outputs.version }}
-        run: |
-          branch="guix/release"
-          git fetch --no-tags origin "${branch}"
-          # Merge the PR branch into main in memory: an identical resulting tree
-          # means merging changes nothing, so the PR is redundant. A non-zero exit
-          # means the merge conflicts, so leave the PR for manual review.
-          if merged=$(git merge-tree --write-tree HEAD FETCH_HEAD) \
-            && [ "${merged}" = "$(git rev-parse 'HEAD^{tree}')" ]; then
-            msg="Superseded: \`main\` already matches \`v${VERSION}\`, so merging this would change nothing."
-            gh pr close "${EXISTING}" --delete-branch --comment "${msg}"
-          else
-            echo "PR #${EXISTING} still carries changes not on main; leaving it open."
-          fi
+          --branch guix/release
+          --add-path 'packaging/guix/'
+          --label '📦 manager: guix'
 
   # Prepare a Nix package definition after the release job. Unlike Homebrew, Scoop,
   # and AUR, the Nix definition is maintained in this repo (see packaging/nix/) while
@@ -303,9 +259,9 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          # Full history so the redundant-PR check can compute the merge base
-          # between main and the open release branch (see the reconcile step below).
-          fetch-depth: 0
+          # The PAT, so the branch `pr-sync` pushes starts the `nix-source` job of
+          # tests-install.yaml: a push made with `GITHUB_TOKEN` starts no workflow.
+          token: ${{ secrets.REPOMATIC_PAT || github.token }}
       - uses: cachix/install-nix-action@448cde739abec1eaf0646249e3d25bb8d9bc7702 # v31.11.2
       - name: Check for new release
         id: check
@@ -351,74 +307,29 @@ jobs:
           python3 packaging/nix/update.py "packaging/nix/${definition}.nix";
           done
       - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
-        if: steps.check.outputs.needs_update == 'true'
+        if: steps.check.outputs.needs_update == 'true' || steps.check.outputs.existing != ''
         with:
           # Pin what CI downloads: unpinned, setup-uv installs the newest uv
           # satisfying `required-version`, leaving the tool that enforces every
           # cooldown installed without one. `sync-workflow-pins` walks it forward
           # once a uv release clears the window.
           version: "0.12.5"
-      - name: Render PR body
-        if: steps.check.outputs.needs_update == 'true'
+      # `pr-sync` owns the pull request's lifecycle, as in the `guix` job above. A
+      # definition held back by its `update-hold:` marker changes nothing, so the
+      # pull request carries only the others, and none at all closes it.
+      - name: Sync pull request
+        if: steps.check.outputs.needs_update == 'true' || steps.check.outputs.existing != ''
         env:
+          # The PAT, so the pull request it opens starts the checks a
+          # `GITHUB_TOKEN`-authored one never would.
+          GH_TOKEN: ${{ secrets.REPOMATIC_PAT || github.token }}
           VERSION: ${{ steps.check.outputs.version }}
         run: >
-          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.18.0' pr-body
-          --template-file .github/pr-templates/update-package-spec.md
+          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.18.0'
+          pr-sync --template-file .github/pr-templates/update-package-spec.md
           --template-arg channel=Nix
           --template-arg version="${VERSION}"
           --template-arg spec_path=packaging/nix/
-          --output body.md
-      - name: Open PR with updated packaging files
-        if: steps.check.outputs.needs_update == 'true'
-        env:
-          VERSION: ${{ steps.check.outputs.version }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          branch="nix/release"
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git checkout -B "${branch}"
-          git add --update packaging/nix/
-          # Nothing staged: every definition was already current, or held back by its `update-hold:` marker.
-          if git diff --cached --quiet; then
-            echo "No Nix definition changed; nothing to propose."
-            exit 0
-          fi
-          git commit --message "Update Nix package definition to v${VERSION}"
-          git push --force --set-upstream origin "${branch}"
-          existing=$(gh pr list --head "${branch}" --state open --json number --jq '.[0].number')
-          if [ -n "${existing}" ]; then
-            gh pr edit "${existing}" \
-              --title "Update Nix package definition to v${VERSION}" \
-              --body-file body.md \
-              --add-label "📦 manager: nix"
-          else
-            gh pr create \
-              --title "Update Nix package definition to v${VERSION}" \
-              --body-file body.md \
-              --label "📦 manager: nix"
-          fi
-      # Reconcile an already-open release PR that a direct commit (or an earlier
-      # merge) has made redundant: main already carries the latest release, so the
-      # PR would change nothing. Close it, but only after proving the merge is a
-      # genuine no-op, so a still-pending PR is never discarded.
-      - name: Close the release PR when it became redundant
-        if: steps.check.outputs.needs_update != 'true' && steps.check.outputs.existing != ''
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          EXISTING: ${{ steps.check.outputs.existing }}
-          VERSION: ${{ steps.check.outputs.version }}
-        run: |
-          branch="nix/release"
-          git fetch --no-tags origin "${branch}"
-          # Merge the PR branch into main in memory: an identical resulting tree
-          # means merging changes nothing, so the PR is redundant. A non-zero exit
-          # means the merge conflicts, so leave the PR for manual review.
-          if merged=$(git merge-tree --write-tree HEAD FETCH_HEAD) \
-            && [ "${merged}" = "$(git rev-parse 'HEAD^{tree}')" ]; then
-            msg="Superseded: \`main\` already matches \`v${VERSION}\`, so merging this would change nothing."
-            gh pr close "${EXISTING}" --delete-branch --comment "${msg}"
-          else
-            echo "PR #${EXISTING} still carries changes not on main; leaving it open."
-          fi
+          --branch nix/release
+          --add-path 'packaging/nix/'
+          --label '📦 manager: nix'

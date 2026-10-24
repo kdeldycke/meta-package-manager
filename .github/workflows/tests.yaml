@@ -738,6 +738,37 @@ jobs:
         # and would only invite a spurious floor check.
         run: uv --no-progress run --frozen -- pytest -m once
 
+  # release.yaml drives the CLI test plan of `[tool.click-extra]` against the Nuitka binaries, on pushes to `main`
+  # alone. This job drives it against the checkout, pull requests included, through both entry points. One runner
+  # suffices: the heavier cases (`installed`, `outdated`, `search`) would query every manager the `tests` job installs.
+  cli-test-plan:
+    name: 📋 CLI test plan
+    # `needs: metadata` is for its skip gate, as in `once-tests` above.
+    needs:
+      - metadata
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          # Pin what CI downloads, as in `once-tests` above.
+          version: "0.13.0"
+      - name: Install Python
+        run: uv --no-progress venv --python 3.14
+      - name: Install project
+        # Every extra: the plan validates a config file in each format, and renders both SBOM flavors.
+        run: uv --no-progress sync --frozen --all-extras
+      - name: Run the plan through the console script
+        run: uv --no-progress run --frozen -- click-extra test-suite --command mpm --jobs max
+      - name: Run the plan through python -m
+        # `!cancelled()` runs it after a failed step above: the two entry points can break independently. Wrapped in
+        # `${{ }}` because a bare leading `!` is a YAML tag.
+        if: ${{ !cancelled() }}
+        run: >
+          uv --no-progress run --frozen --
+          click-extra test-suite --command "python -m meta_package_manager" --jobs max
+
   dnf5-container:
     name: 🎩 Drive mpm against dnf5
     # `needs: metadata` is not for its outputs but for its skip gate: the

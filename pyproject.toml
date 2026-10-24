@@ -1034,9 +1034,6 @@ test-matrix.exclude = [
 test-matrix.full-include = [
   { os = "ubuntu-26.04-arm", python-version = "3.10", resolution = "lowest-direct" },
 ]
-# Windows ARM64 runs as a probe: a failing cell reports without failing the
-# workflow. XXX See the `{todo}` of tests/test_metadata.py.
-test-matrix.unstable = [ { os = "windows-11-arm" } ]
 # Sync optional-dependencies into the build venv so the Nuitka binary ships
 # every feature gated behind try/except imports in click-extra and mpm:
 #   - sbom-offline: cyclonedx-python-lib + spdx-tools, for `mpm sbom --spdx`

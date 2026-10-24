@@ -22,12 +22,6 @@ forces the two to agree, so a `requires-python` bump that forgets the matrix,
 or a `repomatic` release that shifts its floor, would silently leave the
 declared floor untested. These tests turn that drift into a failing check, as
 recommended by [repomatic's test-matrix guide](https://repomatic.net/test-matrix).
-
-```{todo}
-Promote the `windows-11-arm` cells of `tests.yaml` to stable once a full run
-passes on them: delete the `windows-11-arm` entry of `[tool.repomatic]
-test-matrix.unstable` in `pyproject.toml`.
-```
 """
 
 from __future__ import annotations

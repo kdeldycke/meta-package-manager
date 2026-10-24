@@ -81,8 +81,8 @@ jobs:
     # branch (always `main`), not its head branch (see
     # https://github.com/actions/runner/issues/1591), so the version-bump
     # PRs slip through it and must be filtered here via `github.head_ref`.
-    # The branch list mirrors `repomatic.binary.VERSION_BUMP_BRANCHES` and
-    # is pinned by repomatic's own test suite.
+    # The branch list mirrors repomatic's `VERSION_BUMP_BRANCHES` and is
+    # pinned by repomatic's own test suite.
     #
     # The `[changelog] Post-release bump ` commit prefix is intentionally
     # *not* in this list: that push also carries the release commit, and
@@ -123,11 +123,15 @@ jobs:
         ${{ github.event_name != 'pull_request'
         && fromJSON(needs.metadata.outputs.metadata).test_matrix
         || fromJSON(needs.metadata.outputs.metadata).test_matrix_pr }}
-    # A cell carrying a `resolution` key appends it, which tells that cell from
-    # the twin sharing its runner and Python.
+    # `python-label` is set by repomatic show-metadata only where the plain
+    # version would hide why a cell is continue-on-error: a prerelease reads
+    # `3.15-dev`, and every other cell falls back to the version itself. A cell
+    # carrying a `resolution` key appends it, which tells that cell from the
+    # twin sharing its runner and Python.
     name: >-
       ${{ matrix.state == 'stable' && '✅' || '⁉️' }} ${{ matrix.os }} /
-      py${{ matrix.python-version }}${{ matrix.resolution && format(' / {0}', matrix.resolution) || '' }}
+      py${{ matrix.python-label || matrix.python-version }}${{
+      matrix.resolution && format(' / {0}', matrix.resolution) || '' }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 180
     # We keep going when a job flagged as not stable fails.

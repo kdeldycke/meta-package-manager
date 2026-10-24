@@ -20,10 +20,13 @@
 from __future__ import annotations
 
 from dataclasses import fields
+from pathlib import Path
 from textwrap import dedent
 
+import click
 import pytest
 import tomli_w
+from boltons.strutils import strip_ansi
 from click_extra import ValidationError
 
 from meta_package_manager.config import (
@@ -35,10 +38,13 @@ from meta_package_manager.config import (
     ContributionHint,
     MpmConfig,
     _build_issue_url,
+    _warn_risky_overrides_from_untrusted_source,
     apply_manager_overrides,
     dump_manager_overrides,
     format_contribution_hints,
+    validate_manager_overrides_section,
 )
+from meta_package_manager.cooldown import CooldownPolicy
 from meta_package_manager.definitions import (
     OVERRIDABLE_FIELDS,
     OVERRIDES_SECTION,
@@ -100,12 +106,13 @@ def test_overridable_fields_match_base_attributes():
         )
 
 
-def test_none_is_noop():
-    apply_manager_overrides(pool, None)
-
-
-def test_empty_is_noop():
-    apply_manager_overrides(pool, {})
+@pytest.mark.parametrize("section", (None, {}), ids=("none", "empty"))
+def test_empty_section_is_noop(reset_overrides, section):
+    """An absent or empty `[mpm.overrides]` section applies and validates as a
+    no-op."""
+    apply_manager_overrides(pool, section)
+    validate_manager_overrides_section(section, pool=pool)
+    assert OVERRIDE_TARGET not in pool.overridden_fields
 
 
 def test_non_dict_top_level_raises():
@@ -232,9 +239,37 @@ def test_dict_override_adds_to_shipped_variables():
         pool.overridden_fields.pop("cask", None)
 
 
-def test_dict_override_rejects_non_string_value(reset_overrides):
+@pytest.mark.parametrize(
+    "value",
+    (
+        pytest.param({"K": 1}, id="non-string-value"),
+        pytest.param(["PIP_INDEX_URL=https://example.test"], id="not-a-table"),
+    ),
+)
+def test_dict_override_rejects(reset_overrides, value):
     with pytest.raises(ValidationError, match=r"expected a table of string-to-string"):
-        apply_manager_overrides(pool, {OVERRIDE_TARGET: {"extra_env": {"K": 1}}})
+        apply_manager_overrides(pool, {OVERRIDE_TARGET: {"extra_env": value}})
+
+
+def test_cooldown_policy_override(reset_overrides):
+    """The policy keyword is read like the `--cooldown` option reads it,
+    whatever its case."""
+    apply_manager_overrides(pool, {OVERRIDE_TARGET: {"cooldown_policy": "Best-Effort"}})
+    assert pool[OVERRIDE_TARGET].cooldown_policy is CooldownPolicy.best_effort
+
+
+@pytest.mark.parametrize(
+    "value",
+    (
+        pytest.param("strict", id="unknown-keyword"),
+        pytest.param(True, id="not-a-string"),
+    ),
+)
+def test_cooldown_policy_override_rejects(reset_overrides, value):
+    with pytest.raises(
+        ValidationError, match=r"expected one of enforce, best-effort, off"
+    ):
+        apply_manager_overrides(pool, {OVERRIDE_TARGET: {"cooldown_policy": value}})
 
 
 def test_multiple_fields_in_one_call(reset_overrides):
@@ -383,6 +418,63 @@ def test_sudo_is_a_risky_override_field():
     assert "sudo" in RISKY_OVERRIDE_FIELDS
 
 
+@pytest.mark.parametrize(
+    ("source", "is_url", "trusted", "origin"),
+    (
+        pytest.param(None, True, True, "a remote URL", id="remote-url"),
+        pytest.param(
+            Path("/etc/mpm/config.toml"),
+            False,
+            False,
+            f"untrusted file {Path('/etc/mpm/config.toml')}",
+            id="unsafe-file",
+        ),
+        pytest.param(Path("/etc/mpm/config.toml"), False, True, None, id="safe-file"),
+        pytest.param(None, False, True, None, id="no-config"),
+    ),
+)
+def test_risky_override_from_untrusted_source_warns(
+    monkeypatch, caplog, source, is_url, trusted, origin
+):
+    """One warning per shipped manager whose override sets a risky field, when
+    the configuration comes from a remote URL or an unsafe file.
+
+    The source and its trust are stubbed, so the test reads the same on every
+    platform. An unknown ID and a section that is not a table carry no field to
+    warn about.
+    """
+    monkeypatch.setattr(
+        "meta_package_manager.config._config_source", lambda ctx: (source, is_url)
+    )
+    monkeypatch.setattr(
+        "meta_package_manager.config.config_file_is_trusted", lambda path: trusted
+    )
+    _warn_risky_overrides_from_untrusted_source(
+        click.Context(click.Command("mpm")),
+        pool,
+        {
+            OVERRIDE_TARGET: {
+                "pre_cmds": ["env"],
+                "cli_names": ["pip3"],
+                "timeout": 60,
+            },
+            "cask": {"timeout": 60},
+            "fictional-manager": {"pre_cmds": ["env"]},
+            "uv": "not a table",
+        },
+    )
+    warnings = [
+        strip_ansi(record.getMessage())
+        for record in caplog.records
+        if "Override of" in record.getMessage()
+    ]
+    expected = (
+        f"Override of cli_names, pre_cmds on {OVERRIDE_TARGET} comes from "
+        f"{origin}; these fields can run arbitrary commands (see docs/security.md)."
+    )
+    assert warnings == ([] if origin is None else [expected])
+
+
 # Per-operation extra arguments.
 
 
@@ -472,6 +564,26 @@ def test_cli_loads_manager_overrides(invoke, create_config, reset_overrides):
     result = invoke("--config", str(conf_path), "managers")
     assert result.exit_code == 0
     assert pool[OVERRIDE_TARGET].cli_search_path == ("/integration/test/path",)
+
+
+def test_cli_warns_on_stale_overrides_section(invoke, create_config, reset_overrides):
+    """A table under `[mpm.managers]`, the old home of the overrides, is named
+    in a warning and left unapplied, rather than dropped in silence."""
+    conf_path = create_config(
+        "conf.toml",
+        dedent("""\
+            [mpm.managers.pip]
+            cli_search_path = ["/integration/test/path"]
+
+            [mpm.managers.cask]
+            timeout = 60
+            """),
+    )
+    result = invoke("--config", str(conf_path), "managers")
+    assert result.exit_code == 0
+    assert "`[mpm.managers.<id>]` moved to `[mpm.overrides.<id>]`" in result.stderr
+    assert "These sections are ignored: cask, pip." in result.stderr
+    assert pool[OVERRIDE_TARGET].cli_search_path != ("/integration/test/path",)
 
 
 def test_cli_fails_on_unknown_manager_in_config(invoke, create_config):

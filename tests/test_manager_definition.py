@@ -23,13 +23,16 @@ import inspect
 import json
 import os
 import re
+import sys
 from operator import attrgetter
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 from click_extra import ValidationError
 
 import meta_package_manager
+from meta_package_manager.__main__ import main
 from meta_package_manager.capabilities import (
     Operations,
     cleanup_orphan_is_synthesized,
@@ -37,8 +40,13 @@ from meta_package_manager.capabilities import (
     implements_method,
 )
 from meta_package_manager.config import (
+    _candidate_config_path,
+    _collect_definitions,
+    _is_remote_url,
     config_file_is_trusted,
+    discover_config_definitions,
     register_config_managers,
+    register_eager_config_managers,
     validate_manager_overrides_section,
 )
 from meta_package_manager.definitions import (
@@ -58,6 +66,16 @@ skip_windows = pytest.mark.skipif(
     not hasattr(os, "getuid"),
     reason="POSIX-only: needs a shell fake CLI and POSIX file ownership.",
 )
+
+DEFINITION_TOML = """\
+[mpm.overrides.mytool]
+platforms = ["all_platforms"]
+cli_names = ["mytool"]
+
+[mpm.overrides.mytool.operations.sync]
+args = ["update"]
+"""
+"""A configuration file defining one valid manager."""
 
 
 def _clean_definitions() -> None:
@@ -98,6 +116,26 @@ def fake_tool(tmp_path):
     return tool
 
 
+@pytest.fixture
+def eager_inputs(monkeypatch, tmp_path):
+    """Pin every input of the eager configuration discovery, and return the
+    default configuration folder, not created yet.
+
+    The discovery reads the command line, the `MPM_CONFIG` variable and the
+    default folder. {mod}`meta_package_manager.config` binds its own
+    `get_app_dir` at import, which the autouse `isolate_user_config` fixture
+    does not reach: without the patch below, a test reads the configuration
+    folder of the machine it runs on.
+    """
+    app_dir = tmp_path / "app"
+    monkeypatch.setattr(
+        "meta_package_manager.config.get_app_dir", lambda app_name: str(app_dir)
+    )
+    monkeypatch.delenv("MPM_CONFIG", raising=False)
+    monkeypatch.setattr(sys, "argv", ["mpm", "managers"])
+    return app_dir
+
+
 # Parsing and validation.
 
 
@@ -127,6 +165,33 @@ def test_parse_definition_returns_dataclass():
     assert set(definition.operations) == {"installed", "install"}
     assert definition.operations["installed"].parse_mode == "regex"
     assert definition.operations["install"].parse_mode == "none"
+
+
+def test_parse_definition_json_list_path():
+    """A JSON query keeps the dotted `list_path` that leads to its package array."""
+    definition = parse_manager_definition(
+        "mytool",
+        {
+            "platforms": ["linux"],
+            "operations": {
+                "outdated": {
+                    "args": ["outdated", "--json"],
+                    "format": "json",
+                    "list_path": "packages",
+                    "fields": {
+                        "package_id": "name",
+                        "installed_version": "current",
+                        "latest_version": "latest",
+                    },
+                },
+            },
+        },
+    )
+    spec = definition.operations["outdated"]
+    assert spec.parse_mode == "json"
+    assert spec.list_path == "packages"
+    assert spec.fields is not None
+    assert spec.fields["latest_version"] == "latest"
 
 
 def test_parse_definition_accepts_operation_notes():
@@ -236,15 +301,46 @@ def test_parse_definition_versionless_catalog_manager():
 @pytest.mark.parametrize(
     ("section", "expected"),
     (
+        pytest.param("update", "mytool: expected a table, got str", id="not-a-table"),
         pytest.param(
             {"platforms": ["narnia"], "operations": {"sync": {"args": ["s"]}}},
             "unknown platform",
             id="unknown-platform",
         ),
         pytest.param(
+            {"platforms": [], "operations": {"sync": {"args": ["s"]}}},
+            "must list at least one platform or group",
+            id="empty-platforms",
+        ),
+        pytest.param(
             {"platforms": ["linux"], "operations": {"frobnicate": {"args": ["s"]}}},
             "unknown operation",
             id="unknown-operation",
+        ),
+        pytest.param(
+            {"platforms": ["linux"], "operations": {"sync": "update"}},
+            "mytool.operations.sync: expected a table, got str",
+            id="operation-not-a-table",
+        ),
+        pytest.param(
+            {
+                "platforms": ["linux"],
+                "operations": {
+                    "sync": {"args": ["s"], "regex": r"^(?P<package_id>\S+)$"},
+                },
+            },
+            "mytool.operations.sync.regex: unknown key. Allowed: args, cli, sudo.",
+            id="parser-on-command-operation",
+        ),
+        pytest.param(
+            {"platforms": ["linux"], "operations": {"sync": {"sudo": True}}},
+            "mytool.operations.sync.args: required.",
+            id="missing-args",
+        ),
+        pytest.param(
+            {"platforms": ["linux"], "operations": {"sync": {"args": []}}},
+            "mytool.operations.sync.args: must be a non-empty list.",
+            id="empty-args",
         ),
         pytest.param(
             {"platforms": ["linux"], "operations": {"install": {"args": ["install"]}}},
@@ -286,6 +382,29 @@ def test_parse_definition_versionless_catalog_manager():
             },
             "missing required",
             id="regex-missing-latest-version",
+        ),
+        pytest.param(
+            {
+                "platforms": ["linux"],
+                "operations": {
+                    "installed": {"args": ["list"], "regex": r"^(?P<package_id>\S+"},
+                },
+            },
+            "invalid regular expression",
+            id="unbalanced-regex",
+        ),
+        pytest.param(
+            {
+                "platforms": ["linux"],
+                "operations": {
+                    "installed": {
+                        "args": ["list"],
+                        "regex": r"^(?P<package_id>\S+) (?P<version>\S+)$",
+                    },
+                },
+            },
+            "unrecognized field(s): version.",
+            id="regex-group-names-no-field",
         ),
         pytest.param(
             {
@@ -1019,19 +1138,376 @@ def test_factory_json_array_field(monkeypatch):
     assert packages["scalar"] is None
 
 
+def test_factory_install_ignores_a_version_pin(monkeypatch, caplog):
+    """A config-defined install drops a requested version and says so, rather
+    than failing or passing a version its args have no place for."""
+    manager = build_manager_class(
+        _definition(install=OperationSpec(args=("install", "{package_id}"))),
+    )()
+    calls = []
+
+    def fake_run_cli(*args, **kwargs):
+        calls.append(args)
+        return ""
+
+    monkeypatch.setattr(manager, "run_cli", fake_run_cli)
+    manager.install("jq", version="1.7.1")
+    assert calls == [("install", "jq")]
+    assert "do not support version pinning" in caplog.text
+
+
+@pytest.mark.parametrize(
+    ("list_path", "output", "expected", "warns"),
+    (
+        pytest.param(
+            None,
+            "Error: unknown command 'list'",
+            set(),
+            True,
+            id="not-json",
+        ),
+        pytest.param(
+            "data.packages",
+            json.dumps({"data": [{"name": "jq", "version": "1.7.1"}]}),
+            set(),
+            False,
+            id="path-through-an-array",
+        ),
+        pytest.param(
+            None,
+            json.dumps([
+                {"name": "jq", "version": "1.7.1"},
+                "jq",
+                {"version": "1.6"},
+                {"name": "", "version": "1.6"},
+            ]),
+            {("jq", "1.7.1")},
+            False,
+            id="stray-items",
+        ),
+    ),
+)
+def test_factory_json_parsing_skips_unexpected_shapes(
+    monkeypatch, caplog, list_path, output, expected, warns
+):
+    """A payload of an unexpected shape yields what it can, and never raises.
+
+    Output that is not JSON yields nothing and logs one warning. A `list_path`
+    that walks into an array instead of a table finds no package array. Items
+    that are not tables, or that carry no package ID, are skipped.
+    """
+    manager = build_manager_class(
+        _definition(
+            installed=OperationSpec(
+                args=("list", "--json"),
+                parse_mode="json",
+                list_path=list_path,
+                fields={"package_id": "name", "installed_version": "version"},
+            ),
+        ),
+    )()
+    monkeypatch.setattr(manager, "run_cli", lambda *args, **kwargs: output)
+    packages = {(p.id, str(p.installed_version)) for p in manager.installed}
+    assert packages == expected
+    assert ("Could not parse JSON output" in caplog.text) is warns
+
+
+def test_factory_regex_parsing_skips_a_match_without_id(monkeypatch):
+    """A line the pattern matches with an empty `package_id` group is skipped."""
+    manager = build_manager_class(
+        _definition(
+            installed=OperationSpec(
+                args=("list",),
+                parse_mode="regex",
+                regex=r"^(?P<package_id>\S*)@(?P<installed_version>\S+)$",
+            ),
+        ),
+    )()
+    monkeypatch.setattr(
+        manager, "run_cli", lambda *args, **kwargs: "ruff@0.1.2\n@24.1.0"
+    )
+    assert [(p.id, str(p.installed_version)) for p in manager.installed] == [
+        ("ruff", "0.1.2"),
+    ]
+
+
+@pytest.mark.parametrize(
+    ("token", "expected"),
+    (
+        pytest.param("curl-8.7.1", ("curl", "8.7.1"), id="name-and-version"),
+        pytest.param("python311-3.11.9", ("python311", "3.11.9"), id="digits-in-name"),
+        pytest.param("curl", None, id="no-version"),
+    ),
+)
+def test_split_name_version(token, expected):
+    """The default splitter cuts at the last dash a digit follows, and answers
+    `None` for a token that carries no version."""
+    manager = build_manager_class(
+        _definition(sync=OperationSpec(args=("update",))),
+    )()
+    assert manager.split_name_version(token) == expected
+
+
 # Trust gate.
 
 
 @skip_windows
-def test_config_file_is_trusted(tmp_path):
-    good = tmp_path / "config.toml"
-    good.write_text("")
-    assert config_file_is_trusted(good) is True
+@pytest.mark.parametrize(
+    ("file_mode", "folder_mode", "trusted"),
+    (
+        pytest.param(0o600, 0o700, True, id="private"),
+        pytest.param(0o644, 0o755, True, id="readable-by-others"),
+        pytest.param(0o666, 0o755, False, id="world-writable-file"),
+        pytest.param(0o664, 0o755, False, id="group-writable-file"),
+        pytest.param(0o644, 0o777, False, id="world-writable-folder"),
+        pytest.param(0o644, 0o775, False, id="group-writable-folder"),
+        pytest.param(0o644, 0o1777, True, id="sticky-world-writable-folder"),
+    ),
+)
+def test_config_file_is_trusted(tmp_path, request, file_mode, folder_mode, trusted):
+    """A file others can write to, or swap through its folder, is not trusted.
 
-    world_writable = tmp_path / "loose.toml"
-    world_writable.write_text("")
-    world_writable.chmod(0o666)
-    assert config_file_is_trusted(world_writable) is False
+    The sticky bit stops others from replacing a file in a folder they can write
+    to, like `/tmp`, so such a folder is trusted.
+    """
+    folder = tmp_path / "conf"
+    folder.mkdir()
+    config_file = folder / "config.toml"
+    config_file.write_text("", encoding="UTF-8")
+    config_file.chmod(file_mode)
+    folder.chmod(folder_mode)
+    request.addfinalizer(lambda: folder.chmod(0o700))
+    assert folder.stat().st_mode & 0o7777 == folder_mode
+    assert config_file_is_trusted(config_file) is trusted
+
+
+@skip_windows
+def test_config_file_is_trusted_rejects_a_missing_file(tmp_path):
+    """A file that cannot be read is never trusted."""
+    assert config_file_is_trusted(tmp_path / "absent.toml") is False
+
+
+@skip_windows
+def test_config_file_is_trusted_rejects_another_owner(tmp_path, monkeypatch):
+    """A private file owned by another account than the current one, and not by
+    root, is not trusted."""
+    real_uid = os.getuid()
+    if real_uid == 0:
+        pytest.skip("A file root owns is always trusted.")
+    config_file = tmp_path / "config.toml"
+    config_file.write_text("", encoding="UTF-8")
+    config_file.chmod(0o600)
+    assert config_file_is_trusted(config_file) is True
+    monkeypatch.setattr(os, "getuid", lambda: real_uid + 1)
+    assert config_file_is_trusted(config_file) is False
+
+
+def test_config_file_is_trusted_without_posix_ownership(tmp_path, monkeypatch):
+    """Without `os.getuid`, as on Windows, the ownership check does not apply."""
+    monkeypatch.delattr(os, "getuid", raising=False)
+    loose = tmp_path / "loose.toml"
+    loose.write_text("", encoding="UTF-8")
+    loose.chmod(0o666)
+    assert config_file_is_trusted(loose) is True
+
+
+@pytest.mark.parametrize(
+    ("location", "remote"),
+    (
+        pytest.param("https://example.com/mpm/config.toml", True, id="https"),
+        pytest.param("http://example.com/mpm/config.toml", True, id="http"),
+        pytest.param("/etc/mpm/config.toml", False, id="absolute-path"),
+        pytest.param("config.toml", False, id="relative-path"),
+    ),
+)
+def test_is_remote_url(location, remote):
+    assert _is_remote_url(location) is remote
+
+
+def test_collect_definitions_skips_overrides_and_invalid_sections():
+    """Only the valid definitions of new managers come out: a section of a
+    shipped manager is an override, and an invalid one already failed the
+    load-time validator."""
+    sections = {
+        "pip": {"timeout": 60},
+        "mytool": {"platforms": ["linux"], "operations": {"sync": {"args": ["s"]}}},
+        "urpmi-like": {
+            "platforms": ["narnia"],
+            "operations": {"sync": {"args": ["s"]}},
+        },
+    }
+    assert list(_collect_definitions(pool, sections)) == ["mytool"]
+
+
+# Eager pre-load of the definitions, ahead of the CLI construction.
+
+
+def test_candidate_config_path_reads_the_environment(
+    eager_inputs, monkeypatch, tmp_path
+):
+    """`MPM_CONFIG` names the file, which must exist."""
+    config_file = tmp_path / "config.toml"
+    config_file.write_text("", encoding="UTF-8")
+    monkeypatch.setenv("MPM_CONFIG", str(config_file))
+    assert _candidate_config_path() == (config_file, False)
+
+    monkeypatch.setenv("MPM_CONFIG", str(tmp_path / "absent.toml"))
+    assert _candidate_config_path() == (None, False)
+
+
+@pytest.mark.parametrize(
+    "args",
+    (
+        pytest.param(("--config", "{path}"), id="separate-value"),
+        pytest.param(("--config={path}",), id="joined-value"),
+    ),
+)
+def test_candidate_config_path_reads_the_option(
+    eager_inputs, monkeypatch, tmp_path, args
+):
+    """`--config` wins over `MPM_CONFIG`, in both of its spellings."""
+    option_file = tmp_path / "option.toml"
+    option_file.write_text("", encoding="UTF-8")
+    env_file = tmp_path / "env.toml"
+    env_file.write_text("", encoding="UTF-8")
+    monkeypatch.setenv("MPM_CONFIG", str(env_file))
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["mpm", *(arg.format(path=option_file) for arg in args), "managers"],
+    )
+    assert _candidate_config_path() == (option_file, False)
+
+
+def test_candidate_config_path_defers_a_url(eager_inputs, monkeypatch):
+    """A remote location is reported, not read: the CLI pass handles it."""
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["mpm", "--config", "https://example.com/mpm/config.toml", "managers"],
+    )
+    assert _candidate_config_path() == (None, True)
+
+
+@pytest.mark.parametrize(
+    ("app_files", "expected"),
+    (
+        pytest.param(None, None, id="no-folder"),
+        pytest.param((), None, id="empty-folder"),
+        pytest.param(("mpm.json", "config.toml"), "config.toml", id="toml-first"),
+        pytest.param(("mpm.ini", "mpm.json"), "mpm.json", id="json-before-ini"),
+    ),
+)
+def test_candidate_config_path_searches_the_default_folder(
+    eager_inputs, monkeypatch, app_files, expected
+):
+    """With no explicit location, the first file of the default folder wins,
+    TOML first. A trailing `--config` that carries no value is ignored."""
+    monkeypatch.setattr(sys, "argv", ["mpm", "managers", "--config"])
+    if app_files is not None:
+        eager_inputs.mkdir()
+        for name in app_files:
+            (eager_inputs / name).write_text("", encoding="UTF-8")
+    expected_path = eager_inputs / expected if expected else None
+    assert _candidate_config_path() == (expected_path, False)
+
+
+@pytest.mark.parametrize(
+    ("file_name", "content", "found"),
+    (
+        pytest.param("config.toml", DEFINITION_TOML, True, id="mpm-table"),
+        pytest.param(
+            "pyproject.toml",
+            DEFINITION_TOML.replace("[mpm.", "[tool.mpm."),
+            True,
+            id="pyproject-table",
+        ),
+        pytest.param(
+            "config.toml", '[mpm]\nverbosity = "INFO"\n', False, id="no-overrides"
+        ),
+        pytest.param(
+            "config.toml", '[mpm]\noverrides = "none"\n', False, id="not-a-table"
+        ),
+        pytest.param("config.toml", "[mpm.overrides.mytool\n", False, id="malformed"),
+    ),
+)
+def test_discover_config_definitions(
+    eager_inputs, monkeypatch, tmp_path, file_name, content, found
+):
+    """The definitions of a readable file come out with their source, and any
+    failure yields nothing rather than breaking the start of the CLI."""
+    config_file = tmp_path / file_name
+    config_file.write_text(content, encoding="UTF-8")
+    monkeypatch.setenv("MPM_CONFIG", str(config_file))
+    definitions, source = discover_config_definitions(pool)
+    if found:
+        assert list(definitions) == ["mytool"]
+        assert source == config_file
+    else:
+        assert (definitions, source) == ({}, None)
+
+
+@pytest.mark.parametrize(
+    "argv",
+    (
+        pytest.param(["mpm", "managers"], id="no-config"),
+        pytest.param(
+            ["mpm", "--config", "https://example.com/mpm/config.toml", "managers"],
+            id="url",
+        ),
+    ),
+)
+def test_discover_config_definitions_reads_nothing(eager_inputs, monkeypatch, argv):
+    """No local file to read leaves the definitions to the CLI pass."""
+    monkeypatch.setattr(sys, "argv", argv)
+    assert discover_config_definitions(pool) == ({}, None)
+
+
+@pytest.mark.parametrize(
+    ("file_mode", "registered"),
+    (
+        pytest.param(0o600, True, id="private"),
+        pytest.param(0o666, False, marks=skip_windows, id="world-writable"),
+    ),
+)
+def test_register_eager_config_managers(
+    eager_inputs,
+    monkeypatch,
+    tmp_path,
+    reset_definitions,
+    caplog,
+    file_mode,
+    registered,
+):
+    """The eager pass registers the definitions of a trusted file, and refuses
+    those of a file others can write to."""
+    folder = tmp_path / "conf"
+    folder.mkdir()
+    folder.chmod(0o700)
+    config_file = folder / "config.toml"
+    config_file.write_text(DEFINITION_TOML, encoding="UTF-8")
+    config_file.chmod(file_mode)
+    monkeypatch.setenv("MPM_CONFIG", str(config_file))
+    register_eager_config_managers(pool)
+    assert ("mytool" in pool.register) is registered
+    assert ("Refusing to define manager 'mytool'" in caplog.text) is not registered
+
+
+def test_main_registers_definitions_before_the_cli(
+    eager_inputs, monkeypatch, tmp_path, reset_definitions, capsys
+):
+    """The entry point registers the definitions before the CLI runs: `--version`
+    exits ahead of the CLI pass, so only the eager pass can register here."""
+    config_file = tmp_path / "config.toml"
+    config_file.write_text(DEFINITION_TOML, encoding="UTF-8")
+    config_file.chmod(0o600)
+    monkeypatch.setenv("MPM_CONFIG", str(config_file))
+    monkeypatch.setattr(sys, "argv", ["mpm", "--version"])
+    with pytest.raises(SystemExit) as exited:
+        main()
+    assert exited.value.code == 0
+    assert capsys.readouterr().out.startswith("mpm, version ")
+    assert "mytool" in pool.register
 
 
 @skip_windows
@@ -1210,6 +1686,42 @@ def test_bundled_definitions_are_valid():
         assert isinstance(definition, ManagerDefinition)
         assert source.startswith("meta_package_manager/managers/")
         assert source.endswith(".toml")
+
+
+def test_bundled_loader_skips_broken_files(monkeypatch, tmp_path, caplog):
+    """A bundled file that does not parse, or that defines an invalid manager,
+    is logged and skipped, and the valid files still load: one bad resource
+    cannot break the start of `mpm`."""
+    (tmp_path / "broken.toml").write_text("[mpm.overrides.mytool\n", encoding="UTF-8")
+    (tmp_path / "invalid.toml").write_text(
+        DEFINITION_TOML.replace("mytool", "urpmi-like").replace(
+            '"all_platforms"', '"narnia"'
+        ),
+        encoding="UTF-8",
+    )
+    (tmp_path / "valid.toml").write_text(DEFINITION_TOML, encoding="UTF-8")
+    (tmp_path / "readme.md").write_text("", encoding="UTF-8")
+    monkeypatch.setattr(
+        "meta_package_manager.definitions.importlib",
+        SimpleNamespace(resources=SimpleNamespace(files=lambda package: tmp_path)),
+    )
+    load_bundled_definitions.cache_clear()
+    try:
+        bundled = load_bundled_definitions()
+    finally:
+        # Drop the stand-in result, so the next caller reads the shipped files.
+        load_bundled_definitions.cache_clear()
+    assert [(d.manager_id, source) for d, source in bundled] == [
+        ("mytool", "meta_package_manager/managers/valid.toml"),
+    ]
+    assert (
+        "Skipping unreadable bundled definition meta_package_manager/managers/"
+        "broken.toml" in caplog.text
+    )
+    assert (
+        "Skipping invalid bundled manager 'urpmi-like' in meta_package_manager/"
+        "managers/invalid.toml" in caplog.text
+    )
 
 
 def test_bundled_ids_disjoint_from_builtins():

@@ -16,13 +16,21 @@
 
 from __future__ import annotations
 
+import inspect
+import runpy
+import sys
+from functools import partial
+
 import pytest
 
-from meta_package_manager.__main__ import force_unicode_output
+from meta_package_manager.__main__ import force_unicode_output, main
 
 # The glyphs mpm prints that a legacy code page cannot encode: the two status
 # marks of the `managers` table, and one border character of every rounded table.
 UNENCODABLE_ON_CP1252 = ("✓", "✘", "╭", "─")
+
+MAIN_SCRIPT = inspect.getfile(main)
+"""The `__main__.py` file that `python -m meta_package_manager` runs."""
 
 
 class FakeStream:
@@ -46,9 +54,12 @@ class FakeStream:
             self.encoding = kwargs["encoding"]
 
 
-@pytest.mark.parametrize("encoding", ("cp1252", "ascii", "latin-1", None))
+@pytest.mark.parametrize(
+    "encoding", ("cp1252", "ascii", "latin-1", "unknown-8bit", None)
+)
 def test_legacy_stream_is_promoted_to_utf8(monkeypatch, encoding):
-    """A stream that cannot carry mpm's glyphs is reconfigured to UTF-8."""
+    """A stream that cannot carry mpm's glyphs is reconfigured to UTF-8, and so
+    is a stream reporting an encoding Python does not know."""
     out, err = FakeStream(encoding), FakeStream(encoding)
     monkeypatch.setattr("sys.stdout", out)
     monkeypatch.setattr("sys.stderr", err)
@@ -97,3 +108,33 @@ def test_a_stream_without_reconfigure_is_skipped(monkeypatch):
     monkeypatch.setattr("sys.stderr", io.StringIO())
 
     force_unicode_output()
+
+
+@pytest.mark.parametrize(
+    "entry_point",
+    (
+        pytest.param(main, id="function"),
+        pytest.param(
+            partial(runpy.run_path, MAIN_SCRIPT, run_name="__main__"), id="script"
+        ),
+    ),
+)
+def test_entry_point_runs_the_cli(monkeypatch, capsys, tmp_path, entry_point):
+    """Both entry points run the CLI as `mpm`: the `main()` function the `mpm`
+    script calls, and the `__main__.py` file `python -m meta_package_manager`
+    runs, with the path of that file in `sys.argv[0]`.
+
+    The version itself is not checked: click-extra resolves it once per process,
+    from the stack of whichever test reads it first. The configuration inputs of
+    the eager pre-load are pinned to an empty folder, so the test never reads
+    the configuration of the machine it runs on.
+    """
+    monkeypatch.setattr(sys, "argv", [MAIN_SCRIPT, "--version"])
+    monkeypatch.delenv("MPM_CONFIG", raising=False)
+    monkeypatch.setattr(
+        "meta_package_manager.config.get_app_dir", lambda app_name: str(tmp_path)
+    )
+    with pytest.raises(SystemExit) as exited:
+        entry_point()
+    assert exited.value.code == 0
+    assert capsys.readouterr().out.startswith("mpm, version ")

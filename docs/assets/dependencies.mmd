@@ -13,8 +13,8 @@ flowchart LR
     end
 
     jsonschema(["`jsonschema`"])
-    referencing(["`referencing`"])
     typing_extensions(["`typing-extensions`"])
+    referencing(["`referencing`"])
     pygments(["`pygments`"])
     requests(["`requests`"])
     anyio(["`anyio`"])
@@ -109,8 +109,8 @@ flowchart LR
         furo{{"`furo >=2025.9.25`"}}
         sphinx_datatables{{"`sphinx-datatables >=1`"}}
         sphinxcontrib_mermaid{{"`sphinxcontrib-mermaid >=1.2.3`"}}
-        sphinxcontrib_jquery{{"`sphinxcontrib-jquery >=4`"}}
         sphinx_autodoc_typehints{{"`sphinx-autodoc-typehints >=2.4`"}}
+        sphinxcontrib_jquery{{"`sphinxcontrib-jquery >=4`"}}
         sphinx_copybutton{{"`sphinx-copybutton >=0.5.2`"}}
         sphinx_design{{"`sphinx-design >=0.6`"}}
         sphinx_sitemap{{"`sphinx-sitemap >=2.6`"}}
@@ -201,8 +201,8 @@ flowchart LR
     spdx_tools --> semantic_version
     spdx_tools --> uritools
     cyclonedx_python_lib --> jsonschema
-    cyclonedx_python_lib --> referencing
     cyclonedx_python_lib --> typing_extensions
+    cyclonedx_python_lib --> referencing
     cyclonedx_python_lib --> license_expression
     cyclonedx_python_lib --> packageurl_python
     cyclonedx_python_lib --> py_serializable
@@ -236,11 +236,12 @@ flowchart LR
     sphinxcontrib_mermaid --> pyyaml
     sphinxcontrib_mermaid --> jinja2
     coverage --> tomli
+    sphinx_autodoc_typehints --> sphinx
+    sphinx_autodoc_typehints --> typing_extensions
     sphinxcontrib_jquery --> sphinx
     pytest_github_actions_annotate_failures --> pytest
     pytest_randomly --> pytest
     respx --> httpx
-    sphinx_autodoc_typehints --> sphinx
     sphinx_copybutton --> sphinx
     sphinx_design --> sphinx
     sphinx_sitemap --> sphinx_last_updated_by_git

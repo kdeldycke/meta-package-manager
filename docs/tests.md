@@ -41,7 +41,9 @@
    tests.test_help
    tests.test_logo
    tests.test_main
+   tests.test_manager_apm
    tests.test_manager_apt
+   tests.test_manager_bin
    tests.test_manager_cpan
    tests.test_manager_definition
    tests.test_manager_dnf
@@ -50,15 +52,23 @@
    tests.test_manager_homebrew
    tests.test_manager_mas
    tests.test_manager_microdnf
+   tests.test_manager_miktex
    tests.test_manager_mise
+   tests.test_manager_nala
+   tests.test_manager_oh_my_fish
    tests.test_manager_overrides
    tests.test_manager_pip
    tests.test_manager_pipx
+   tests.test_manager_pkg
    tests.test_manager_protonplus
    tests.test_manager_pwsh_gallery
    tests.test_manager_scoop
+   tests.test_manager_sdkman
+   tests.test_manager_sfsu
    tests.test_manager_tazpkg
    tests.test_manager_uv
+   tests.test_manager_vagrant
+   tests.test_manager_vcpkg
    tests.test_manager_winget
    tests.test_manager_yarn
    tests.test_manager_zypper

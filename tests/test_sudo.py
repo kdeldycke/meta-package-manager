@@ -1600,19 +1600,6 @@ def test_resolve_escalator_keeps_sudo_on_a_sudo_rs_host():
     assert escalator.id == "sudo"
 
 
-def test_resolve_escalator_falls_back_to_a_lone_impostor():
-    """An impostor still escalates, so it beats reporting no escalator at all."""
-    with (
-        only_escalator("sudo"),
-        patch.object(Escalator, "is_genuine", return_value=False),
-    ):
-        resolve_escalator.cache_clear()
-        escalator = resolve_escalator()
-        resolve_escalator.cache_clear()
-    assert escalator is not None
-    assert escalator.id == "sudo"
-
-
 @pytest.mark.parametrize(
     ("windows", "expected"),
     (
@@ -1620,13 +1607,17 @@ def test_resolve_escalator_falls_back_to_a_lone_impostor():
         pytest.param(True, None, id="windows-runs-unescalated"),
     ),
 )
-def test_resolve_escalator_never_hands_windows_sudo_to_posix_sudo(windows, expected):
-    """A disabled Sudo for Windows gets no fallback.
+def test_resolve_escalator_falls_back_to_a_lone_impostor_off_windows(
+    windows, expected
+):
+    """An impostor still escalates, so it beats reporting no escalator at all,
+    except on Windows.
 
     Disabled, Microsoft's `sudo.exe` fails both identity probes: its `--help`
     prints only how to enable it. The fallback then drove it as POSIX `sudo`,
     whose `--non-interactive` it rejects as an unknown argument, which failed
-    every `choco` install on the `windows-11-arm` runner image.
+    every `choco` install on the `windows-11-arm` runner image. The platform is
+    pinned both ways, so neither case depends on the host running the suite.
     """
     with (
         only_escalator("sudo"),

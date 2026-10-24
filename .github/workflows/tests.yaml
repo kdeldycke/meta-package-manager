@@ -424,10 +424,12 @@ jobs:
         # XXX Force shell configuration to PowerShell, even if it is the default for Windows runners, so the actionlint
         # job from the lint.yaml workflow will not try to validate the command syntax with shellcheck.
         shell: pwsh
-        # Ignore exit code, as WinGet will fail if it is already up-to-date.
+        # Ignore exit code, as WinGet will fail if it is already up-to-date. The windows-11-arm image ships no WinGet,
+        # so the upgrade only runs where the command exists.
         run: >
+          if (Get-Command winget -ErrorAction SilentlyContinue) {
           winget upgrade winget --accept-package-agreements --accept-source-agreements --disable-interactivity
-          || & { "ignore failure"; $global:LASTEXITCODE = 0 }
+          || & { "ignore failure"; $global:LASTEXITCODE = 0 } }
 
       # DNF
       - name: DNF - Linux install

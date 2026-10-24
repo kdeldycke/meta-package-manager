@@ -194,12 +194,16 @@ jobs:
 
       # Pip and Pipx
       - name: Pip, Setuptools & Pipx - Upgrade
-        # uv installs them, not pip: the runner's pip predates the `26.1` cooldown option, and uv applies the workflow's
-        # UV_EXCLUDE_NEWER. The target is the interpreter that `python` resolves to on the runner.
+        # A pinned pip from uvx does the install: the runner's own pip predates the `26.1` cooldown option. `--python`
+        # points it at the interpreter that `python` resolves to, and it installs there as the runner's pip would. That
+        # is the user site on Linux, whose system interpreter is externally managed, a target uv itself refuses.
         shell: bash
+        env:
+          # Held equal to `[tool.repomatic] minimum-release-age`, like the workflow's UV_EXCLUDE_NEWER.
+          PIP_UPLOADED_PRIOR_TO: P7D
         run: >
-          uv --no-progress pip install --python "$(python -c 'import sys; print(sys.executable)')"
-          --upgrade pip pipx setuptools
+          uvx --no-progress 'pip==26.2.1' --python "$(python -c 'import sys; print(sys.executable)')"
+          install --upgrade pip pipx setuptools
 
       # Homebrew
       - name: Homebrew - macOS upgrade

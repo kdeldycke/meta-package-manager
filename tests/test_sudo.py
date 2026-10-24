@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import logging
 import os
+import signal
 import subprocess
 import sys
 import threading
@@ -37,6 +38,7 @@ import time
 from collections.abc import Callable
 from contextlib import ExitStack, contextmanager
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import click
@@ -60,12 +62,17 @@ from meta_package_manager.sudo import (
     ESCALATORS,
     UNANSWERED_PROMPT_DETAIL,
     Escalator,
+    _escalation_is_passwordless,
     _hidden_prompt_risk,
     _installed_release,
     _is_permission_failure,
     _is_sudo_auth_failure,
     _is_sudo_denied,
     _probe_credentials,
+    _restore_terminal_modes,
+    _StallWatchdog,
+    _terminal_echo,
+    _terminal_modes,
     diagnose_escalation,
     inspect_install_root,
     prime_sudo,
@@ -533,6 +540,46 @@ def test_prime_sudo_skips_the_prompt_under_a_passwordless_policy(caplog):
     assert not any("--prompt" in call.args[0] for call in run.call_args_list)
 
 
+def test_passwordless_probe_asks_about_escalated_binaries_alone(tmp_path):
+    """The policy probe names the binary of each manager mpm escalates, and skips
+    a manager whose commands run unescalated."""
+    sudo = next(e for e in ESCALATORS if e.id == "sudo")
+    assert sudo.passwordless_probe_args is not None
+    unescalated = FakeManager()
+    unescalated.cli_path = tmp_path / "fake-mpm"
+    escalated = _escalating_manager()
+    with patch("meta_package_manager.sudo.subprocess.run") as run:
+        run.return_value = subprocess.CompletedProcess((), 0)
+        assert _escalation_is_passwordless(sudo, [unescalated, escalated])
+    assert [call.args[0] for call in run.call_args_list] == [
+        (*sudo.passwordless_probe_args, str(escalated.cli_path)),
+    ]
+
+
+@pytest.mark.parametrize(
+    ("binary_found", "probe_error"),
+    (
+        pytest.param(False, None, id="binary-not-found"),
+        pytest.param(True, FileNotFoundError("sudo"), id="probe-cannot-run"),
+    ),
+)
+def test_passwordless_probe_answers_no_when_unsure(
+    monkeypatch, binary_found, probe_error
+):
+    """An escalated manager whose binary was not found, or a policy probe that
+    cannot run, answers `False`: the cold-cache path then handles the run."""
+    sudo = next(e for e in ESCALATORS if e.id == "sudo")
+    manager = _escalating_manager()
+    if not binary_found:
+        monkeypatch.setattr(manager, "cli_path", None)
+    with patch(
+        "meta_package_manager.sudo.subprocess.run", side_effect=probe_error
+    ) as run:
+        assert not _escalation_is_passwordless(sudo, [manager])
+    # A binary that was not found is no command to ask the policy about.
+    assert run.call_count == int(binary_found)
+
+
 def test_prime_sudo_authenticates_and_keeps_alive_on_tty():
     """A cold cache on a terminal: probe first, then one branded password prompt,
     then the keepalive until the context closes."""
@@ -674,6 +721,80 @@ def test_keepalive_drop_warns_once_and_rearms(monkeypatch, caplog):
         "warm again" in record.getMessage() and record.levelno == logging.INFO
         for record in caplog.records
     )
+
+
+def test_keepalive_refresh_of_warm_credentials_stays_at_debug(monkeypatch, caplog):
+    """A refresh finding the credentials still there keeps the flag set, and says
+    so at DEBUG alone: a routine tick is no news for the user."""
+    monkeypatch.setattr("meta_package_manager.sudo._SUDO_KEEPALIVE_INTERVAL", 0.01)
+    ctx = click.Context(click.Command("mpm"))
+
+    def refreshes():
+        return [
+            record
+            for record in list(caplog.records)
+            if record.getMessage() == "Refreshed the sudo credentials."
+        ]
+
+    with prime_sudo_env() as run, caplog.at_level(logging.DEBUG):
+        run.return_value = subprocess.CompletedProcess((), 0)
+        try:
+            prime_sudo(ctx, [_escalating_manager()], operations=INSTALL_RUN)
+            assert _wait_for(lambda: bool(refreshes()))
+            assert _SUDO_CACHE_WARM.is_set()
+        finally:
+            ctx.close()
+    assert not _SUDO_CACHE_WARM.is_set()
+    assert all(record.levelno == logging.DEBUG for record in refreshes())
+
+
+def test_keepalive_drops_a_refresh_answered_after_the_stop_request(monkeypatch, caplog):
+    """A refresh still running when the run ends drops its answer.
+
+    The teardown clears the warm flag once it has joined the thread. An answer
+    that lands after the stop request is about credentials the run no longer
+    holds, so it must neither set the flag back nor report on them.
+
+    The refresh waits for the stop request before it answers, as a `sudo` slow
+    to answer would. The module's `threading` is replaced by a stand-in that
+    records the stop event the keepalive creates, so the fake probe can wait for
+    it.
+    """
+    monkeypatch.setattr("meta_package_manager.sudo._SUDO_KEEPALIVE_INTERVAL", 0.01)
+    stop_requests: list[threading.Event] = []
+
+    def recorded_event() -> threading.Event:
+        event = threading.Event()
+        stop_requests.append(event)
+        return event
+
+    monkeypatch.setattr(
+        "meta_package_manager.sudo.threading",
+        SimpleNamespace(Event=recorded_event, Thread=threading.Thread),
+    )
+    in_flight = threading.Event()
+
+    def fake_run(argv, **kwargs):
+        # The probe of prime_sudo runs before the keepalive creates its event.
+        # Every later call is a refresh of the keepalive.
+        if stop_requests:
+            in_flight.set()
+            stop_requests[0].wait(5)
+        return subprocess.CompletedProcess(argv, 0)
+
+    ctx = click.Context(click.Command("mpm"))
+    with prime_sudo_env() as run, caplog.at_level(logging.DEBUG):
+        run.side_effect = fake_run
+        try:
+            prime_sudo(ctx, [_escalating_manager()], operations=INSTALL_RUN)
+            assert in_flight.wait(5)
+        finally:
+            ctx.close()
+    assert not _SUDO_CACHE_WARM.is_set()
+    # A warm answer handled as usual would log this line, the flag still set.
+    assert "Refreshed the sudo credentials." not in [
+        record.getMessage() for record in caplog.records
+    ]
 
 
 def test_prime_sudo_narrates_warm_probe_at_info(caplog):
@@ -1182,6 +1303,39 @@ def test_inspect_install_root_swallows_probe_failures():
     assert inspect_install_root(_BrokenProbe()) is None
 
 
+def test_inspect_install_root_needs_posix_ownership(monkeypatch, tmp_path):
+    """A host whose `os` has no `getuid`, as on Windows, reports no install root,
+    even for a root that exists.
+
+    The module's `os` is replaced by a stand-in without `getuid`, so the check
+    runs on every platform: on POSIX, the real module would report the root.
+    """
+    manager = FakeManager()
+    manager.install_root = tmp_path
+    monkeypatch.setattr("meta_package_manager.sudo.os", SimpleNamespace())
+    assert inspect_install_root(manager) is None
+
+
+@pytest.mark.skipif(
+    is_any_windows(),
+    reason="The POSIX ownership model does not apply on Windows.",
+)
+def test_inspect_install_root_names_an_unknown_owner_by_uid(monkeypatch, tmp_path):
+    """A root owned by a uid with no account, as files unpacked from a container
+    image, names its owner by the bare uid."""
+
+    def no_account(uid):
+        raise KeyError(f"getpwuid(): uid not found: {uid}")
+
+    monkeypatch.setattr(pwd, "getpwuid", no_account)
+    manager = FakeManager()
+    manager.install_root = tmp_path
+    root = inspect_install_root(manager)
+    assert root is not None
+    assert root.owner_uid == os.getuid()
+    assert root.owner_name == str(os.getuid())
+
+
 @pytest.mark.parametrize(
     ("manager_id", "expected_argv"),
     (
@@ -1377,6 +1531,8 @@ def test_run0_forwards_a_forced_environment():
     # Nothing to carry leaves the command exactly as it was.
     assert run0.forward_env(argv, {}) == argv
     assert run0.forward_env(argv, None) == argv
+    # A variable to unset is not carried: the far side never had it.
+    assert run0.forward_env(argv, {"LC_ALL": None}) == argv
 
 
 @pytest.mark.parametrize(
@@ -1607,9 +1763,7 @@ def test_resolve_escalator_keeps_sudo_on_a_sudo_rs_host():
         pytest.param(True, None, id="windows-runs-unescalated"),
     ),
 )
-def test_resolve_escalator_falls_back_to_a_lone_impostor_off_windows(
-    windows, expected
-):
+def test_resolve_escalator_falls_back_to_a_lone_impostor_off_windows(windows, expected):
     """An impostor still escalates, so it beats reporting no escalator at all,
     except on Windows.
 
@@ -2099,6 +2253,122 @@ def test_diagnose_escalation_tells_unrunnable_from_stand_in():
     assert "Credentials: doas could not run." in lines
 
 
+def test_diagnose_escalation_under_a_passwordless_policy():
+    """A cold credential cache over a policy that clears every escalated command
+    reads as passwordless: no password to type, so no fix to apply.
+
+    The internal escalator beside it gets a line of its own, and stays out of the
+    policy probe, which asks about the commands mpm escalates alone.
+    """
+
+    def answer(argv, **kwargs):
+        """A genuine `sudo`, with a cold cache and a policy clearing the command."""
+        argv = tuple(argv)
+        if argv == ("sudo", "--version"):
+            return subprocess.CompletedProcess(
+                argv, 0, stdout="Sudo version 1.9.17p2\n"
+            )
+        return subprocess.CompletedProcess(
+            argv, 0 if "--list" in argv else 1, stdout=b"", stderr=b""
+        )
+
+    sudo = next(e for e in ESCALATORS if e.id == "sudo")
+    assert sudo.passwordless_probe_args is not None
+    escalated = _escalating_manager()
+    with (
+        only_escalator("sudo"),
+        patch("meta_package_manager.sudo.subprocess.run", side_effect=answer) as run,
+        patch("meta_package_manager.sudo.os.geteuid", return_value=1000, create=True),
+    ):
+        lines = diagnose_escalation([escalated, _internal_manager()]).lines()
+    assert lines == [
+        "Escalator: sudo at /usr/bin/sudo, detected.",
+        "Credentials: the policy runs every escalated command with no password.",
+        "Escalated by mpm: fakemanager.",
+        "Escalating on their own: fakemanager.",
+    ]
+    policy_probes = [
+        call.args[0] for call in run.call_args_list if "--list" in call.args[0]
+    ]
+    assert policy_probes == [
+        (*sudo.passwordless_probe_args, str(escalated.cli_path)),
+    ]
+
+
+def test_diagnose_escalation_when_polkit_keeps_the_authorization():
+    """polkit under `auth_admin_keep` keeps what a password buys, so the report
+    says a prompt would hold for the whole run.
+
+    The `pkcheck` answer of the credential probe is the one measured on Fedora 44
+    with polkit 127.
+    """
+
+    def answer(argv, **kwargs):
+        """A cold `pkcheck` whose policy keeps the authorization it grants."""
+        if tuple(argv) == ("pkexec", "--version"):
+            return subprocess.CompletedProcess(argv, 0, stdout="pkexec version 127\n")
+        return subprocess.CompletedProcess(
+            argv,
+            2,
+            stdout=b"polkit\\56result=auth_admin_keep\n" + AUTH_ADMIN_KEEP,
+            stderr=PKCHECK_COLD,
+        )
+
+    with (
+        only_escalator("pkexec"),
+        patch("meta_package_manager.sudo.subprocess.run", side_effect=answer),
+        patch("meta_package_manager.sudo.os.geteuid", return_value=1000, create=True),
+    ):
+        lines = diagnose_escalation([_escalating_manager()]).lines()
+    assert lines == [
+        "Escalator: pkexec at /usr/bin/pkexec, detected.",
+        "Release: 127.",
+        (
+            "Credentials: a password is needed "
+            "(Authorization requires authentication and -u wasn't passed.)."
+        ),
+        "Prompt: the authorization would hold for the whole run.",
+        f"Fix: {PKEXEC.remedy}",
+        "Escalated by mpm: fakemanager.",
+    ]
+
+
+def _slitaz_sudo_answer(argv, **kwargs):
+    """SliTaz's `sudo`, a BusyBox `su -c` wrapper: it asks for the root password
+    whatever the arguments, and exits 0 whatever happened."""
+    prompt = "Password: \n"
+    return subprocess.CompletedProcess(
+        argv, 0, stdout=prompt if kwargs.get("text") else prompt.encode()
+    )
+
+
+def test_diagnose_escalation_flags_a_chosen_stand_in():
+    """A stand-in named with `--sudo-command` is driven anyway, so the report
+    warns that its answers may be misread.
+
+    SliTaz's wrapper exits 0 on the credential probe, which reads as ready: the
+    identity line is what tells the user not to trust it.
+    """
+    with (
+        only_escalator("sudo", selected="sudo"),
+        patch(
+            "meta_package_manager.sudo.subprocess.run",
+            side_effect=_slitaz_sudo_answer,
+        ),
+        patch("meta_package_manager.sudo.os.geteuid", return_value=1000, create=True),
+    ):
+        lines = diagnose_escalation([_escalating_manager()]).lines()
+    assert lines == [
+        "Escalator: sudo at /usr/bin/sudo, chosen with --sudo-command.",
+        (
+            "Identity: the sudo on PATH does not identify as sudo, so mpm may "
+            "misread its answers."
+        ),
+        "Credentials: ready, escalated commands run with no prompt.",
+        "Escalated by mpm: fakemanager.",
+    ]
+
+
 # Stall watchdog: a call of an internal escalator (cask, fink) that goes silent
 # may be blocked on a hidden sudo password prompt. run() arms _StallWatchdog
 # around the spawn to flag the silence.
@@ -2170,6 +2440,55 @@ def test_stall_watchdog_notice_starts_on_a_fresh_line(monkeypatch, capsys):
     captured = capsys.readouterr().err
     assert "No output for " in captured
     assert captured.startswith("\n")
+
+
+def test_stall_watchdog_notice_without_an_output_line(monkeypatch, caplog):
+    """A silence that started with the call has no line to quote, and says so.
+
+    The watchdog is armed alone, with no call behind it to feed it a line, and
+    with no terminal to read: an echo the host terminal holds off would hold the
+    notice back.
+    """
+    monkeypatch.setattr("meta_package_manager.sudo._STALL_NOTICE_DELAY", 0.05)
+    monkeypatch.setattr("meta_package_manager.sudo._terminal_modes", lambda: None)
+
+    def notices():
+        return [
+            record
+            for record in list(caplog.records)
+            if "hidden password prompt" in record.getMessage()
+        ]
+
+    label = FakeManager().subject
+    with caplog.at_level(logging.WARNING):
+        watchdog = _StallWatchdog(label)
+        try:
+            assert _wait_for(lambda: bool(notices()))
+        finally:
+            watchdog.stop()
+    # One silence episode, so one notice.
+    assert len(notices()) == 1
+    assert notices()[0].getMessage().endswith("No output since the command started.")
+    assert notices()[0].label == label
+
+
+def test_stall_watchdog_reports_a_record_it_cannot_format(monkeypatch):
+    """A record whose message cannot be formatted goes to the error report of
+    the handler, as `logging` expects of every handler, and is not raised into
+    the call."""
+    monkeypatch.setattr("meta_package_manager.sudo._terminal_modes", lambda: None)
+    watchdog = _StallWatchdog(FakeManager().subject)
+    reported: list[logging.LogRecord] = []
+    monkeypatch.setattr(watchdog, "handleError", reported.append)
+    # Format arguments that do not match their placeholder.
+    record = logging.LogRecord(
+        "mpm", logging.DEBUG, __file__, 0, "%d apples", ("seven",), None
+    )
+    try:
+        watchdog.emit(record)
+    finally:
+        watchdog.stop()
+    assert reported == [record]
 
 
 @pytest.fixture
@@ -2347,6 +2666,62 @@ def test_timeout_names_an_unanswered_password_prompt(
     assert manager.cli_errors[0].detail == detail
     assert _echo(terminal) is echo_at_start
     assert label.endswith(f"mango ({detail})" if named else "mango")
+
+
+def test_terminal_helpers_answer_nothing_on_windows(monkeypatch):
+    """Windows has no `termios`: the terminal reads as no modes, nothing is given
+    back to it, and no echo is reported, before any terminal is opened.
+
+    The module's `sys` is replaced by a stand-in naming Windows, so the check
+    runs on every platform. On Windows, `os.ctermid` does not even exist.
+    """
+    monkeypatch.setattr(
+        "meta_package_manager.sudo.sys", SimpleNamespace(platform="win32")
+    )
+    opened: list[None] = []
+    monkeypatch.setattr(
+        "meta_package_manager.sudo.os.ctermid",
+        lambda: opened.append(None),
+        raising=False,
+    )
+    modes = [0, 0, 0, 0, 0, 0, []]
+    assert _terminal_modes() is None
+    _restore_terminal_modes(modes)
+    assert _terminal_echo(modes) is None
+    assert not opened
+
+
+@pytest.mark.skipif(is_any_windows(), reason="Windows has no terminal modes.")
+@pytest.mark.parametrize("echoes", (True, False))
+def test_terminal_echo_reads_the_local_flags(echoes):
+    """The echo is the `ECHO` bit of the local flags, the fourth item of what
+    `termios.tcgetattr` returns: a password read clears it, a line read keeps it."""
+    local_flags = termios.ICANON | (termios.ECHO if echoes else 0)
+    assert _terminal_echo([0, 0, 0, local_flags, 0, 0, []]) is echoes
+
+
+@pytest.mark.skipif(is_any_windows(), reason="Windows has no terminal modes.")
+@pytest.mark.parametrize("present", (True, False), ids=("not-a-terminal", "gone"))
+def test_terminal_modes_survive_a_terminal_that_cannot_answer(
+    monkeypatch, tmp_path, present
+):
+    """A controlling terminal that cannot answer reads as no modes, and takes no
+    modes back: the watchdog only reads the terminal to word a warning, so it must
+    never fail the call it watches.
+
+    A regular file stands in for a device that refuses the terminal requests, and
+    a missing path for a terminal that went away during the call. The signal mask
+    blocked around the write comes back as it was.
+    """
+    device = tmp_path / "tty"
+    if present:
+        device.write_bytes(b"")
+    monkeypatch.setattr("meta_package_manager.sudo.os.ctermid", lambda: str(device))
+    mask = signal.pthread_sigmask(signal.SIG_BLOCK, ())
+    assert _terminal_modes() is None
+    # The shape `termios.tcgetattr` returns. The write fails before it reads them.
+    _restore_terminal_modes([0, 0, 0, termios.ECHO, 0, 0, [b"\x00"] * termios.NCCS])
+    assert signal.pthread_sigmask(signal.SIG_BLOCK, ()) == mask
 
 
 @pytest.mark.parametrize(

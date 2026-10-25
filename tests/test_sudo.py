@@ -2412,6 +2412,30 @@ def test_stall_watchdog_notices_silent_internal_escalator(monkeypatch, caplog):
     assert len(quoting) == 1
 
 
+def test_stall_watchdog_ignores_the_command_line(monkeypatch, caplog):
+    """The command line `run_cli` discloses is no output of the child: a child
+    that prints nothing gets the notice of a silence since the start, which quotes
+    no line."""
+    assert not _SUDO_CACHE_WARM.is_set()
+    manager = FakeManager()
+    manager.internal_sudo = True
+    manager._active_operation = "install"
+    monkeypatch.setattr("meta_package_manager.sudo._STALL_NOTICE_DELAY", 0.2)
+    with (
+        patch("sys.stderr.isatty", return_value=True),
+        caplog.at_level(logging.WARNING),
+    ):
+        manager.run_cli("-c", "import time; time.sleep(1)")
+    notices = [
+        record.getMessage()
+        for record in caplog.records
+        if "hidden password prompt" in record.getMessage()
+    ]
+    assert notices
+    for notice in notices:
+        assert notice.endswith("No output since the command started.")
+
+
 def test_stall_watchdog_notice_starts_on_a_fresh_line(monkeypatch, capsys):
     """The notice breaks the line before writing, sparing a prompt sitting on it.
 

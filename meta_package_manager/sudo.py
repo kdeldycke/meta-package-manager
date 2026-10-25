@@ -2087,6 +2087,9 @@ class _StallWatchdog(logging.Handler):
         super().__init__()
         self._label = label
         self._started = time.monotonic()
+        # The thread that arms the watchdog is the one calling `run_cli`, which
+        # logs its own command line from there. See emit().
+        self._caller = threading.get_ident()
         # Latest child activity, one `(monotonic timestamp, output line)` pair.
         # Written by emit() in a single reference assignment and read the same way
         # by the notice thread, so the pair stays consistent without a lock
@@ -2118,10 +2121,12 @@ class _StallWatchdog(logging.Handler):
     def emit(self, record: logging.LogRecord) -> None:
         """Track child activity, then forward `record` verbatim to the root.
 
-        Only the streamed output lines refresh the activity state: they are the
-        records carrying a `label` attribute (`run_cli` labels the child's
-        output lines only, never its own prompt-disclosure or PID-tracking lines),
-        and only genuine output vouches that the child is not blocked on a prompt.
+        Only the streamed output lines refresh the activity state: `run_cli` logs
+        them from its reader threads, each with the `label` of the call. It labels
+        the command line it discloses too, but logs that one from the calling
+        thread, the one that armed this watchdog: a labeled record from there is
+        narration, not output. Only genuine output vouches that the child is not
+        blocked on a prompt.
 
         Forwarding re-enters {meth}`logging.Logger.log` on the root logger so
         its level gate (the one click-extra's `--verbosity` manages) and its
@@ -2134,7 +2139,8 @@ class _StallWatchdog(logging.Handler):
             if label is None:
                 root.log(record.levelno, message)
             else:
-                self._activity = (time.monotonic(), message)
+                if record.thread != self._caller:
+                    self._activity = (time.monotonic(), message)
                 root.log(record.levelno, message, extra={"label": label})
         except Exception:  # noqa: BLE001
             self.handleError(record)

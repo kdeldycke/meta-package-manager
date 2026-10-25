@@ -14,6 +14,7 @@
 - [choco,mpm] Stop driving a disabled Sudo for Windows as POSIX `sudo`: commands run unescalated there, where every `choco` install failed on `--non-interactive`.
 - [mpm] Add the variables of an `extra_env` override to those the manager sets, instead of replacing them, as the documentation of the field says.
 - [mpm] Refuse manager definitions from a remote or unsafe configuration file, and warn about its risky overrides, as documented. Make the file and its folder writable by you alone to keep its definitions.
+- [mpm] Say that a silent command printed nothing in the hidden password prompt warning, instead of quoting its own command line as its last output.
 - [mpm] Raise the `packageurl-python` floor to `0.17.6`: below it, parsing a pURL spec raises `TypeError`.
 - [sfsu] Raise the `sfsu` floor to `1.18.1`: below it, `outdated` misses every app installed for `arm64` on Windows on ARM. Run `scoop update sfsu` to upgrade an older install.
 

@@ -106,6 +106,15 @@ def _split_dep_spec(spec: str) -> tuple[str, str, str]:
     return match["name"], match["extras"] or "", match["rest"].strip()
 
 
+_EXTRA_MARKER_REGEX = re.compile(r"\bextra\s*==")
+"""Matches the `extra` comparison of a {pep}`508` environment marker.
+
+A `Requires-Dist` entry whose marker compares `extra`, like
+`pytest; extra == 'tests'`, installs only when the user asks for that extra, so
+{meth}`Pip._distribution_metadata` records it as an optional dependency.
+"""
+
+
 class Pip(PackageManager):
     """The pip package installer for Python, driven as a module (`python -m pip`)
     rather than through the `pip` executable.
@@ -625,23 +634,21 @@ class Pip(PackageManager):
             originator = Originator(name=author_name, email=address or None)
 
         # Requires-Dist lines look like `cryptography>=42.0; python_version<'3.13'`.
-        # Strip environment markers and version constraints to land just
-        # the dependency name in `target_id`; the version_constraint
-        # column carries the rest for any downstream consumer that wants
-        # it.
+        # The name lands in `target_id` and the version constraint beside it,
+        # while the environment marker decides the scope alone.
         deps: list[Dependency] = []
         for raw in meta.get_all("Requires-Dist") or ():
-            if ";" in raw:
-                spec, _, _marker = raw.partition(";")
-            else:
-                spec = raw
-            spec = spec.strip()
+            spec, _, marker = raw.partition(";")
             name, _, constraint = _split_dep_spec(spec)
             if name:
                 deps.append(
                     Dependency(
                         target_id=name,
-                        scope=DependencyScope.RUNTIME,
+                        scope=(
+                            DependencyScope.OPTIONAL
+                            if _EXTRA_MARKER_REGEX.search(marker)
+                            else DependencyScope.RUNTIME
+                        ),
                         version_constraint=constraint or None,
                     )
                 )

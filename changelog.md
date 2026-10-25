@@ -17,6 +17,7 @@
 - [mpm] Say that a silent command printed nothing in the hidden password prompt warning, instead of quoting its own command line as its last output.
 - [pip] Read the license of a Python package from its `License-Expression` field in `mpm sbom`, where core metadata `2.4` declares it.
 - [pip] Name the author of a Python package in `mpm sbom` from its `Author-email` field, when no `Author` field gives the name.
+- [pip] List the requirements of an extra of a Python package as optional dependencies in the SPDX output of `mpm sbom`, not as runtime ones.
 - [mpm] Raise the `packageurl-python` floor to `0.17.6`: below it, parsing a pURL spec raises `TypeError`.
 - [sfsu] Raise the `sfsu` floor to `1.18.1`: below it, `outdated` misses every app installed for `arm64` on Windows on ARM. Run `scoop update sfsu` to upgrade an older install.
 

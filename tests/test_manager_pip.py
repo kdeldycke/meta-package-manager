@@ -30,6 +30,7 @@ from meta_package_manager.managers.pip import _PIP_PROBE_MARKER, Pip, _split_dep
 from meta_package_manager.package import (
     EMPTY_METADATA,
     Dependency,
+    DependencyScope,
     Originator,
     PackageMetadata,
     Supplier,
@@ -478,18 +479,18 @@ def test_split_dep_spec(spec, expected):
                 summary="A library implementing the 'SemVer' scheme.",
                 description="A library implementing the 'SemVer' scheme.",
                 dependencies=(
-                    Dependency("Django", version_constraint="(>=1.11)"),
-                    Dependency("nose2"),
-                    Dependency("tox"),
-                    Dependency("check-manifest"),
-                    Dependency("coverage"),
-                    Dependency("flake8"),
-                    Dependency("wheel"),
-                    Dependency("zest.releaser"),
-                    Dependency("readme-renderer", version_constraint="(<25.0)"),
-                    Dependency("colorama", version_constraint="(<=0.4.1)"),
-                    Dependency("Sphinx"),
-                    Dependency("sphinx-rtd-theme"),
+                    Dependency("Django", DependencyScope.OPTIONAL, "(>=1.11)"),
+                    Dependency("nose2", DependencyScope.OPTIONAL),
+                    Dependency("tox", DependencyScope.OPTIONAL),
+                    Dependency("check-manifest", DependencyScope.OPTIONAL),
+                    Dependency("coverage", DependencyScope.OPTIONAL),
+                    Dependency("flake8", DependencyScope.OPTIONAL),
+                    Dependency("wheel", DependencyScope.OPTIONAL),
+                    Dependency("zest.releaser", DependencyScope.OPTIONAL),
+                    Dependency("readme-renderer", DependencyScope.OPTIONAL, "(<25.0)"),
+                    Dependency("colorama", DependencyScope.OPTIONAL, "(<=0.4.1)"),
+                    Dependency("Sphinx", DependencyScope.OPTIONAL),
+                    Dependency("sphinx-rtd-theme", DependencyScope.OPTIONAL),
                 ),
                 extras={
                     "pip.keywords": "semantic version,versioning,version",
@@ -596,8 +597,8 @@ def test_split_dep_spec(spec, expected):
                 dependencies=(
                     Dependency("polib"),
                     Dependency("regex"),
-                    Dependency("pytest"),
-                    Dependency("pytest-cov"),
+                    Dependency("pytest", DependencyScope.OPTIONAL),
+                    Dependency("pytest-cov", DependencyScope.OPTIONAL),
                 ),
                 extras={"pip.classifiers": ["Topic :: Documentation :: Sphinx"]},
             ),
@@ -634,8 +635,8 @@ def test_distribution_metadata(tmp_path, metadata, expected):
     `License-Expression`, else from `License`, of which a text keeps its first
     line. The maintainer stands in for a missing author, then the name of the
     first entry of the address field, whose address is kept alone. A
-    requirement keeps its name and its constraint, but loses its extras and
-    its environment marker.
+    requirement keeps its name and its constraint, but not its extras, and is
+    optional when its environment marker names an extra.
     """
     assert Pip._distribution_metadata(_dist_info(tmp_path, metadata)) == expected
 

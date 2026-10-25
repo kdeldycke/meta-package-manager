@@ -396,6 +396,21 @@ Project-URL: Documentation, https://packaging.pypa.io/
 Project-URL: Source, https://github.com/pypa/packaging
 """
 
+SPHINX_LINT_METADATA = """\
+Metadata-Version: 2.4
+Name: sphinx-lint
+Version: 1.0.2
+Project-URL: Changelog, https://github.com/sphinx-contrib/sphinx-lint/releases
+Project-URL: Repository, https://github.com/sphinx-contrib/sphinx-lint
+Author-email: Georg Brandl <georg@python.org>, Julien Palard <julien@palard.fr>
+License-Expression: PSF-2.0
+Classifier: Topic :: Documentation :: Sphinx
+Requires-Dist: polib
+Requires-Dist: regex
+Requires-Dist: pytest; extra == 'tests'
+Requires-Dist: pytest-cov; extra == 'tests'
+"""
+
 WEBCOLORS_METADATA = """\
 Metadata-Version: 2.1
 Name: webcolors
@@ -534,6 +549,10 @@ def test_split_dep_spec(spec, expected):
                     "obtaining a copy"
                 ),
                 supplier=PYPI_SUPPLIER,
+                originator=Originator(
+                    name="Ronny Pfannschmidt",
+                    email="opensource@ronnypfannschmidt.de",
+                ),
                 summary="the blessed package to manage your versions by scm tags",
                 description="the blessed package to manage your versions by scm tags",
                 dependencies=(
@@ -544,7 +563,7 @@ def test_split_dep_spec(spec, expected):
                 ),
                 extras={"pip.classifiers": ["License :: OSI Approved :: MIT License"]},
             ),
-            id="license-text-and-no-author-name",
+            id="license-text-and-author-in-address",
         ),
         pytest.param(
             PACKAGING_METADATA,
@@ -554,6 +573,7 @@ def test_split_dep_spec(spec, expected):
                 license_declared="Apache-2.0 OR BSD-2-Clause",
                 license_concluded="Apache-2.0 OR BSD-2-Clause",
                 supplier=PYPI_SUPPLIER,
+                originator=Originator(name="Donald Stufft", email="donald@stufft.io"),
                 summary="Core utilities for Python packages",
                 description="Core utilities for Python packages",
                 extras={
@@ -564,6 +584,24 @@ def test_split_dep_spec(spec, expected):
                 },
             ),
             id="license-expression",
+        ),
+        pytest.param(
+            SPHINX_LINT_METADATA,
+            PackageMetadata(
+                vcs_url="https://github.com/sphinx-contrib/sphinx-lint",
+                license_declared="PSF-2.0",
+                license_concluded="PSF-2.0",
+                supplier=PYPI_SUPPLIER,
+                originator=Originator(name="Georg Brandl", email="georg@python.org"),
+                dependencies=(
+                    Dependency("polib"),
+                    Dependency("regex"),
+                    Dependency("pytest"),
+                    Dependency("pytest-cov"),
+                ),
+                extras={"pip.classifiers": ["Topic :: Documentation :: Sphinx"]},
+            ),
+            id="two-authors-in-address",
         ),
         pytest.param(
             WEBCOLORS_METADATA,
@@ -594,9 +632,10 @@ def test_distribution_metadata(tmp_path, metadata, expected):
     A `Home-page` header wins over every `Project-URL`, whose labels otherwise
     pick the homepage, the repository and the tracker. The license comes from
     `License-Expression`, else from `License`, of which a text keeps its first
-    line. The maintainer stands in for a missing author, and the address
-    of a `Name <address>` field is kept alone. A requirement keeps its name and
-    its constraint, but loses its extras and its environment marker.
+    line. The maintainer stands in for a missing author, then the name of the
+    first entry of the address field, whose address is kept alone. A
+    requirement keeps its name and its constraint, but loses its extras and
+    its environment marker.
     """
     assert Pip._distribution_metadata(_dist_info(tmp_path, metadata)) == expected
 

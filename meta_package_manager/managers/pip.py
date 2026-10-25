@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import email.message
+import email.utils
 import importlib.metadata
 import re
 import subprocess
@@ -611,17 +612,17 @@ class Pip(PackageManager):
             # the first line so the SPDX parser has a fighting chance.
             license_str = license_str.splitlines()[0].strip()
 
-        author_name = meta.get("Author") or meta.get("Maintainer") or None
-        author_email = meta.get("Author-email") or meta.get("Maintainer-email") or None
+        # An address field holds RFC 822 addresses, comma-separated, each bare or
+        # as `Name <address>`. The first one gives the address, and its name
+        # stands in for a missing `Author`: PEP 621 writes an author with both a
+        # name and an address to `Author-email` alone.
+        address_field = meta.get("Author-email") or meta.get("Maintainer-email")
+        addresses = email.utils.getaddresses([address_field]) if address_field else []
+        address_name, address = addresses[0] if addresses else ("", "")
+        author_name = meta.get("Author") or meta.get("Maintainer") or address_name
         originator = None
         if author_name:
-            # `Author-email` can carry a `"Name <email>"` payload.
-            email_match = None
-            if author_email and "<" in author_email and ">" in author_email:
-                email_match = author_email.split("<", 1)[1].split(">", 1)[0].strip()
-            elif author_email:
-                email_match = author_email
-            originator = Originator(name=author_name, email=email_match)
+            originator = Originator(name=author_name, email=address or None)
 
         # Requires-Dist lines look like `cryptography>=42.0; python_version<'3.13'`.
         # Strip environment markers and version constraints to land just

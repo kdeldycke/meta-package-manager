@@ -30,8 +30,6 @@ import sys
 import threading
 from collections import Counter
 from datetime import datetime, timezone
-from io import TextIOWrapper
-from pathlib import Path
 
 import tomli_w
 from click_extra import (
@@ -441,17 +439,11 @@ def restore(ctx, toml_files):
     # Gather one task per referenced (package, manager) across all the input files.
     tasks: list[tuple[PackageManager, Callable[[], tuple[bool, str]]]] = []
     for toml_input in toml_files:
-        is_stdin = isinstance(toml_input, TextIOWrapper)
-        if is_stdin:
-            toml_input.reconfigure(encoding="utf-8")
-            toml_filepath = toml_input.name
-            toml_content = toml_input.read()
-        else:
-            toml_filepath = Path(toml_input.name).resolve()
-            toml_content = toml_filepath.read_text(encoding="utf-8")
-
-        logging.info(f"Load package list from {toml_filepath}")
-        doc = tomllib.loads(toml_content)
+        # `File` hands over a text stream for a path and for `-` alike. Nothing has
+        # read it yet, so its encoding can still change to the one TOML mandates.
+        toml_input.reconfigure(encoding="UTF-8")
+        logging.info(f"Load package list from {toml_input.name}")
+        doc = tomllib.loads(toml_input.read())
 
         # List unrecognized sections.
         ignored_sections = [

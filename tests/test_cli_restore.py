@@ -196,17 +196,26 @@ def test_empty_manager(invoke, create_config):
     assert ":uv.install: Restore packages." in result.stderr
 
 
-def test_restore_reports_what_moved(invoke, create_config, changing_fake_pool):
-    """Restoring a snapshot reports each package installed, at its version."""
+@pytest.mark.parametrize("from_stdin", (False, True), ids=("file", "stdin"))
+def test_restore_reports_what_moved(
+    invoke, create_config, changing_fake_pool, from_stdin
+):
+    """Restoring a snapshot reports each package installed, at its version.
+
+    The snapshot is read as UTF-8 from a file and from `<stdin>` alike: the `Á`
+    of its comment holds a byte that `cp1252`, the encoding of Windows, cannot
+    decode.
+    """
     mid = changing_fake_pool.id
-    toml_path = create_config(
-        "snapshot.toml",
-        f"""
+    snapshot = f"""
+        # Taken in Ávila.
         [{mid}]
         fake-pkg-theta = "2.0.0"
-        """,
-    )
-    result = invoke("restore", str(toml_path))
+        """
+    if from_stdin:
+        result = invoke("restore", "-", input=snapshot)
+    else:
+        result = invoke("restore", str(create_config("snapshot.toml", snapshot)))
     assert result.exit_code == 0
     check_report(
         result.stdout,

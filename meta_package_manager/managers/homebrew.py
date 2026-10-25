@@ -58,6 +58,8 @@ class Homebrew(PackageManager):
     carry the manager-level narrative.
     """
 
+    logo = "homebrew"
+
     platforms = LINUX_LIKE, MACOS
     """Homebrew core is now compatible with [Linux and Windows Subsystem for Linux (WSL) 2](https://docs.brew.sh/Homebrew-on-Linux)."""
 
@@ -1033,7 +1035,6 @@ class Brew(Homebrew):
     documentation_url = "https://docs.brew.sh/"
     repository_url = "https://github.com/Homebrew/brew"
     wikipedia_url = "https://en.wikipedia.org/wiki/Homebrew_(package_manager)"
-    logo = "homebrew"
 
     keywords = ("homebrew",)
 
@@ -1128,7 +1129,6 @@ class Cask(Homebrew):
 
     documentation_url = "https://docs.brew.sh/Manpage"
     repository_url = "https://github.com/Homebrew/homebrew-cask"
-    logo = "homebrew"
 
     brewfile_entry_type = "cask"
 

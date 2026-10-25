@@ -661,13 +661,6 @@ class CleanupFakeManager(FakeManager):
         self.calls.append("cleanup_cache")
 
 
-class OrphanCleanupFakeManager(CleanupFakeManager):
-    """Fake manager that additionally supports the system-wide orphan sweep."""
-
-    def cleanup_orphan(self) -> None:
-        self.calls.append("cleanup_orphan")
-
-
 class SweepSynthesizingFakeManager(CleanupFakeManager):
     """Fake manager with cleanup, an orphan listing (inherited) and removal, but no
     native sweep verb: `cleanup --orphans` must go through the synthesized base
@@ -700,14 +693,6 @@ def test_remove_orphans_falls_back_to_plain_removal(invoke, removable_fake_pool)
     )
 
 
-def test_cleanup_orphans_runs_only_the_sweep(invoke, patch_pool_with):
-    """`cleanup --orphans` runs `cleanup_orphan`, not the full `cleanup`."""
-    fake = patch_pool_with(OrphanCleanupFakeManager())
-    result = invoke("cleanup", "--orphans")
-    assert result.exit_code == 0
-    assert fake.calls == ["cleanup_orphan"]
-
-
 def test_cleanup_orphans_reports_the_sweep(invoke, changing_fake_pool):
     """The trail line counts the packages the sweep removed, and the report names
     them."""
@@ -718,96 +703,104 @@ def test_cleanup_orphans_reports_the_sweep(invoke, changing_fake_pool):
     check_report(result.stdout, {"fake-pkg-epsilon": (PackageOutcome.REMOVED.label,)})
 
 
-def test_cleanup_without_flags_runs_default_categories(invoke, patch_pool_with):
-    """Plain `cleanup` runs the non-destructive default categories only: a native
-    orphan sweep does not join in without an explicit `--orphans`."""
-    fake = patch_pool_with(OrphanCleanupFakeManager())
-    result = invoke("cleanup")
-    assert result.exit_code == 0
-    assert fake.calls == ["cleanup_cache"]
-
-
-def test_cleanup_orphans_skips_manager_without_sweep(invoke, patch_pool_with):
-    """A cleanup-capable manager with no orphan sweep at all (an orphan listing but
-    no removal) is skipped by `--orphans`, not fully cleaned up."""
-    fake = patch_pool_with(CleanupFakeManager())
-    result = invoke("cleanup", "--orphans")
-    assert result.exit_code == 0
-    assert fake.calls == []
-
-
-def test_cleanup_orphans_runs_synthesized_sweep(invoke, patch_pool_with):
-    """`cleanup --orphans` on a manager without a native sweep verb synthesizes it:
-    the listed orphans are removed one by one, and the full `cleanup` never runs."""
-    fake = patch_pool_with(SweepSynthesizingFakeManager())
-    result = invoke("cleanup", "--orphans")
-    assert result.exit_code == 0
-    assert fake.calls == ["remove:fake-orphan-alpha"]
-
-
 @pytest.mark.parametrize(
-    ("args", "expected_calls"),
+    ("manager_class", "args", "expected_calls"),
     (
-        # No flag: the non-destructive default categories only.
-        ((), ["cleanup_cache"]),
-        # --skip-orphans is a harmless no-op: orphans is not in the default.
-        (("--skip-orphans",), ["cleanup_cache"]),
-        # Positive flags narrow the run to exactly the listed categories.
-        (("--orphans",), ["cleanup_orphan"]),
-        (("--cache",), ["cleanup_cache"]),
-        (("--orphans", "--cache"), ["cleanup_orphan", "cleanup_cache"]),
+        # A manager decomposed into an orphan and a cache category. No flag runs
+        # the non-destructive default categories only: an orphan sweep does not
+        # join in without an explicit `--orphans`.
+        pytest.param(
+            DecomposedCleanupFakeManager, (), ["cleanup_cache"], id="decomposed"
+        ),
+        # `--skip-orphans` is a harmless no-op: orphans is not in the default.
+        pytest.param(
+            DecomposedCleanupFakeManager,
+            ("--skip-orphans",),
+            ["cleanup_cache"],
+            id="decomposed-skip-orphans",
+        ),
+        # Positive flags narrow the run to exactly the listed categories, so
+        # `--orphans` runs the sweep and never the full `cleanup`.
+        pytest.param(
+            DecomposedCleanupFakeManager,
+            ("--orphans",),
+            ["cleanup_orphan"],
+            id="decomposed-orphans",
+        ),
+        pytest.param(
+            DecomposedCleanupFakeManager,
+            ("--cache",),
+            ["cleanup_cache"],
+            id="decomposed-cache",
+        ),
+        pytest.param(
+            DecomposedCleanupFakeManager,
+            ("--orphans", "--cache"),
+            ["cleanup_orphan", "cleanup_cache"],
+            id="decomposed-orphans-cache",
+        ),
         # Skip flags subtract categories from the default selection: skipping cache
         # leaves nothing, since orphans never joins without a positive flag.
-        (("--skip-cache",), []),
+        pytest.param(
+            DecomposedCleanupFakeManager,
+            ("--skip-cache",),
+            [],
+            id="decomposed-skip-cache",
+        ),
         # An unsupported selected category is simply not run.
-        (("--repair",), []),
+        pytest.param(
+            DecomposedCleanupFakeManager, ("--repair",), [], id="decomposed-repair"
+        ),
+        # A cache-only manager runs its single category under `--cache`. With an
+        # orphan listing but no removal, it has no sweep at all, so `--orphans`
+        # skips it rather than run a full cleanup.
+        pytest.param(
+            CleanupFakeManager, ("--cache",), ["cleanup_cache"], id="cache-only"
+        ),
+        pytest.param(CleanupFakeManager, ("--orphans",), [], id="cache-only-orphans"),
+        # With a removal but no native sweep verb, `--orphans` synthesizes the
+        # sweep: the listed orphans are removed one by one, and the full `cleanup`
+        # never runs.
+        pytest.param(
+            SweepSynthesizingFakeManager,
+            ("--orphans",),
+            ["remove:fake-orphan-alpha"],
+            id="synthesized-orphans",
+        ),
+        # A plain run keeps to the native categories. The flag pairs default to
+        # `True`, so `--help` renders each default as its positive side, and only
+        # a flag the user actually set counts as a positive that engages the
+        # synthesized sweep.
+        pytest.param(
+            SweepSynthesizingFakeManager, (), ["cleanup_cache"], id="synthesized"
+        ),
+        # A skip flag subtracts from the native bundle only: `--skip-cache` must
+        # not surprise-remove packages, so the manager is skipped entirely.
+        pytest.param(
+            SweepSynthesizingFakeManager,
+            ("--skip-cache",),
+            [],
+            id="synthesized-skip-cache",
+        ),
+        # `--skip-orphans` subtracts the sweep alone: the native categories run.
+        pytest.param(
+            SweepSynthesizingFakeManager,
+            ("--skip-orphans",),
+            ["cleanup_cache"],
+            id="synthesized-skip-orphans",
+        ),
     ),
 )
-def test_cleanup_category_selection(invoke, patch_pool_with, args, expected_calls):
-    """The tri-state category flags compose on a decomposed manager."""
-    fake = patch_pool_with(DecomposedCleanupFakeManager())
+def test_cleanup_category_selection(
+    invoke, patch_pool_with, manager_class, args, expected_calls
+):
+    """The tri-state category flags compose, whatever cleanup steps a manager
+    has: an orphan and a cache category, a cache category alone, or a sweep it
+    can only synthesize from its orphan listing and its removal."""
+    fake = patch_pool_with(manager_class())
     result = invoke("cleanup", *args)
     assert result.exit_code == 0
     assert fake.calls == expected_calls
-
-
-def test_cleanup_cache_category_alone(invoke, patch_pool_with):
-    """A cache-only manager runs its single category under `--cache` and under a
-    plain `cleanup` alike."""
-    fake = patch_pool_with(CleanupFakeManager())
-    result = invoke("cleanup", "--cache")
-    assert result.exit_code == 0
-    assert fake.calls == ["cleanup_cache"]
-
-
-def test_plain_cleanup_never_engages_synthesized_sweep(invoke, patch_pool_with):
-    """Plain `cleanup` runs native categories only: the flag pairs default to
-    `True` (so `--help` renders each default as its positive side), and only a
-    flag the user actually set may count as a positive and engage the synthesized
-    sweep."""
-    fake = patch_pool_with(SweepSynthesizingFakeManager())
-    result = invoke("cleanup")
-    assert result.exit_code == 0
-    assert fake.calls == ["cleanup_cache"]
-
-
-def test_cleanup_skip_never_engages_synthesized_sweep(invoke, patch_pool_with):
-    """A skip flag subtracts from the native bundle only: on a monolithic manager
-    with a synthesizable sweep, `--skip-cache` must not surprise-remove packages,
-    so the manager is skipped entirely."""
-    fake = patch_pool_with(SweepSynthesizingFakeManager())
-    result = invoke("cleanup", "--skip-cache")
-    assert result.exit_code == 0
-    assert fake.calls == []
-
-
-def test_cleanup_skip_orphans_keeps_native_categories(invoke, patch_pool_with):
-    """`--skip-orphans` on a manager with a synthesizable-but-not-native sweep
-    keeps its native categories running: only the sweep is subtracted."""
-    fake = patch_pool_with(SweepSynthesizingFakeManager())
-    result = invoke("cleanup", "--skip-orphans")
-    assert result.exit_code == 0
-    assert fake.calls == ["cleanup_cache"]
 
 
 def test_cleanup_narration_names_categories(invoke, patch_pool_with):

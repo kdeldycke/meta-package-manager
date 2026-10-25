@@ -639,13 +639,54 @@ compared_gt = (
     ),
 )
 
+# Known limitations: comparisons the heuristic tokenizer gets wrong, because it
+# implements no format-specific semantics. Each row is `xfail(strict=True)`, so
+# it fails loudly once the limitation is gone, which lets us claim the fix.
 
-@pytest.mark.parametrize(("ver1", "ver2"), compared_gt)
+GT_KNOWN_FAILURES = (
+    # Debian: the revision (after the last `-`) makes a version newer,
+    # but `-` also introduces a semver pre-release, which makes a version
+    # older. A format-agnostic comparator cannot tell the two apart and
+    # treats the string suffix as a pre-release. Unlike epochs, this
+    # separator is genuinely ambiguous, so it stays unhandled.
+    pytest.param(
+        "6.0.1-0ubuntu1",
+        "6.0.1",
+        id="debian-revision",
+        marks=pytest.mark.xfail(
+            strict=True, reason="Debian revision vs semver pre-release."
+        ),
+    ),
+)
+
+LT_KNOWN_FAILURES = (
+    # PEP 440: dev releases precede all pre-releases.
+    pytest.param(
+        "1.0.dev1",
+        "1.0a1",
+        id="pep440-dev-lt-alpha",
+        marks=pytest.mark.xfail(strict=True, reason="Ordering inversion."),
+    ),
+    # Semver 11.4.4: numeric identifiers always have lower precedence
+    # than alphanumeric identifiers in pre-release fields. Our
+    # int-outranks-string rule is the exact opposite.
+    pytest.param(
+        "1.0.0-alpha.1",
+        "1.0.0-alpha.beta",
+        id="semver-numeric-lt-string",
+        marks=pytest.mark.xfail(strict=True, reason="Ordering inversion."),
+    ),
+)
+
+
+@pytest.mark.parametrize(("ver1", "ver2"), (*compared_gt, *GT_KNOWN_FAILURES))
 def test_version_comparison_gt(ver1, ver2):
     assert TokenizedString(ver1) > TokenizedString(ver2)
 
 
-@pytest.mark.parametrize(("ver1", "ver2"), reverse_fixtures(compared_gt))
+@pytest.mark.parametrize(
+    ("ver1", "ver2"), (*reverse_fixtures(compared_gt), *LT_KNOWN_FAILURES)
+)
 def test_version_comparison_lt(ver1, ver2):
     assert TokenizedString(ver1) < TokenizedString(ver2)
 
@@ -700,10 +741,29 @@ compared_eq = (
     ("1:1.0", "1:1.0.0"),
 )
 
+EQ_KNOWN_FAILURES = tuple(
+    pytest.param(
+        ver1,
+        ver2,
+        id=param_id,
+        marks=pytest.mark.xfail(strict=True, reason="Format-specific normalization."),
+    )
+    for ver1, ver2, param_id in (
+        # PEP 440: local version equals base for ordering.
+        ("1.0+local", "1.0", "pep440-local-ignored"),
+        # Semver: build metadata is ignored in precedence.
+        ("1.0.0+build.123", "1.0.0", "semver-build-metadata"),
+        ("1.0.0+build.123", "1.0.0+build.124", "semver-build-metadata-diff"),
+        # Perl: floating-point versions treat `1.1` as `1.100`.
+        ("1.1", "1.10", "perl-float-equal"),
+        # Gentoo: three-digit-group conversion of Perl versions.
+        ("1.020030", "1.20.30", "gentoo-3digit-group"),
+    )
+)
 
-@pytest.mark.parametrize(("ver1", "ver2"), compared_eq)
+
+@pytest.mark.parametrize(("ver1", "ver2"), (*compared_eq, *EQ_KNOWN_FAILURES))
 def test_version_comparison_eq(ver1, ver2):
-    assert TokenizedString(ver1) == TokenizedString(ver2)
     assert TokenizedString(ver1) == TokenizedString(ver2)
     assert TokenizedString(ver1) >= TokenizedString(ver2)
     assert TokenizedString(ver1) <= TokenizedString(ver2)
@@ -928,70 +988,3 @@ def test_diff_versions_accepts_tokenized_strings():
     """A `TokenizedString` is stringified before the split, like a plain str."""
     tokenized = diff_versions(TokenizedString("1.2.3"), TokenizedString("1.2.4"))
     assert tokenized == diff_versions("1.2.3", "1.2.4")
-
-
-# --- Known limitations ---
-#
-# These tests document comparisons that the heuristic tokenizer gets wrong
-# because it does not implement format-specific semantics. Each test is
-# `xfail(strict=True)` so it fails loudly if the limitation is removed,
-# letting us claim the fix.
-
-
-@pytest.mark.parametrize(
-    ("ver1", "ver2"),
-    (
-        # Debian: the revision (after the last `-`) makes a version newer,
-        # but `-` also introduces a semver pre-release, which makes a version
-        # older. A format-agnostic comparator cannot tell the two apart and
-        # treats the string suffix as a pre-release. Unlike epochs, this
-        # separator is genuinely ambiguous, so it stays unhandled.
-        pytest.param("6.0.1-0ubuntu1", "6.0.1", id="debian-revision"),
-    ),
-)
-@pytest.mark.xfail(strict=True, reason="Debian revision vs semver pre-release.")
-def test_version_comparison_gt_known_failures(ver1, ver2):
-    assert TokenizedString(ver1) > TokenizedString(ver2)
-
-
-@pytest.mark.parametrize(
-    ("ver1", "ver2"),
-    (
-        # PEP 440: dev releases precede all pre-releases.
-        pytest.param("1.0.dev1", "1.0a1", id="pep440-dev-lt-alpha"),
-        # Semver 11.4.4: numeric identifiers always have lower precedence
-        # than alphanumeric identifiers in pre-release fields. Our
-        # int-outranks-string rule is the exact opposite.
-        pytest.param(
-            "1.0.0-alpha.1",
-            "1.0.0-alpha.beta",
-            id="semver-numeric-lt-string",
-        ),
-    ),
-)
-@pytest.mark.xfail(strict=True, reason="Ordering inversion.")
-def test_version_comparison_lt_known_failures(ver1, ver2):
-    assert TokenizedString(ver1) < TokenizedString(ver2)
-
-
-@pytest.mark.parametrize(
-    ("ver1", "ver2"),
-    (
-        # PEP 440: local version equals base for ordering.
-        pytest.param("1.0+local", "1.0", id="pep440-local-ignored"),
-        # Semver: build metadata is ignored in precedence.
-        pytest.param("1.0.0+build.123", "1.0.0", id="semver-build-metadata"),
-        pytest.param(
-            "1.0.0+build.123",
-            "1.0.0+build.124",
-            id="semver-build-metadata-diff",
-        ),
-        # Perl: floating-point versions treat `1.1` as `1.100`.
-        pytest.param("1.1", "1.10", id="perl-float-equal"),
-        # Gentoo: three-digit-group conversion of Perl versions.
-        pytest.param("1.020030", "1.20.30", id="gentoo-3digit-group"),
-    ),
-)
-@pytest.mark.xfail(strict=True, reason="Format-specific normalization.")
-def test_version_comparison_eq_known_failures(ver1, ver2):
-    assert TokenizedString(ver1) == TokenizedString(ver2)

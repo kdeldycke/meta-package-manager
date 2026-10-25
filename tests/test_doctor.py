@@ -108,32 +108,44 @@ def _doctor_with_stubbed_run(monkeypatch, *, code, stdout, stderr, completed=Tru
     return manager
 
 
-def test_doctor_healthy_merges_streams(monkeypatch):
+@pytest.mark.parametrize(
+    ("code", "stdout", "stderr", "verdict"),
+    (
+        # A healthy run merges both streams into the report.
+        pytest.param(
+            0,
+            "All good.",
+            "Note: chatter.",
+            (True, "All good.\nNote: chatter."),
+            id="healthy-merges-streams",
+        ),
+        # A non-zero exit with a silent `<stderr>`, the shape of `pip check`, passes
+        # the failure gate but still reads as unhealthy: the exit code is the
+        # verdict.
+        pytest.param(
+            1,
+            "conflicting dependencies found",
+            "",
+            (False, "conflicting dependencies found"),
+            id="unhealthy-from-stdout-only-exit",
+        ),
+        # The unhealthy exit is the diagnosis, not a plumbing error: the `CLIError`
+        # of the gate is reclaimed, so the end-of-run summary is not inflated.
+        pytest.param(
+            1,
+            "",
+            "Warning: broken linkage.",
+            (False, "Warning: broken linkage."),
+            id="reclaims-failure-gate-entry",
+        ),
+    ),
+)
+def test_doctor_verdict(monkeypatch, code, stdout, stderr, verdict):
+    """The exit code decides the health, and no run leaves a `CLIError` behind."""
     manager = _doctor_with_stubbed_run(
-        monkeypatch, code=0, stdout="All good.", stderr="Note: chatter."
+        monkeypatch, code=code, stdout=stdout, stderr=stderr
     )
-    assert manager.doctor() == (True, "All good.\nNote: chatter.")
-    assert manager.cli_errors == []
-
-
-def test_doctor_unhealthy_from_stdout_only_exit(monkeypatch):
-    """A non-zero exit with silent `<stderr>` (the pip check shape) is tolerated
-    by the failure gate but must still read as unhealthy: the exit code is the
-    verdict."""
-    manager = _doctor_with_stubbed_run(
-        monkeypatch, code=1, stdout="conflicting dependencies found", stderr=""
-    )
-    assert manager.doctor() == (False, "conflicting dependencies found")
-    assert manager.cli_errors == []
-
-
-def test_doctor_reclaims_failure_gate_entry(monkeypatch):
-    """The unhealthy exit is the diagnosis, not a plumbing error: the gate's
-    `CLIError` is reclaimed so the end-of-run summary is not inflated."""
-    manager = _doctor_with_stubbed_run(
-        monkeypatch, code=1, stdout="", stderr="Warning: broken linkage."
-    )
-    assert manager.doctor() == (False, "Warning: broken linkage.")
+    assert manager.doctor() == verdict
     assert manager.cli_errors == []
 
 

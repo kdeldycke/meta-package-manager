@@ -121,35 +121,25 @@ def test_changelog_releases_are_anchored_on_their_version(built_docs):
 
 
 @pytest.mark.parametrize(
-    "option",
+    ("page", "anchor"),
     (
-        "dry-run",
-        "jobs",
-        "stop-on-error",
-        "timeout",
+        # The `{click:config} mpm` summary table, one row per option.
+        *(
+            ("configuration.html", option)
+            for option in ("dry-run", "jobs", "stop-on-error", "timeout")
+        ),
+        # The `{click:tree} mpm` summary table, one row per command.
+        *(
+            ("cli-parameters.html", command)
+            for command in ("mpm-install", "mpm-remove", "mpm-sync", "mpm-upgrade")
+        ),
     ),
 )
-def test_config_summary_links_to_option_sections(built_docs, option):
-    """The `{click:config} mpm` summary table deep-links each option to its section."""
-    html = read_html(built_docs, "configuration.html")
-    assert f'id="{option}"' in html, f"missing section anchor for {option}"
-    assert f'href="#{option}"' in html, f"summary table does not link to {option}"
-
-
-@pytest.mark.parametrize(
-    "command",
-    (
-        "mpm-install",
-        "mpm-remove",
-        "mpm-sync",
-        "mpm-upgrade",
-    ),
-)
-def test_cli_tree_links_to_command_sections(built_docs, command):
-    """The `{click:tree} mpm` summary table deep-links each command to its section."""
-    html = read_html(built_docs, "cli-parameters.html")
-    assert f'id="{command}"' in html, f"missing section anchor for {command}"
-    assert f'href="#{command}"' in html, f"summary table does not link to {command}"
+def test_summary_tables_link_to_their_sections(built_docs, page, anchor):
+    """A summary table deep-links each option or command to its section."""
+    html = read_html(built_docs, page)
+    assert f'id="{anchor}"' in html, f"missing section anchor for {anchor}"
+    assert f'href="#{anchor}"' in html, f"summary table does not link to {anchor}"
 
 
 def test_intersphinx_click_resolves(built_docs):

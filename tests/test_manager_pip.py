@@ -51,56 +51,63 @@ def _installer_dist(installer):
 # --- Guard one: mpm's own distributor-managed bundle. ------------------------
 
 
-def test_bundled_app_detected_under_cellar():
-    """A `sys.prefix` under a Homebrew Cellar is conclusive on its own."""
-    cellar = "/opt/homebrew/Cellar/meta-package-manager/7.0.0/libexec"
-    with (
-        patch(PATCH_PREFIX, cellar),
-        # The INSTALLER lookup must not even be consulted when Cellar matches.
-        patch(PATCH_DIST, side_effect=AssertionError("must not be called")),
-    ):
-        assert Pip._running_from_bundled_app() is True
-
-
 @pytest.mark.parametrize(
-    "prefix",
-    ["/usr", "/home/kde/.venv", "/opt/homebrew", "/opt/homebrew/opt/python@3.14"],
+    ("prefix", "distribution", "bundled"),
+    (
+        # A `sys.prefix` under a Homebrew Cellar is conclusive on its own: the
+        # `INSTALLER` lookup must not even be consulted.
+        pytest.param(
+            "/opt/homebrew/Cellar/meta-package-manager/7.0.0/libexec",
+            {"side_effect": AssertionError("must not be called")},
+            True,
+            id="cellar-prefix",
+        ),
+        # Outside Cellar, an `INSTALLER` of `brew` still flags the bundle.
+        *(
+            pytest.param(
+                prefix,
+                {"return_value": _installer_dist("brew")},
+                True,
+                id=f"brew-installer-in-{label}",
+            )
+            for label, prefix in (
+                ("system", "/usr"),
+                ("venv", "/home/kde/.venv"),
+                ("homebrew", "/opt/homebrew"),
+                ("homebrew-python", "/opt/homebrew/opt/python@3.14"),
+            )
+        ),
+        # The `INSTALLER` tag is matched case- and whitespace-insensitively.
+        pytest.param(
+            "/usr",
+            {"return_value": _installer_dist("  Brew  ")},
+            True,
+            id="brew-installer-in-any-case",
+        ),
+        # A user-managed install outside Cellar is not a bundle.
+        *(
+            pytest.param(
+                "/home/kde/project/.venv",
+                {"return_value": _installer_dist(installer)},
+                False,
+                id=f"{installer or 'empty'}-installer",
+            )
+            for installer in ("pip", "uv", "poetry", "")
+        ),
+        # Running from source, with `mpm` not installed, is not a bundle.
+        pytest.param(
+            "/home/kde/project/.venv",
+            {"side_effect": importlib.metadata.PackageNotFoundError("x")},
+            False,
+            id="mpm-not-installed",
+        ),
+    ),
 )
-def test_bundled_app_detected_by_brew_installer(prefix):
-    """Outside Cellar, an `INSTALLER` of `brew` still flags the bundle."""
-    with (
-        patch(PATCH_PREFIX, prefix),
-        patch(PATCH_DIST, return_value=_installer_dist("brew")),
-    ):
-        assert Pip._running_from_bundled_app() is True
-
-
-def test_brew_installer_case_and_whitespace_insensitive():
-    """The `INSTALLER` tag is matched case- and whitespace-insensitively."""
-    with (
-        patch(PATCH_PREFIX, "/usr"),
-        patch(PATCH_DIST, return_value=_installer_dist("  Brew  ")),
-    ):
-        assert Pip._running_from_bundled_app() is True
-
-
-@pytest.mark.parametrize("installer", ["pip", "uv", "poetry", ""])
-def test_user_install_not_flagged(installer):
-    """A user-managed install (pip/uv/...) outside Cellar is not a bundle."""
-    with (
-        patch(PATCH_PREFIX, "/home/kde/project/.venv"),
-        patch(PATCH_DIST, return_value=_installer_dist(installer)),
-    ):
-        assert Pip._running_from_bundled_app() is False
-
-
-def test_bundled_app_false_when_mpm_absent():
-    """Running from source (`mpm` not installed) is not a bundle."""
-    with (
-        patch(PATCH_PREFIX, "/home/kde/project/.venv"),
-        patch(PATCH_DIST, side_effect=importlib.metadata.PackageNotFoundError("x")),
-    ):
-        assert Pip._running_from_bundled_app() is False
+def test_running_from_bundled_app(prefix, distribution, bundled):
+    """A bundle is told by its `sys.prefix` and by the `INSTALLER` record of the
+    `mpm` distribution."""
+    with patch(PATCH_PREFIX, prefix), patch(PATCH_DIST, **distribution):
+        assert Pip._running_from_bundled_app() is bundled
 
 
 # --- Guard two: PEP 668 externally-managed, non-virtualenv interpreters. ------
@@ -133,13 +140,25 @@ def test_pip_install_blocked_parses_probe(stdout, expected):
 
 
 @pytest.mark.parametrize(
-    "error",
-    [OSError("not a python"), subprocess.TimeoutExpired("python", 1)],
+    "probe",
+    (
+        # Guard two then reads as not blocked.
+        pytest.param("_pip_install_blocked", id="externally-managed-probe"),
+        # Guard three then reads as pip being present.
+        pytest.param("_pip_module_missing", id="pip-module-probe"),
+    ),
 )
-def test_pip_install_blocked_keeps_candidate_on_error(error):
-    """A failed probe must not hide a candidate: default to not-blocked."""
+@pytest.mark.parametrize(
+    "error",
+    (
+        pytest.param(OSError("not a python"), id="not-a-python"),
+        pytest.param(subprocess.TimeoutExpired("python", 1), id="timeout"),
+    ),
+)
+def test_probe_keeps_candidate_on_error(probe, error):
+    """A failed probe must not hide a candidate: both probes answer `False`."""
     with patch(PATCH_RUN, side_effect=error):
-        assert Pip()._pip_install_blocked(Path("/usr/bin/python3")) is False
+        assert getattr(Pip(), probe)(Path("/usr/bin/python3")) is False
 
 
 # --- Discovery: both guards composed in search_all_cli. -----------------------
@@ -250,16 +269,6 @@ def test_pip_module_missing_parses_probe(stdout, returncode, expected):
     assert command[0] == str(candidate)
     assert command[1] == "-c"
     assert "find_spec" in command[2]
-
-
-@pytest.mark.parametrize(
-    "error",
-    [OSError("not a python"), subprocess.TimeoutExpired("python", 1)],
-)
-def test_pip_module_missing_keeps_candidate_on_error(error):
-    """A failed probe must not hide a candidate: default to pip being present."""
-    with patch(PATCH_RUN, side_effect=error):
-        assert Pip()._pip_module_missing(Path("/usr/bin/python3")) is False
 
 
 def test_search_skips_running_interpreter_without_pip():

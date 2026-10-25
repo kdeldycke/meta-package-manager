@@ -102,42 +102,51 @@ def test_quote_non_ascii_passes_through():
     assert quote("café") == '"café"'
 
 
-def test_format_entry_bare():
-    assert format_entry("brew", "git") == 'brew "git"'
+@pytest.mark.parametrize(
+    ("entry_type", "name", "options", "expected"),
+    (
+        pytest.param("brew", "git", None, 'brew "git"', id="bare"),
+        pytest.param(
+            "mas",
+            "Xcode",
+            {"id": 497799835},
+            'mas "Xcode", id: 497799835',
+            id="scalar-int",
+        ),
+        pytest.param(
+            "flatpak",
+            "org.mozilla.firefox",
+            {"with": ["flathub"]},
+            'flatpak "org.mozilla.firefox", with: ["flathub"]',
+            id="list",
+        ),
+        pytest.param(
+            "tap",
+            "user/repo",
+            {"trusted": True},
+            'tap "user/repo", trusted: true',
+            id="bool",
+        ),
+    ),
+)
+def test_format_entry(entry_type, name, options, expected):
+    assert format_entry(entry_type, name, options) == expected
 
 
-def test_format_entry_with_scalar_int():
-    assert (
-        format_entry("mas", "Xcode", {"id": 497799835}) == 'mas "Xcode", id: 497799835'
-    )
-
-
-def test_format_entry_with_list():
-    assert (
-        format_entry("flatpak", "org.mozilla.firefox", {"with": ["flathub"]})
-        == 'flatpak "org.mozilla.firefox", with: ["flathub"]'
-    )
-
-
-def test_format_entry_with_bool():
-    assert (
-        format_entry("tap", "user/repo", {"trusted": True})
-        == 'tap "user/repo", trusted: true'
-    )
-
-
-def test_tap_from_package_id_third_party():
-    assert tap_from_package_id("gromgit/fuse/ntfs-3g-mac") == "gromgit/fuse"
-
-
-def test_tap_from_package_id_default_tap_returns_none():
-    assert tap_from_package_id("homebrew/core/git") is None
-    assert tap_from_package_id("homebrew/cask/iterm2") is None
-
-
-def test_tap_from_package_id_bare_name_returns_none():
-    assert tap_from_package_id("git") is None
-    assert tap_from_package_id("python@3.11") is None
+@pytest.mark.parametrize(
+    ("package_id", "tap"),
+    (
+        pytest.param("gromgit/fuse/ntfs-3g-mac", "gromgit/fuse", id="third-party"),
+        # Homebrew enables its default taps on its own.
+        pytest.param("homebrew/core/git", None, id="default-core"),
+        pytest.param("homebrew/cask/iterm2", None, id="default-cask"),
+        # A bare name carries no tap.
+        pytest.param("git", None, id="bare"),
+        pytest.param("python@3.11", None, id="bare-versioned"),
+    ),
+)
+def test_tap_from_package_id(package_id, tap):
+    assert tap_from_package_id(package_id) == tap
 
 
 def test_format_header_lists_coverage_and_skipped():

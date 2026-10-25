@@ -132,6 +132,8 @@ def test_resolve_timeout_explicit_wins(active_operation):
         ("remove", MUTATING_TIMEOUT),
         ("sync", MUTATING_TIMEOUT),
         ("cleanup", MUTATING_TIMEOUT),
+        # A CLI call with no known operation gets the conservative default.
+        (None, DEFAULT_TIMEOUT),
     ),
 )
 def test_resolve_timeout_per_operation(active_operation, expected):
@@ -142,26 +144,19 @@ def test_resolve_timeout_per_operation(active_operation, expected):
     assert manager._resolve_timeout() == expected
 
 
-def test_resolve_timeout_unknown_operation_falls_back_to_default():
-    """A CLI call with no known operation gets the conservative default."""
+@pytest.mark.parametrize(
+    ("progress", "live"),
+    (
+        # Without the progress opt-in, the spinner is forced off.
+        pytest.param(False, "never", id="progress-off"),
+        # With progress on, the spinner auto-detects a TTY at runtime.
+        pytest.param(True, "auto", id="progress-on"),
+    ),
+)
+def test_make_spinner_live_mode_follows_progress(progress, live):
     manager = FakeManager()
-    manager.timeout = None
-    manager._active_operation = None
-    assert manager._resolve_timeout() == DEFAULT_TIMEOUT
-
-
-def test_make_spinner_disabled_without_progress():
-    """Without the progress opt-in, the spinner is forced off."""
-    manager = FakeManager()
-    manager.progress = False
-    assert manager._make_spinner().live == "never"
-
-
-def test_make_spinner_defers_to_tty_with_progress():
-    """With progress on, the spinner is left to auto-detect a TTY at runtime."""
-    manager = FakeManager()
-    manager.progress = True
-    assert manager._make_spinner().live == "auto"
+    manager.progress = progress
+    assert manager._make_spinner().live == live
 
 
 @pytest.fixture

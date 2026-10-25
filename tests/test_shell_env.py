@@ -104,21 +104,21 @@ def test_read_shell_env_returns_the_exports(tmp_path):
     assert answer[SHELL_ENV_GUARD] == "1"
 
 
-def test_read_shell_env_rejects_a_failing_shell(tmp_path):
-    shell = fake_shell(tmp_path, "exit 3")
-    with pytest.raises(ShellEnvError, match="exited with code 3"):
-        read_shell_env(shell, bare_environ(tmp_path, shell))
-
-
-def test_read_shell_env_rejects_a_silent_shell(tmp_path):
-    shell = fake_shell(tmp_path, "exit 0")
-    with pytest.raises(ShellEnvError, match="printed no environment"):
-        read_shell_env(shell, bare_environ(tmp_path, shell))
-
-
-def test_read_shell_env_rejects_a_missing_shell(tmp_path):
-    shell = str(tmp_path / "nonexistent-shell")
-    with pytest.raises(ShellEnvError, match="cannot start"):
+@pytest.mark.parametrize(
+    ("script", "error"),
+    (
+        pytest.param("exit 3", "exited with code 3", id="failing"),
+        pytest.param("exit 0", "printed no environment", id="silent"),
+        # No script: the shell path names no file at all.
+        pytest.param(None, "cannot start", id="missing"),
+    ),
+)
+def test_read_shell_env_rejects_a_broken_shell(tmp_path, script, error):
+    if script is None:
+        shell = str(tmp_path / "nonexistent-shell")
+    else:
+        shell = fake_shell(tmp_path, script)
+    with pytest.raises(ShellEnvError, match=error):
         read_shell_env(shell, bare_environ(tmp_path, shell))
 
 

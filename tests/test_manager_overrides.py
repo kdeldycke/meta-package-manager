@@ -133,9 +133,59 @@ def test_non_dict_manager_section_raises():
         )
 
 
-def test_unknown_field_raises(reset_overrides):
-    with pytest.raises(ValidationError, match=r"unknown field"):
-        apply_manager_overrides(pool, {OVERRIDE_TARGET: {"made_up_field": 99}})
+@pytest.mark.parametrize(
+    ("field", "value", "message"),
+    (
+        pytest.param("made_up_field", 99, r"unknown field", id="unknown-field"),
+        pytest.param(
+            "cli_search_path",
+            "/single/path",
+            r"expected a list of strings",
+            id="string-list-given-a-string",
+        ),
+        pytest.param(
+            "cli_search_path",
+            ["/ok", 42],
+            r"expected all entries to be strings",
+            id="string-list-given-a-number",
+        ),
+        pytest.param("stop_on_error", 1, r"expected a boolean", id="boolean-given-1"),
+        # `bool` subclasses `int` in Python, yet a boolean is no integer override.
+        pytest.param("timeout", True, r"expected an integer", id="integer-given-true"),
+        pytest.param("timeout", "42", r"expected an integer", id="integer-given-text"),
+        pytest.param("requirement", 23, r"expected a string", id="string-given-23"),
+        pytest.param("sudo", 1, r"expected a boolean", id="sudo-given-1"),
+        pytest.param(
+            "extra_env",
+            {"K": 1},
+            r"expected a table of string-to-string",
+            id="table-given-a-number-value",
+        ),
+        pytest.param(
+            "extra_env",
+            ["PIP_INDEX_URL=https://example.test"],
+            r"expected a table of string-to-string",
+            id="table-given-a-list",
+        ),
+        pytest.param(
+            "cooldown_policy",
+            "strict",
+            r"expected one of enforce, best-effort, off",
+            id="policy-given-an-unknown-keyword",
+        ),
+        pytest.param(
+            "cooldown_policy",
+            True,
+            r"expected one of enforce, best-effort, off",
+            id="policy-given-a-boolean",
+        ),
+    ),
+)
+def test_override_rejects(reset_overrides, field, value, message):
+    """A field mpm does not know, or a value of the wrong type, stops the override
+    with an error that names what the field accepts."""
+    with pytest.raises(ValidationError, match=message):
+        apply_manager_overrides(pool, {OVERRIDE_TARGET: {field: value}})
 
 
 def test_str_tuple_override_replaces_default(reset_overrides):
@@ -155,55 +205,30 @@ def test_str_tuple_override_coerces_list_to_tuple(reset_overrides):
     assert isinstance(pool[OVERRIDE_TARGET].cli_names, tuple)
 
 
-def test_str_tuple_override_rejects_bare_string(reset_overrides):
-    with pytest.raises(ValidationError, match=r"expected a list of strings"):
-        apply_manager_overrides(
-            pool, {OVERRIDE_TARGET: {"cli_search_path": "/single/path"}}
-        )
-
-
-def test_str_tuple_override_rejects_non_string_entries(reset_overrides):
-    with pytest.raises(ValidationError, match=r"expected all entries to be strings"):
-        apply_manager_overrides(
-            pool, {OVERRIDE_TARGET: {"cli_search_path": ["/ok", 42]}}
-        )
-
-
-def test_bool_override(reset_overrides):
-    apply_manager_overrides(pool, {OVERRIDE_TARGET: {"stop_on_error": True}})
-    assert pool[OVERRIDE_TARGET].stop_on_error is True
-
-
-def test_bool_override_rejects_int(reset_overrides):
-    with pytest.raises(ValidationError, match=r"expected a boolean"):
-        apply_manager_overrides(pool, {OVERRIDE_TARGET: {"stop_on_error": 1}})
-
-
-def test_int_override(reset_overrides):
-    apply_manager_overrides(pool, {OVERRIDE_TARGET: {"timeout": 42}})
-    assert pool[OVERRIDE_TARGET].timeout == 42
-
-
-def test_int_override_rejects_bool(reset_overrides):
-    """A boolean is not an acceptable integer override even though `bool` subclasses
-    `int` in Python."""
-    with pytest.raises(ValidationError, match=r"expected an integer"):
-        apply_manager_overrides(pool, {OVERRIDE_TARGET: {"timeout": True}})
-
-
-def test_int_override_rejects_string(reset_overrides):
-    with pytest.raises(ValidationError, match=r"expected an integer"):
-        apply_manager_overrides(pool, {OVERRIDE_TARGET: {"timeout": "42"}})
-
-
-def test_str_override(reset_overrides):
-    apply_manager_overrides(pool, {OVERRIDE_TARGET: {"requirement": ">=20.0"}})
-    assert pool[OVERRIDE_TARGET].requirement == ">=20.0"
-
-
-def test_str_override_rejects_int(reset_overrides):
-    with pytest.raises(ValidationError, match=r"expected a string"):
-        apply_manager_overrides(pool, {OVERRIDE_TARGET: {"requirement": 23}})
+@pytest.mark.parametrize(
+    ("field", "value", "expected"),
+    (
+        pytest.param("stop_on_error", True, True, id="boolean"),
+        pytest.param("timeout", 42, 42, id="integer"),
+        pytest.param("requirement", ">=20.0", ">=20.0", id="string"),
+        pytest.param("sudo", True, True, id="sudo"),
+        # The policy keyword is read like the `--cooldown` option reads it,
+        # whatever its case.
+        pytest.param(
+            "cooldown_policy",
+            "Best-Effort",
+            CooldownPolicy.best_effort,
+            id="policy-in-any-case",
+        ),
+    ),
+)
+def test_override_applies(reset_overrides, field, value, expected):
+    """An override of the right type sets the field on the manager, as the type
+    the field holds."""
+    apply_manager_overrides(pool, {OVERRIDE_TARGET: {field: value}})
+    applied = getattr(pool[OVERRIDE_TARGET], field)
+    assert applied == expected
+    assert type(applied) is type(expected)
 
 
 def test_dict_override(reset_overrides):
@@ -239,39 +264,6 @@ def test_dict_override_adds_to_shipped_variables():
         pool.overridden_fields.pop("cask", None)
 
 
-@pytest.mark.parametrize(
-    "value",
-    (
-        pytest.param({"K": 1}, id="non-string-value"),
-        pytest.param(["PIP_INDEX_URL=https://example.test"], id="not-a-table"),
-    ),
-)
-def test_dict_override_rejects(reset_overrides, value):
-    with pytest.raises(ValidationError, match=r"expected a table of string-to-string"):
-        apply_manager_overrides(pool, {OVERRIDE_TARGET: {"extra_env": value}})
-
-
-def test_cooldown_policy_override(reset_overrides):
-    """The policy keyword is read like the `--cooldown` option reads it,
-    whatever its case."""
-    apply_manager_overrides(pool, {OVERRIDE_TARGET: {"cooldown_policy": "Best-Effort"}})
-    assert pool[OVERRIDE_TARGET].cooldown_policy is CooldownPolicy.best_effort
-
-
-@pytest.mark.parametrize(
-    "value",
-    (
-        pytest.param("strict", id="unknown-keyword"),
-        pytest.param(True, id="not-a-string"),
-    ),
-)
-def test_cooldown_policy_override_rejects(reset_overrides, value):
-    with pytest.raises(
-        ValidationError, match=r"expected one of enforce, best-effort, off"
-    ):
-        apply_manager_overrides(pool, {OVERRIDE_TARGET: {"cooldown_policy": value}})
-
-
 def test_multiple_fields_in_one_call(reset_overrides):
     apply_manager_overrides(
         pool,
@@ -302,19 +294,33 @@ def test_cached_property_evicted_on_override(reset_overrides):
     assert "cli_path" not in manager.__dict__
 
 
-def test_per_manager_timeout_beats_global_default(reset_overrides):
-    """A per-manager `timeout` override must survive the global `setattr` loop in
+@pytest.mark.parametrize(
+    ("field", "override", "global_value"),
+    (
+        pytest.param("timeout", 42, 999, id="timeout"),
+        pytest.param("stop_on_error", True, False, id="stop-on-error"),
+        # A manager can opt out of escalation, or into it, whatever the global
+        # `--sudo`.
+        pytest.param("sudo", False, True, id="sudo"),
+    ),
+)
+def test_per_manager_override_beats_global_default(
+    reset_overrides, field, override, global_value
+):
+    """A per-manager override must survive the global `setattr` loop in
     `_select_managers`: the most specific value wins."""
-    apply_manager_overrides(pool, {OVERRIDE_TARGET: {"timeout": 42}})
+    apply_manager_overrides(pool, {OVERRIDE_TARGET: {field: override}})
     selected = list(
         pool._select_managers(
             keep=(OVERRIDE_TARGET,),
             drop_not_found=False,
-            timeout=999,
+            **{field: global_value},
         )
     )
     assert len(selected) == 1
-    assert selected[0].timeout == 42
+    kept = getattr(selected[0], field)
+    assert kept == override
+    assert type(kept) is type(override)
 
 
 @pytest.mark.parametrize(
@@ -359,19 +365,6 @@ def test_timeout_binds_detection_phase(
     assert recorded[OVERRIDE_TARGET] == expected
 
 
-def test_per_manager_stop_on_error_beats_global_default(reset_overrides):
-    apply_manager_overrides(pool, {OVERRIDE_TARGET: {"stop_on_error": True}})
-    selected = list(
-        pool._select_managers(
-            keep=(OVERRIDE_TARGET,),
-            drop_not_found=False,
-            stop_on_error=False,
-        )
-    )
-    assert len(selected) == 1
-    assert selected[0].stop_on_error is True
-
-
 def test_global_default_still_applies_without_override():
     """Sanity: with no per-manager override, the global default reaches the manager."""
     selected = list(
@@ -385,31 +378,6 @@ def test_global_default_still_applies_without_override():
     assert selected[0].timeout == 77
     # Reset for following tests.
     pool["uv"].__dict__.pop("timeout", None)
-
-
-def test_sudo_override(reset_overrides):
-    apply_manager_overrides(pool, {OVERRIDE_TARGET: {"sudo": True}})
-    assert pool[OVERRIDE_TARGET].sudo is True
-
-
-def test_sudo_override_rejects_int(reset_overrides):
-    with pytest.raises(ValidationError):
-        apply_manager_overrides(pool, {OVERRIDE_TARGET: {"sudo": 1}})
-
-
-def test_per_manager_sudo_beats_global_default(reset_overrides):
-    """A per-manager `sudo` override survives the global `setattr` loop, so a
-    manager can opt out of (or into) escalation regardless of the global `--sudo`."""
-    apply_manager_overrides(pool, {OVERRIDE_TARGET: {"sudo": False}})
-    selected = list(
-        pool._select_managers(
-            keep=(OVERRIDE_TARGET,),
-            drop_not_found=False,
-            sudo=True,
-        )
-    )
-    assert len(selected) == 1
-    assert selected[0].sudo is False
 
 
 def test_sudo_is_a_risky_override_field():
@@ -793,73 +761,66 @@ def test_format_contribution_hints_lists_each_with_url():
     assert "--no-suggest-contribs" in msg
 
 
-def test_cli_prints_contribution_hint(invoke, create_config, reset_overrides):
-    """End-to-end: a config with a detection-related override surfaces the hint."""
-    conf_path = create_config(
-        "conf.toml",
-        dedent("""\
+@pytest.mark.parametrize(
+    ("config", "args", "hinted"),
+    (
+        # A detection-related override surfaces the hint.
+        pytest.param(
+            """\
             [mpm.overrides.pip]
             cli_search_path = ["/no/such/path/for/test"]
-            """),
-    )
-    result = invoke("--config", str(conf_path), "managers")
-    assert result.exit_code == 0
-    assert "Detected user override" in result.stderr
-    assert "cli_search_path" in result.stderr
-    assert "issues/new" in result.stderr
-
-
-def test_cli_no_hint_for_preference_override(invoke, create_config, reset_overrides):
-    """Overriding only a preference field must not surface a hint."""
-    conf_path = create_config(
-        "conf.toml",
-        dedent("""\
+            """,
+            (),
+            True,
+            id="detection-override",
+        ),
+        # Overriding only a preference field surfaces no hint.
+        pytest.param(
+            """\
             [mpm.overrides.pip]
             timeout = 42
-            """),
-    )
-    result = invoke("--config", str(conf_path), "managers")
-    assert result.exit_code == 0
-    assert "Detected user override" not in result.stderr
-
-
-def test_cli_opt_out_suppresses_hint(invoke, create_config, reset_overrides):
-    """`--no-suggest-contribs` silences the hint output."""
-    conf_path = create_config(
-        "conf.toml",
-        dedent("""\
+            """,
+            (),
+            False,
+            id="preference-override",
+        ),
+        # `--no-suggest-contribs` silences the hint.
+        pytest.param(
+            """\
             [mpm.overrides.pip]
             cli_search_path = ["/no/such/path"]
-            """),
-    )
-    result = invoke(
-        "--config",
-        str(conf_path),
-        "--no-suggest-contribs",
-        "managers",
-    )
-    assert result.exit_code == 0
-    assert "Detected user override" not in result.stderr
-    assert "issues/new" not in result.stderr
-
-
-def test_cli_opt_out_via_config(invoke, create_config, reset_overrides):
-    """The `[mpm] suggest_contribs = false` config also silences
-    the hint."""
-    conf_path = create_config(
-        "conf.toml",
-        dedent("""\
+            """,
+            ("--no-suggest-contribs",),
+            False,
+            id="opt-out-option",
+        ),
+        # The `[mpm] suggest_contribs = false` configuration silences it too.
+        pytest.param(
+            """\
             [mpm]
             suggest_contribs = false
 
             [mpm.overrides.pip]
             cli_search_path = ["/no/such/path"]
-            """),
-    )
-    result = invoke("--config", str(conf_path), "managers")
+            """,
+            (),
+            False,
+            id="opt-out-configuration",
+        ),
+    ),
+)
+def test_cli_contribution_hint(
+    invoke, create_config, reset_overrides, config, args, hinted
+):
+    """End to end: the configuration decides whether the contribution hint,
+    and the issue link it carries, reach `<stderr>`."""
+    conf_path = create_config("conf.toml", dedent(config))
+    result = invoke("--config", str(conf_path), *args, "managers")
     assert result.exit_code == 0
-    assert "Detected user override" not in result.stderr
-    assert "issues/new" not in result.stderr
+    assert ("Detected user override" in result.stderr) is hinted
+    assert ("issues/new" in result.stderr) is hinted
+    if hinted:
+        assert "cli_search_path" in result.stderr
 
 
 # dump_manager_overrides + config-template subcommand.

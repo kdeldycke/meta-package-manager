@@ -275,20 +275,20 @@ def test_output_to_file(invoke, subcmd, fake_pool, export_format, standard_name)
             assert rdf_elem.text == "SPDX-2.3"
 
 
-def test_sbom_query_filter_narrows_to_matches(invoke, fake_pool):
-    """`sbom --query` keeps only installed packages matching the query."""
-    result = invoke("sbom", "--query", "alpha", "--minimal")
+@pytest.mark.parametrize(
+    ("args", "listed"),
+    (
+        # A query keeps only the installed packages matching it.
+        pytest.param(("--query", "alpha"), {"fake-pkg-alpha"}, id="query"),
+        # Without a query, the whole installed inventory is kept.
+        pytest.param((), {"fake-pkg-alpha", "fake-pkg-beta"}, id="no-query"),
+    ),
+)
+def test_sbom_query_filter(invoke, fake_pool, args, listed):
+    result = invoke("sbom", *args, "--minimal")
     assert result.exit_code == 0
-    assert "fake-pkg-alpha" in result.stdout
-    assert "fake-pkg-beta" not in result.stdout
-
-
-def test_sbom_without_query_lists_all(invoke, fake_pool):
-    """Without a query, `sbom` exports the full installed inventory."""
-    result = invoke("sbom", "--minimal")
-    assert result.exit_code == 0
-    assert "fake-pkg-alpha" in result.stdout
-    assert "fake-pkg-beta" in result.stdout
+    for package_id in ("fake-pkg-alpha", "fake-pkg-beta"):
+        assert (package_id in result.stdout) is (package_id in listed)
 
 
 def test_minimal_mode_skips_metadata_extractor(invoke):

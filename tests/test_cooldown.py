@@ -633,42 +633,49 @@ Build Date      : Tue, 22 Jul 2025 09:14:02
 """
 
 
-def test_paru_release_date_reads_aur_last_modified(stub_run_cli):
-    manager = Paru()
-    stub_run_cli(manager, _PARU_AUR_INFO_OUTPUT)
-    published = manager.release_date("paru")
-    assert published == datetime(2025, 7, 12, 14, 52, 15, tzinfo=timezone.utc)
-
-
-def test_paru_release_date_parses_space_padded_days(stub_run_cli):
-    output = _PARU_AUR_INFO_OUTPUT.replace(
-        "Sat, 12 Jul 2025 14:52:15", "Wed,  2 Jul 2025 08:01:02"
-    )
+@pytest.mark.parametrize(
+    ("package_id", "output", "expected"),
+    (
+        pytest.param(
+            "paru",
+            _PARU_AUR_INFO_OUTPUT,
+            datetime(2025, 7, 12, 14, 52, 15, tzinfo=timezone.utc),
+            id="aur-last-modified",
+        ),
+        pytest.param(
+            "paru",
+            _PARU_AUR_INFO_OUTPUT.replace(
+                "Sat, 12 Jul 2025 14:52:15", "Wed,  2 Jul 2025 08:01:02"
+            ),
+            datetime(2025, 7, 2, 8, 1, 2, tzinfo=timezone.utc),
+            id="space-padded-day",
+        ),
+        pytest.param(
+            "firefox",
+            _PARU_REPO_INFO_OUTPUT,
+            COOLDOWN_EXEMPT,
+            id="repository-package-exempt",
+        ),
+        pytest.param(
+            "paru",
+            _PARU_AUR_INFO_OUTPUT.replace(
+                "Sat, 12 Jul 2025 14:52:15", "sometime last summer"
+            ),
+            None,
+            id="unparsable-date",
+        ),
+        pytest.param("paru", "Name : paru\n", None, id="no-date-field"),
+    ),
+)
+def test_paru_release_date(stub_run_cli, package_id, output, expected):
+    """An AUR package is dated by its `Last Modified` field, a repository package
+    is exempt, and an answer with no readable date dates nothing."""
     manager = Paru()
     stub_run_cli(manager, output)
-    published = manager.release_date("paru")
-    assert published == datetime(2025, 7, 2, 8, 1, 2, tzinfo=timezone.utc)
-
-
-def test_paru_release_date_exempts_repository_packages(stub_run_cli):
-    manager = Paru()
-    stub_run_cli(manager, _PARU_REPO_INFO_OUTPUT)
-    assert manager.release_date("firefox") is COOLDOWN_EXEMPT
-
-
-def test_paru_release_date_none_on_unparsable_date(stub_run_cli):
-    output = _PARU_AUR_INFO_OUTPUT.replace(
-        "Sat, 12 Jul 2025 14:52:15", "sometime last summer"
-    )
-    manager = Paru()
-    stub_run_cli(manager, output)
-    assert manager.release_date("paru") is None
-
-
-def test_paru_release_date_none_without_fields(stub_run_cli):
-    manager = Paru()
-    stub_run_cli(manager, "Name : paru\n")
-    assert manager.release_date("paru") is None
+    published = manager.release_date(package_id)
+    assert published == expected
+    # The exemption is a sentinel: only that very object reads as exempt.
+    assert (published is COOLDOWN_EXEMPT) is (expected is COOLDOWN_EXEMPT)
 
 
 def test_hold_passes_exempt_sentinel(monkeypatch):
@@ -711,34 +718,30 @@ def test_paru_gated_upgrade_all_without_holds_keeps_native_cli(monkeypatch):
     assert ran == [("paru", "--sync", "--refresh", "--sysupgrade")]
 
 
-def test_mas_release_date_reads_catalog_record(monkeypatch):
-    manager = MAS()
-
-    def fake_run_cli(*args, **kwargs):
-        assert args == ("lookup", "999999999", "--json")
-        return (
+@pytest.mark.parametrize(
+    ("output", "expected"),
+    (
+        pytest.param(
             '{"adamID":999999999,"currentVersionReleaseDate":'
-            '"2020-03-18T17:39:23Z","name":"Papaya","version":"2.0"}'
-        )
-
-    monkeypatch.setattr(manager, "run_cli", fake_run_cli)
-    published = manager.release_date("999999999")
-    assert published == datetime(2020, 3, 18, 17, 39, 23, tzinfo=timezone.utc)
-
-
-def test_mas_release_date_none_without_date_field(stub_run_cli):
+            '"2020-03-18T17:39:23Z","name":"Papaya","version":"2.0"}',
+            datetime(2020, 3, 18, 17, 39, 23, tzinfo=timezone.utc),
+            id="catalog-record",
+        ),
+        pytest.param('{"adamID":999999999,"name":"Papaya"}', None, id="no-date-field"),
+        pytest.param(
+            '{"adamID":999999999,"currentVersionReleaseDate":"soon","name":"Papaya"}',
+            None,
+            id="unparsable-date",
+        ),
+    ),
+)
+def test_mas_release_date(capture_run_cli, output, expected):
+    """The release date is the `currentVersionReleaseDate` of the catalog record
+    `mas lookup` prints, and `None` when the record holds no readable date."""
     manager = MAS()
-    stub_run_cli(manager, '{"adamID":999999999,"name":"Papaya"}')
-    assert manager.release_date("999999999") is None
-
-
-def test_mas_release_date_none_on_unparsable_date(stub_run_cli):
-    manager = MAS()
-    stub_run_cli(
-        manager,
-        '{"adamID":999999999,"currentVersionReleaseDate":"soon","name":"Papaya"}',
-    )
-    assert manager.release_date("999999999") is None
+    calls = capture_run_cli(manager, output)
+    assert manager.release_date("999999999") == expected
+    assert calls == [("lookup", "999999999", "--json")]
 
 
 def test_attempt_install_reports_cooldown_status(monkeypatch):

@@ -148,21 +148,17 @@ def test_upgrade_one_cli_builds_spec(manager, version, expected_spec):
     assert cli[-1] == expected_spec
 
 
-def test_remove_uses_all_flag(manager, capture_run_cli):
-    """`--all` matches mpm's "remove the package, full stop" contract even
-    when `mise` has multiple versions of the same tool installed."""
+@pytest.mark.parametrize(
+    ("operation", "args", "expected"),
+    (
+        # `--all` matches the "remove the package, full stop" contract of mpm,
+        # even when `mise` holds several versions of the same tool.
+        pytest.param("remove", ("node",), ("uninstall", "--all", "node"), id="remove"),
+        pytest.param("sync", (), ("plugins", "update"), id="sync"),
+        pytest.param("cleanup", (), ("cache", "clear"), id="cleanup"),
+    ),
+)
+def test_operation_command(manager, capture_run_cli, operation, args, expected):
     captured = capture_run_cli(manager)
-    manager.remove("node")
-    assert captured == [("uninstall", "--all", "node")]
-
-
-def test_sync_runs_plugins_update(manager, capture_run_cli):
-    captured = capture_run_cli(manager)
-    manager.sync()
-    assert captured == [("plugins", "update")]
-
-
-def test_cleanup_runs_cache_clear(manager, capture_run_cli):
-    captured = capture_run_cli(manager)
-    manager.cleanup()
-    assert captured == [("cache", "clear")]
+    getattr(manager, operation)(*args)
+    assert captured == [expected]

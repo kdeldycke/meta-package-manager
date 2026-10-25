@@ -1795,21 +1795,47 @@ def test_bundled_definition_carries_no_boilerplate(toml_path):
 
 
 @pytest.mark.parametrize(
-    ("operation", "expected"),
+    ("manager_id", "operation", "expected"),
     (
-        (Operations.installed, True),
-        (Operations.search, True),
-        (Operations.install, True),
-        (Operations.remove, True),
-        (Operations.upgrade, True),
-        (Operations.upgrade_all, True),
-        (Operations.outdated, False),
-        (Operations.sync, False),
-        (Operations.cleanup, False),
+        ("gh-ext", Operations.installed, True),
+        ("gh-ext", Operations.search, True),
+        ("gh-ext", Operations.install, True),
+        ("gh-ext", Operations.remove, True),
+        ("gh-ext", Operations.upgrade, True),
+        ("gh-ext", Operations.upgrade_all, True),
+        ("gh-ext", Operations.outdated, False),
+        ("gh-ext", Operations.sync, False),
+        ("gh-ext", Operations.cleanup, False),
+        ("soar", Operations.installed, True),
+        ("soar", Operations.search, True),
+        ("soar", Operations.install, True),
+        ("soar", Operations.remove, True),
+        ("soar", Operations.upgrade, True),
+        ("soar", Operations.upgrade_all, True),
+        ("soar", Operations.sync, True),
+        ("soar", Operations.cleanup, True),
+        ("soar", Operations.outdated, False),
+        # SteamCMD exposes no inventory: only install and per-title upgrade
+        # exist, both mapping to the same idempotent `+app_update` command.
+        ("steamcmd", Operations.install, True),
+        ("steamcmd", Operations.installed, False),
+        ("steamcmd", Operations.outdated, False),
+        ("steamcmd", Operations.search, False),
+        ("steamcmd", Operations.remove, False),
+        ("steamcmd", Operations.sync, False),
+        ("steamcmd", Operations.cleanup, False),
+        # The declared upgrade_one command is not enough: single-package upgrade
+        # also needs an `installed` listing to resolve which manager owns the
+        # package, and SteamCMD cannot provide one. Same verdict as the former
+        # Python class.
+        ("steamcmd", Operations.upgrade, False),
+        ("steamcmd", Operations.upgrade_all, False),
     ),
 )
-def test_gh_ext_capabilities(operation, expected):
-    assert implements(pool["gh-ext"], operation) is expected
+def test_bundled_definition_capabilities(manager_id, operation, expected):
+    """A bundled definition implements the operations its file maps, and no
+    other."""
+    assert implements(pool[manager_id], operation) is expected
 
 
 def _version_sample_params():
@@ -1834,48 +1860,6 @@ def test_bundled_version_regex(manager_id, output, expected):
     match = re.search(pool[manager_id].version_regexes[0], output)
     assert match is not None
     assert match.group("version") == expected
-
-
-@pytest.mark.parametrize(
-    ("operation", "expected"),
-    (
-        (Operations.installed, True),
-        (Operations.search, True),
-        (Operations.install, True),
-        (Operations.remove, True),
-        (Operations.upgrade, True),
-        (Operations.upgrade_all, True),
-        (Operations.sync, True),
-        (Operations.cleanup, True),
-        (Operations.outdated, False),
-    ),
-)
-def test_soar_capabilities(operation, expected):
-    assert implements(pool["soar"], operation) is expected
-
-
-@pytest.mark.parametrize(
-    ("operation", "expected"),
-    (
-        (Operations.install, True),
-        (Operations.installed, False),
-        (Operations.outdated, False),
-        (Operations.search, False),
-        (Operations.remove, False),
-        (Operations.sync, False),
-        (Operations.cleanup, False),
-        # The declared upgrade_one command is not enough: single-package upgrade
-        # also needs an `installed` listing to resolve which manager owns the
-        # package, and SteamCMD cannot provide one. Same verdict as the former
-        # Python class.
-        (Operations.upgrade, False),
-        (Operations.upgrade_all, False),
-    ),
-)
-def test_steamcmd_capabilities(operation, expected):
-    """SteamCMD exposes no inventory: only install and per-title upgrade exist,
-    both mapping to the same idempotent `+app_update` command."""
-    assert implements(pool["steamcmd"], operation) is expected
 
 
 def _parsing_sample_params():

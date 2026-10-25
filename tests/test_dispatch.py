@@ -203,10 +203,18 @@ def test_preserves_input_order_despite_completion_order():
     assert [manager_id for manager_id, _ in results] == [f"m{i}" for i in range(8)]
 
 
-def test_suppresses_per_manager_spinners_when_concurrent():
-    """Concurrent mode mutes per-manager spinners (one aggregate stands in)."""
-    ctx = FakeContext(jobs=4)
-    managers = [StubManager(f"m{i}", progress=True) for i in range(4)]
+@pytest.mark.parametrize(
+    ("jobs", "count", "progress"),
+    (
+        # Concurrent mode mutes per-manager spinners: one aggregate stands in.
+        pytest.param(4, 4, False, id="concurrent"),
+        # Sequential mode leaves the per-manager spinner gate untouched.
+        pytest.param(1, 3, True, id="sequential"),
+    ),
+)
+def test_per_manager_spinners_follow_the_job_count(jobs, count, progress):
+    ctx = FakeContext(jobs=jobs)
+    managers = [StubManager(f"m{i}", progress=True) for i in range(count)]
     collect_from_managers(
         "Testing",
         "Tested",
@@ -214,21 +222,7 @@ def test_suppresses_per_manager_spinners_when_concurrent():
         lambda manager: (manager.id, {}),
         ctx=ctx,  # type: ignore[arg-type]
     )
-    assert all(manager.progress is False for manager in managers)
-
-
-def test_keeps_per_manager_spinners_when_sequential():
-    """Sequential mode leaves the per-manager spinner gate untouched."""
-    ctx = FakeContext(jobs=1)
-    managers = [StubManager(f"m{i}", progress=True) for i in range(3)]
-    collect_from_managers(
-        "Testing",
-        "Tested",
-        managers,  # type: ignore[arg-type]
-        lambda manager: (manager.id, {}),
-        ctx=ctx,  # type: ignore[arg-type]
-    )
-    assert all(manager.progress is True for manager in managers)
+    assert all(manager.progress is progress for manager in managers)
 
 
 def test_empty_manager_list_returns_empty():

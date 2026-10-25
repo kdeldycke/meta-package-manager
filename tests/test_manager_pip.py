@@ -279,7 +279,7 @@ def test_pip_module_missing_reads_past_undecodable_output():
     The candidate is the running interpreter, which prints a Latin-1 `café`
     before the marked answer.
     """
-    probe = f"import sys; sys.stdout.buffer.write(b'caf\\xe9 {_PIP_PROBE_MARKER} 1\\n')"
+    probe = f"import sys; sys.stdout.buffer.write(b'calf\\xe9 {_PIP_PROBE_MARKER} 1\\n')"
     with patch("meta_package_manager.managers.pip._PIP_MODULE_PROBE", probe):
         assert Pip()._pip_module_missing(Path(sys.executable)) is False
 

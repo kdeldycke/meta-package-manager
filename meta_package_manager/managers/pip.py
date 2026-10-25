@@ -603,7 +603,9 @@ class Pip(PackageManager):
             }:
                 issue_tracker_url = url
 
-        license_str = meta.get("License") or None
+        # Core metadata 2.4 moved the license to an SPDX expression in
+        # `License-Expression`, which readers prefer when `License` is set too.
+        license_str = meta.get("License-Expression") or meta.get("License") or None
         if license_str and "\n" in license_str:
             # Some projects dump the full license text here. Truncate to
             # the first line so the SPDX parser has a fighting chance.

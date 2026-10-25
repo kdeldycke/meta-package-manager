@@ -15,6 +15,7 @@
 - [mpm] Add the variables of an `extra_env` override to those the manager sets, instead of replacing them, as the documentation of the field says.
 - [mpm] Refuse manager definitions from a remote or unsafe configuration file, and warn about its risky overrides, as documented. Make the file and its folder writable by you alone to keep its definitions.
 - [mpm] Say that a silent command printed nothing in the hidden password prompt warning, instead of quoting its own command line as its last output.
+- [pip] Read the license of a Python package from its `License-Expression` field in `mpm sbom`, where core metadata `2.4` declares it.
 - [mpm] Raise the `packageurl-python` floor to `0.17.6`: below it, parsing a pURL spec raises `TypeError`.
 - [sfsu] Raise the `sfsu` floor to `1.18.1`: below it, `outdated` misses every app installed for `arm64` on Windows on ARM. Run `scoop update sfsu` to upgrade an older install.
 

@@ -383,6 +383,19 @@ Requires-Dist: tomli>=1; python_version < "3.11"
 Requires-Dist: typing-extensions; python_version < "3.10"
 """
 
+PACKAGING_METADATA = """\
+Metadata-Version: 2.4
+Name: packaging
+Version: 26.3
+Summary: Core utilities for Python packages
+Author-email: Donald Stufft <donald@stufft.io>
+License-Expression: Apache-2.0 OR BSD-2-Clause
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Typing :: Typed
+Project-URL: Documentation, https://packaging.pypa.io/
+Project-URL: Source, https://github.com/pypa/packaging
+"""
+
 WEBCOLORS_METADATA = """\
 Metadata-Version: 2.1
 Name: webcolors
@@ -534,6 +547,25 @@ def test_split_dep_spec(spec, expected):
             id="license-text-and-no-author-name",
         ),
         pytest.param(
+            PACKAGING_METADATA,
+            PackageMetadata(
+                homepage="https://packaging.pypa.io/",
+                vcs_url="https://github.com/pypa/packaging",
+                license_declared="Apache-2.0 OR BSD-2-Clause",
+                license_concluded="Apache-2.0 OR BSD-2-Clause",
+                supplier=PYPI_SUPPLIER,
+                summary="Core utilities for Python packages",
+                description="Core utilities for Python packages",
+                extras={
+                    "pip.classifiers": [
+                        "Development Status :: 5 - Production/Stable",
+                        "Typing :: Typed",
+                    ]
+                },
+            ),
+            id="license-expression",
+        ),
+        pytest.param(
             WEBCOLORS_METADATA,
             PackageMetadata(
                 homepage="https://webcolors.readthedocs.io",
@@ -560,8 +592,9 @@ def test_distribution_metadata(tmp_path, metadata, expected):
     """The core metadata of a distribution fills the portable fields.
 
     A `Home-page` header wins over every `Project-URL`, whose labels otherwise
-    pick the homepage, the repository and the tracker. A license text keeps its
-    first line. The maintainer stands in for a missing author, and the address
+    pick the homepage, the repository and the tracker. The license comes from
+    `License-Expression`, else from `License`, of which a text keeps its first
+    line. The maintainer stands in for a missing author, and the address
     of a `Name <address>` field is kept alone. A requirement keeps its name and
     its constraint, but loses its extras and its environment marker.
     """

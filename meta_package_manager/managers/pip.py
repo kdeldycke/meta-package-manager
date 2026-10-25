@@ -349,6 +349,10 @@ class Pip(PackageManager):
         set, else the {data}`~meta_package_manager.execution.READ_ONLY_TIMEOUT`
         read-only cap.
 
+        The output decodes as UTF-8, and each byte that does not decode becomes
+        a replacement character. The answers the guards read are ASCII, and a
+        candidate can print anything around them.
+
         Returns `None` when the probe never ran to completion (a missing or
         non-executable file, an interpreter hanging past the timeout), so the
         caller keeps the candidate rather than hide a usable interpreter.
@@ -358,7 +362,8 @@ class Pip(PackageManager):
             return subprocess.run(
                 (str(python_path), "-c", code),
                 capture_output=True,
-                text=True,
+                encoding="UTF-8",
+                errors="replace",
                 timeout=timeout,
                 check=False,
             )

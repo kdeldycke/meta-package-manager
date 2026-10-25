@@ -34,9 +34,15 @@ The Nix package definition is maintained in-tree at `packaging/nix/` while [NixO
 
 Two dependencies (`click-extra` and `extra-platforms`) are also bundled in `packaging/nix/` since they are not yet in nixpkgs. A `default.nix` wrapper overlays them into the Python package set, and a `flake.nix` provides flake-based access. Once the nixpkgs PR lands, the overlay and bundled dependencies become unnecessary.
 
-## MacPorts and Alpine
+## Channels refreshed by hand
 
-The MacPorts Portfile overlay (`packaging/macports/`) and the Alpine APKBUILD overlay (`packaging/alpine/`) have no automated bump job: they pin the released version and its source checksums, and must be refreshed by hand as part of each release. Their build instructions and upstream submission statuses are catalogued on the [packaging page](packaging.md#channels).
+Only the Guix and Nix definitions have a bump job in `release.yaml`. The channels below are refreshed by hand as part of each release. The [packaging page](packaging.md#channels) catalogs their build instructions and upstream submission statuses.
+
+- The Alpine APKBUILD overlay (`packaging/alpine/`) pins the released version and the checksums of its source archives. So does the MacPorts Portfile overlay (`packaging/macports/`).
+- The Chocolatey nuspec (`packaging/choco/`) pins the released version and the checksums of the Windows binaries.
+- The openSUSE spec (`packaging/opensuse/`) pins the released version, and its `.changes` file logs it.
+- The Ubuntu PPA has no pin: `packaging/ppa/build-source.py` packages the newest tag, and each series is uploaded by hand.
+- Void Linux has no spec in this repository: its templates live in a pull request outside it.
 
 ## Antivirus false positives on Windows binaries
 

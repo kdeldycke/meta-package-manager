@@ -276,10 +276,10 @@ def test_pip_module_missing_parses_probe(stdout, returncode, expected):
 def test_pip_module_missing_reads_past_undecodable_output():
     """An answer behind bytes that are no UTF-8 still decides.
 
-    The candidate is the running interpreter, which prints a Latin-1 `café`
+    The candidate is the running interpreter, which prints a Latin-1 `Köln`
     before the marked answer.
     """
-    probe = f"import sys; sys.stdout.buffer.write(b'caf\\xe9 {_PIP_PROBE_MARKER} 1\\n')"
+    probe = f"import sys; sys.stdout.buffer.write(b'K\\xf6ln {_PIP_PROBE_MARKER} 1\\n')"
     with patch("meta_package_manager.managers.pip._PIP_MODULE_PROBE", probe):
         assert Pip()._pip_module_missing(Path(sys.executable)) is False
 

@@ -103,7 +103,7 @@ Where `mpm` stands on each distribution channel whose packaging is maintained fr
 | Ubuntu (deb-get) | [definition](https://github.com/kdeldycke/deb-get/blob/add-meta-package-manager/01-main/packages/meta-package-manager) | [pending review](https://github.com/wimpysworld/deb-get/pull/2036)                                        | —                                                                                    | n/a          |
 | Void Linux       | [void-linux/void-packages#60532](https://github.com/void-linux/void-packages/pull/60532/files)                         | [closed: needs a contributor](#void-linux)                                                                | `check-void-deps`                                                                    | manual       |
 
-The `*-source` jobs of [`tests-install.yaml`](https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/tests-install.yaml) build and install each in-repo spec on every change to it and on a weekly schedule. Automated bumps are performed by `release.yaml` jobs right after each release (see [releasing](releasing.md)); manual specs pin the released version and its source checksums, refreshed by hand at each release.
+The `*-source` jobs of [`tests-install.yaml`](https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/tests-install.yaml) build and install each in-repo spec on every change to it and on a weekly schedule. Automated bumps are performed by `release.yaml` jobs right after each release (see [releasing](releasing.md)). The channels marked manual are refreshed by hand at each release. An in-repo spec of that kind pins the released version, the PPA is uploaded once per series, and the Void templates sit in a pull request outside this repository.
 
 ### Alpine Linux
 
@@ -229,10 +229,12 @@ $ git clone https://github.com/kdeldycke/meta-package-manager.git
 $ cd ./meta-package-manager/packaging/opensuse
 $ sudo zypper install --no-recommends $(rpmspec --query --buildrequires meta-package-manager.spec | cut --delimiter=' ' --fields=1)
 $ mkdir --parents ~/rpmbuild/SOURCES
-$ curl --location --output ~/rpmbuild/SOURCES/meta_package_manager-8.0.1.tar.gz https://files.pythonhosted.org/packages/source/m/meta-package-manager/meta_package_manager-8.0.1.tar.gz
+$ curl --location --output ~/rpmbuild/SOURCES/meta_package_manager-8.1.2.tar.gz https://files.pythonhosted.org/packages/source/m/meta-package-manager/meta_package_manager-8.1.2.tar.gz
 $ rpmbuild -ba meta-package-manager.spec
 $ sudo zypper install --allow-unsigned-rpm ~/rpmbuild/RPMS/noarch/meta-package-manager-*.rpm
 ```
+
+Run the `rpmbuild` step as an unprivileged user, as the Open Build Service does. Under root, `mpm` escalates nothing, so the tests that assert a `sudo` prefix fail in the `%check` phase.
 
 Every runtime dependency is already packaged in Tumbleweed, so this is the one channel whose spec introduces no dependency of its own. The package is built for the primary Python flavor alone and keeps an unsuffixed `/usr/bin/mpm`, the shape openSUSE gives an application rather than a library, and its `%check` phase runs the hermetic layer with `pytest -m "not integration"`.
 
@@ -263,8 +265,8 @@ To build one series by hand instead, with [`uv`](https://docs.astral.sh/uv/) on 
 $ sudo apt-get install --no-install-recommends build-essential debhelper dh-python dpkg-dev fakeroot git
 $ git clone https://github.com/kdeldycke/meta-package-manager.git
 $ cd ./meta-package-manager
-$ ./packaging/ppa/build-source.py --mpm-version 8.1.1 --series noble --output ./dist
-$ cd ./dist/meta-package-manager-8.1.1ppa1~noble1
+$ ./packaging/ppa/build-source.py --mpm-version 8.1.2 --series noble --output ./dist
+$ cd ./dist/meta-package-manager-8.1.2ppa1~noble1
 $ dpkg-buildpackage --build=binary --no-sign
 $ sudo apt-get install ../meta-package-manager_*.deb
 ```
@@ -273,7 +275,7 @@ Uploading signs the source package instead, once per series:
 
 ```{code-block} shell-session
 $ debuild -S -sa
-$ dput ppa:kdeldycke/mpm ../meta-package-manager_8.1.1ppa1~noble1_source.changes
+$ dput ppa:kdeldycke/mpm ../meta-package-manager_8.1.2ppa1~noble1_source.changes
 ```
 
 The `~{series}` suffixes sort in release order, the Ubuntu codenames happening to be alphabetical, so a machine upgrading from one series to the next picks the newer build up on its own. The targets are `jammy`, `noble`, `resolute` and `stonking`; `questing` reached its end of life in July 2026.

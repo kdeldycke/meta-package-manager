@@ -192,9 +192,9 @@ class Homebrew(PackageManager):
         [#17](https://github.com/kdeldycke/meta-package-manager/issues/17).
         ```
         """
-        errors_before = len(self.cli_errors)
-        output = self.run_cli("list", "--quiet", "--versions")
-        for error in self.cli_errors[errors_before:]:
+        with self.new_errors() as errors:
+            output = self.run_cli("list", "--quiet", "--versions")
+        for error in errors:
             if match := self._STALE_CASK_REGEXP.search(error.error):
                 cask_id = match["cask_id"]
                 logging.warning(

@@ -118,7 +118,7 @@ Xbar mangles quoted version specifiers in dependency metadata ([matryer/xbar#831
 
 GNOME Shell raises a `TypeError` when a submenu opens or closes in a `PopupMenuSection` that no menu registered with `addMenuItem()` ([GNOME/gnome-shell#9424](https://gitlab.gnome.org/GNOME/gnome-shell/-/work_items/9424)). The [extension](gnome-shell.md) holds its scrollable report in such a section. It therefore gives that section its own `_setOpenedSubMenu` method.
 
-`shexli`, the static analyzer extensions.gnome.org runs on each upload, segfaults with `tree-sitter` `0.26.0` ([Infrastructure/extensions-web#398](https://gitlab.gnome.org/Infrastructure/extensions-web/-/work_items/398)). Its `tree-sitter>=0.25.0` requirement allows that version, so the extension's `shexli` CI job pins `tree-sitter==0.25.2`.
+`shexli`, the static analyzer extensions.gnome.org runs on each upload, segfaults with `tree-sitter` `0.26.0` ([Infrastructure/extensions-web#398](https://gitlab.gnome.org/Infrastructure/extensions-web/-/work_items/398)). Its `tree-sitter>=0.25.0` requirement allows that version, so the extension's `shexli` CI job caps it with `tree-sitter<0.26`.
 
 ## Declined by upstream
 

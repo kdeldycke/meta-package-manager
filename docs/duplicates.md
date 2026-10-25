@@ -14,7 +14,7 @@ $ mpm search broot --exact
 │ broot      │      │ brew    │ 1.16.2         │
 │ broot      │      │ cargo   │ 0.13.6         │
 ╰────────────┴──────┴─────────┴────────────────╯
-2 packages total (brew: 1, pip: 1, cask: 0, gem: 0, mas: 0, npm: 0).
+2 packages total (brew: 1, cargo: 1, cask: 0, gem: 0, mas: 0, npm: 0).
 ```
 
 Then choose your preferred package manager to install it:

@@ -1133,19 +1133,13 @@ def test_factory_json_array_field(stub_run_cli):
     assert packages["scalar"] is None
 
 
-def test_factory_install_ignores_a_version_pin(monkeypatch, caplog):
+def test_factory_install_ignores_a_version_pin(capture_run_cli, caplog):
     """A config-defined install drops a requested version and says so, rather
     than failing or passing a version its args have no place for."""
     manager = build_manager_class(
         _definition(install=OperationSpec(args=("install", "{package_id}"))),
     )()
-    calls = []
-
-    def fake_run_cli(*args, **kwargs):
-        calls.append(args)
-        return ""
-
-    monkeypatch.setattr(manager, "run_cli", fake_run_cli)
+    calls = capture_run_cli(manager)
     manager.install("jq", version="1.7.1")
     assert calls == [("install", "jq")]
     assert "do not support version pinning" in caplog.text

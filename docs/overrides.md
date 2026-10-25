@@ -14,6 +14,7 @@ Each built-in manager exposes a small set of attributes that can be overridden f
 | `dry_run`             | boolean          | Simulate CLI calls without performing any action, only for this manager.                                                                                                             |
 | `extra_env`           | table of strings | Environment variables added to those the manager sets, on every CLI call. A variable the manager sets takes the value given here.                                                    |
 | `operations`          | table            | Arguments added to the commands of one operation alone, keyed by operation name. See [per-operation arguments](#per-operation-arguments).                                            |
+| `plan`                | boolean          | Print the state-changing commands instead of running them, only for this manager. See [inspect the plan before running](augmentations.md#inspect-the-plan-before-running).           |
 | `post_args`           | list of strings  | Arguments appended **after** every CLI invocation.                                                                                                                                   |
 | `pre_args`            | list of strings  | Arguments inserted **before** every CLI invocation.                                                                                                                                  |
 | `pre_cmds`            | list of strings  | Commands prepended to every CLI invocation (typically `sudo`).                                                                                                                       |
@@ -103,7 +104,7 @@ operations.upgrade_all.extra_args = ["--greedy"]
 A `[mpm.overrides.<id>]` section whose ID is **not** a built-in manager defines a brand-new manager rather than overriding one. `mpm` builds it at startup and treats it like any built-in: it gets its own `--<id>` / `--no-<id>` selectors, joins the default set on its supported platforms, and is driven by every subcommand it implements.
 
 ```{important}
-A manager definition makes `mpm` run the commands you declare. Definitions are only loaded from a trusted, local configuration file (owned by you, not world-writable, never a remote `--config` URL). Read {doc}`security` before adding one.
+A manager definition makes `mpm` run the commands you declare. Definitions are only loaded from a trusted, local configuration file: the file and its folder belong to you or to root, and neither is writable by a group or by others. A remote `--config` URL never qualifies. Read {doc}`security` before adding one.
 ```
 
 ### Required keys
@@ -113,7 +114,7 @@ A manager definition makes `mpm` run the commands you declare. Definitions are o
 | `platforms`  | list of strings | Platform or group IDs the manager runs on (like `linux`, `macos`, `all_platforms`, or a specific `ubuntu`). |
 | `operations` | table           | At least one operation (see below). A manager with no operations does nothing.                              |
 
-Every [overridable field](#overridable-fields) (`cli_names`, `cli_search_path`, `requirement`, `version_regexes`, `pre_args`, `extra_env`, `timeout`, ...) may also be set, plus `name`, `homepage_url`, `documentation_url` (the entry point of the tool's own documentation: its manual, its docs site, or the man page of the CLI `mpm` drives), `repository_url` (the repository holding the tool's code), `wikipedia_url` (the English Wikipedia article about the tool) and `logo` (the slug of a brand mark vendored under `docs/assets/managers/`, inlined at the top of that page). When `cli_names` is omitted it defaults to the manager ID.
+These [overridable fields](#overridable-fields) may also be set: `cli_names`, `cli_search_path`, `extra_env`, `post_args`, `pre_args`, `pre_cmds`, `requirement`, `timeout`, `unmaintained`, `version_cli_options` and `version_regexes`. A definition rejects the other overridable fields: `cooldown_policy`, `dry_run`, `plan`, `stop_on_error` and `sudo`. Its `operations` table is the one described below, not the `extra_args` table of an override. A definition may also set `name`, `homepage_url`, `documentation_url` (the entry point of the tool's own documentation: its manual, its docs site, or the man page of the CLI `mpm` drives), `repository_url` (the repository holding the tool's code), `wikipedia_url` (the English Wikipedia article about the tool) and `logo` (the slug of a brand mark vendored under `docs/assets/managers/`, inlined at the top of that page). When `cli_names` is omitted it defaults to the manager ID.
 
 Twelve definition-only fields have no override counterpart:
 

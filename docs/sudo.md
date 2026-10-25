@@ -30,6 +30,8 @@ Which managers escalate is decided per manager. System package managers ([`apt`]
 
 A `sudo` on `PATH` is checked before it is preferred, because the name does not always belong to sudo. Alpine packages [`doas-sudo-shim`](https://github.com/jirutka/doas-sudo-shim), which installs a `/usr/bin/sudo` script forwarding to `doas` and accepting `--non-interactive` out of everything `mpm` sends: escalation through it works while every credential probe fails on an unknown option, which reads as a cold cache on a host that never asks for a password. So `mpm` runs `sudo --version` first and drives `doas` directly where that does not answer as sudo. SliTaz's `/usr/bin/sudo` is a BusyBox `su -c` wrapper instead, which asks for the root password on any argument: `mpm` runs its check with no terminal attached, so the wrapper fails at once instead of waiting on a prompt nobody sees. Naming a stand-in with `--sudo-command` still drives it, with a warning: the SliTaz wrapper exits `0` whatever happened, so a failed command reads as a success.
 
+Where no installed escalator identifies as itself, `mpm` still drives the first one it finds, since a stand-in usually escalates all the same. Windows is the exception. Microsoft's `sudo.exe` is disabled by default, and `sudo --help` then prints only how to enable it, so the binary identifies as neither POSIX `sudo` nor Sudo for Windows. A disabled `sudo.exe` escalates nothing, and it rejects the `--non-interactive` option of POSIX `sudo` as unknown. So `mpm` drives no escalator there and runs every command unescalated. A command still runs in an elevated shell, and fails in another one on the manager's own permission error.
+
 Name one explicitly with `--sudo-command`, or with its `[mpm] sudo_command` config key:
 
 ```toml
@@ -126,12 +128,12 @@ The decision path, from the up-front probe to the end of the run:
 
 ```mermaid
 flowchart TD
-    begin(["Mutating subcommand: install, upgrade,<br/>remove, sync, cleanup, restore"]) --> skip{"Windows, running as root,<br/>dry run or plan,<br/>or nothing escalates?"}
+    begin(["Mutating subcommand: install, upgrade,<br/>remove, sync, cleanup, restore"]) --> skip{"Running as root,<br/>dry run or plan,<br/>or nothing escalates?"}
     skip -->|"yes"| bare["No sudo machinery:<br/>managers run as themselves"]
     skip -->|"no"| audit["Tamper audit: warn on an escalated<br/>binary that others can modify"]
     audit --> pick{"Which escalator does<br/>the host carry?"}
     pick -->|"none"| noesc["One warning:<br/>escalations run unprivileged"]
-    pick -->|"sudo, doas, run0<br/>or pkexec"| probe["Probe its credential cache,<br/>without prompting"]
+    pick -->|"sudo, doas, run0, pkexec,<br/>gsudo or Windows sudo"| probe["Probe its credential cache,<br/>without prompting"]
     probe -->|"warm"| keepalive["Silent keepalive: every escalated call<br/>spends the cache, refreshed<br/>until the run ends"]
     probe -->|"cold: sudoers<br/>denies the user"| denied["One warning, no prompt:<br/>escalations fail fast"]
     probe -->|"cold:<br/>no terminal"| notty["One warning:<br/>escalations fail fast"]

@@ -241,8 +241,8 @@ AUTO_UPDATES_REPLACEMENT: Final[str] = (
 
 The `--ignore-auto-updates/--include-auto-updates` flag, its `[mpm]` key and its
 per-manager override field had one effect: `--greedy` on the `outdated` and
-`upgrade --all` commands of `cask`. Each of the three removed spellings names this
-replacement in its error or warning.
+`upgrade --all` commands of `cask`. A removed spelling that asks for the
+auto-updating casks names this replacement in its error or warning.
 """
 
 
@@ -465,8 +465,9 @@ def validate_manager_overrides_section(
     same rules.
 
     A section keyed by a built-in manager ID is validated as an *override* (its
-    fields must be a subset of {data}`~meta_package_manager.definitions.OVERRIDABLE_FIELDS`,
-    plus an `operations` table checked by
+    fields must be a subset of
+    {data}`~meta_package_manager.definitions.OVERRIDABLE_FIELDS`, plus an
+    `operations` table checked by
     {func}`~meta_package_manager.definitions.parse_operation_overrides`). A section
     keyed by any other ID is validated as a brand-new manager *definition* via
     {func}`~meta_package_manager.definitions.parse_manager_definition`.

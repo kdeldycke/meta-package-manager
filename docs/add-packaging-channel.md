@@ -58,4 +58,4 @@ Rebase when the tree asks for it: `aports` and many others fast-forward-merge, s
 
 ## Maintenance
 
-A spec that pins a released version and its checksums (MacPorts, Alpine) is bumped by hand at each release. The Nix and Guix definitions are bumped automatically by dedicated `release.yaml` jobs. See the [releasing page](releasing.md) for which is which.
+A spec that pins a released version (Alpine, Chocolatey, MacPorts, openSUSE) is bumped by hand at each release, and so is the upload of the Ubuntu PPA. The Nix and Guix definitions are bumped automatically by dedicated `release.yaml` jobs. See the [releasing page](releasing.md) for which is which.

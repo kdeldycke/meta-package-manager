@@ -9,6 +9,8 @@
 - [mpm] Add an `operations` table to `[mpm.overrides.<id>]`, whose `extra_args` reach the commands of one operation alone. Closes [#2171](https://github.com/kdeldycke/meta-package-manager/issues/2171).
 - [mpm] List the operations each manager accepts in the `mpm config-template` output and on each manager page.
 - [cask] Name the cask whose leftover Caskroom directory makes Homebrew list no cask, and the `brew uninstall --cask --force` command that removes it.
+- [mpm] Raise the `packageurl-python` floor to `0.17.6`: below it, parsing a pURL spec raises `TypeError`.
+- [sfsu] Raise the `sfsu` floor to `1.18.1`: below it, `outdated` misses every app installed for `arm64` on Windows on ARM. Run `scoop update sfsu` to upgrade an older install.
 - [mpm] Skip a `PATH` directory or file that cannot be read during manager detection, instead of crashing on Python `3.10` to `3.13`.
 - [mpm] Skip a `PATH` directory that is a symlink loop during manager detection, instead of crashing on Python `3.10` to `3.12`.
 - [choco,mpm] Stop driving a disabled Sudo for Windows as POSIX `sudo`: commands run unescalated there, where every `choco` install failed on `--non-interactive`.
@@ -20,8 +22,6 @@
 - [pip] List the requirements of an extra of a Python package as optional dependencies in the SPDX output of `mpm sbom`, not as runtime ones.
 - [pip] Read the answer of a Python interpreter that prints bytes outside UTF-8 during `pip` detection, instead of crashing `mpm`.
 - [vcpkg] Read the ID and version of a port whose name has 24 characters or more in `mpm search`, instead of one ID holding its version and description.
-- [mpm] Raise the `packageurl-python` floor to `0.17.6`: below it, parsing a pURL spec raises `TypeError`.
-- [sfsu] Raise the `sfsu` floor to `1.18.1`: below it, `outdated` misses every app installed for `arm64` on Windows on ARM. Run `scoop update sfsu` to upgrade an older install.
 
 ## [`8.1.2` (2026-10-12)](https://github.com/kdeldycke/meta-package-manager/compare/v8.1.1...v8.1.2)
 

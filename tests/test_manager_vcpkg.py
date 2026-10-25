@@ -51,8 +51,9 @@ REVISED_LIST_OUTPUT = """\
     "desc": ["FreeXL is an open source library to extract valid data"]
   }
 }"""
-"""The record of {data}`~tests.test_manager_vcpkg.LIST_OUTPUT`, for the `freexl` port of
-{data}`~tests.test_manager_vcpkg.SEARCH_COLUMN_OUTPUT`, whose `2.0.0#2` carries a port revision."""
+"""The record of {data}`~tests.test_manager_vcpkg.LIST_OUTPUT`, for the `freexl`
+port of {data}`~tests.test_manager_vcpkg.SEARCH_COLUMN_OUTPUT`, whose `2.0.0#2`
+carries a port revision."""
 
 SEARCH_COLUMN_OUTPUT = """\
 cpr                      1.14.2           C++ Requests is a simple wrapper around libcurl

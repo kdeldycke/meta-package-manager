@@ -16,7 +16,7 @@ project_path = Path(__file__).parent.parent.resolve()
 
 # Fetch general information about the project from pyproject.toml.
 toml_path = project_path / "pyproject.toml"
-toml_config = tomllib.loads(toml_path.read_text(encoding="utf-8"))
+toml_config = tomllib.loads(toml_path.read_text(encoding="UTF-8"))
 
 # Redistribute pyproject.toml config to Sphinx.
 project_id = toml_config["project"]["name"]
@@ -53,8 +53,8 @@ extensions = [
     # Adds a copy button to code blocks.
     "sphinx_copybutton",
     "sphinx_design",
-    # Emits sitemap.xml from html_baseurl, so crawlers get the 81 manager pages
-    # as a list instead of having to discover them by following links.
+    # Emits sitemap.xml from html_baseurl, so crawlers get every manager page as
+    # a list instead of having to discover them by following links.
     "sphinx_sitemap",
     "sphinxext.opengraph",
     "myst_parser",
@@ -478,9 +478,11 @@ sitemap_url_scheme = "{link}"
 html_css_files = ["custom.css", "manager-index.css", "table-crosshair.css"]
 html_js_files = ["manager-index.js", "table-crosshair.js"]
 
-# Opt into click_extra.sphinx's executable directives. Enables the `click:run`
-# blocks in docs/cli-parameters.md and docs/configuration.md, which run mpm's CLI
-# at build time to render live --help and --params output. These directives
+# Opt into click_extra.sphinx's executable directives: the `click:tree` block of
+# docs/cli-parameters.md, the `click:config` and `click:run` blocks of
+# docs/configuration.md, and the `python:render` blocks that generate sections of
+# several other pages. They import mpm's CLI and package at build time to render
+# live --help, schema, --params and --export-config output. These directives
 # execute Python during the build; mpm's own docs are the only trusted source, so
 # the opt-in stays scoped to this project.
 click_extra_enable_exec_directives = True

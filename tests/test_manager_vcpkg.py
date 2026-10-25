@@ -62,6 +62,18 @@ freexl                   2.0.0#2          FreeXL is an open source library to ex
 """`vcpkg --classic search excel`, as the docstring of
 {meth}`~meta_package_manager.managers.vcpkg.VCPKG.search` shows it."""
 
+SEARCH_LONG_NAMES_OUTPUT = """\
+azure-security-keyvault-administration-cpp 4.0.0-beta.5#3 Microsoft Azure Key Vault Administration SDK for C++
+azure-security-keyvault-certificates-cpp 4.2.1#5 Microsoft Azure Key Vault Certificates SDK for C++
+azure-security-keyvault-keys-cpp 4.4.1#5  Microsoft Azure Key Vault Keys SDK for C++
+azure-security-keyvault-secrets-cpp 4.2.1#5 Microsoft Azure Key Vault Secrets SDK for C++"""
+"""The rows of `vcpkg --classic search keyvault` for the ports of the `2026.07.29`
+registry, each name longer than the 24 columns vcpkg pads it to.
+
+Laid out from the manifests by the rules of the `do_print` function of vcpkg, not
+captured from a vcpkg run.
+"""
+
 
 @pytest.mark.parametrize(
     ("output", "expected"),
@@ -96,17 +108,39 @@ def test_installed_skips_what_is_not_a_record(stub_run_cli, output):
     assert list(manager.installed) == []
 
 
-def test_search_reads_the_column_listing(capture_run_cli):
+@pytest.mark.parametrize(
+    ("query", "output", "expected"),
+    (
+        pytest.param(
+            "excel",
+            SEARCH_COLUMN_OUTPUT,
+            [("cpr", "1.14.2"), ("freexl", "2.0.0#2")],
+            id="padded-names",
+        ),
+        pytest.param(
+            "keyvault",
+            SEARCH_LONG_NAMES_OUTPUT,
+            [
+                ("azure-security-keyvault-administration-cpp", "4.0.0-beta.5#3"),
+                ("azure-security-keyvault-certificates-cpp", "4.2.1#5"),
+                ("azure-security-keyvault-keys-cpp", "4.4.1#5"),
+                ("azure-security-keyvault-secrets-cpp", "4.2.1#5"),
+            ],
+            id="long-names",
+        ),
+    ),
+)
+def test_search_reads_the_column_listing(capture_run_cli, query, output, expected):
     """A port gives its name and version, and the rows of its features are
-    skipped."""
+    skipped. A name longer than its column still ends at the space after it."""
     manager = VCPKG()
-    calls = capture_run_cli(manager, SEARCH_COLUMN_OUTPUT)
+    calls = capture_run_cli(manager, output)
     packages = [
         (p.id, str(p.latest_version))
-        for p in manager.search("excel", extended=False, exact=False)
+        for p in manager.search(query, extended=False, exact=False)
     ]
-    assert packages == [("cpr", "1.14.2"), ("freexl", "2.0.0#2")]
-    assert calls == [("search", "excel")]
+    assert packages == expected
+    assert calls == [("search", query)]
 
 
 def test_search_empty_answer(stub_run_cli):

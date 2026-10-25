@@ -131,14 +131,6 @@ class VCPKG(PackageManager):
     with a literal separator and no truncation, so it is parsed as text.
     """
 
-    _COLUMN_GAP_REGEXP = re.compile(r"[ \t]{2,}")
-    """Splits a row of the human search listing into its columns.
-
-    The widths are computed from the results rather than fixed, so the gap
-    between columns is the only stable separator. A single space never
-    separates them, descriptions being full of them.
-    """
-
     def _parse_column_listing(self, output: str) -> Iterator[Package]:
         """Parse the human column listing of a vcpkg search.
 
@@ -147,19 +139,25 @@ class VCPKG(PackageManager):
         Those are skipped: mpm keys on the port, which has a row of its own,
         and a feature has no version to report anyway.
 
+        A row is read as words, not as columns. vcpkg pads a port name to 24
+        columns, then writes a single space, so a longer name ends at that one
+        space: see
+        [`do_print`](https://github.com/microsoft/vcpkg-tool/blob/73afc2038fbc10bf807963e69326edb77ef36fbd/src/vcpkg/commands.find.cpp#L42-L75).
+        Neither a port name nor a version holds a space, so they are the first
+        two words.
+
         The version is recognised by starting with a digit rather than by its
-        column, which is what separates a genuine version from the description
+        position, which is what separates a genuine version from the description
         of a port that happens to declare none.
         """
         for line in output.splitlines():
-            fields = self._COLUMN_GAP_REGEXP.split(line.strip())
-            package_id = fields[0]
-            if not package_id or "[" in package_id:
+            fields = line.split(maxsplit=2)
+            if not fields or "[" in fields[0]:
                 continue
             version = None
             if len(fields) > 1 and fields[1][:1].isdigit():
                 version = fields[1]
-            yield self.package(id=package_id, latest_version=version)
+            yield self.package(id=fields[0], latest_version=version)
 
     @property
     def installed(self) -> Iterator[Package]:

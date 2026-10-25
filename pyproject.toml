@@ -757,7 +757,7 @@ run.branch = true
 # The Windows cells cover the least: most managers and the POSIX-only tests do
 # not run there. The floor stays under them, so no stable cell reports a
 # coverage failure.
-report.fail_under = 88
+report.fail_under = 94
 report.precision = 2
 
 [tool.bumpversion]

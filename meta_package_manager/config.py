@@ -52,7 +52,7 @@ from click_extra.config import (
     ValidationError,
     read_file,
 )
-from click_extra.context import CONF_FULL
+from click_extra.context import CONF_FULL, CONF_SOURCE
 from click_extra.theme import get_current_theme as theme
 
 from .cooldown import parse_cooldown_section
@@ -922,11 +922,11 @@ def _config_source(ctx: click.Context) -> tuple[Path | None, bool]:
     """Return `(local_path, is_url)` for the config file click-extra loaded.
 
     Reads the location click-extra records under
-    {data}`~click_extra.config.CONFIG_PATH_METADATA_KEY`. A remote URL yields
+    {data}`~click_extra.context.CONF_SOURCE`. A remote URL yields
     `(None, True)`; a local file yields `(Path, False)`; nothing loaded yields
     `(None, False)`.
     """
-    raw = ctx.meta.get(CONFIG_PATH_METADATA_KEY)
+    raw = ctx.meta.get(CONF_SOURCE)
     if not raw:
         return None, False
     text = str(raw)

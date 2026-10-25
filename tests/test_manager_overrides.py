@@ -54,6 +54,7 @@ from meta_package_manager.definitions import (
 from meta_package_manager.pool import pool
 
 from .conftest import all_manager_ids, tomllib
+from .test_manager_definition import skip_windows
 
 OVERRIDE_TARGET = "pip"
 """Manager ID used as a fixture target for override tests.
@@ -532,6 +533,21 @@ def test_cli_loads_manager_overrides(invoke, create_config, reset_overrides):
     result = invoke("--config", str(conf_path), "managers")
     assert result.exit_code == 0
     assert pool[OVERRIDE_TARGET].cli_search_path == ("/integration/test/path",)
+
+
+@skip_windows
+def test_cli_warns_on_risky_override_from_untrusted_file(
+    invoke, create_config, reset_overrides
+):
+    """The CLI warns about a risky override read from a file others can write to."""
+    conf_path = create_config(
+        "conf.toml", CONFIG_TEMPLATE.format(manager_id=OVERRIDE_TARGET)
+    )
+    conf_path.chmod(0o666)
+    result = invoke("--config", str(conf_path), "managers")
+    assert result.exit_code == 0
+    assert "Override of cli_search_path on" in result.stderr
+    assert "comes from untrusted file" in result.stderr
 
 
 def test_cli_warns_on_stale_overrides_section(invoke, create_config, reset_overrides):

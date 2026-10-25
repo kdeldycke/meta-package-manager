@@ -28,8 +28,10 @@ from operator import attrgetter
 from pathlib import Path
 from types import SimpleNamespace
 
+import click
 import pytest
 from click_extra import ValidationError
+from click_extra.context import CONF_SOURCE
 
 import meta_package_manager
 from meta_package_manager.__main__ import main
@@ -42,6 +44,7 @@ from meta_package_manager.capabilities import (
 from meta_package_manager.config import (
     _candidate_config_path,
     _collect_definitions,
+    _config_source,
     _is_remote_url,
     config_file_is_trusted,
     discover_config_definitions,
@@ -1314,6 +1317,25 @@ def test_is_remote_url(location, remote):
     assert _is_remote_url(location) is remote
 
 
+@pytest.mark.parametrize(
+    ("location", "expected"),
+    (
+        pytest.param(None, (None, False), id="no-config"),
+        pytest.param("https://example.com/mpm/config.toml", (None, True), id="url"),
+        pytest.param(
+            "/etc/mpm/config.toml",
+            (Path("/etc/mpm/config.toml"), False),
+            id="local-file",
+        ),
+    ),
+)
+def test_config_source(location, expected):
+    """The source of the trust gate is the location click-extra loaded."""
+    ctx = click.Context(click.Command("mpm"))
+    ctx.meta[CONF_SOURCE] = location
+    assert _config_source(ctx) == expected
+
+
 def test_collect_definitions_skips_overrides_and_invalid_sections():
     """Only the valid definitions of new managers come out: a section of a
     shipped manager is an override, and an invalid one already failed the
@@ -1622,6 +1644,20 @@ def test_cli_lists_config_defined_manager(
     result = invoke("--config", str(conf_path), "managers")
     assert result.exit_code == 0
     assert "mytool" in result.stdout
+
+
+@skip_windows
+def test_cli_refuses_definition_from_untrusted_file(
+    invoke, create_config, reset_definitions
+):
+    """The trust gate checks the file the CLI loads, not only the file the eager
+    pass of `main()` finds."""
+    conf_path = create_config("conf.toml", DEFINITION_TOML)
+    conf_path.chmod(0o666)
+    result = invoke("--config", str(conf_path), "managers")
+    assert result.exit_code == 0
+    assert "unsafe config file ownership or permissions" in result.stderr
+    assert "mytool" not in pool.register
 
 
 def test_cli_rejects_bad_definition(invoke, create_config, reset_definitions):

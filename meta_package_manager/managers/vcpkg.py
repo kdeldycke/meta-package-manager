@@ -16,8 +16,6 @@
 
 from __future__ import annotations
 
-import json
-import logging
 import re
 from typing import ClassVar
 
@@ -142,7 +140,7 @@ class VCPKG(PackageManager):
     """
 
     def _parse_column_listing(self, output: str) -> Iterator[Package]:
-        """Parse the human search listing vcpkg prints when `--x-json` is ignored.
+        """Parse the human column listing of a vcpkg search.
 
         Rows are `port`, `version` and `description`, except that a port's
         features repeat it as `port[feature]` carrying a description alone.
@@ -239,57 +237,25 @@ class VCPKG(PackageManager):
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
 
-        Read as JSON, whose keys are the port names. The human listing computes
-        its column widths from the results and renders a port's features as
-        rows of their own carrying no version, neither of which a single
-        pattern reads reliably.
+        Read from the human column listing. vcpkg prints JSON only for a search
+        with no query, and ignores `--x-json` for a search of one, as its
+        [`commands.find.cpp`](https://github.com/microsoft/vcpkg-tool/blob/73afc2038fbc10bf807963e69326edb77ef36fbd/src/vcpkg/commands.find.cpp#L145-L188)
+        shows.
 
         ```{caution}
         Search does not support extended or exact matching.
         ```
 
-        ```{caution}
-        `--x-json` is experimental, as its `x` prefix announces, and a vcpkg
-        predating it *ignores it silently* rather than refusing it: the command
-        succeeds and prints the human column listing instead. Decoding that as
-        JSON raises, and nothing isolates one manager's failure from the rest
-        of a fan-out, so an unhandled decode error would take down the entire
-        `mpm search` on any host carrying such a build. A version floor cannot
-        catch it, vcpkg numbering its releases by date, as
-        {attr}`~meta_package_manager.managers.vcpkg.VCPKG.requirement` explains,
-        so the column listing is parsed instead when the JSON does not decode.
-
-        The fallback matters beyond search: `install` picks its manager by
-        searching first, so a vcpkg whose search answers nothing can install
-        nothing either.
-        ```
-
         ```{code-block} console
 
-        $ vcpkg --classic search excel --x-json
+        $ vcpkg --classic search excel
         cpr                      1.14.2           C++ Requests is a simple wrapper around libcurl
         cpr[ssl]                                  Enable SSL support
         duckdb[excel]                             Statically link the excel extension into DuckDB
         freexl                   2.0.0#2          FreeXL is an open source library to extract valid data
         ```
         """
-        output = self.run_cli("search", query, "--x-json")
-        if not output.strip():
-            return
-        try:
-            results = json.loads(output)
-        except json.JSONDecodeError:
-            results = None
-        if isinstance(results, dict):
-            for port_name, data in results.items():
-                version = data.get("version") if isinstance(data, dict) else None
-                yield self.package(id=port_name, latest_version=version)
-            return
-        logging.debug(
-            "Search did not answer JSON: parsing the column listing instead.",
-            extra={"label": self.subject},
-        )
-        yield from self._parse_column_listing(output)
+        yield from self._parse_column_listing(self.run_cli("search", query))
 
     @version_not_implemented
     def install(self, package_id: str, version: str | None = None) -> str:

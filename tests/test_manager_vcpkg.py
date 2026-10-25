@@ -59,21 +59,8 @@ cpr                      1.14.2           C++ Requests is a simple wrapper aroun
 cpr[ssl]                                  Enable SSL support
 duckdb[excel]                             Statically link the excel extension into DuckDB
 freexl                   2.0.0#2          FreeXL is an open source library to extract valid data"""
-"""`vcpkg --classic search excel --x-json`, which answers the human column
-listing, as the docstring of
+"""`vcpkg --classic search excel`, as the docstring of
 {meth}`~meta_package_manager.managers.vcpkg.VCPKG.search` shows it."""
-
-SEARCH_JSON_OUTPUT = """\
-{
-  "cpr": {
-    "package_name": "cpr",
-    "version": "1.14.2",
-    "port_version": 0,
-    "description": ["C++ Requests is a simple wrapper around libcurl"]
-  }
-}"""
-"""The `cpr` row of {data}`~tests.test_manager_vcpkg.SEARCH_COLUMN_OUTPUT`, in the shape of the JSON object
-`vcpkg` builds for a search result."""
 
 
 @pytest.mark.parametrize(
@@ -109,9 +96,9 @@ def test_installed_skips_what_is_not_a_record(stub_run_cli, output):
     assert list(manager.installed) == []
 
 
-def test_search_falls_back_to_the_column_listing(capture_run_cli):
-    """An answer that is not JSON is read as the column listing: a port gives
-    its name and version, and the rows of its features are skipped."""
+def test_search_reads_the_column_listing(capture_run_cli):
+    """A port gives its name and version, and the rows of its features are
+    skipped."""
     manager = VCPKG()
     calls = capture_run_cli(manager, SEARCH_COLUMN_OUTPUT)
     packages = [
@@ -119,30 +106,11 @@ def test_search_falls_back_to_the_column_listing(capture_run_cli):
         for p in manager.search("excel", extended=False, exact=False)
     ]
     assert packages == [("cpr", "1.14.2"), ("freexl", "2.0.0#2")]
-    assert calls == [("search", "excel", "--x-json")]
-
-
-@pytest.mark.parametrize(
-    ("output", "expected"),
-    (
-        pytest.param(SEARCH_JSON_OUTPUT, [("cpr", "1.14.2")], id="json-object"),
-        pytest.param('{"cpr": "1.14.2"}', [("cpr", None)], id="record-not-a-table"),
-    ),
-)
-def test_search_reads_a_json_answer(stub_run_cli, output, expected):
-    """A JSON answer is keyed by port name. A value that is not an object still
-    names the port, with no version."""
-    manager = VCPKG()
-    stub_run_cli(manager, output)
-    packages = [
-        (p.id, None if p.latest_version is None else str(p.latest_version))
-        for p in manager.search("excel", extended=False, exact=False)
-    ]
-    assert packages == expected
+    assert calls == [("search", "excel")]
 
 
 def test_search_empty_answer(stub_run_cli):
-    """An empty answer is no match, and never reaches either parser."""
+    """An empty answer is no match."""
     manager = VCPKG()
     stub_run_cli(manager, "")
     assert list(manager.search("excel", extended=False, exact=False)) == []

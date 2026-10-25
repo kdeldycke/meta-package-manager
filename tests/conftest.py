@@ -320,6 +320,11 @@ def isolate_user_config(isolated_app_dir):
     to subprocesses. Tests that exercise config loading pass ``--config
     <path>`` explicitly, which bypasses the default search pattern and is
     therefore left untouched.
+
+    The eager pre-load of `main()` escapes it: {mod}`meta_package_manager.config`
+    binds `get_app_dir` at import, out of the reach of this fixture. A test
+    driving that pre-load patches `meta_package_manager.config.get_app_dir`
+    itself.
     """
     return isolated_app_dir
 

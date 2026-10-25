@@ -428,14 +428,14 @@ i+ | openSUSE   | libbar  | 0.9-2.4   | noarch
         ),
     ),
 )
-def test_orphans_parsing(monkeypatch, manager_id, output, expected):
+def test_orphans_parsing(monkeypatch, stub_run_cli, manager_id, output, expected):
     """Each manager's `orphans` query parses its native listing into packages.
 
     The canned outputs mirror the `shell-session` samples of the `orphans`
     docstrings, so the documented format and the tested format cannot drift apart.
     """
     manager = pool[manager_id]
-    monkeypatch.setattr(manager, "run_cli", lambda *args, **kwargs: output)
+    stub_run_cli(manager, output)
     monkeypatch.setattr(
         manager,
         "sibling_cli",
@@ -617,11 +617,11 @@ _FLATPAK_RUNTIMES = "org.freedesktop.Platform\t24.08\norg.gnome.Platform\t48\n"
     ),
 )
 def test_flatpak_may_hold_only_runtimes_as_dependencies(
-    monkeypatch, package_id, expected
+    stub_run_cli, package_id, expected
 ):
     """Only an installed runtime can be a dependency, by ID or by `ID//BRANCH`."""
     manager = pool["flatpak"]
-    monkeypatch.setattr(manager, "run_cli", lambda *args, **kwargs: _FLATPAK_RUNTIMES)
+    stub_run_cli(manager, _FLATPAK_RUNTIMES)
     assert manager.may_hold_as_dependency(package_id) is expected
 
 

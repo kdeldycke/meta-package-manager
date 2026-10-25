@@ -163,9 +163,9 @@ def test_search_registry_failure(yarn, monkeypatch, caplog, stdout, diagnosis):
     assert caplog.records[0].levelno == logging.WARNING
 
 
-def test_search_ignores_an_earlier_run(yarn, monkeypatch):
+def test_search_ignores_an_earlier_run(yarn, stub_run_cli):
     """A failure recorded by an earlier call never leaks into this one."""
     yarn._last_run = (0, REQUEST, INFO_FAIL)
-    monkeypatch.setattr(yarn, "run_cli", lambda *args, **kwargs: INSPECT)
+    stub_run_cli(yarn, INSPECT)
     assert [p.id for p in yarn.search("ms", extended=False, exact=False)] == ["ms"]
     assert yarn.cli_errors == []

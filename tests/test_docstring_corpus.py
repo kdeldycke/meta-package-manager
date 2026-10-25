@@ -211,7 +211,9 @@ def _documented_packages(manager, member, output, monkeypatch) -> list:
 
 
 @pytest.mark.parametrize("manager, member, output", list(_fixtures()))
-def test_documented_output_still_parses(manager, member, output, monkeypatch):
+def test_documented_output_still_parses(
+    manager, member, output, monkeypatch, stub_run_cli
+):
     """The output documented next to a parser must still parse through it."""
     _neutralize_binaries(manager, monkeypatch)
 
@@ -226,7 +228,7 @@ def test_documented_output_still_parses(manager, member, output, monkeypatch):
         # and does not leak the stubbed result to another test.
         monkeypatch.setattr(manager, "supported", True)
         monkeypatch.setattr(manager, "executable", True)
-        monkeypatch.setattr(manager, "run_cli", lambda *args, **kwargs: output)
+        stub_run_cli(manager, output)
         manager.__dict__.pop("version", None)
         try:
             version = manager.version

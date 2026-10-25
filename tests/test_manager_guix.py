@@ -161,8 +161,8 @@ def guix(monkeypatch):
     return manager
 
 
-def test_installed_strips_padding_and_names_outputs(guix, monkeypatch):
-    monkeypatch.setattr(guix, "run_cli", lambda *args, **kwargs: LIST_INSTALLED)
+def test_installed_strips_padding_and_names_outputs(guix, stub_run_cli):
+    stub_run_cli(guix, LIST_INSTALLED)
     assert [
         (package.id, str(package.installed_version)) for package in guix.installed
     ] == [
@@ -199,8 +199,8 @@ def test_outdated_reads_the_report_from_stderr(guix, monkeypatch, report, expect
     ] == expected
 
 
-def test_search_strips_synopsis_padding(guix, monkeypatch):
-    monkeypatch.setattr(guix, "run_cli", lambda *args, **kwargs: SEARCH_OUTPUT)
+def test_search_strips_synopsis_padding(guix, stub_run_cli):
+    stub_run_cli(guix, SEARCH_OUTPUT)
     assert [
         (package.id, str(package.latest_version), package.description)
         for package in guix.search("cowsay", extended=False, exact=False)
@@ -219,9 +219,9 @@ def test_search_strips_synopsis_padding(guix, monkeypatch):
         pytest.param("gtk+:apricot", [], id="missing_output"),
     ),
 )
-def test_search_reports_a_name_once(guix, monkeypatch, query, expected):
+def test_search_reports_a_name_once(guix, stub_run_cli, query, expected):
     """`mpm install` fails when its exact search returns more than one package."""
-    monkeypatch.setattr(guix, "run_cli", lambda *args, **kwargs: SEARCH_GTK_OUTPUT)
+    stub_run_cli(guix, SEARCH_GTK_OUTPUT)
     assert [
         (package.id, str(package.latest_version))
         for package in guix.search(query, extended=False, exact=False)

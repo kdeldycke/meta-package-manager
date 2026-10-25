@@ -158,7 +158,7 @@ def test_installed_lists_every_catalog_match(winget, monkeypatch):
     assert calls == [("list", "--source", "winget", "--details")]
 
 
-def test_outdated_keeps_every_winget_upgrade(winget, monkeypatch):
+def test_outdated_keeps_every_winget_upgrade(winget, stub_run_cli):
     output = RUNNER_UPGRADES + dedent("""\
         (21/22) Some Store App [9PF4QZKKRZ7N]
         Version: 1.0.0
@@ -172,7 +172,7 @@ def test_outdated_keeps_every_winget_upgrade(winget, monkeypatch):
           msstore [2.40.0]
           winget [2.45.1]
         """)
-    monkeypatch.setattr(winget, "run_cli", lambda *args, **kwargs: output)
+    stub_run_cli(winget, output)
 
     packages = {
         package.id: (str(package.installed_version), str(package.latest_version))
@@ -228,7 +228,7 @@ def test_build_package_store_uses_msstore_sentinel(winget, package_id):
     assert str(pkg.latest_version) == "msstore"
 
 
-def test_search_orders_native_before_store(winget, monkeypatch):
+def test_search_orders_native_before_store(winget, stub_run_cli):
     """Microsoft Store entries must come after winget-native ones in the search
     output, regardless of the order winget returned them in."""
     rows = [
@@ -240,7 +240,7 @@ def test_search_orders_native_before_store(winget, monkeypatch):
     header = "Name              Id                Version      Match           Source"
     table = "\n".join([header, "-" * width, *rows]) + "\n"
 
-    monkeypatch.setattr(winget, "run_cli", lambda *a, **kw: table)
+    stub_run_cli(winget, table)
 
     results = list(winget.search("vscode", extended=True, exact=False))
     ids = [p.id for p in results]

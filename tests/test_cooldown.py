@@ -633,45 +633,41 @@ Build Date      : Tue, 22 Jul 2025 09:14:02
 """
 
 
-def test_paru_release_date_reads_aur_last_modified(monkeypatch):
+def test_paru_release_date_reads_aur_last_modified(stub_run_cli):
     manager = Paru()
-    monkeypatch.setattr(
-        manager, "run_cli", lambda *args, **kwargs: _PARU_AUR_INFO_OUTPUT
-    )
+    stub_run_cli(manager, _PARU_AUR_INFO_OUTPUT)
     published = manager.release_date("paru")
     assert published == datetime(2025, 7, 12, 14, 52, 15, tzinfo=timezone.utc)
 
 
-def test_paru_release_date_parses_space_padded_days(monkeypatch):
+def test_paru_release_date_parses_space_padded_days(stub_run_cli):
     output = _PARU_AUR_INFO_OUTPUT.replace(
         "Sat, 12 Jul 2025 14:52:15", "Wed,  2 Jul 2025 08:01:02"
     )
     manager = Paru()
-    monkeypatch.setattr(manager, "run_cli", lambda *args, **kwargs: output)
+    stub_run_cli(manager, output)
     published = manager.release_date("paru")
     assert published == datetime(2025, 7, 2, 8, 1, 2, tzinfo=timezone.utc)
 
 
-def test_paru_release_date_exempts_repository_packages(monkeypatch):
+def test_paru_release_date_exempts_repository_packages(stub_run_cli):
     manager = Paru()
-    monkeypatch.setattr(
-        manager, "run_cli", lambda *args, **kwargs: _PARU_REPO_INFO_OUTPUT
-    )
+    stub_run_cli(manager, _PARU_REPO_INFO_OUTPUT)
     assert manager.release_date("firefox") is COOLDOWN_EXEMPT
 
 
-def test_paru_release_date_none_on_unparsable_date(monkeypatch):
+def test_paru_release_date_none_on_unparsable_date(stub_run_cli):
     output = _PARU_AUR_INFO_OUTPUT.replace(
         "Sat, 12 Jul 2025 14:52:15", "sometime last summer"
     )
     manager = Paru()
-    monkeypatch.setattr(manager, "run_cli", lambda *args, **kwargs: output)
+    stub_run_cli(manager, output)
     assert manager.release_date("paru") is None
 
 
-def test_paru_release_date_none_without_fields(monkeypatch):
+def test_paru_release_date_none_without_fields(stub_run_cli):
     manager = Paru()
-    monkeypatch.setattr(manager, "run_cli", lambda *args, **kwargs: "Name : paru\n")
+    stub_run_cli(manager, "Name : paru\n")
     assert manager.release_date("paru") is None
 
 
@@ -730,24 +726,17 @@ def test_mas_release_date_reads_catalog_record(monkeypatch):
     assert published == datetime(2020, 3, 18, 17, 39, 23, tzinfo=timezone.utc)
 
 
-def test_mas_release_date_none_without_date_field(monkeypatch):
+def test_mas_release_date_none_without_date_field(stub_run_cli):
     manager = MAS()
-    monkeypatch.setattr(
-        manager,
-        "run_cli",
-        lambda *args, **kwargs: '{"adamID":999999999,"name":"Papaya"}',
-    )
+    stub_run_cli(manager, '{"adamID":999999999,"name":"Papaya"}')
     assert manager.release_date("999999999") is None
 
 
-def test_mas_release_date_none_on_unparsable_date(monkeypatch):
+def test_mas_release_date_none_on_unparsable_date(stub_run_cli):
     manager = MAS()
-    monkeypatch.setattr(
+    stub_run_cli(
         manager,
-        "run_cli",
-        lambda *args, **kwargs: (
-            '{"adamID":999999999,"currentVersionReleaseDate":"soon","name":"Papaya"}'
-        ),
+        '{"adamID":999999999,"currentVersionReleaseDate":"soon","name":"Papaya"}',
     )
     assert manager.release_date("999999999") is None
 

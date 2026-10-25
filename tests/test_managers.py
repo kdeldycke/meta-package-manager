@@ -496,7 +496,7 @@ and the last line is a package rather than a footer.
 
 
 @pytest.mark.parametrize("member", ("installed", "outdated"))
-def test_eopkg_listing_keeps_its_last_rows(member, monkeypatch):
+def test_eopkg_listing_keeps_its_last_rows(member, stub_run_cli):
     """`eopkg`'s listings carry no footer, so no trailing line may be discarded.
 
     Both listings used to drop the last two lines before matching, on the
@@ -513,7 +513,7 @@ def test_eopkg_listing_keeps_its_last_rows(member, monkeypatch):
     # `outdated` follows the listing with an `info` call; answering both with
     # the listing leaves every candidate unresolved, which is the point here:
     # this test is about which rows survive, not about the version join.
-    monkeypatch.setattr(manager, "run_cli", lambda *args, **kwargs: EOPKG_LISTING)
+    stub_run_cli(manager, EOPKG_LISTING)
 
     ids = {package.id for package in getattr(manager, member)}
 
@@ -522,7 +522,7 @@ def test_eopkg_listing_keeps_its_last_rows(member, monkeypatch):
     assert ids == {"aalib", "zram-generator-defaults", "zstd", "zxing-cpp"}
 
 
-def test_eopkg_installed_reports_the_bare_version(monkeypatch):
+def test_eopkg_installed_reports_the_bare_version(stub_run_cli):
     """`installed` reports the `Version` column alone, release excluded.
 
     Every snapshot carries this string, so the release stays out of it. Only
@@ -530,7 +530,7 @@ def test_eopkg_installed_reports_the_bare_version(monkeypatch):
     as the same version on both sides.
     """
     manager = pool["eopkg"]
-    monkeypatch.setattr(manager, "run_cli", lambda *args, **kwargs: EOPKG_LISTING)
+    stub_run_cli(manager, EOPKG_LISTING)
 
     versions = {
         package.id: str(package.installed_version) for package in manager.installed
@@ -679,7 +679,7 @@ def test_eopkg_outdated_skips_the_info_call_when_nothing_is_outdated(monkeypatch
     assert [call[0] for call in calls] == ["list-upgrades"]
 
 
-def test_eopkg_search_decodes_character_references(monkeypatch):
+def test_eopkg_search_decodes_character_references(stub_run_cli):
     """`eopkg search` emits the index's raw summary, character references included.
 
     `list-available` resolves the same text, so the two disagree on the very
@@ -692,7 +692,7 @@ def test_eopkg_search_decodes_character_references(monkeypatch):
         "imagemagick         - ImageMagick&#xAE; suite to create, edit, compose\n"
         "imagemagick-docs    - Documentation for imagemagick\n"
     )
-    monkeypatch.setattr(manager, "run_cli", lambda *args, **kwargs: output)
+    stub_run_cli(manager, output)
 
     descriptions = {
         package.id: package.description

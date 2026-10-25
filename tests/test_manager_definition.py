@@ -797,7 +797,7 @@ def test_build_class_implements(operations, implemented, not_implemented):
         assert implements(manager, operation) is False
 
 
-def test_factory_regex_parsing(monkeypatch):
+def test_factory_regex_parsing(stub_run_cli):
     manager = build_manager_class(
         _definition(
             installed=OperationSpec(
@@ -807,16 +807,14 @@ def test_factory_regex_parsing(monkeypatch):
             ),
         ),
     )()
-    monkeypatch.setattr(
-        manager, "run_cli", lambda *args, **kwargs: "ruff@0.1.2\nblack@24.1.0"
-    )
+    stub_run_cli(manager, "ruff@0.1.2\nblack@24.1.0")
     assert [(p.id, str(p.installed_version)) for p in manager.installed] == [
         ("ruff", "0.1.2"),
         ("black", "24.1.0"),
     ]
 
 
-def test_factory_json_parsing(monkeypatch):
+def test_factory_json_parsing(stub_run_cli):
     manager = build_manager_class(
         _definition(
             outdated=OperationSpec(
@@ -831,10 +829,9 @@ def test_factory_json_parsing(monkeypatch):
             ),
         ),
     )()
-    monkeypatch.setattr(
+    stub_run_cli(
         manager,
-        "run_cli",
-        lambda *a, **k: json.dumps(
+        json.dumps(
             {"packages": [{"name": "ruff", "current": "0.1.2", "latest": "0.2.0"}]},
         ),
     )
@@ -890,7 +887,7 @@ def test_factory_operation_cli(monkeypatch):
         manager.remove("jq")
 
 
-def test_factory_orphans_query(monkeypatch):
+def test_factory_orphans_query(stub_run_cli):
     """A config-defined manager can declare the `orphans` read-only query, parsed
     like `installed` and advertised as a routable operation."""
     manager = build_manager_class(
@@ -903,11 +900,7 @@ def test_factory_orphans_query(monkeypatch):
             remove=OperationSpec(args=("remove", "{package_id}")),
         ),
     )()
-    monkeypatch.setattr(
-        manager,
-        "run_cli",
-        lambda *args, **kwargs: "libfoo 1.2\nlibbar 3.4",
-    )
+    stub_run_cli(manager, "libfoo 1.2\nlibbar 3.4")
     assert implements(manager, Operations.orphans) is True
     packages = {(p.id, str(p.installed_version)) for p in manager.orphans}
     assert packages == {("libfoo", "1.2"), ("libbar", "3.4")}
@@ -1108,7 +1101,7 @@ def test_factory_search_without_refinements_relies_on_refiltering():
     assert search_func.extended_support is False  # type: ignore[attr-defined]
 
 
-def test_factory_json_array_field(monkeypatch):
+def test_factory_json_array_field(stub_run_cli):
     """A `key[N]` selector picks one element out of a list-valued JSON field,
     and resolves to nothing on non-list values or out-of-range indexes."""
     manager = build_manager_class(
@@ -1123,10 +1116,9 @@ def test_factory_json_array_field(monkeypatch):
             ),
         ),
     )()
-    monkeypatch.setattr(
+    stub_run_cli(
         manager,
-        "run_cli",
-        lambda *a, **k: json.dumps([
+        json.dumps([
             {"name": "jq", "installed_versions": ["1.7.1", "1.6"]},
             {"name": "empty", "installed_versions": []},
             {"name": "scalar", "installed_versions": "oops"},
@@ -1188,7 +1180,7 @@ def test_factory_install_ignores_a_version_pin(monkeypatch, caplog):
     ),
 )
 def test_factory_json_parsing_skips_unexpected_shapes(
-    monkeypatch, caplog, list_path, output, expected, warns
+    stub_run_cli, caplog, list_path, output, expected, warns
 ):
     """A payload of an unexpected shape yields what it can, and never raises.
 
@@ -1206,13 +1198,13 @@ def test_factory_json_parsing_skips_unexpected_shapes(
             ),
         ),
     )()
-    monkeypatch.setattr(manager, "run_cli", lambda *args, **kwargs: output)
+    stub_run_cli(manager, output)
     packages = {(p.id, str(p.installed_version)) for p in manager.installed}
     assert packages == expected
     assert ("Could not parse JSON output" in caplog.text) is warns
 
 
-def test_factory_regex_parsing_skips_a_match_without_id(monkeypatch):
+def test_factory_regex_parsing_skips_a_match_without_id(stub_run_cli):
     """A line the pattern matches with an empty `package_id` group is skipped."""
     manager = build_manager_class(
         _definition(
@@ -1223,9 +1215,7 @@ def test_factory_regex_parsing_skips_a_match_without_id(monkeypatch):
             ),
         ),
     )()
-    monkeypatch.setattr(
-        manager, "run_cli", lambda *args, **kwargs: "ruff@0.1.2\n@24.1.0"
-    )
+    stub_run_cli(manager, "ruff@0.1.2\n@24.1.0")
     assert [(p.id, str(p.installed_version)) for p in manager.installed] == [
         ("ruff", "0.1.2"),
     ]

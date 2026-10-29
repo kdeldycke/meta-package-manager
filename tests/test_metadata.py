@@ -40,6 +40,9 @@ pytestmark = pytest.mark.once
 """These read `pyproject.toml` and the generated matrix, so they answer the same
 on every OS and Python: the `once-tests` job runs them on a single runner."""
 
+CLICK_USAGE_ERROR_EXIT_CODE = 2
+"""Exit code of a Click CLI refusing its arguments, like a renamed option."""
+
 PYTHON_CLASSIFIER_PREFIX = "Programming Language :: Python :: "
 """Prefix of the trove classifiers enumerating supported Python versions."""
 
@@ -160,6 +163,12 @@ def test_matrix_python_floor_matches_requires_python():
             timeout=300,
             check=True,
         )
+    except subprocess.CalledProcessError as error:
+        # A fetch failure exits 1. Exit 2 is a Click usage error: the pinned
+        # repomatic refuses this invocation, which is drift to fix, not a skip.
+        if error.returncode == CLICK_USAGE_ERROR_EXIT_CODE:
+            pytest.fail(f"repomatic refused the invocation:\n{error.stderr}")
+        pytest.skip(f"Could not run repomatic to read the matrix: {error}")
     except (OSError, subprocess.SubprocessError) as error:
         pytest.skip(f"Could not run repomatic to read the matrix: {error}")
 

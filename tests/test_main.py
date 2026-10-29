@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import inspect
+import io
 import runpy
 import sys
 from functools import partial
@@ -58,8 +59,10 @@ class FakeStream:
     "encoding", ("cp1252", "ascii", "latin-1", "unknown-8bit", None)
 )
 def test_legacy_stream_is_promoted_to_utf8(monkeypatch, encoding):
-    """A stream that cannot carry mpm's glyphs is reconfigured to UTF-8, and so
-    is a stream reporting an encoding Python does not know."""
+    """A stream that cannot carry mpm's glyphs is reconfigured to UTF-8.
+
+    So is a stream reporting an encoding Python does not know.
+    """
     out, err = FakeStream(encoding), FakeStream(encoding)
     monkeypatch.setattr("sys.stdout", out)
     monkeypatch.setattr("sys.stderr", err)
@@ -75,8 +78,10 @@ def test_legacy_stream_is_promoted_to_utf8(monkeypatch, encoding):
 
 @pytest.mark.parametrize("encoding", ("utf-8", "UTF-8", "utf8"))
 def test_utf8_stream_is_left_alone(monkeypatch, encoding):
-    """Reconfiguration never fires on a stream that already speaks UTF-8,
-    whatever spelling it reports."""
+    """Reconfiguration never fires on a stream that already speaks UTF-8.
+
+    Whatever spelling it reports.
+    """
     out, err = FakeStream(encoding), FakeStream(encoding)
     monkeypatch.setattr("sys.stdout", out)
     monkeypatch.setattr("sys.stderr", err)
@@ -88,8 +93,10 @@ def test_utf8_stream_is_left_alone(monkeypatch, encoding):
 
 
 def test_a_refusing_stream_never_raises(monkeypatch):
-    """A stream refusing reconfiguration is left as the platform made it, rather
-    than taking the whole CLI down before it has printed anything."""
+    """A stream refusing reconfiguration is left as the platform made it.
+
+    Rather than taking the whole CLI down before it has printed anything.
+    """
     out = FakeStream("cp1252", refuse=True)
     monkeypatch.setattr("sys.stdout", out)
     monkeypatch.setattr("sys.stderr", FakeStream("utf-8"))
@@ -100,10 +107,10 @@ def test_a_refusing_stream_never_raises(monkeypatch):
 
 
 def test_a_stream_without_reconfigure_is_skipped(monkeypatch):
-    """Not every object standing in for a stream carries `reconfigure`: a
-    captured `io.StringIO` does not, and must not crash the entry point."""
-    import io
+    """A stream object without `reconfigure` does not crash the entry point.
 
+    A captured `io.StringIO` is one.
+    """
     monkeypatch.setattr("sys.stdout", io.StringIO())
     monkeypatch.setattr("sys.stderr", io.StringIO())
 
@@ -120,9 +127,10 @@ def test_a_stream_without_reconfigure_is_skipped(monkeypatch):
     ),
 )
 def test_entry_point_runs_the_cli(monkeypatch, capsys, tmp_path, entry_point):
-    """Both entry points run the CLI as `mpm`: the `main()` function the `mpm`
-    script calls, and the `__main__.py` file `python -m meta_package_manager`
-    runs, with the path of that file in `sys.argv[0]`.
+    """Both entry points run the CLI as `mpm`.
+
+    The `main()` function the `mpm` script calls, and the `__main__.py` file `python -m
+    meta_package_manager` runs, with the path of that file in `sys.argv[0]`.
 
     The version itself is not checked: click-extra resolves it once per process,
     from the stack of whichever test reads it first. The configuration inputs of

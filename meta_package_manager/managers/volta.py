@@ -30,9 +30,10 @@ if TYPE_CHECKING:
 
 
 class Volta(PackageManager):
-    """Volta manages JavaScript command-line tools, installing each package from
-    the npm registry into its own isolated image pinned to a specific Node
-    runtime.
+    """Volta manages JavaScript command-line tools.
+
+    It installs each package from the npm registry into its own isolated image, pinned
+    to a specific Node runtime.
 
     Tools installed with `volta install` never land in npm's global prefix:
     Volta keeps them under its own `VOLTA_HOME` layout and exposes their

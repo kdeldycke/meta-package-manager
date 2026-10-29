@@ -93,7 +93,7 @@ class Whalebrew(PackageManager):
     $ whalebrew version
     Whalebrew 0.4.1-38-g79b8605-dirty+2024-08-02.79b860575946278fd3215e68677d7439424d1cd1
     ```
-    """
+    """  # noqa: E501
 
     _INSTALLED_REGEXP = re.compile(r"^(?P<command>\S+)[ \t]+(?P<package_id>\S+)$")
     """One package per line: the command, then the image it runs."""

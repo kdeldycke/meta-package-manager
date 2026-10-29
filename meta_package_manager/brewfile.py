@@ -15,8 +15,8 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """Render the installed-package inventory as a Brewfile.
 
-Defines {func}`~meta_package_manager.brewfile.build_brewfile` and the helpers used by `mpm dump --brewfile`
-to emit a Brewfile that `brew bundle install` can consume.
+Defines {func}`~meta_package_manager.brewfile.build_brewfile` and the helpers used by
+`mpm dump --brewfile` to emit a Brewfile that `brew bundle install` can consume.
 
 {doc}`/dump` is the canonical home of every user-facing Brewfile fact: the table
 of managers and entry keywords, the header, the taps and the per-manager
@@ -36,7 +36,7 @@ from __future__ import annotations
 
 import json
 from collections import Counter
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from . import __version__
 
@@ -123,7 +123,7 @@ def format_header(
     platform: str,
 ) -> str:
     """Render the comment block at the top of a Brewfile dump."""
-    timestamp = datetime.now(tz=timezone.utc).isoformat(timespec="seconds")
+    timestamp = datetime.now(tz=UTC).isoformat(timespec="seconds")
     coverage_line = (
         ", ".join(f"{mid}={n}" for mid, n in sorted(coverage.items())) or "(empty)"
     )
@@ -175,10 +175,11 @@ def build_brewfile(
 ) -> str:
     """Render a Brewfile from the given managers' installed packages.
 
-    Only managers whose {attr}`~meta_package_manager.manager.PackageManager.brewfile_entry_type`
-    is set contribute output; the caller is expected to have filtered the iterable
-    accordingly, but managers without a configured entry type are silently skipped
-    as a defensive measure.
+    Only managers whose
+    {attr}`~meta_package_manager.manager.PackageManager.brewfile_entry_type` is set
+    contribute output; the caller is expected to have filtered the iterable accordingly,
+    but managers without a configured entry type are silently skipped as a defensive
+    measure.
 
     `packages_by_manager` (keyed by manager id) supplies each manager's installed
     packages so the caller can fetch them concurrently up front. When omitted, each

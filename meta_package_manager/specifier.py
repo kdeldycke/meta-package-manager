@@ -149,7 +149,9 @@ handle the package type.
 There is no official list of `pkg:<type>/...` prefixes defined in the pURL
 specification.
 
-The only source we found lying around in the pURL literature is this [list of diverse aliases, examples and libraries](https://github.com/package-url/purl-spec/blob/master/PURL-TYPES.rst). We use
+The only source we found lying around in the pURL literature is this [list of diverse
+aliases, examples and
+libraries](https://github.com/package-url/purl-spec/blob/master/PURL-TYPES.rst). We use
 this document to compile the keys of this `PURL_MAP` mapping.
 ```
 
@@ -303,8 +305,7 @@ class EmptyReduction(Exception):
 
 
 class Solver:
-    """Combine a set of `Specifier` and allow for the solving of the constraints they
-    represent."""
+    """Combine a set of `Specifier` and solve the constraints they represent."""
 
     manager_priority: Sequence[str] = ()
 
@@ -343,8 +344,7 @@ class Solver:
         return None
 
     def reduce_specs(self, specs: Iterable[Specifier]) -> Specifier:
-        """Reduce a collection of `Specifier` to its essential, minimal and unique
-        form.
+        """Reduce a collection of `Specifier` to its essential, minimal and unique form.
 
         This method assumes that all provided `specs` are of the same package (like
         `resolve_package_specs()` does).

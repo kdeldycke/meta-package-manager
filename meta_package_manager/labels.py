@@ -13,8 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-"""Utilities to generate the extra labels and labeller rules for GitHub issues
-and PRs.
+"""Utilities to generate the extra labels and labeller rules for GitHub issues and PRs.
 
 The content and file rules produced here are a convenience: they pre-label a
 freshly filed issue or PR to save the maintainer a first pass. They never replace
@@ -428,8 +427,9 @@ def _sorted_keywords(keywords: tuple[str, ...]) -> tuple[str, ...]:
 
 
 def generate_content_rules() -> TLabelRules:
-    r"""Build every content rule: the static ones plus one per manager or platform
-    label that has curated keywords.
+    r"""Build every content rule.
+
+    The static ones, plus one per manager or platform label that has curated keywords.
 
     Manager labels are driven solely by each manager's own
     {attr}`~meta_package_manager.manager.PackageManager.keywords`, never by the bare

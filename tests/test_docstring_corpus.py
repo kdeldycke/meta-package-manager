@@ -46,7 +46,6 @@ from __future__ import annotations
 
 import re
 import shlex
-from collections.abc import Callable
 from contextlib import suppress
 from functools import cached_property
 from itertools import product
@@ -66,6 +65,10 @@ from meta_package_manager.package import manager_purl
 from meta_package_manager.pool import pool
 from meta_package_manager.specifier import Specifier
 from meta_package_manager.version import VersionRange, parse_version
+
+TYPE_CHECKING = False
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 def _query_commands(cls: type, members: tuple[str, ...]) -> list[tuple[list[str], str]]:
@@ -117,8 +120,9 @@ def _documented_query(cls: type) -> str:
 def _dispatch(
     command_map: list[tuple[list[str], str]], default: str = ""
 ) -> Callable[..., str]:
-    """A `run_cli` stub returning the output whose documented command best
-    matches the invocation.
+    """A `run_cli` stub returning the output of the best-matching command.
+
+    The documented command that best matches the invocation.
 
     An `outdated` that cross-references two commands (`list` + `latest`) gets
     each call routed to its own block: the match is the documented command
@@ -278,8 +282,10 @@ def test_documented_output_still_parses(
     [param for param in _fixtures() if param.values[1] != "version_regexes"],
 )
 def test_documented_ids_read_back_from_their_purl(manager, member, output, monkeypatch):
-    """Every package ID a manager documents reads back from the pURL a menu action
-    passes to `mpm upgrade`, tied to the same manager."""
+    """Every documented package ID reads back from the pURL of a menu action.
+
+    The pURL a menu action passes to `mpm upgrade`, tied to the same manager.
+    """
     _neutralize_binaries(manager, monkeypatch)
     for package in _documented_packages(manager, member, output, monkeypatch):
         purl = manager_purl(manager.id, package.id)
@@ -290,8 +296,9 @@ def test_documented_ids_read_back_from_their_purl(manager, member, output, monke
 
 
 def test_display_blocks_align_with_raw():
-    """The compiled harvest the docs render and the raw harvest this test
-    replays must agree on structure.
+    """The compiled and raw harvests agree on structure.
+
+    The compiled harvest is what the docs render, the raw one what this test replays.
 
     `meta_package_manager/_docs.py` selects reference-trace blocks by (member, index)
     from {func}`~meta_package_manager.docstring_corpus.class_display_blocks`, while
@@ -537,8 +544,10 @@ def _matches(
 
 
 def _mutation_fixtures():
-    """Yield one `pytest.param` per manager mutation member with literal
-    documented commands."""
+    """Yield one `pytest.param` per manager mutation with documented commands.
+
+    Only for members with literal documented commands.
+    """
     for manager in pool.values():
         for member in MUTATION_MEMBERS:
             documented = _documented_commands(
@@ -699,8 +708,10 @@ def _class_command_map(cls: type) -> list[tuple[list[str], str]]:
 
 
 def _query_fixtures():
-    """Yield one `pytest.param` per manager query member with literal
-    documented commands."""
+    """Yield one `pytest.param` per manager query with documented commands.
+
+    Only for members with literal documented commands.
+    """
     for manager in pool.values():
         for member in QUERY_MEMBERS:
             documented = _documented_commands(

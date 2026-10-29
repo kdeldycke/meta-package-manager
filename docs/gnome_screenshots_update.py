@@ -73,7 +73,7 @@ from typing import NamedTuple
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterator, Mapping
+    from collections.abc import Callable, Generator, Mapping
 
 PROJECT_ROOT = Path(__file__).parent.parent
 
@@ -704,7 +704,7 @@ def png_rows(target: Path) -> Frame:
 
 
 def settle_frame(fresh: Path, target: Path) -> None:
-    """Put a fresh capture in place of the committed frame, unless it is the same picture.
+    """Put a fresh capture in place of the committed frame, unless it is the same.
 
     Kept when the capture differs from the frame by no more than
     {data}`FRAME_TOLERANCE_LEVELS` on fewer than {data}`FRAME_TOLERANCE_SHARE`
@@ -941,7 +941,7 @@ def write_fake_mpm(root: Path) -> Path:
 
 
 @contextmanager
-def shell_session(log: Path) -> Iterator[None]:
+def shell_session(log: Path) -> Generator[None, None, None]:
     """Run a headless `gnome-shell` for the duration of the block."""
     argv = (
         "gnome-shell",

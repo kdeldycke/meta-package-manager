@@ -74,12 +74,11 @@ records an upstream source URL.
 ```
 
 ```{seealso}
-[VulnerableCode](https://github.com/aboutcode-org/vulnerablecode)
-is the candidate second source: it aggregates OSV, GitHub and the
-Linux distro trackers (Debian, Arch, Gentoo, Red Hat, SUSE, Ubuntu)
-plus project-specific feeds behind a purl-keyed API, with a public
-instance at [public.vulnerablecode.io](https://public.vulnerablecode.io). That would widen coverage
-beyond OSV's language ecosystems without mpm taking on CPE mapping
+[VulnerableCode](https://github.com/aboutcode-org/vulnerablecode) is the candidate
+second source: it aggregates OSV, GitHub and the Linux distro trackers (Debian, Arch,
+Gentoo, Red Hat, SUSE, Ubuntu) plus project-specific feeds behind a purl-keyed API, with
+a public instance at [public.vulnerablecode.io](https://public.vulnerablecode.io). That
+would widen coverage beyond OSV's language ecosystems without mpm taking on CPE mapping
 itself.
 ```
 
@@ -415,7 +414,7 @@ def _parse_timestamp(value: str | None) -> datetime | None:
     if not value:
         return None
     try:
-        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+        return datetime.fromisoformat(value)
     except ValueError:
         return None
 

@@ -33,7 +33,7 @@ DRY_RUN_REPORT = """\
   • /home/user/.local/bin/fzf v0.40.0 -> v0.74.2 (https://github.com/junegunn/fzf/releases/tag/v0.74.2)
   • /home/user/.local/bin/gh v2.40.0 -> v2.97.0 (https://github.com/cli/cli/releases/tag/v2.97.0)
   ⨯ command failed                                   error=Updates found, exit (dry-run mode).
-"""
+"""  # noqa: E501
 """The `<stderr>` of `bin update --dry-run`, as the docstring of
 {attr}`~meta_package_manager.managers.bin.Bin.outdated` shows it."""
 

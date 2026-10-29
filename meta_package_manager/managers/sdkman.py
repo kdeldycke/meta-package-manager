@@ -35,12 +35,11 @@ if TYPE_CHECKING:
 
 
 _SDKMAN_DIR = os.environ.get("SDKMAN_DIR", str(Path.home() / ".sdkman"))
-"""Resolve the SDKMAN installation directory from the environment variable or default."""
+"""The SDKMAN installation directory, from the environment variable or the default."""
 
 
 class SDKMAN(PackageManager):
-    """SDKMAN! manages parallel versions of multiple Software Development Kits on
-    Unix-based systems.
+    """SDKMAN! manages parallel versions of SDKs on Unix-based systems.
 
     ```{note}
     SDKMAN! primarily serves the JVM ecosystem: Java, Gradle, Maven, Kotlin,
@@ -229,9 +228,10 @@ class SDKMAN(PackageManager):
     def remove(self, package_id: str) -> str:
         """Remove one package.
 
-        SDKMAN's `uninstall` command requires both the candidate and a specific
-        version. The currently installed version is looked up from
-        {meth}`~meta_package_manager.manager.PackageManager.installed` and passed to the CLI.
+        SDKMAN's `uninstall` command requires both the candidate and a specific version.
+        The currently installed version is looked up from
+        {meth}`~meta_package_manager.manager.PackageManager.installed` and passed to the
+        CLI.
 
         That lookup is stamped as the read it is: plan mode captures by the
         operation in flight, so an inventory read issued under `remove` would be

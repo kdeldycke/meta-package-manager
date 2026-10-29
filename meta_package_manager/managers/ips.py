@@ -34,9 +34,10 @@ if TYPE_CHECKING:
 class IPS(PackageManager):
     """The Image Packaging System, the native `pkg` of Solaris and illumos.
 
-    The CLI is named `pkg`, which the FreeBSD {class}`~meta_package_manager.managers.pkg.PKG` manager also claims.
-    The two never coexist, their `platforms` being disjoint, but the manager ID
-    here is `ips` so the two stay addressable apart.
+    The CLI is named `pkg`, which the FreeBSD
+    {class}`~meta_package_manager.managers.pkg.PKG` manager also claims. The two never
+    coexist, their `platforms` being disjoint, but the manager ID here is `ips` so the
+    two stay addressable apart.
 
     ```{note}
     Only root may modify the image, so mutating operations escalate through

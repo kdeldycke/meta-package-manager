@@ -144,8 +144,7 @@ class Zypper(PackageManager):
     """
 
     def _search(self, *args: str) -> Iterator[SearchResult]:
-        """Utility method to parse and interpret results of the `zypper search`
-        command.
+        """Utility method to parse and interpret results of the `zypper search` command.
 
         This is reused by the `installed` and `search` operations.
 
@@ -175,7 +174,7 @@ class Zypper(PackageManager):
         </search-result>
         </stream>
         ```
-        """
+        """  # noqa: E501
         output = self.run_cli(
             "--xmlout",
             "search",
@@ -255,7 +254,7 @@ class Zypper(PackageManager):
         </update-status>
         </stream>
         ```
-        """
+        """  # noqa: E501
         output = self.run_cli("--xmlout", "list-updates", must_succeed=True)
         if not output:
             return

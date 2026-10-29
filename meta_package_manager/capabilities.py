@@ -53,8 +53,7 @@ if TYPE_CHECKING:
 
 
 class Operations(Enum):
-    """Recognized operation IDs that are implemented by package manager with their
-    specific CLI invocation.
+    """Operation IDs implemented by a package manager with its own CLI call.
 
     Each operation has its own CLI subcommand.
     """
@@ -327,8 +326,7 @@ def extended_search_is_synthesized(
 
 
 def search_capabilities(extended_support: bool = True, exact_support: bool = True):
-    """Decorator factory to be used on `search()` operations to signal `mpm`
-    framework manager's capabilities.
+    """Decorate `search()` operations to signal the capabilities of a manager.
 
     The flags are exposed as `extended_support` and `exact_support` attributes
     on the wrapped method, so the documentation can derive which managers rely on
@@ -371,9 +369,10 @@ def search_capabilities(extended_support: bool = True, exact_support: bool = Tru
 
 
 def version_not_implemented(func: Callable[P, T]) -> Callable[P, T]:
-    """Decorator to be used on `install()` or `upgrade_one_cli()` operations to
-    signal that a particular operation does not implement (yet) the version specifier
-    parameter."""
+    """Mark an operation that does not implement the version specifier yet.
+
+    To be used on `install()` or `upgrade_one_cli()` operations.
+    """
 
     @wraps(func)
     def print_warning(*args: P.args, **kwargs: P.kwargs) -> T:
@@ -426,8 +425,9 @@ class DelegatedMethod:
 
 
 class Delegate:
-    """Factory that creates {class}`DelegatedMethod` descriptors for delegating
-    operations to another package manager's CLI.
+    """Create {class}`DelegatedMethod` descriptors.
+
+    Each descriptor delegates an operation to the CLI of another package manager.
 
     Typical usage in a manager class body:
 

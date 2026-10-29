@@ -168,7 +168,8 @@ class Roswell(PackageManager):
         """Install one Lisp implementation.
 
         A version is appended to the implementation with a slash, the same
-        `impl/version` spelling {meth}`~meta_package_manager.manager.PackageManager.installed` reports.
+        `impl/version` spelling
+        {meth}`~meta_package_manager.manager.PackageManager.installed` reports.
 
         ```{code-block} shell-session
 

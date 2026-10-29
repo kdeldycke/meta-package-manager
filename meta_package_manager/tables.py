@@ -50,7 +50,7 @@ from click_extra.table import AUTO_WIDTH, SERIALIZATION_FORMATS
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Iterator, Sequence
+    from collections.abc import Generator, Iterable, Sequence
 
     from click_extra import Context
 
@@ -66,8 +66,9 @@ class SortableField(StrEnum):
 
 
 class PackageOutcome(StrEnum):
-    """What a command did to one package, as the `status` column of
-    {data}`CHANGE_REPORT_COLUMNS` spells it.
+    """What a command did to one package.
+
+    As the `status` column of {data}`CHANGE_REPORT_COLUMNS` spells it.
 
     Classified by {func}`meta_package_manager.cli.package_outcomes` from the
     inventory a manager reports before and after the command changes it. The
@@ -102,8 +103,10 @@ class PackageOutcome(StrEnum):
 
     @property
     def label(self) -> str:
-        """The outcome as the report table shows it: its glyph from
-        {data}`PACKAGE_OUTCOME_GLYPHS`, then its word."""
+        """The outcome as the report table shows it: its glyph, then its word.
+
+        The glyph comes from {data}`PACKAGE_OUTCOME_GLYPHS`.
+        """
         return f"{PACKAGE_OUTCOME_GLYPHS[self]} {self.value}"
 
 
@@ -418,8 +421,10 @@ WHICH_COLUMNS: tuple[TColumn, ...] = (
 
 
 def column_specs(columns: Sequence[TColumn]) -> tuple[ColumnSpec, ...]:
-    """Extract the bare {class}`~click_extra.columns.ColumnSpec` tuple from a column
-    registry."""
+    """Extract the bare `ColumnSpec` tuple from a column registry.
+
+    See {class}`~click_extra.columns.ColumnSpec`.
+    """
     return tuple(spec for spec, _ in columns)
 
 
@@ -443,7 +448,7 @@ def sort_header(spec: ColumnSpec, field: SortableField | None) -> ColumnSpec:
 
 
 @contextmanager
-def _terminal_width_budget(ctx: Context) -> Iterator[None]:
+def _terminal_width_budget(ctx: Context) -> Generator[None, None, None]:
     """Give a table the whole terminal, then put the help budget back.
 
     click-extra sizes every {data}`~click_extra.table.AUTO_WIDTH` column from

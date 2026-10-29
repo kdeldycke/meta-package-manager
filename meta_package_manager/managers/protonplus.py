@@ -230,7 +230,7 @@ class ProtonPlus(PackageManager):
         [Vysp3r/ProtonPlus#1313](https://github.com/Vysp3r/ProtonPlus/issues/1313)
         makes `list` print the runner ID and tag of each release.
         ```
-        """
+        """  # noqa: E501
         tags: dict[str, list[str]] = {}
         for record in self._records():
             package_id = f"{record['launcher_id']}/{record['provider_id']}"

@@ -13,10 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-"""Manager-agnostic {class}`meta_package_manager.package.Package` data model
-and the {class}`meta_package_manager.package.PackageMetadata` companion
-that augments it with data pulled from sources outside the package manager
-itself.
+"""Manager-agnostic package data model, and its metadata companion.
+
+{class}`meta_package_manager.package.Package` is the model.
+{class}`meta_package_manager.package.PackageMetadata` augments it with data pulled from
+sources outside the package manager itself.
 
 Defines the lightweight representation of a package (ID, name, installed and latest
 versions, architecture) that every manager operation yields, plus
@@ -43,7 +44,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from functools import cached_property, lru_cache
 from urllib.parse import quote
 
@@ -259,7 +260,7 @@ def packages_asdict(packages: Iterable[Package], keep_fields: tuple[str, ...]):
     return ({field: getattr(p, field) for field in keep_fields} for p in packages)
 
 
-class DependencyScope(str, Enum):
+class DependencyScope(StrEnum):
     """Maps loosely onto SPDX `RelationshipType` variants.
 
     SBOM renderers translate these into `RUNTIME_DEPENDENCY_OF`,
@@ -276,7 +277,7 @@ class DependencyScope(str, Enum):
     RECOMMENDED = "recommended"
 
 
-class ChecksumAlgorithm(str, Enum):
+class ChecksumAlgorithm(StrEnum):
     """Subset of algorithms shared by SPDX and CycloneDX schemas.
 
     Used by {class}`Checksum` to identify a content hash without

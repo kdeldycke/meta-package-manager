@@ -21,7 +21,7 @@ import csv
 import importlib.util
 import re
 import shutil
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from itertools import permutations
 from pathlib import Path
 from textwrap import indent
@@ -62,8 +62,7 @@ from .conftest import PROJECT_ROOT, all_managers, tomllib
 
 
 def _load_docs_update():
-    """Load `docs/docs_update.py` as a module without requiring `docs` to
-    be a package.
+    """Load `docs/docs_update.py` as a module without requiring `docs` to be a package.
 
     The script lives next to the docs but is not part of any importable
     package, so we resolve it by file path.
@@ -317,8 +316,10 @@ def test_new_package_manager_issue_template():
 
 
 def test_extra_labels_in_pyproject():
-    """Check the generated `[tool.repomatic.labels.extra]` block in
-    `pyproject.toml` is consistent with the `LABELS` registry."""
+    """Check the generated label block is consistent with `LABELS`.
+
+    The `[tool.repomatic.labels.extra]` block of `pyproject.toml`.
+    """
     pyproject = PROJECT_ROOT / "pyproject.toml"
     data = tomllib.loads(pyproject.read_text(encoding="utf-8"))
     extra_labels = data["tool"]["repomatic"]["labels"]["extra"]
@@ -351,8 +352,9 @@ def test_extra_labels_in_pyproject():
 
 
 def test_label_rules_reference_known_labels():
-    """Every file- and content-rule must target a label that exists in the
-    generated `[tool.repomatic.labels.extra]` block.
+    """Every file- and content-rule targets a label that exists.
+
+    The label must be in the generated `[tool.repomatic.labels.extra]` block.
 
     A rule naming an unknown label silently applies a label the repository does not
     have: the stale `dnf-based` rules left behind when the `labels.py` group was
@@ -369,9 +371,10 @@ def test_label_rules_reference_known_labels():
 
 
 def test_label_rules_in_pyproject():
-    """Check the generated `[tool.repomatic.labels.*]` rule blocks in
-    `pyproject.toml` match a fresh generation from the pool, in the schema
-    repomatic reads.
+    """Check the generated labeller rule blocks match a fresh generation.
+
+    The `[tool.repomatic.labels.*]` blocks of `pyproject.toml` are generated from the
+    pool, in the schema repomatic reads.
 
     Drift means a manager was added without running `docs/docs_update.py`
     (repomatic's `update-docs` job self-heals this on the next push).
@@ -492,8 +495,9 @@ def test_string_array_wraps_where_pyproject_fmt_wraps(glyph, columns, tmp_path):
 
 
 def test_benchmark_toml_well_formed():
-    """Check `docs/benchmark.toml` only encodes flags from the known
-    competitor set and homepage URLs for non-pool managers.
+    """Check `docs/benchmark.toml` encodes only known flags and homepages.
+
+    Flags from the known competitor set, and homepage URLs for non-pool managers.
 
     A duplicate manager-id row anywhere in the file (in any table) is a
     `tomllib.TOMLDecodeError` at load time, below, rather than a silently
@@ -616,8 +620,9 @@ def test_benchmark_toml_well_formed():
 
 
 def test_benchmark_homepages_cover_non_pool_managers():
-    """Every non-pool manager listed in `benchmark.toml` must have a
-    matching `homepages` entry so the table can link the identifier.
+    """Every non-pool manager of `benchmark.toml` has a `homepages` entry.
+
+    So the table can link the identifier.
 
     Pool-implemented managers are excluded: their URL is sourced from the
     class's `homepage_url` attribute, and a redundant entry in the TOML
@@ -699,8 +704,9 @@ def test_manager_wikipedia_url(manager):
 
 
 def test_benchmark_table_renders():
-    """Check the `Package manager support` table generator still produces a
-    well-formed table from the current pool and TOML.
+    """Check the `Package manager support` table generator still works.
+
+    It must produce a well-formed table from the current pool and TOML.
 
     The table is rendered live at Sphinx build time by the ``{python:render}``
     block in `docs/benchmark.md`, and `test_mirror_blocks_in_sync` compares its
@@ -898,7 +904,7 @@ def test_metrics_store_well_formed():
     rows = _load_metrics_store()
     assert rows, "no metric reading recorded yet"
 
-    today = datetime.now(tz=timezone.utc).date()
+    today = datetime.now(tz=UTC).date()
     star_days = set()
     attributes = set()
     releases = set()
@@ -968,8 +974,9 @@ def test_metrics_subjects_match_benchmark():
 
 
 def test_binaries_download_table_renders():
-    """Check the latest-release binaries table generator still produces a
-    well-formed table from the binaries catalog.
+    """Check the latest-release binaries table generator still works.
+
+    It must produce a well-formed table from the binaries catalog.
 
     The table is rendered live at Sphinx build time by the ``{python:render}``
     block in `docs/install.md`, so there is no checked-in copy to compare
@@ -1075,8 +1082,9 @@ def test_lock_families_render():
 
 
 def test_augmentations_table_renders():
-    """Check the augmentations table generator still produces a well-formed
-    table from the current pool.
+    """Check the augmentations table generator still produces a valid table.
+
+    The table is generated from the current pool.
 
     The table is rendered live at Sphinx build time by the ``{python:render}``
     block in `docs/augmentations.md`, so there is no checked-in copy to compare
@@ -1239,7 +1247,7 @@ def test_manager_logo_renders(manager):
 def test_manager_card_renders(manager):
     """Check each manager's infobox carries its facts, and its mark when it has one."""
     card = _docs.manager_card(manager.id)
-    assert card.startswith("```{card}\n:class-card: manager-card")
+    assert card.startswith("```{card}\n:class-card: manager-card")  # noqa: RUF027
     assert card.endswith("```")
     assert card in _docs.manager_intro(manager.id)
 
@@ -1405,8 +1413,9 @@ def test_manager_logo_credits_renders():
 
 
 def test_manager_stubs_in_sync():
-    """Check the committed page stubs of `docs/managers/` match a fresh
-    generation from the pool.
+    """Check the page stubs of `docs/managers/` match a fresh generation.
+
+    The committed stubs are generated from the pool.
 
     The directory is wholly owned by `update_manager_stubs()`: one stub per
     pool manager, nothing else, each byte-identical to its template. Drift
@@ -1477,8 +1486,9 @@ def test_api_stubs_are_reachable_from_a_toctree():
 
 
 def test_manager_page_headings_survive_a_build(tmp_path):
-    """Check a real Sphinx build turns the generated headings into sections,
-    under a generated title and below the lede.
+    """Check a real Sphinx build turns the generated headings into sections.
+
+    Under a generated title and below the lede.
 
     The stub carries no heading at all, not even the page title: every one is
     printed by `manager_page()` and parsed out of the directive's output, which
@@ -1499,7 +1509,7 @@ def test_manager_page_headings_survive_a_build(tmp_path):
     pytest.importorskip("sphinx_design")
     build = pytest.importorskip("sphinx.cmd.build")
     try:
-        import click_extra.sphinx  # noqa: F401
+        import click_extra.sphinx  # noqa: F401, PLC0415
     except ImportError:
         pytest.skip("needs the docs dependency group (click-extra[sphinx])")
 
@@ -1552,8 +1562,9 @@ def test_manager_page_headings_survive_a_build(tmp_path):
 
 @all_managers
 def test_manager_page_sections_render(manager):
-    """Check every section generator of the per-manager pages produces
-    non-empty, heading-free MyST.
+    """Check every section generator of the manager pages makes valid MyST.
+
+    The MyST must be non-empty and heading-free.
 
     The sections are rendered live at Sphinx build time by the single
     ``{python:render}`` block of `docs/managers/<id>.md`, so there is no
@@ -1610,8 +1621,9 @@ def test_operation_notes_reach_the_operations_table(manager):
 
 @all_managers
 def test_operation_notes_are_full_sentences(manager):
-    """Check every populated *Notes* cell of the operations table reads as
-    standalone sentences.
+    """Check every *Notes* cell of the operations table reads as sentences.
+
+    Each populated cell must read as standalone sentences.
 
     The column mixes the manager's declared notes with the synthesized backfill
     captions, so the sentence shape (a capital to open, a period to close, no
@@ -1634,8 +1646,9 @@ def test_operation_notes_are_full_sentences(manager):
 
 
 def test_version_probe_nests_under_the_reference_traces():
-    """Check the version probe is a subsection of the reference traces, and a
-    section of its own on a page carrying no traces.
+    """Check the version probe is a subsection of the reference traces.
+
+    On a page carrying no traces, it is a section of its own.
 
     `MANAGER_SECTIONS` declares the probe one level below `manager_traces`, and
     `manager_page()` promotes a subsection whose parent rendered nothing. Both
@@ -1809,8 +1822,9 @@ def test_docstrings_carry_no_bare_url():
 
 
 def test_docstrings_carry_no_angle_bracket_link_destination():
-    """The `](<url>)` destination form renders as broken markup: see
-    `ANGLE_LINK_DEST` for the converter limitation and the rewrite to apply.
+    """The `](<url>)` destination form renders as broken markup.
+
+    See `ANGLE_LINK_DEST` for the converter limitation and the rewrite to apply.
     """
     hits = [
         f"{path.relative_to(PROJECT_ROOT)}:{lineno}: {match.group()}"
@@ -1861,8 +1875,9 @@ def test_trail_glyph_matches_the_emitted_one():
 
 
 def test_self_referencing_urls_name_a_file_the_tree_holds():
-    """A `raw.githubusercontent.com` URL pointing at this repository's own
-    `main` names a file the tree still carries.
+    """A raw URL to this repository's `main` names a file the tree carries.
+
+    Applies to `raw.githubusercontent.com` URLs.
 
     Nothing else resolves these: they are fetched by a reader far from any test.
     The `<xbar.image>` header of the bar plugin is what xbarapp.com renders as
@@ -1899,9 +1914,10 @@ def test_self_referencing_urls_name_a_file_the_tree_holds():
 
 
 def test_manager_traces_render_literal_blocks():
-    """A class-based manager's reference traces surface exactly the literal
-    installed/outdated/orphans blocks the corpus validates, in terminal-facing
-    form.
+    """The reference traces of a class-based manager match the corpus.
+
+    They surface exactly the literal installed/outdated/orphans blocks the corpus
+    validates, in terminal-facing form.
 
     `manager_traces` and the corpus round-trip both read
     {func}`~meta_package_manager.docstring_corpus.literal_blocks`, so the
@@ -2008,8 +2024,10 @@ def test_frontend_changelog_sections():
 
 
 def test_manager_support_bar_renders():
-    """Check the support bar opens the page with one region per state, each as
-    wide as its own population, and coloured by a step the stylesheet declares.
+    """Check the support bar opens the page with one region per state.
+
+    Each region is as wide as its own population, and coloured by a step the stylesheet
+    declares.
 
     Rendered live at Sphinx build time by the ``{python:render}`` block opening
     `docs/managers.md`, as raw HTML: the shares are a ratio CSS can draw, and a
@@ -2141,9 +2159,10 @@ def _row_manager_id(row: str) -> str:
 
 
 def test_managers_index_table_renders():
-    """Check the manager index renders as one well-formed table: six verdict
-    groups, each opening on its own title row, wrapped managers linking to their
-    documentation page and declined ones to their verdict, in the same columns.
+    """Check the manager index renders as one well-formed table.
+
+    Six verdict groups, each opening on its own title row, wrapped managers linking to
+    their documentation page and declined ones to their verdict, in the same columns.
 
     The table is rendered live at Sphinx build time by the ``{python:render}``
     block in `docs/managers.md`, so there is no checked-in copy to compare
@@ -2392,8 +2411,9 @@ def test_manager_upstream_badges():
 
 
 def test_matrix_blocks_in_sync():
-    """Check the compatibility matrices embedded in the docs match a fresh
-    regeneration from the git tags.
+    """Check the compatibility matrices of the docs match the git tags.
+
+    Each embedded matrix must match a fresh regeneration.
 
     Drift here means a release changed the Python classifiers or the
     click-extra requirement before repomatic's `update-docs` job refreshed
@@ -2405,7 +2425,7 @@ def test_matrix_blocks_in_sync():
     leaves every block untouched and the test passes vacuously.
     """
     try:
-        from click_extra.sphinx import matrix
+        from click_extra.sphinx import matrix  # noqa: PLC0415
     except ImportError:
         pytest.skip("needs the docs dependency group (click-extra[sphinx])")
     stale = matrix.update_matrix_blocks(
@@ -2416,8 +2436,9 @@ def test_matrix_blocks_in_sync():
 
 
 def test_mirror_blocks_in_sync(monkeypatch):
-    """Check the `<!-- mirror-src -->` and `:mirror:` blocks embedded in the docs
-    and readme match a fresh regeneration from their generators.
+    """Check the mirror blocks of the docs and readme match their generators.
+
+    The `<!-- mirror-src -->` and `:mirror:` blocks must match a fresh regeneration.
 
     Drift here means a generator's output changed (a manager joined or left the
     pool) before repomatic's `update-docs` job refreshed the embedded blocks with
@@ -2431,7 +2452,7 @@ def test_mirror_blocks_in_sync(monkeypatch):
     dependency group) is missing, as in the hermetic unit-test environment.
     """
     try:
-        from click_extra.sphinx.python import update_mirror_blocks
+        from click_extra.sphinx.python import update_mirror_blocks  # noqa: PLC0415
     except ImportError:
         pytest.skip("needs the docs dependency group (click-extra[sphinx])")
     # click-extra measures an emoji-presentation sequence (⚠️, ☠️) by the running
@@ -2452,8 +2473,9 @@ def test_mirror_blocks_in_sync(monkeypatch):
 
 
 def test_unsupported_page_matches_benchmark():
-    """Check `docs/unsupported.md`'s sections cover exactly the benchmark's
-    `unsupported` set, with matching glyphs, sorted by anchor.
+    """Check `docs/unsupported.md` covers the benchmark's `unsupported` set.
+
+    Exactly that set, with matching glyphs, sorted by anchor.
 
     The benchmark renders each `unsupported` manager as a glyph linking into
     that page for the reason, so the two must stay in lockstep. A manager
@@ -2522,8 +2544,9 @@ def test_unsupported_page_matches_benchmark():
 
 
 def test_unsupported_verdicts_cite_a_release():
-    """Check every verdict of `docs/unsupported.md` closes on the release that
-    published it, and that the changelog declares that release.
+    """Check every verdict of `docs/unsupported.md` closes on its release.
+
+    The release that published it, which the changelog must declare.
 
     The page invites a reassessment of any verdict it carries, and the release
     is what dates one: without it a reader cannot tell a decision taken two
@@ -2663,7 +2686,7 @@ def test_unsupported_anchors_match_docutils():
     the reader at the top of the page.
     """
     try:
-        from docutils.nodes import make_id
+        from docutils.nodes import make_id  # noqa: PLC0415
     except ImportError:
         pytest.skip("needs the docs dependency group (click-extra[sphinx])")
 

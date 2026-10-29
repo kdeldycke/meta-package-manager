@@ -34,8 +34,7 @@ if TYPE_CHECKING:
 
 
 class Flatpak(PackageManager):
-    """Flatpak manages sandboxed desktop applications pulled from remotes like
-    Flathub.
+    """Flatpak manages sandboxed desktop applications pulled from remotes like Flathub.
 
     mpm covers applications only: every listing passes `--app`, so runtimes
     and SDKs stay out of scope.
@@ -85,8 +84,9 @@ class Flatpak(PackageManager):
     brewfile_entry_type = "flatpak"
     """Mapped to Homebrew Bundle's `flatpak` extension.
 
-    Its `with: ["remote"]` keyword goes unused, {meth}`~meta_package_manager.manager.PackageManager.installed` capturing no
-    origin remote to fill it with. See {doc}`/dump`, section "Flatpak remote".
+    Its `with: ["remote"]` keyword goes unused,
+    {meth}`~meta_package_manager.manager.PackageManager.installed` capturing no origin
+    remote to fill it with. See {doc}`/dump`, section "Flatpak remote".
     """
 
     platforms = UNIX_WITHOUT_MACOS
@@ -122,7 +122,7 @@ class Flatpak(PackageManager):
         r"^\s*Date:\s*(?P<date>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [+-]\d{4})",
         re.MULTILINE,
     )
-    _C_LOCALE_ENV = {"LC_ALL": "C.UTF-8"}
+    _C_LOCALE_ENV: ClassVar = {"LC_ALL": "C.UTF-8"}
     """Locale forced on the release-date probes below.
 
     The `Origin:` and `Date:` field labels parsed by {meth}`release_date` are
@@ -265,7 +265,7 @@ class Flatpak(PackageManager):
                Subject: Merge pull request #52 from flathub/update-master-19cd934 (ee57e22e7a51)
                   Date: 2026-03-18 19:40:01 +0000
         ```
-        """
+        """  # noqa: E501
         remotes = []
         if package_id in self.installed_ids:
             origin_output = self.run_cli(

@@ -57,7 +57,7 @@ import subprocess
 import sys
 import threading
 from contextlib import contextmanager
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from functools import cached_property
 from pathlib import Path
 from textwrap import dedent, indent, shorten
@@ -98,7 +98,7 @@ from .version import parse_version
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Generator, Iterable, Iterator, Mapping
+    from collections.abc import Generator, Iterable, Mapping
     from datetime import timedelta
 
     from click_extra.envvar import TEnvVars
@@ -639,8 +639,8 @@ class CLIExecutor:
 
     Mixin inherited by {class}`meta_package_manager.manager.PackageManager`. Owns the
     CLI-invocation configuration (names, search paths, environment, arguments, timeout)
-    and the engine that searches for the binary, executes it, captures and normalizes its
-    output, accumulates errors, and parses its self-reported version.
+    and the engine that searches for the binary, executes it, captures and normalizes
+    its output, accumulates errors, and parses its self-reported version.
     """
 
     cli_names: tuple[str, ...]
@@ -733,7 +733,8 @@ class CLIExecutor:
     """Regular expressions used to extract the version number.
 
     This property must be a tuple of strings, each of which is a valid regular
-    expression that must contain a [group](https://docs.python.org/3/library/re.html#index-18) named `<version>`.
+    expression that must contain a
+    [group](https://docs.python.org/3/library/re.html#index-18) named `<version>`.
 
     The first of these regexes producing a match and returning non-empty `<version>`
     group will be used as the version string of the package manager.
@@ -829,12 +830,12 @@ class CLIExecutor:
     """Whether the command just built carries a privileged marker the policy left off.
 
     Stamped by {meth}`build_cli` when an operation passes `sudo=True` but
-    {func}`~meta_package_manager.sudo._resolved_sudo` keeps escalation off (the
-    dormant markers of `pip`, `npm`, `gem` and `cpan`). Consumed by the failure
-    gate of {meth}`~meta_package_manager.execution.CLIExecutor.run`, which turns the permission error such a call is prone
-    to into the hint naming the scoped opt-in. Per-call state, safe for the same
-    reason `_active_operation` is: a manager instance runs one command at
-    a time (see `SHARED_LOCK_FAMILIES` in
+    {func}`~meta_package_manager.sudo._resolved_sudo` keeps escalation off (the dormant
+    markers of `pip`, `npm`, `gem` and `cpan`). Consumed by the failure gate of
+    {meth}`~meta_package_manager.execution.CLIExecutor.run`, which turns the permission
+    error such a call is prone to into the hint naming the scoped opt-in. Per-call
+    state, safe for the same reason `_active_operation` is: a manager instance runs one
+    command at a time (see `SHARED_LOCK_FAMILIES` in
     {mod}`meta_package_manager.dispatch`).
     """
 
@@ -887,12 +888,13 @@ class CLIExecutor:
     `_select_managers`).
 
     Only privileged operations are ever escalated, and only on a host carrying an
-    escalator. Carrying one is the whole platform test, Windows included, since
-    `gsudo` and Microsoft's `sudo.exe` give it one. A manager that escalates
-    *internally* ({attr}`internal_sudo`) has no such markers and is never wrapped
-    in `sudo` by `mpm`: its own `sudo` reuses the credential cache when
+    escalator. Carrying one is the whole platform test, Windows included, since `gsudo`
+    and Microsoft's `sudo.exe` give it one. A manager that escalates *internally*
+    ({attr}`internal_sudo`) has no such markers and is never wrapped in `sudo` by `mpm`:
+    its own `sudo` reuses the credential cache when
     {func}`~meta_package_manager.sudo.prime_sudo` finds it already warm, and is
-    otherwise covered by the silent-call notice in {meth}`~meta_package_manager.execution.CLIExecutor.run`.
+    otherwise covered by the silent-call notice in
+    {meth}`~meta_package_manager.execution.CLIExecutor.run`.
     """
 
     default_sudo: bool = False
@@ -1032,12 +1034,12 @@ class CLIExecutor:
     cli_errors: list[CLIError]
     """Accumulate all CLI errors encountered by the package manager.
 
-    Every {class}`CLIError` produced by {meth}`~meta_package_manager.execution.CLIExecutor.run` lands here, whether or not it
-    is also raised: a failure the caller goes on to swallow
-    ({meth}`~meta_package_manager.manager.PackageManager.installed_or_empty` and
-    its peers) is still a failure this manager committed, and the end-of-run
-    summary, the serialized `errors` payload and the ✓/✘ trail all read this list
-    to say so.
+    Every {class}`CLIError` produced by
+    {meth}`~meta_package_manager.execution.CLIExecutor.run` lands here, whether or not
+    it is also raised: a failure the caller goes on to swallow
+    ({meth}`~meta_package_manager.manager.PackageManager.installed_or_empty` and its
+    peers) is still a failure this manager committed, and the end-of-run summary, the
+    serialized `errors` payload and the ✓/✘ trail all read this list to say so.
 
     Recording only the non-raising half made a manager's visibility hinge on
     whether its query happened to pass `must_succeed`: {command}`mpm list` printed
@@ -1059,21 +1061,25 @@ class CLIExecutor:
     """
 
     _last_run: tuple[int, str, str] | None = None
-    """`(exit code, <stdout>, <stderr>)` of the most recent completed {meth}`~meta_package_manager.execution.CLIExecutor.run`.
+    """`(exit code, <stdout>, <stderr>)` of the most recent completed run.
 
-    `None` until a run completes, and reset to `None` at the start of each run, so
-    a spawn that never finished (timeout, interrupt, missing binary) leaves no stale
+    The run is {meth}`~meta_package_manager.execution.CLIExecutor.run`.
+
+    `None` until a run completes, and reset to `None` at the start of each run, so a
+    spawn that never finished (timeout, interrupt, missing binary) leaves no stale
     result behind. Consumed by
-    {meth}`meta_package_manager.manager.PackageManager.doctor`, whose health verdict
-    is the exit code alone and whose report merges both streams: the return value of
-    {meth}`~meta_package_manager.execution.CLIExecutor.run` carries neither. Safe to read right after the call under mpm's
-    dispatch model, where a manager never runs two of its own invocations at once.
+    {meth}`meta_package_manager.manager.PackageManager.doctor`, whose health verdict is
+    the exit code alone and whose report merges both streams: the return value of
+    {meth}`~meta_package_manager.execution.CLIExecutor.run` carries neither. Safe to
+    read right after the call under mpm's dispatch model, where a manager never runs two
+    of its own invocations at once.
     """
 
     run_cache: dict[tuple, tuple[int, str, str]] | None = None
     """Optional cache that de-duplicates identical CLI runs across a lane's managers.
 
-    `None` by default, which disables caching: every {meth}`~meta_package_manager.execution.CLIExecutor.run` call spawns its own
+    `None` by default, which disables caching: every
+    {meth}`~meta_package_manager.execution.CLIExecutor.run` call spawns its own
     subprocess. Two callers install a shared dict, each for the duration of one lane:
 
     - {func}`meta_package_manager.dispatch.dispatch`, on every multi-manager
@@ -1085,10 +1091,11 @@ class CLIExecutor:
       {func}`meta_package_manager.dispatch.merge_into_probe_lanes`), so `brew` and
       `cask` both probing `brew --version` spawn it once too.
 
-    The replay still walks {meth}`~meta_package_manager.execution.CLIExecutor.run`'s logging and failure gate, so a failed shared
-    command is attributed to every member. Keyed on the resolved command line, its
-    environment and whether the operation in flight changes the system (see
-    `_MUTATING_OPERATIONS`), so only genuinely identical invocations collapse.
+    The replay still walks {meth}`~meta_package_manager.execution.CLIExecutor.run`'s
+    logging and failure gate, so a failed shared command is attributed to every member.
+    Keyed on the resolved command line, its environment and whether the operation in
+    flight changes the system (see `_MUTATING_OPERATIONS`), so only genuinely identical
+    invocations collapse.
 
     A cached read holds until the lane changes the system. A state-changing command
     that runs for real first drops every read its lane cached, so the next one
@@ -1144,12 +1151,13 @@ class CLIExecutor:
         this.
         """
         assert self.cooldown is not None
-        cutoff = datetime.now(tz=timezone.utc) - self.cooldown
+        cutoff = datetime.now(tz=UTC) - self.cooldown
         return cutoff.isoformat()
 
     def cooldown_rounded_up(self, unit_seconds: int) -> str:
-        """Render {attr}`cooldown` as an integer count of `unit_seconds`-long
-        units, rounded up.
+        """Render {attr}`cooldown` as a count of `unit_seconds`-long units.
+
+        The count is an integer, rounded up.
 
         Helper for the {meth}`cooldown_env_value` overrides of managers whose native
         release-age knob expects a unit count rather than the default RFC 3339 timestamp
@@ -1164,8 +1172,9 @@ class CLIExecutor:
         """Environment fragment enforcing the {attr}`cooldown`, empty when inactive.
 
         Returns an empty mapping unless a {attr}`cooldown` is set *and* the manager
-        supports it *and* its {attr}`cooldown_policy` has not exempted it
-        (`off`). Merged into the environment of every {meth}`~meta_package_manager.execution.CLIExecutor.run` call.
+        supports it *and* its {attr}`cooldown_policy` has not exempted it (`off`).
+        Merged into the environment of every
+        {meth}`~meta_package_manager.execution.CLIExecutor.run` call.
         """
         if (
             self.cooldown is None
@@ -1201,7 +1210,9 @@ class CLIExecutor:
 
         ```{caution}
 
-        Symlinks are not resolved, because some manager like [Homebrew on Linux relies on some sort of symlink-based trickery](https://github.com/kdeldycke/meta-package-manager/pull/188) to set
+        Symlinks are not resolved, because some manager like [Homebrew on Linux relies
+        on some sort of symlink-based
+        trickery](https://github.com/kdeldycke/meta-package-manager/pull/188) to set
         environment variables.
         ```
         """
@@ -1284,7 +1295,9 @@ class CLIExecutor:
                             & stat.FILE_ATTRIBUTE_REPARSE_POINT
                         ):
                             logging.debug(
-                                f"CLI found at {highlight_cli_name(file, cli_names)} (reparse point)"
+                                "CLI found at "
+                                f"{highlight_cli_name(file, cli_names)} "
+                                "(reparse point)"
                             )
                             yield file
                             continue
@@ -1469,7 +1482,7 @@ class CLIExecutor:
         operation: str | None = None,
         *,
         stop_on_error: bool | None = None,
-    ) -> Iterator[None]:
+    ) -> Generator[None, None, None]:
         """Temporarily adjust the manager's execution state, restoring it on exit.
 
         `operation` re-stamps `_active_operation` (the per-operation
@@ -1496,7 +1509,7 @@ class CLIExecutor:
             self.stop_on_error = previous_stop
 
     @contextmanager
-    def operation_key_scope(self, key: str) -> Iterator[None]:
+    def operation_key_scope(self, key: str) -> Generator[None, None, None]:
         """Stamp `_operation_key` with `key` for the duration of the block.
 
         The previous key comes back on exit. An operation method called from inside
@@ -1511,7 +1524,7 @@ class CLIExecutor:
             self._operation_key = previous
 
     @contextmanager
-    def new_errors(self) -> Iterator[list[CLIError]]:
+    def new_errors(self) -> Generator[list[CLIError], None, None]:
         """Collect the {attr}`cli_errors` this manager accumulates inside the block.
 
         The yielded list is filled when the block exits, whatever the exit: a
@@ -1594,8 +1607,9 @@ class CLIExecutor:
         )
 
     def _cleanup_windows_processes(self) -> None:
-        """Forcibly terminate the lingering grandchildren this manager is known to
-        leave behind on Windows (see {attr}`windows_processes_to_cleanup`).
+        """Terminate the grandchildren this manager leaves behind on Windows.
+
+        See {attr}`windows_processes_to_cleanup`.
 
         No-op on non-Windows platforms and for managers with no cleanup list.
         """
@@ -2102,8 +2116,10 @@ class CLIExecutor:
         override_post_args: TNestedArgs | None = None,
         sudo: bool = False,
     ) -> tuple[str, ...]:
-        """Build the package manager CLI by combining the custom `*args` with the
-        package manager's global parameters.
+        """Build the package manager CLI.
+
+        The command combines the custom `*args` with the global parameters of the
+        package manager.
 
         Returns a tuple of strings.
 
@@ -2156,7 +2172,7 @@ class CLIExecutor:
         blocking on a password prompt).
         When escalation applies, `override_pre_cmds` is not allowed to be set and
         `auto_pre_cmds` is forced to `False`. A non-UNIX host never escalates.
-        """
+        """  # noqa: E501
         # Apply delegation overrides if set by a DelegatedMethod descriptor.
         delegate_path = getattr(self, "_delegate_cli_path", None)
         if delegate_path is not None:
@@ -2248,8 +2264,10 @@ class CLIExecutor:
         must_succeed: bool = False,
         sudo: bool = False,
     ) -> str:
-        """Build and run the package manager CLI by combining the custom `*args` with
-        the package manager's global parameters.
+        """Build and run the package manager CLI.
+
+        The command combines the custom `*args` with the global parameters of the
+        package manager.
 
         After the CLI is built with the
         {meth}`meta_package_manager.execution.CLIExecutor.build_cli` method, it is
@@ -2268,8 +2286,8 @@ class CLIExecutor:
           command. It is used for reads whose output is needed regardless (version
           detection, `yarn global dir`), which must run for real even when the
           user asked to simulate or to only plan mutations.
-        * `must_succeed` raises on non-zero exit regardless of
-          `mpm --stop-on-error`. See {meth}`~meta_package_manager.execution.CLIExecutor.run` for details.
+        * `must_succeed` raises on non-zero exit regardless of `mpm --stop-on-error`.
+          See {meth}`~meta_package_manager.execution.CLIExecutor.run` for details.
         """
         cli = self.build_cli(
             *args,

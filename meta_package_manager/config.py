@@ -157,11 +157,12 @@ class MpmConfig:
     managers that cannot enforce it (`enforce` skips them, `best-effort` runs
     them without the safeguard).
 
-    Typed as `dict[str, Any]` so click-extra treats the `[mpm.cooldown]`
-    sub-tree as opaque: it carries no CLI flag of its own (the `--cooldown`
-    option merges over it axis by axis at runtime instead) and its keys are
-    validated by {func}`~meta_package_manager.config.validate_cooldown_section`, registered as a
-    {class}`~click_extra.config.schema.ConfigValidator`. The deprecated `[mpm] cooldown =
+    Typed as `dict[str, Any]` so click-extra treats the `[mpm.cooldown]` sub-tree as
+    opaque: it carries no CLI flag of its own (the `--cooldown` option merges over it
+    axis by axis at runtime instead) and its keys are validated by
+    {func}`~meta_package_manager.config.validate_cooldown_section`, registered as a
+    {class}`~click_extra.config.schema.ConfigValidator`. The deprecated `[mpm] cooldown
+    =
     "<duration>"` string spelling stays accepted as the period."""
 
     description: bool = False
@@ -191,11 +192,12 @@ class MpmConfig:
     overrides: dict[str, dict] = field(default_factory=dict)
     """Per-manager attribute overrides keyed by manager ID.
 
-    Typed as `dict[str, dict]` so click-extra treats the sub-tree as opaque:
-    its keys are manager IDs (data, not flag names) and its leaf entries are
-    validated by {func}`~meta_package_manager.config.validate_manager_overrides_section` registered as a
-    {class}`~click_extra.config.schema.ConfigValidator`. The field carries no CLI flag — it
-    only exists in the schema to declare opacity and to enable `--validate-config`
+    Typed as `dict[str, dict]` so click-extra treats the sub-tree as opaque: its keys
+    are manager IDs (data, not flag names) and its leaf entries are validated by
+    {func}`~meta_package_manager.config.validate_manager_overrides_section` registered
+    as a {class}`~click_extra.config.schema.ConfigValidator`. The field carries no CLI
+    flag — it only exists in the schema to declare opacity and to enable
+    `--validate-config`
     coverage of the override block."""
 
 
@@ -208,7 +210,8 @@ INVALIDATED_CACHED_PROPS: Final[tuple[str, ...]] = (
     "version",
 )
 """Cached properties on {class}`meta_package_manager.manager.PackageManager` that may
-have been computed from attributes covered by {data}`~meta_package_manager.definitions.OVERRIDABLE_FIELDS`.
+have been computed from attributes covered by
+{data}`~meta_package_manager.definitions.OVERRIDABLE_FIELDS`.
 
 Any pre-computed values are popped from the manager instance's `__dict__` after an
 override is applied so the next access recomputes them against the new attribute
@@ -223,8 +226,10 @@ CONTRIBUTION_HINT_FIELDS: Final[frozenset[str]] = frozenset({
     "version_cli_options",
     "version_regexes",
 })
-"""Subset of {data}`~meta_package_manager.definitions.OVERRIDABLE_FIELDS` whose override probably reflects a real
-upstream detection bug rather than a personal preference.
+"""Overridable fields whose override probably reflects an upstream detection bug.
+
+A subset of {data}`~meta_package_manager.definitions.OVERRIDABLE_FIELDS`: overriding
+one of these reflects a real upstream detection bug rather than a personal preference.
 
 When the user overrides one of these, mpm did not find the binary, used the wrong
 binary name, rejected a valid version, or failed to parse one. The other overridable
@@ -267,8 +272,7 @@ URL builder rather than a configuration we should tolerate."""
 
 @dataclass(frozen=True)
 class ContributionHint:
-    """A user override of a detection-related field, candidate for upstream
-    contribution.
+    """A user override of a detection field, candidate for upstream contribution.
 
     Captured at override time by {func}`apply_manager_overrides` so the user can
     later be invited to file an upstream issue with a pre-filled bug-report URL.
@@ -291,8 +295,9 @@ class ContributionHint:
 
 
 def _build_issue_url(hint: ContributionHint) -> str:
-    """Build a GitHub new-issue URL targeting the bug-report template, with the
-    relevant fields pre-filled from `hint`.
+    """Build a GitHub new-issue URL for the bug-report template.
+
+    The relevant fields are pre-filled from `hint`.
 
     Returns the URL only: it's the caller's job to render and surface it. Length
     stays well under GitHub's URL-length cap because the body summarizes the
@@ -358,8 +363,9 @@ def _build_issue_url(hint: ContributionHint) -> str:
 
 
 def format_contribution_hints(hints: list[ContributionHint]) -> str:
-    """Render a multi-line, human-readable batch message inviting the user to
-    contribute their overrides back upstream.
+    """Render a message inviting the user to send their overrides upstream.
+
+    The message is multi-line, human-readable, and covers the whole batch.
 
     Returns an empty string for an empty list so the caller can branch on
     truthiness without a length check.
@@ -412,8 +418,9 @@ def validate_cooldown_section(section: Any) -> None:
 
 
 def build_cooldown_validator() -> ConfigValidator:
-    """Construct a {class}`~click_extra.config.schema.ConfigValidator` for the
-    `[mpm.cooldown]` sub-tree.
+    """Construct the validator of the `[mpm.cooldown]` sub-tree.
+
+    A {class}`~click_extra.config.schema.ConfigValidator`.
 
     Used by the CLI bootstrap (`@group` decorator) to register the validator
     alongside the manager-overrides one. Stateless: the cooldown section
@@ -456,13 +463,12 @@ def validate_manager_overrides_section(
 ) -> None:
     """Strict validator for the `[mpm.overrides.<id>]` configuration sub-tree.
 
-    Pure function: inspects `section` against the pool's registered managers
-    and {data}`~meta_package_manager.definitions.OVERRIDABLE_FIELDS`, raises the first
-    {class}`click_extra.ValidationError` it encounters, never mutates the pool.
-    Suitable for registration as a {class}`~click_extra.config.schema.ConfigValidator` and for
-    direct invocation by {func}`apply_manager_overrides` so both the
-    `--validate-config` path and the runtime application path enforce the
-    same rules.
+    Pure function: inspects `section` against the pool's registered managers and
+    {data}`~meta_package_manager.definitions.OVERRIDABLE_FIELDS`, raises the first
+    {class}`click_extra.ValidationError` it encounters, never mutates the pool. Suitable
+    for registration as a {class}`~click_extra.config.schema.ConfigValidator` and for
+    direct invocation by {func}`apply_manager_overrides` so both the `--validate-config`
+    path and the runtime application path enforce the same rules.
 
     A section keyed by a built-in manager ID is validated as an *override* (its
     fields must be a subset of
@@ -502,7 +508,8 @@ def validate_manager_overrides_section(
                 raise ValidationError(
                     manager_id,
                     f"unknown manager ID {manager_id!r}. To define a new manager, "
-                    "declare 'platforms' and an [operations] table (see docs/overrides.md).",
+                    "declare 'platforms' and an [operations] table "
+                    "(see docs/overrides.md).",
                     code="unknown_manager",
                 )
             parse_manager_definition(manager_id, fields)
@@ -532,7 +539,8 @@ def _validate_override_fields(
 ) -> None:
     """Validate one `[mpm.overrides.<built-in id>]` override section.
 
-    Each field must be a known {data}`~meta_package_manager.definitions.OVERRIDABLE_FIELDS` attribute and carry a
+    Each field must be a known
+    {data}`~meta_package_manager.definitions.OVERRIDABLE_FIELDS` attribute and carry a
     value its converter accepts. The `operations` table must suit `manager`: see
     {func}`~meta_package_manager.definitions.parse_operation_overrides`. Raises
     {class}`click_extra.ValidationError` on the first problem.
@@ -584,11 +592,10 @@ def apply_manager_overrides(
     unconditionally forward whatever was parsed from the config file.
 
     Validation is delegated to
-    {func}`~meta_package_manager.config.validate_manager_overrides_section`, which raises
-    {class}`click_extra.ValidationError` on the first issue. Both the
-    runtime config-loading path and the explicit `--validate-config` path
-    enforce the same rules through that single validator, so a config that
-    survives one survives the other.
+    {func}`~meta_package_manager.config.validate_manager_overrides_section`, which
+    raises {class}`click_extra.ValidationError` on the first issue. Both the runtime
+    config-loading path and the explicit `--validate-config` path enforce the same rules
+    through that single validator, so a config that survives one survives the other.
 
     After validation succeeds, every override is applied as an instance
     attribute (shadowing the class default for the lifetime of the process),
@@ -673,15 +680,17 @@ def apply_manager_overrides(
 
 
 def build_manager_overrides_validator(pool: ManagerPool) -> ConfigValidator:
-    """Construct a {class}`~click_extra.config.schema.ConfigValidator` for the
-    `[mpm.overrides]` sub-tree, bound to a specific {class}`~meta_package_manager.pool.ManagerPool`.
+    """Construct the validator of the `[mpm.overrides]` sub-tree.
 
-    Used by the CLI bootstrap (`@group` decorator) to register a validator
-    against the live pool. Wrapping {func}`~meta_package_manager.config.validate_manager_overrides_section`
-    in a closure satisfies the
-    {attr}`~click_extra.config.schema.ConfigValidator.validator` signature
-    (`Callable[[dict], None]`) while keeping the underlying validator pool-agnostic
-    and testable in isolation.
+    A {class}`~click_extra.config.schema.ConfigValidator`, bound to a specific
+    {class}`~meta_package_manager.pool.ManagerPool`.
+
+    Used by the CLI bootstrap (`@group` decorator) to register a validator against the
+    live pool. Wrapping
+    {func}`~meta_package_manager.config.validate_manager_overrides_section` in a closure
+    satisfies the {attr}`~click_extra.config.schema.ConfigValidator.validator` signature
+    (`Callable[[dict], None]`) while keeping the underlying validator pool-agnostic and
+    testable in isolation.
     """
 
     def _validator(section: dict[str, Any]) -> None:
@@ -695,15 +704,13 @@ def build_manager_overrides_validator(pool: ManagerPool) -> ConfigValidator:
 
 
 def dump_manager_overrides(manager: PackageManager) -> dict[str, Any]:
-    """Return the current overridable attributes of `manager` as a TOML-ready
-    dict.
+    """Return the current overridable attributes of `manager` as a TOML-ready dict.
 
-    Walks {data}`~meta_package_manager.definitions.OVERRIDABLE_FIELDS` in alphabetical order, reads each attribute
-    from the manager instance, and converts tuples to lists so `tomli_w`
-    can serialize the result without translation. Attributes whose value is
-    `None` are skipped: TOML cannot express `None` and the user cannot
-    override a field *to* `None` either, so emitting the key would be
-    misleading.
+    Walks {data}`~meta_package_manager.definitions.OVERRIDABLE_FIELDS` in alphabetical
+    order, reads each attribute from the manager instance, and converts tuples to lists
+    so `tomli_w` can serialize the result without translation. Attributes whose value is
+    `None` are skipped: TOML cannot express `None` and the user cannot override a field
+    *to* `None` either, so emitting the key would be misleading.
 
     Every other overridable field is emitted, including ones still at the class
     default. The output is meant to be a canonical override template: paste,
@@ -796,8 +803,7 @@ def apply_manager_overrides_from_context(
     ctx: click.Context,
     pool: ManagerPool,
 ) -> None:
-    """Read the `[mpm.overrides.<id>]` sections from the loaded config and apply
-    them to `pool`.
+    """Apply the `[mpm.overrides.<id>]` sections of the config to `pool`.
 
     Reads the full parsed config that {mod}`click_extra` exposes under
     {data}`~click_extra.context.CONF_FULL` after configuration discovery and

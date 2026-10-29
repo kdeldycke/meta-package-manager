@@ -73,8 +73,11 @@ def test_store_id_re_rejects(package_id):
 
 
 def test_parse_details_ignores_indented_upgrade_line(winget):
-    """Regression test: the package-block split must not fire on indented
-    `  winget [version]` lines under `Available Upgrades`."""
+    """Regression test: indented `winget` lines do not split package blocks.
+
+    The package-block split must not fire on indented `  winget [version]` lines under
+    `Available Upgrades`.
+    """
     output = dedent("""\
         (1/1) Git [Git.Git]
         Version: 2.37.3
@@ -139,7 +142,7 @@ Installed Scope: User
 Installed Architecture: X64
 Installed Location: C:\Users\runneradmin\AppData\Local\Microsoft\WinGet\Packages\sharkdp.hyperfine_Microsoft.Winget.Source_8wekyb3d8bbwe
 Origin Source: winget
-"""
+"""  # noqa: E501
 
 
 def test_installed_lists_every_catalog_match(winget, monkeypatch):
@@ -186,10 +189,11 @@ def test_outdated_keeps_every_winget_upgrade(winget, stub_run_cli):
 
 
 def test_parse_table_handles_short_header_line(winget):
-    """Regression test: winget may emit a header line shorter than the
-    separator (trailing spaces on the last column are trimmed). The separator
-    must drive the column width so data rows that fill the full width do not
-    trip the width assertion."""
+    """Regression test: winget may emit a header shorter than the separator.
+
+    Trailing spaces on the last column are trimmed. The separator must drive the column
+    width so data rows that fill the full width do not trip the width assertion.
+    """
     # Build a table where the header line is intentionally one char shorter
     # than the separator (last column lacks a trailing space) but data rows
     # match the separator length. Pre-fix code computed
@@ -229,8 +233,10 @@ def test_build_package_store_uses_msstore_sentinel(winget, package_id):
 
 
 def test_search_orders_native_before_store(winget, stub_run_cli):
-    """Microsoft Store entries must come after winget-native ones in the search
-    output, regardless of the order winget returned them in."""
+    """Microsoft Store entries come after winget-native ones in the search.
+
+    Regardless of the order winget returned them in.
+    """
     rows = [
         "Store App         XP99BNH2JZBBQR    1.0.0        Tag: vscode     msstore",
         "Codium            Alex313031.Codium 1.86.0       Tag: vscode     winget ",

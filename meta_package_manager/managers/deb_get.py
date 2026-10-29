@@ -32,8 +32,9 @@ if TYPE_CHECKING:
 
 
 class Deb_Get(PackageManager):
-    """`deb-get` installs third-party software on Debian and Ubuntu via `.deb`
-    packages sourced from GitHub releases, direct URLs, and PPAs.
+    """`deb-get` installs third-party `.deb` packages on Debian and Ubuntu.
+
+    It sources them from GitHub releases, direct URLs, and PPAs.
 
     ```{note}
     `deb-get` wraps `apt` under the hood for actual package installation

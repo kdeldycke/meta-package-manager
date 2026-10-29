@@ -10,17 +10,17 @@
 # XXX SwiftBar requires quotes around a default value. Xbar accepts them and removes
 # them. Without the quotes, SwiftBar ignores the variable and never shows it in its
 # settings UI.
-# <xbar.var>boolean(VAR_GROUP_BY_MANAGER="true"): Group each manager's packages into a section of its own.</xbar.var>
-# <xbar.var>boolean(VAR_ALIGN_COLUMNS="true"): Centers versions around the arrow and aligns names in a monospaced font.</xbar.var>
-# <xbar.var>number(VAR_MAX_VERSION_WIDTH="18"): Widest a version renders in a menu line, in characters. Longer ones are shortened with an ellipsis.</xbar.var>
-# <xbar.var>string(VAR_MPM_OPTIONS=""): Extra options for every mpm call the plugin makes, placed before the subcommand.</xbar.var>
+# <xbar.var>boolean(VAR_GROUP_BY_MANAGER="true"): Group each manager's packages into a section of its own.</xbar.var>  # noqa: E501
+# <xbar.var>boolean(VAR_ALIGN_COLUMNS="true"): Centers versions around the arrow and aligns names in a monospaced font.</xbar.var>  # noqa: E501
+# <xbar.var>number(VAR_MAX_VERSION_WIDTH="18"): Widest a version renders in a menu line, in characters. Longer ones are shortened with an ellipsis.</xbar.var>  # noqa: E501
+# <xbar.var>string(VAR_MPM_OPTIONS=""): Extra options for every mpm call the plugin makes, placed before the subcommand.</xbar.var>  # noqa: E501
 # XXX The font options are for SwiftBar only: Xbar cuts a default value at its first
 # `=` character. See: https://github.com/matryer/xbar/issues/832
-# <swiftbar.var>string(VAR_DEFAULT_FONT=""): Font parameters for regular text.</swiftbar.var>
-# <swiftbar.var>string(VAR_MONOSPACE_FONT="font=Menlo size=12"): Font parameters for monospace text. Used for table rendering and error messages.</swiftbar.var>
+# <swiftbar.var>string(VAR_DEFAULT_FONT=""): Font parameters for regular text.</swiftbar.var>  # noqa: E501
+# <swiftbar.var>string(VAR_MONOSPACE_FONT="font=Menlo size=12"): Font parameters for monospace text. Used for table rendering and error messages.</swiftbar.var>  # noqa: E501
 # XXX SwiftBar alone hides a plugin that produces no output, so this variable is for
 # SwiftBar only too.
-# <swiftbar.var>boolean(VAR_ALWAYS_VISIBLE="true"): Keep the menu bar icon while no package is outdated and no manager reports an error.</swiftbar.var>
+# <swiftbar.var>boolean(VAR_ALWAYS_VISIBLE="true"): Keep the menu bar icon while no package is outdated and no manager reports an error.</swiftbar.var>  # noqa: E501
 """SwiftBar and Xbar plugin for Meta Package Manager (the {command}`mpm` CLI).
 
 Set the update cycle to several hours. One notice a day is enough, and each
@@ -150,8 +150,7 @@ build reports `8.0.0.dev0+40ce0879`, and its suffix identifies the build.
 
 
 class Candidate(NamedTuple):
-    """One way to run `mpm` found on the system, and the result of its version
-    probe.
+    """One way to run `mpm` found on the system, and the result of its version probe.
 
     `version` is the tuple that the code compares with {data}`MPM_MIN_VERSION`,
     and `release` is the token as printed. The `probeMpm()` function of the
@@ -167,8 +166,9 @@ class Candidate(NamedTuple):
 
     @property
     def rank(self) -> tuple[bool, bool, tuple[int, ...]]:
-        """Sort key of {attr}`MPMPlugin.ranked_mpm`: runnable first, then up to
-        date, then the highest version.
+        """Sort key of {attr}`MPMPlugin.ranked_mpm`.
+
+        Runnable first, then up to date, then the highest version.
 
         `error` and `release` are not part of the key. Python cannot compare two
         exceptions, and it cannot compare a missing version with a found one.
@@ -382,8 +382,7 @@ class MPMPlugin:
 
     @staticmethod
     def search_venv(folder: Path) -> tuple[str, ...] | None:
-        """Return the command that runs `mpm` from the project in `folder`, or
-        `None`.
+        """Return the command that runs `mpm` from the project in `folder`, or `None`.
 
         A folder is a project when it holds a lockfile. The command is the one
         that the project's tool provides to run a program inside the environment
@@ -572,8 +571,7 @@ class MPMPlugin:
                 )
 
     def print_about(self) -> None:
-        """Print the menu footer, with the version of the plugin and the
-        version of `mpm`.
+        """Print the menu footer, with the plugin and `mpm` versions.
 
         This script and `mpm` are installed and updated separately. A plugin
         file copied into the host's folder keeps its version while `mpm`

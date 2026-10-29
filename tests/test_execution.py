@@ -57,6 +57,7 @@ from meta_package_manager.execution import (
     _spinner_label,
     format_plan_command,
 )
+from meta_package_manager.managers.npm import NPM
 from meta_package_manager.pool import pool
 from meta_package_manager.sudo import (
     _SUDO_CACHE_WARM,
@@ -76,8 +77,10 @@ _NON_UNIX_PLATFORM = next(p for p in ALL_PLATFORMS if p not in UNIX)
 
 
 def test_operation_timeouts_cover_all_operations():
-    """Every routable operation must have a per-operation timeout default, so the
-    map and the `Operations` enum never drift apart."""
+    """Every routable operation has a per-operation timeout default.
+
+    So the map and the `Operations` enum never drift apart.
+    """
     for operation in Operations:
         assert operation.name in OPERATION_TIMEOUTS
 
@@ -111,8 +114,10 @@ def test_read_only_tier_is_shorter_than_mutating_tier():
 
 @pytest.mark.parametrize("active_operation", (None, "version", "search", "install"))
 def test_resolve_timeout_explicit_wins(active_operation):
-    """An explicit timeout (`--timeout` or per-manager override) wins for every
-    operation, including unknown ones."""
+    """An explicit timeout wins for every operation, including unknown ones.
+
+    `--timeout` or a per-manager override.
+    """
     manager = FakeManager()
     manager.timeout = 42
     manager._active_operation = active_operation
@@ -384,8 +389,11 @@ FAIL_ON_STDERR = "import sys; sys.stderr.write('boom'); sys.exit(8)"
     ),
 )
 def test_run_failure_gate(stop_on_error, must_succeed, script, expectation):
-    """The failure gate decides raise / accumulate / tolerate from the exit code,
-    the `<stderr>` content, and the `stop_on_error`/`must_succeed` context."""
+    """The failure gate decides to raise, accumulate or tolerate.
+
+    From the exit code, the `<stderr>` content, and the `stop_on_error`/`must_succeed`
+    context.
+    """
     manager = FakeManager()
     manager.stop_on_error = stop_on_error
 
@@ -478,8 +486,11 @@ def _numbered_lines(stop, start=0):
     ),
 )
 def test_cli_error_diagnosis(error, output, expected):
-    """`CLIError.diagnosis` prefers `<stderr>`, falls back on `<stdout>`, states a
-    silent death, and keeps the head and the tail around a truncation counter."""
+    """`CLIError.diagnosis` prefers `<stderr>`, then falls back on `<stdout>`.
+
+    It states a silent death, and keeps the head and the tail around a truncation
+    counter.
+    """
     assert CLIError(8, output, error).diagnosis == expected
 
 
@@ -533,8 +544,10 @@ def test_cli_error_diagnosis_keeps_an_opening_error():
     ),
 )
 def test_failed_run_relays_diagnosis(stop_on_error, script, expected, caplog):
-    """The failure gate logs the diagnosis at WARNING, tagged with the manager ID,
-    for accumulated and raised failures alike."""
+    """The failure gate logs the diagnosis at WARNING, tagged with the manager.
+
+    For accumulated and raised failures alike.
+    """
     manager = FakeManager()
     manager.stop_on_error = stop_on_error
     with caplog.at_level(logging.INFO):
@@ -564,8 +577,10 @@ def test_failed_run_relays_diagnosis(stop_on_error, script, expected, caplog):
     ),
 )
 def test_no_diagnosis_relay(script, level, caplog):
-    """No WARNING relay without a genuine failure, nor when DEBUG already streamed
-    the raw output inline."""
+    """No WARNING relay without a genuine failure.
+
+    Nor when DEBUG already streamed the raw output inline.
+    """
     manager = FakeManager()
     with caplog.at_level(level):
         manager.run_cli("-c", script)
@@ -574,8 +589,11 @@ def test_no_diagnosis_relay(script, level, caplog):
 
 @pytest.mark.parametrize("operation", sorted(_DIAGNOSIS_EXEMPT_OPERATIONS))
 def test_exempt_operations_skip_diagnosis_relay(operation, caplog):
-    """Version probes (fired per candidate on selection) and doctor (which relays
-    its report verbatim) fail without the WARNING relay."""
+    """Version probes and doctor fail without the WARNING relay.
+
+    Version probes fire per candidate on selection, and doctor relays its report
+    verbatim.
+    """
     manager = FakeManager()
     with caplog.at_level(logging.INFO), manager.acting_as(operation):
         manager.run_cli("-c", FAIL_ON_STDERR)
@@ -607,8 +625,10 @@ def test_version_probe_failure_stays_out_of_cli_errors():
 
 
 def test_version_probe_incomplete_run_stays_an_error():
-    """A probe that never completed is plumbing, not a verdict: it stays in the
-    tally, mirroring `doctor`'s own split."""
+    """A probe that never completed is plumbing, not a verdict.
+
+    It stays in the tally, mirroring `doctor`'s own split.
+    """
     manager = FakeManager()
     manager.timeout = 1
     with manager.acting_as(VERSION_PROBE):
@@ -692,7 +712,7 @@ def test_run_cache_keeps_distinct_commands_apart(tmp_path):
 
 
 def test_run_cache_collapses_dry_run(caplog):
-    """Under --dry-run a family's identical command is announced once, not per member."""
+    """Under --dry-run a family's identical command is announced once."""
     cache: dict = {}
     first, second = FakeManager(), FakeManager()
     first.dry_run = second.dry_run = True
@@ -870,8 +890,10 @@ class _SynthesizedUpgradeFakeManager(FakeManager):
 
 
 def test_plan_synthesized_upgrade_all_resolves_reads(invoke, patch_pool_with):
-    """`mpm --plan upgrade` on a synthesized upgrade-all prints the per-package
-    upgrade commands, resolved against a really-executed `outdated` read.
+    """`mpm --plan upgrade` on a synthesized upgrade-all prints each command.
+
+    The per-package upgrade commands, resolved against a really-executed `outdated`
+    read.
 
     Guards the read-stamp of the synthesized fallback in
     `PackageManager.upgrade`: the whole run is stamped `upgrade_all` (a
@@ -948,8 +970,9 @@ def test_run_registers_live_process_then_discards_it():
 
 
 def test_build_cli_escalates_with_sudo_n_when_policy_on():
-    """A privileged op escalates to `sudo --non-interactive` when the manager's
-    policy opts in.
+    """A privileged op escalates to `sudo --non-interactive` when opted in.
+
+    When the manager's policy opts in.
 
     The escalator is pinned rather than detected: a Windows runner carries no
     `sudo` on `PATH`, and detection finding none would skip the wrapping this
@@ -1039,8 +1062,10 @@ def test_build_cli_escalation_follows_the_escalator_not_the_platform():
 
 
 def test_build_cli_no_escalation_without_an_escalator():
-    """A host carrying none runs unprivileged rather than crashing on a missing
-    binary, on any platform."""
+    """A host carrying none runs unprivileged on any platform.
+
+    Rather than crashing on a missing binary.
+    """
     manager = FakeManager()
     manager.sudo = True
     with (
@@ -1067,10 +1092,10 @@ def test_build_cli_marker_required_for_escalation():
 
 
 def test_npm_sudo_marker_dormant_until_opted_in():
-    """npm marks its global installs privileged, but stays unescalated until the user
-    opts in via --sudo / config (default_sudo is False)."""
-    from meta_package_manager.managers.npm import NPM
+    """npm marks its global installs privileged, but stays unescalated.
 
+    Until the user opts in via --sudo / config (default_sudo is False).
+    """
     manager = NPM()
     assert manager.default_sudo is False
     # Pinned, not detected: a Windows runner carries no `sudo` on `PATH`.
@@ -1084,9 +1109,11 @@ def test_npm_sudo_marker_dormant_until_opted_in():
 
 
 def test_dormant_marker_permission_failure_hints_the_opt_in(caplog):
-    """An operation carrying a dormant privileged marker that dies on a
-    permission error draws the hint naming the scoped opt-in, labeled and
-    placed after the tool's own account of the refusal."""
+    """A dormant privileged op dying on a permission error draws the hint.
+
+    The hint names the scoped opt-in, labeled and placed after the tool's own account of
+    the refusal.
+    """
     manager = FakeManager()
     assert manager.sudo is None and manager.default_sudo is False
     script = (
@@ -1121,8 +1148,11 @@ def test_dormant_marker_permission_failure_hints_the_opt_in(caplog):
     ),
 )
 def test_dormant_marker_hint_negative_gates(caplog, marker, stderr, euid):
-    """Each gate individually silences the hint: no privileged marker, a
-    failure that is not a permission refusal, or a process already root."""
+    """Each gate individually silences the hint.
+
+    No privileged marker, a failure that is not a permission refusal, or a process
+    already root.
+    """
     manager = FakeManager()
     script = f"import sys; sys.stderr.write({stderr!r}); sys.exit(1)"
     with (
@@ -1151,9 +1181,10 @@ def test_dormant_marker_hint_negative_gates(caplog, marker, stderr, euid):
     ),
 )
 def test_failed_run_names_a_prompt_its_sudo_gave_up_on(caplog, stderr, named):
-    """A tool whose own `sudo` stopped waiting for a password fails like a
-    timeout of mpm on that prompt: the same advice, after the tool's own
-    account, and the same cause for the trail line.
+    """A tool whose `sudo` stopped waiting for a password fails like a timeout.
+
+    Like a timeout of mpm on that prompt: the same advice, after the tool's own account,
+    and the same cause for the trail line.
 
     The two controls keep the plain relay: a line no `sudo` signed, and a
     `sudo` that refuses for another reason.
@@ -1191,8 +1222,9 @@ def test_failed_run_names_a_prompt_its_sudo_gave_up_on(caplog, stderr, named):
 def test_run_hints_when_escalation_cannot_authenticate(
     tmp_path, monkeypatch, caplog, escalator_id, refusal, returncode
 ):
-    """A real escalator that cannot authenticate triggers the actionable hint,
-    naming that escalator and what its policy needs.
+    """A real escalator that cannot authenticate triggers the actionable hint.
+
+    The hint names that escalator and what its policy needs.
 
     A fake escalator on `PATH` mimics the refusal, so the whole build_cli →
     subprocess → failure-gate → hint path runs for real, without root.
@@ -1271,9 +1303,9 @@ def test_escalated_calls_keep_the_controlling_terminal(escalate):
 def test_internal_escalator_spends_a_warm_cache_in_the_terminal_session(
     monkeypatch, internal_sudo, resets, operation, warm, detached
 ):
-    """A call of an internal escalator stays in the session of the terminal
-    while the credential cache is warm, in each operation where its tool may
-    run `sudo`.
+    """An internal escalator call stays in the terminal session while cached.
+
+    While the credential cache is warm, in each operation where its tool may run `sudo`.
 
     `sudo` keys a ticket on the terminal and on its session. Detached, the
     tool's own `sudo` finds no ticket and no terminal to prompt on, so its
@@ -1332,8 +1364,10 @@ def test_run_forwards_a_forced_environment_across_run0():
 
 
 def test_run_forwards_nothing_across_an_escalator_that_needs_no_help():
-    """`sudo` resets the environment through a `sudoers` policy the host owns,
-    so mpm splices nothing of its own."""
+    """`sudo` resets the environment through a `sudoers` policy the host owns.
+
+    So mpm splices nothing of its own.
+    """
     manager = FakeManager()
     manager.sudo = True
     with (
@@ -1360,8 +1394,10 @@ def test_run_forwards_nothing_across_an_escalator_that_needs_no_help():
     ),
 )
 def test_mutating_subcommands_prime_sudo(invoke, fake_pool, args):
-    """Every mutating subcommand authenticates sudo up front, so a future command
-    cannot silently skip the priming."""
+    """Every mutating subcommand authenticates sudo up front.
+
+    So a future command cannot silently skip the priming.
+    """
     with patch("meta_package_manager.cli_maintenance.prime_sudo") as prime:
         invoke("--dry-run", *args)
     assert prime.called, f"`mpm {args[0]}` did not call prime_sudo"
@@ -1397,8 +1433,9 @@ def test_read_subcommand_does_not_prime_sudo(invoke, fake_pool):
 def test_sourced_operation_stamps_active_operation(
     invoke, fake_pool, monkeypatch, args, expected_operation
 ):
-    """A sourced `remove`/`upgrade <packages>` runs its mutating action under the
-    real operation stamp.
+    """A sourced `remove`/`upgrade <packages>` runs under the real operation stamp.
+
+    Its mutating action carries the stamp.
 
     Source discovery re-selects the managers with `installed`, which stamps
     `_active_operation = "installed"` on the shared singletons. Each per-package
@@ -1430,8 +1467,7 @@ def test_sourced_operation_stamps_active_operation(
 def test_untied_install_search_runs_under_read_only_stamp(
     invoke, fake_pool, monkeypatch
 ):
-    """The untied-install priority search runs under the `search` stamp, not
-    `install`.
+    """The untied-install priority search runs under the `search` stamp, not `install`.
 
     The search is read-only and can never escalate, so it must not resolve the mutating
     timeout nor arm the internal-escalator stall watchdog (both keyed on
@@ -1569,8 +1605,9 @@ def test_windows_pathext_tracks_cpython():
     change first, and turns a Windows-only detection failure into a named
     failure everywhere.
 
-    On divergence: update {data}`~meta_package_manager.execution.WIN_DEFAULT_PATHEXT` to the new value. If the
-    attribute is gone for good, the fallback is already what the code uses.
+    On divergence: update {data}`~meta_package_manager.execution.WIN_DEFAULT_PATHEXT` to
+    the new value. If the attribute is gone for good, the fallback is already what the
+    code uses.
     """
     cpython_value = getattr(shutil, "_WIN_DEFAULT_PATHEXT", None)
     assert cpython_value is not None, (

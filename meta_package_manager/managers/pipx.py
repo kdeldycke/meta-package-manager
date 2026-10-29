@@ -67,7 +67,8 @@ class Pipx(PackageManager):
         ),
         "search": (
             "The request was closed as not planned "
-            "([pypa/pipx#777](https://github.com/pypa/pipx/issues/777#issuecomment-990919047)): "
+            "([pypa/pipx#777]"
+            "(https://github.com/pypa/pipx/issues/777#issuecomment-990919047)): "
             "PyPI exposes no search API and custom search is out of pipx's "
             "scope."
         ),
@@ -111,11 +112,11 @@ class Pipx(PackageManager):
     outdated_requirement = ">=1.16.0"
     """Minimum pipx version providing the native outdated query.
 
-    [1.16.0](https://github.com/pypa/pipx/releases/tag/1.16.0) introduced
-    `pipx list --outdated` (see
-    [pypa/pipx#149](https://github.com/pypa/pipx/issues/149)). Kept
-    apart from {attr}`requirement` (`>=1.0.0`) so an older pipx stays fully
-    usable, {attr}`~meta_package_manager.manager.PackageManager.outdated` falling back to one pip probe per venv.
+    [1.16.0](https://github.com/pypa/pipx/releases/tag/1.16.0) introduced `pipx list
+    --outdated` (see [pypa/pipx#149](https://github.com/pypa/pipx/issues/149)). Kept
+    apart from {attr}`requirement` (`>=1.0.0`) so an older pipx stays fully usable,
+    {attr}`~meta_package_manager.manager.PackageManager.outdated` falling back to one
+    pip probe per venv.
     """
 
     @property

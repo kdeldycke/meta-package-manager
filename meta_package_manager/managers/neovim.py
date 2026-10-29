@@ -239,7 +239,7 @@ class Lazy(PackageManager):
     > -c 'lua local p = vim.fn.stdpath("data") .. "/lazy/lazy.nvim" if (vim.uv or vim.loop).fs_stat(p) then vim.opt.rtp:prepend(p) io.write("lazy.nvim " .. require("lazy.core.config").version) end os.exit(0)'
     lazy.nvim 11.17.5
     ```
-    """
+    """  # noqa: E501
 
     @property
     def installed(self) -> Iterator[Package]:
@@ -271,7 +271,7 @@ class Lazy(PackageManager):
           "z": { "branch": "master", "commit": "d37a763a6a30e1b32766fecc3b8ffd6127f8a0fd" }
         }
         ```
-        """
+        """  # noqa: E501
         output = self.run_cli(
             "--clean",
             "-c",
@@ -368,9 +368,10 @@ class Mason(PackageManager):
     describing.
 
     ```{caution}
-    This floors *mason*, never the receipts it wrote. A host on a current mason
-    still carries receipts from `1.x` for anything installed back then, which is
-    why {meth}`~meta_package_manager.manager.PackageManager.installed` reads both of their shapes.
+    This floors *mason*, never the receipts it wrote. A host on a current mason still
+    carries receipts from `1.x` for anything installed back then, which is why
+    {meth}`~meta_package_manager.manager.PackageManager.installed` reads both of their
+    shapes.
     ```
     """
 
@@ -420,7 +421,7 @@ class Mason(PackageManager):
 
     The `v` is optional in the pattern because it belongs to mason's own string
     rather than to the version: it is a tag name reported verbatim.
-    """
+    """  # noqa: E501
 
     @property
     def installed(self) -> Iterator[Package]:
@@ -451,7 +452,7 @@ class Mason(PackageManager):
         > -c 'cquit'
         stylua	pkg:github/johnnymorganz/stylua@v2.5.2
         ```
-        """
+        """  # noqa: E501
         output = self.run_cli(
             "--clean",
             "-c",
@@ -640,7 +641,7 @@ class Vim_Pack(PackageManager):
         > -c 'cquit'
         [{"active":false,"rev":"0ce2d843d6f588bb0c8c7eec6449171615dc56d9","spec":{"name":"vim-sensible","src":"https://github.com/tpope/vim-sensible"},"path":"/home/kev/.local/share/nvim/site/pack/core/opt/vim-sensible"},{"active":false,"rev":"a2e1f2b2e2e5a4c1d0f9b8a7c6d5e4f3a2b1c0d9","spec":{"name":"plenary.nvim","src":"https://github.com/nvim-lua/plenary.nvim"},"path":"/home/kev/.local/share/nvim/site/pack/core/opt/plenary.nvim"}]
         ```
-        """
+        """  # noqa: E501
         output = self.run_cli(
             "-c",
             lua_command(f"io.write(vim.json.encode({VIM_PACK_PLUGINS}))"),
@@ -664,7 +665,7 @@ class Vim_Pack(PackageManager):
         > -c 'lua vim.pack.add({{src = "https://github.com/tpope/vim-sensible"}}, {confirm = false, load = false}) os.exit(0)' \
         > -c 'cquit'
         ```
-        """
+        """  # noqa: E501
         return self.run_cli(
             "-c",
             lua_command(
@@ -703,7 +704,7 @@ class Vim_Pack(PackageManager):
         > -c 'lua for _, p in ipairs(vim.pack.get(nil, {info = false})) do if p.spec.src == "https://github.com/tpope/vim-sensible" then vim.pack.update({p.spec.name}, {force = true}) end end os.exit(0)' \
         > -c 'cquit'
         ```
-        """
+        """  # noqa: E501
         return self.build_cli(
             "-c",
             vim_pack_resolve(
@@ -721,7 +722,7 @@ class Vim_Pack(PackageManager):
         > -c 'lua for _, p in ipairs(vim.pack.get(nil, {info = false})) do if p.spec.src == "https://github.com/tpope/vim-sensible" then vim.pack.del({p.spec.name}, {force = true}) end end os.exit(0)' \
         > -c 'cquit'
         ```
-        """
+        """  # noqa: E501
         return self.run_cli(
             "-c",
             vim_pack_resolve(

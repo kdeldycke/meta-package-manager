@@ -31,8 +31,7 @@ if TYPE_CHECKING:
 
 
 class Pixi(PackageManager):
-    """pixi installs conda packages, either into a project workspace or
-    machine-wide as global tools.
+    """pixi installs conda packages, into a workspace or as global tools.
 
     `mpm` is system-scoped, so this wrapper drives the `pixi global` scope
     alone and never touches a `pixi.toml` workspace. Global tools resolve from
@@ -275,8 +274,9 @@ class Pixi(PackageManager):
         """Remove one package.
 
         `pixi global uninstall` removes a whole environment, deleting its prefix
-        outright, which is the counterpart of the `pixi global install` that
-        created it and matches the unit {meth}`~meta_package_manager.manager.PackageManager.installed` reports. An
+        outright, which is the counterpart of the `pixi global install` that created it
+        and matches the unit
+        {meth}`~meta_package_manager.manager.PackageManager.installed` reports. An
         environment carrying co-installed extras loses those too.
 
         The sibling `pixi global remove` is deliberately not used: it drops one

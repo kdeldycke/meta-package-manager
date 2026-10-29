@@ -87,8 +87,9 @@ class PNPM(PackageManager):
     """
 
     def cooldown_env_value(self) -> str:
-        """Render {attr}`meta_package_manager.execution.CLIExecutor.cooldown` as an
-        integer minute count for pnpm's `minimumReleaseAge`.
+        """Render the cooldown as a minute count for `minimumReleaseAge` of pnpm.
+
+        See {attr}`meta_package_manager.execution.CLIExecutor.cooldown`.
 
         Sub-minute cooldowns round up so the gate over-protects rather than silently
         collapsing to `0` (the "no cooldown" sentinel).

@@ -32,8 +32,7 @@ if TYPE_CHECKING:
 
 
 class Pacstall(PackageManager):
-    """AUR-inspired, source-based package manager for Ubuntu and other Linux
-    distributions.
+    """AUR-inspired, source-based package manager for Ubuntu and other distros.
 
     Pacstall builds packages from "pacscripts" and installs the results as
     `.deb` archives through `dpkg`. `mpm` forces `NO_COLOR` and

@@ -924,10 +924,11 @@ fan-out's worker threads, where the click context is not reliably reachable.
 
 
 def _resolved_sudo(manager: CLIExecutor) -> bool:
-    """Whether `manager` escalates: its
-    {attr}`~meta_package_manager.execution.CLIExecutor.sudo` override if set,
-    else its built-in
-    {attr}`~meta_package_manager.execution.CLIExecutor.default_sudo`."""
+    """Whether `manager` escalates.
+
+    Its {attr}`~meta_package_manager.execution.CLIExecutor.sudo` override if set, else
+    its built-in {attr}`~meta_package_manager.execution.CLIExecutor.default_sudo`.
+    """
     return manager.sudo if manager.sudo is not None else manager.default_sudo
 
 
@@ -1080,12 +1081,12 @@ def _is_sudo_denied(error: str) -> bool:
     non-sudoer's `--validate` with `Sorry, user plain may not run sudo on
     localhost`, which reading that phrasing as the pre-`1.9` one would drop.
 
-    `sudo-rs` denies a `--validate` differently from a `--list`, which matters
-    because {attr}`~meta_package_manager.sudo.Escalator.probe_args` runs the former first: a user no
-    `sudoers` rule matches gets `I'm sorry {user}. I'm afraid I can't do that`
-    (`Error::Authorization`) where `--list` says `may not run sudo`. Matching
-    only the list wording would leave a non-sudoer on Ubuntu `25.10` and later
-    being prompted for a password that could never authorize them.
+    `sudo-rs` denies a `--validate` differently from a `--list`, which matters because
+    {attr}`~meta_package_manager.sudo.Escalator.probe_args` runs the former first: a
+    user no `sudoers` rule matches gets `I'm sorry {user}. I'm afraid I can't do that`
+    (`Error::Authorization`) where `--list` says `may not run sudo`. Matching only the
+    list wording would leave a non-sudoer on Ubuntu `25.10` and later being prompted for
+    a password that could never authorize them.
     """
     lowered = error.lower()
     if any(
@@ -1198,7 +1199,7 @@ def inspect_install_root(manager: PackageManager) -> InstallRoot | None:
     except OSError:
         return None
     # Deferred on purpose: `pwd` does not exist on Windows, returned above.
-    import pwd
+    import pwd  # noqa: PLC0415
 
     try:
         owner_name = pwd.getpwuid(uid).pw_name
@@ -1233,8 +1234,9 @@ def _prompt_kept(
     escalator: Escalator,
     probe: subprocess.CompletedProcess[bytes],
 ) -> bool | None:
-    """Whether a password prompt would authorize the commands after it, read
-    from polkit ahead of any prompt, or `None` where nothing tells.
+    """Whether a password prompt would authorize the commands after it.
+
+    Read from polkit ahead of any prompt, or `None` where nothing tells.
 
     `probe` is the cold answer of the credential probe, which carries the
     answer for `pkexec`. A `pkcheck` that cannot run leaves the question open.
@@ -1329,13 +1331,13 @@ def _escalation_is_passwordless(
 ) -> bool:
     """Whether every command mpm escalates already runs without a password.
 
-    Asked only after {attr}`~meta_package_manager.sudo.Escalator.probe_args` reported a cold cache, and
-    answering the question that probe cannot: `sudo --validate` refuses while any
-    matching `sudoers` entry wants a password, where
-    {attr}`~Escalator.passwordless_probe_args` names one command and reports the
-    rule that would actually run it. A host whose policy grants every escalated
-    command unauthenticated therefore needs no prompt, no warning and no
-    keepalive, having no credential to keep.
+    Asked only after {attr}`~meta_package_manager.sudo.Escalator.probe_args` reported a
+    cold cache, and answering the question that probe cannot: `sudo --validate` refuses
+    while any matching `sudoers` entry wants a password, where
+    {attr}`~Escalator.passwordless_probe_args` names one command and reports the rule
+    that would actually run it. A host whose policy grants every escalated command
+    unauthenticated therefore needs no prompt, no warning and no keepalive, having no
+    credential to keep.
 
     Conservative on every uncertainty: an escalator with no such query, a manager
     whose binary was not found, or a single command the policy does not clear
@@ -1484,7 +1486,7 @@ def prime_sudo(
 
     # Deferred on purpose: `config` pulls in the definitions machinery, which
     # imports back into this module through `manager` and `execution`.
-    from .config import config_file_is_trusted
+    from .config import config_file_is_trusted  # noqa: PLC0415
 
     for manager in escalating_managers:
         # The same file-plus-parent tamper test the config loader applies (see

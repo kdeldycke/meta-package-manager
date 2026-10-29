@@ -49,11 +49,11 @@ class UVBase(PackageManager):
     cooldown_env_var = "UV_EXCLUDE_NEWER"
     """uv honors a release-age cooldown through its `exclude-newer` resolver option.
 
-    `UV_EXCLUDE_NEWER` mirrors the `--exclude-newer` flag and is read by every
-    resolving subcommand (`pip install`, `pip list --outdated`, `tool install`,
-    `tool upgrade`), so a single environment variable covers install, upgrade and
-    outdated at once. uv accepts an RFC 3339 timestamp, which is exactly what the
-    default {meth}`meta_package_manager.execution.CLIExecutor.cooldown_env_value` produces.
+    `UV_EXCLUDE_NEWER` mirrors the `--exclude-newer` flag and is read by every resolving
+    subcommand (`pip install`, `pip list --outdated`, `tool install`, `tool upgrade`),
+    so a single environment variable covers install, upgrade and outdated at once. uv
+    accepts an RFC 3339 timestamp, which is exactly what the default
+    {meth}`meta_package_manager.execution.CLIExecutor.cooldown_env_value` produces.
 
     ```{note}
     The environment variable is the only mechanism that reaches these
@@ -85,7 +85,8 @@ class UVBase(PackageManager):
         Control colors in output [default: `auto`]
 
         Possible values:
-        - `auto`: Enables colored output only when the output is going to a terminal or TTY with support
+        - `auto`: Enables colored output only when the output is going to a terminal or
+          TTY with support
         - `always`: Enables colored output regardless of the detected environment
         - `never`: Disables colored output
 

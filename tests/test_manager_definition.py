@@ -14,8 +14,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-"""Tests for brand-new package managers defined from the `[mpm.overrides.<id>]`
-configuration section."""
+"""Tests for new package managers defined from the configuration.
+
+From the `[mpm.overrides.<id>]` configuration section.
+"""
 
 from __future__ import annotations
 
@@ -121,8 +123,9 @@ def fake_tool(tmp_path):
 
 @pytest.fixture
 def eager_inputs(monkeypatch, tmp_path):
-    """Pin every input of the eager configuration discovery, and return the
-    default configuration folder, not created yet.
+    """Pin every input of the eager configuration discovery.
+
+    Return the default configuration folder, not created yet.
 
     The discovery reads the command line, the `MPM_CONFIG` variable and the
     default folder. {mod}`meta_package_manager.config` binds its own
@@ -223,8 +226,10 @@ def test_parse_definition_accepts_operation_notes():
 
 
 def test_parse_definition_accepts_orphan_operations():
-    """The schema recognizes the `remove_orphan` and `cleanup_orphan` refinements;
-    `remove_orphan` requires its ``{package_id}`` placeholder like `remove`."""
+    """The schema recognizes the `remove_orphan` and `cleanup_orphan` refinements.
+
+    `remove_orphan` requires its ``{package_id}`` placeholder like `remove`.
+    """
     definition = parse_manager_definition(
         "mytool",
         {
@@ -242,8 +247,10 @@ def test_parse_definition_accepts_orphan_operations():
 
 
 def test_parse_definition_rejects_legacy_cleanup():
-    """The monolithic `cleanup` operation is gone from the schema: declaring it
-    names the category keys that replaced it."""
+    """The monolithic `cleanup` operation is gone from the schema.
+
+    Declaring it names the category keys that replaced it.
+    """
     with pytest.raises(ValidationError, match="cleanup_orphan, cleanup_cache"):
         parse_manager_definition(
             "mytool",
@@ -257,8 +264,10 @@ def test_parse_definition_rejects_legacy_cleanup():
 
 @pytest.mark.parametrize("operation", ("mark_explicit", "remove_orphan"))
 def test_parse_definition_package_operation_requires_package_id(operation):
-    """A per-package operation targets nothing without ``{package_id}``, so it is
-    rejected."""
+    """A per-package operation without ``{package_id}`` is rejected.
+
+    It targets nothing.
+    """
     with pytest.raises(ValidationError, match="package_id"):
         parse_manager_definition(
             "mytool",
@@ -615,8 +624,11 @@ def test_parse_definition_rejects_bad_id():
 
 
 def test_parse_definition_multi_binary_and_sudo():
-    """A definition can span sibling binaries, mark privileged operations, and
-    declare an alternate version probe."""
+    """A definition can span binaries, mark privileged operations, and more.
+
+    It can span sibling binaries, mark privileged operations, and declare an alternate
+    version probe.
+    """
     definition = parse_manager_definition(
         "urpmi-like",
         {
@@ -650,8 +662,10 @@ def test_parse_definition_multi_binary_and_sudo():
 
 
 def test_parse_definition_internal_sudo():
-    """A definition can mark its tool as escalating internally (like fink), and
-    the flag lands on the built class without touching the wrapping policy."""
+    """A definition can mark its tool as escalating internally, like fink.
+
+    The flag lands on the built class without touching the wrapping policy.
+    """
     definition = parse_manager_definition(
         "finklike",
         {
@@ -672,8 +686,10 @@ def test_parse_definition_internal_sudo():
 
 
 def test_parse_definition_resets_sudo_timestamp():
-    """A definition can mark its tool as dropping the cached `sudo` credentials
-    itself (like Homebrew), beside the internal escalation it qualifies."""
+    """A definition can mark its tool as dropping cached `sudo` credentials.
+
+    Like Homebrew, beside the internal escalation it qualifies.
+    """
     definition = parse_manager_definition(
         "brewlike",
         {
@@ -866,8 +882,11 @@ def test_factory_command_substitution(monkeypatch):
 
 
 def test_factory_operation_cli(monkeypatch):
-    """An operation carrying its own `cli` resolves the sibling binary and routes
-    the call through it; a missing sibling is an error, not a silent fallback."""
+    """An operation with its own `cli` routes the call through that binary.
+
+    It resolves the sibling binary. A missing sibling is an error, not a silent
+    fallback.
+    """
     manager = build_manager_class(
         _definition(
             remove=OperationSpec(args=("--auto", "{package_id}"), cli="urpme"),
@@ -891,8 +910,10 @@ def test_factory_operation_cli(monkeypatch):
 
 
 def test_factory_orphans_query(stub_run_cli):
-    """A config-defined manager can declare the `orphans` read-only query, parsed
-    like `installed` and advertised as a routable operation."""
+    """A config-defined manager can declare the `orphans` read-only query.
+
+    It is parsed like `installed` and advertised as a routable operation.
+    """
     manager = build_manager_class(
         _definition(
             orphans=OperationSpec(
@@ -913,9 +934,11 @@ def test_factory_orphans_query(stub_run_cli):
 
 
 def test_factory_orphan_operations(monkeypatch):
-    """A config-defined manager can declare the orphan refinements: `remove_orphan`
-    substitutes ``{package_id}`` like `remove`, `cleanup_orphan` runs a bare command
-    like `cleanup`. Both register as implemented capabilities."""
+    """A config-defined manager can declare the orphan refinements.
+
+    `remove_orphan` substitutes ``{package_id}`` like `remove`, `cleanup_orphan` runs a
+    bare command like `cleanup`. Both register as implemented capabilities.
+    """
     manager = build_manager_class(
         _definition(
             remove_orphan=OperationSpec(args=("remove", "--recursive", "{package_id}")),
@@ -946,8 +969,10 @@ def test_factory_orphan_operations(monkeypatch):
 
 
 def test_factory_mark_explicit(monkeypatch):
-    """A config-defined manager can declare `mark_explicit`, which substitutes
-    ``{package_id}`` like `remove` and registers as implemented."""
+    """A config-defined manager can declare `mark_explicit`.
+
+    It substitutes ``{package_id}`` like `remove` and registers as implemented.
+    """
     manager = build_manager_class(
         _definition(mark_explicit=OperationSpec(args=("mark", "{package_id}"))),
     )()
@@ -1002,8 +1027,11 @@ def test_factory_operation_sudo(monkeypatch):
 
 
 def test_factory_query_sudo(monkeypatch):
-    """A query marked `sudo = true` runs privileged, for tools that gate even
-    their read-only listings behind root (deb-get's upgradable check)."""
+    """A query marked `sudo = true` runs privileged.
+
+    For tools that gate even their read-only listings behind root (deb-get's upgradable
+    check).
+    """
     manager = build_manager_class(
         _definition(
             outdated=OperationSpec(
@@ -1054,8 +1082,10 @@ def test_factory_query_sudo(monkeypatch):
     ),
 )
 def test_factory_search_refinements(monkeypatch, extended, exact, expected_args):
-    """Refinement markers expand in place to their argument lists when active,
-    and to nothing otherwise; declaring them advertises native support."""
+    """Refinement markers expand in place to their argument lists when active.
+
+    They expand to nothing otherwise. Declaring them advertises native support.
+    """
     manager = build_manager_class(
         _definition(
             search=OperationSpec(
@@ -1105,8 +1135,10 @@ def test_factory_search_without_refinements_relies_on_refiltering():
 
 
 def test_factory_json_array_field(stub_run_cli):
-    """A `key[N]` selector picks one element out of a list-valued JSON field,
-    and resolves to nothing on non-list values or out-of-range indexes."""
+    """A `key[N]` selector picks one element out of a list-valued JSON field.
+
+    It resolves to nothing on non-list values or out-of-range indexes.
+    """
     manager = build_manager_class(
         _definition(
             installed=OperationSpec(
@@ -1134,8 +1166,10 @@ def test_factory_json_array_field(stub_run_cli):
 
 
 def test_factory_install_ignores_a_version_pin(capture_run_cli, caplog):
-    """A config-defined install drops a requested version and says so, rather
-    than failing or passing a version its args have no place for."""
+    """A config-defined install drops a requested version and says so.
+
+    Rather than failing, or passing a version its args have no place for.
+    """
     manager = build_manager_class(
         _definition(install=OperationSpec(args=("install", "{package_id}"))),
     )()
@@ -1227,8 +1261,10 @@ def test_factory_regex_parsing_skips_a_match_without_id(stub_run_cli):
     ),
 )
 def test_split_name_version(token, expected):
-    """The default splitter cuts at the last dash a digit follows, and answers
-    `None` for a token that carries no version."""
+    """The default splitter cuts at the last dash a digit follows.
+
+    It answers `None` for a token that carries no version.
+    """
     manager = build_manager_class(
         _definition(sync=OperationSpec(args=("update",))),
     )()
@@ -1276,8 +1312,10 @@ def test_config_file_is_trusted_rejects_a_missing_file(tmp_path):
 
 @skip_windows
 def test_config_file_is_trusted_rejects_another_owner(tmp_path, monkeypatch):
-    """A private file owned by another account than the current one, and not by
-    root, is not trusted."""
+    """A private file owned by another account, and not root, is not trusted.
+
+    Another account than the current one.
+    """
     real_uid = os.getuid()
     if real_uid == 0:
         pytest.skip("A file root owns is always trusted.")
@@ -1331,9 +1369,11 @@ def test_config_source(location, expected):
 
 
 def test_collect_definitions_skips_overrides_and_invalid_sections():
-    """Only the valid definitions of new managers come out: a section of a
-    shipped manager is an override, and an invalid one already failed the
-    load-time validator."""
+    """Only the valid definitions of new managers come out.
+
+    A section of a shipped manager is an override, and an invalid one already failed the
+    load-time validator.
+    """
     sections = {
         "pip": {"timeout": 60},
         "mytool": {"platforms": ["linux"], "operations": {"sync": {"args": ["s"]}}},
@@ -1407,8 +1447,10 @@ def test_candidate_config_path_defers_a_url(eager_inputs, monkeypatch):
 def test_candidate_config_path_searches_the_default_folder(
     eager_inputs, monkeypatch, app_files, expected
 ):
-    """With no explicit location, the first file of the default folder wins,
-    TOML first. A trailing `--config` that carries no value is ignored."""
+    """With no explicit location, the first file of the default folder wins, TOML first.
+
+    A trailing `--config` that carries no value is ignored.
+    """
     monkeypatch.setattr(sys, "argv", ["mpm", "managers", "--config"])
     if app_files is not None:
         eager_inputs.mkdir()
@@ -1440,8 +1482,10 @@ def test_candidate_config_path_searches_the_default_folder(
 def test_discover_config_definitions(
     eager_inputs, monkeypatch, tmp_path, file_name, content, found
 ):
-    """The definitions of a readable file come out with their source, and any
-    failure yields nothing rather than breaking the start of the CLI."""
+    """The definitions of a readable file come out with their source.
+
+    Any failure yields nothing rather than breaking the start of the CLI.
+    """
     config_file = tmp_path / file_name
     config_file.write_text(content, encoding="UTF-8")
     monkeypatch.setenv("MPM_CONFIG", str(config_file))
@@ -1485,8 +1529,10 @@ def test_register_eager_config_managers(
     file_mode,
     registered,
 ):
-    """The eager pass registers the definitions of a trusted file, and refuses
-    those of a file others can write to."""
+    """The eager pass registers the definitions of a trusted file.
+
+    It refuses those of a file others can write to.
+    """
     folder = tmp_path / "conf"
     folder.mkdir()
     folder.chmod(0o700)
@@ -1502,8 +1548,10 @@ def test_register_eager_config_managers(
 def test_main_registers_definitions_before_the_cli(
     eager_inputs, monkeypatch, tmp_path, reset_definitions, capsys
 ):
-    """The entry point registers the definitions before the CLI runs: `--version`
-    exits ahead of the CLI pass, so only the eager pass can register here."""
+    """The entry point registers the definitions before the CLI runs.
+
+    `--version` exits ahead of the CLI pass, so only the eager pass can register here.
+    """
     config_file = tmp_path / "config.toml"
     config_file.write_text(DEFINITION_TOML, encoding="UTF-8")
     config_file.chmod(0o600)
@@ -1594,8 +1642,10 @@ def test_factory_functional(tmp_path, fake_tool, reset_definitions):
 
 @skip_windows
 def test_factory_functional_version_cli(tmp_path, fake_tool, reset_definitions):
-    """The version probe runs the `version_cli` binary instead of the main CLI,
-    like OS-versioned tool suites exposing no version flag of their own."""
+    """The version probe runs the `version_cli` binary instead of the main CLI.
+
+    Like OS-versioned tool suites exposing no version flag of their own.
+    """
     probe = tmp_path / "myuname"
     probe.write_text("#!/bin/sh\necho '7.7'\n")
     probe.chmod(0o755)
@@ -1644,8 +1694,10 @@ def test_cli_lists_config_defined_manager(
 def test_cli_refuses_definition_from_untrusted_file(
     invoke, create_config, reset_definitions
 ):
-    """The trust gate checks the file the CLI loads, not only the file the eager
-    pass of `main()` finds."""
+    """The trust gate checks the file the CLI loads.
+
+    Not only the file the eager pass of `main()` finds.
+    """
     conf_path = create_config("conf.toml", DEFINITION_TOML)
     conf_path.chmod(0o666)
     result = invoke("--config", str(conf_path), "managers")
@@ -1690,8 +1742,11 @@ manager (with its samples) extends those tests without touching this module.
 
 
 def _fresh_bundled(manager_id):
-    """Build a throwaway config-defined manager instance so parsing tests can
-    monkeypatch `run_cli` without mutating the shared pool singleton."""
+    """Build a throwaway config-defined manager instance.
+
+    So parsing tests can monkeypatch `run_cli` without mutating the shared pool
+    singleton.
+    """
     for definition, _ in load_bundled_definitions():
         if definition.manager_id == manager_id:
             return build_manager_class(definition)()
@@ -1709,9 +1764,11 @@ def test_bundled_definitions_are_valid():
 
 
 def test_bundled_loader_skips_broken_files(monkeypatch, tmp_path, caplog):
-    """A bundled file that does not parse, or that defines an invalid manager,
-    is logged and skipped, and the valid files still load: one bad resource
-    cannot break the start of `mpm`."""
+    """A broken bundled file is logged and skipped, and the valid files load.
+
+    A file that does not parse, or that defines an invalid manager: one bad resource
+    cannot break the start of `mpm`.
+    """
     (tmp_path / "broken.toml").write_text("[mpm.overrides.mytool\n", encoding="UTF-8")
     (tmp_path / "invalid.toml").write_text(
         DEFINITION_TOML.replace("mytool", "urpmi-like").replace(
@@ -1863,8 +1920,7 @@ def test_bundled_definition_carries_no_boilerplate(toml_path):
     ),
 )
 def test_bundled_definition_capabilities(manager_id, operation, expected):
-    """A bundled definition implements the operations its file maps, and no
-    other."""
+    """A bundled definition implements the operations its file maps, and no other."""
     assert implements(pool[manager_id], operation) is expected
 
 
@@ -1885,8 +1941,11 @@ def _version_sample_params():
 
 @pytest.mark.parametrize(("manager_id", "output", "expected"), _version_sample_params())
 def test_bundled_version_regex(manager_id, output, expected):
-    """Lock each bundled definition's version probe to the output sample shipped in
-    its TOML file, derived from the upstream tool's own source or documentation."""
+    """Lock the version probe of each bundled definition to its output sample.
+
+    The sample ships in its TOML file, derived from the upstream tool's own source or
+    documentation.
+    """
     match = re.search(pool[manager_id].version_regexes[0], output)
     assert match is not None
     assert match.group("version") == expected
@@ -1921,8 +1980,10 @@ def _parsing_sample_params():
     _parsing_sample_params(),
 )
 def test_bundled_parsing(manager_id, operation, output, expected):
-    """Lock each bundled definition's parsers to the output samples shipped in its
-    TOML file, derived from the upstream tools' own source code or documentation.
+    """Lock the parsers of each bundled definition to its output samples.
+
+    The samples ship in its TOML file, derived from the upstream tools' own source code
+    or documentation.
 
     Versions are compared as raw captured strings (omitted from the sample when
     the regex captures no version group). `which` is stubbed so operations

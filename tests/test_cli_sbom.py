@@ -160,8 +160,9 @@ def test_default_spdx_json_output_to_console(invoke, subcmd):
 
 
 def test_unrecognized_extension_without_format(invoke, subcmd):
-    """A target path with no recognized extension must fail before any
-    package collection happens, with an actionable message pointing at
+    """A target path with no recognized extension fails early.
+
+    Before any package collection happens, with an actionable message pointing at
     `--format`.
     """
     result = invoke(subcmd, "help")
@@ -175,8 +176,9 @@ def test_unrecognized_extension_without_format(invoke, subcmd):
 def test_unrecognized_extension_with_explicit_format(
     invoke, subcmd, fake_pool, tmp_path
 ):
-    """An explicit `--format` overrides extension auto-detection, even when
-    the filename carries no recognizable suffix.
+    """An explicit `--format` overrides extension auto-detection.
+
+    Even when the filename carries no recognizable suffix.
 
     The subject is the filename, so the inventory behind it is the fake one:
     collecting the host's real packages to prove a suffix was overridden costs
@@ -292,9 +294,10 @@ def test_sbom_query_filter(invoke, fake_pool, args, listed):
 
 
 def test_minimal_mode_skips_metadata_extractor(invoke):
-    """`--minimal` must avoid the rich-metadata code path so the
-    export matches the historical bare shape even for managers that
-    implement an extractor (Homebrew, pip).
+    """`--minimal` avoids the rich-metadata code path.
+
+    So the export matches the historical bare shape, even for managers that implement an
+    extractor (Homebrew, pip).
     """
     result = invoke("sbom", "--minimal")
     assert result.exit_code == 0
@@ -399,8 +402,10 @@ def test_metadata_failure_falls_back_to_minimal_data(invoke, patch_pool_with):
 
 
 def test_network_attaches_the_advisories_of_an_alias(invoke, patch_pool_with, osv):
-    """`--network` queries OSV with the PyPI alias of each package, and attaches
-    the advisory reported for an alias to the package behind it."""
+    """`--network` queries OSV with the PyPI alias of each package.
+
+    It attaches the advisory reported for an alias to the package behind it.
+    """
     patch_pool_with(AliasedFakeManager())
     batch = osv.post("/v1/querybatch").respond(
         json={"results": [{"vulns": [{"id": "GHSA-aaaa-bbbb-cccc"}]}, {}]},

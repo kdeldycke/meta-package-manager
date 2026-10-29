@@ -47,8 +47,7 @@ pytestmark = [
 
 
 def fake_shell(tmp_path, body: str = "") -> str:
-    """A stand-in login shell: runs `body`, drops `-i -l` and hands `-c` to
-    `/bin/sh`.
+    """A stand-in login shell: runs `body`, drops `-i -l` and hands `-c` to `/bin/sh`.
 
     A real login shell would read the developer's own profile and change `PATH`
     in ways no assertion can predict. `body` is where a test exports what its
@@ -166,8 +165,10 @@ def test_import_shell_env_reports_an_unchanged_path(tmp_path, caplog):
 
 
 def test_import_shell_env_skips_inside_a_probe(tmp_path):
-    """The guard stops a shell configuration running `mpm --shell-env` from
-    spawning a shell from within the shell."""
+    """The guard stops `mpm --shell-env` from spawning a shell in a shell.
+
+    When a shell configuration runs `mpm --shell-env`.
+    """
     sentinel = tmp_path / "spawned"
     shell = fake_shell(tmp_path, f"touch {sentinel}")
     environ = bare_environ(tmp_path, shell)
@@ -214,8 +215,10 @@ def test_import_shell_env_is_ignored_on_windows(tmp_path, monkeypatch, caplog):
 
 
 def test_cli_shell_env_option(invoke, fake_pool, monkeypatch, tmp_path):
-    """`--shell-env` adopts the shell's answer into the process environment
-    before the managers are selected, and narrates it at `INFO`."""
+    """`--shell-env` adopts the answer of the shell before manager selection.
+
+    It goes into the process environment, and is narrated at `INFO`.
+    """
     shell = fake_shell(tmp_path, "export MPM_TEST_FRUIT=apple")
     monkeypatch.setenv("SHELL", shell)
     # Registered with monkeypatch first, so its teardown restores the variable

@@ -72,11 +72,11 @@ def escape_pattern(query: str) -> str:
 class Aptitude(PackageManager):
     """Front-end to Debian's `apt`, with a resolver and a query language of its own.
 
-    Aptitude reaches the same archives `apt` does, over the same dpkg backend,
-    and is wrapped on the same grounds as {class}`~meta_package_manager.managers.nala.Nala`:
-    a distinct tool with a vocabulary of its own, rather than a translation
-    layer over another CLI. It shares dpkg's lock with the rest of that family,
-    so mpm runs it serially against them.
+    Aptitude reaches the same archives `apt` does, over the same dpkg backend, and is
+    wrapped on the same grounds as {class}`~meta_package_manager.managers.nala.Nala`: a
+    distinct tool with a vocabulary of its own, rather than a translation layer over
+    another CLI. It shares dpkg's lock with the rest of that family, so mpm runs it
+    serially against them.
     """
 
     # Every listing is a `search` over aptitude's own pattern language (`~i`
@@ -282,7 +282,7 @@ class Aptitude(PackageManager):
         $ aptitude --quiet --disable-columns search ~n^libsigc\\+\\+-2\\.0-0v5$ --display-format %p,%V,%d
         libsigc++-2.0-0v5,2.12.1-3,type-safe Signal Framework for C++ - runtime
         ```
-        """
+        """  # noqa: E501
         pattern = escape_pattern(query)
         if exact:
             pattern = f"^{pattern}$"
@@ -314,7 +314,7 @@ class Aptitude(PackageManager):
 
         $ sudo aptitude --quiet --disable-columns --assume-yes install nyancat=1.5.2-0.3+b1
         ```
-        """
+        """  # noqa: E501
         return self.run_cli(
             "--assume-yes",
             "install",
@@ -395,8 +395,9 @@ class Aptitude(PackageManager):
     def cleanup_orphan(self) -> None:
         """Remove every package installed as a dependency and no longer required.
 
-        Aptitude has no `autoremove` verb: the garbage set is named as a pattern
-        on `remove`, the same one {meth}`~meta_package_manager.manager.PackageManager.orphans` reports.
+        Aptitude has no `autoremove` verb: the garbage set is named as a pattern on
+        `remove`, the same one
+        {meth}`~meta_package_manager.manager.PackageManager.orphans` reports.
 
         ```{code-block} shell-session
 

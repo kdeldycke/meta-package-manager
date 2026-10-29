@@ -118,8 +118,10 @@ def test_install_unresolved_exits_nonzero(invoke, fake_pool):
 
 @pytest.mark.parametrize("flag", ("--zero-exit", "-0"))
 def test_install_unresolved_zero_exit_opt_out(invoke, fake_pool, flag):
-    """-0/--zero-exit keeps the exit code at 0 on per-package failures; the
-    critical summary stays as the durable record."""
+    """-0/--zero-exit keeps the exit code at 0 on per-package failures.
+
+    The critical summary stays as the durable record.
+    """
     result = invoke(flag, "install", "package-provided-by-no-manager")
     assert result.exit_code == 0
     assert "Could not install: package-provided-by-no-manager." in result.stderr
@@ -168,8 +170,10 @@ def test_remove_with_manager_lacking_inventory(invoke, create_config, tmp_path):
 
 
 def test_install_reports_what_moved(invoke, changing_fake_pool):
-    """A package tied to its manager installs on the concurrent path, and the
-    report names it with the dependency it pulled in."""
+    """A package tied to its manager installs on the concurrent path.
+
+    The report names it with the dependency it pulled in.
+    """
     mid = changing_fake_pool.id
     result = invoke("install", f"pkg:{mid}/fake-pkg-theta")
     assert result.exit_code == 0
@@ -184,8 +188,10 @@ def test_install_reports_what_moved(invoke, changing_fake_pool):
 
 
 def test_install_untied_reports_every_attempt(invoke, changing_fake_pool):
-    """Packages left untied install through the sequential priority search. Its
-    manager opens once, so the report keeps the first install too."""
+    """Packages left untied install through the sequential priority search.
+
+    Its manager opens once, so the report keeps the first install too.
+    """
     result = invoke("install", "fake-pkg-theta", "fake-pkg-iota")
     assert result.exit_code == 0
     check_report(
@@ -279,8 +285,10 @@ def test_install_report_serialized_keeps_the_exit_code(invoke, changing_fake_poo
 
 
 def test_install_ties_and_searches_in_one_run(invoke, changing_fake_pool):
-    """A run holding both kinds installs the tied package first, then searches
-    for the untied one."""
+    """A run holding both kinds installs the tied package first.
+
+    Then it searches for the untied one.
+    """
     mid = changing_fake_pool.id
     result = invoke("install", f"pkg:{mid}/fake-pkg-theta", "fake-pkg-iota")
     assert result.exit_code == 0
@@ -299,8 +307,10 @@ def test_install_ties_and_searches_in_one_run(invoke, changing_fake_pool):
 
 
 def test_install_without_search_tries_the_package_directly(invoke, patch_pool_with):
-    """A manager with no search operation gets the install attempt anyway, and
-    the next manager never runs."""
+    """A manager with no search operation still gets the install attempt.
+
+    The next manager never runs.
+    """
     patch_pool_with(SearchlessFakeManager(), ChangingFakeManager())
     result = invoke("--verbosity", "INFO", "install", "fake-pkg-theta")
     assert result.exit_code == 0
@@ -323,8 +333,11 @@ def test_install_falls_through_a_failed_search(invoke, patch_pool_with):
 
 
 def test_install_stops_at_a_cooldown_hold(invoke, patch_pool_with):
-    """A held package ends the search at the first manager providing it: the next
-    manager would sidestep the hold. A hold is no failure, so the run exits `0`."""
+    """A held package ends the search at the first manager providing it.
+
+    The next manager would sidestep the hold. A hold is no failure, so the run exits
+    `0`.
+    """
     patch_pool_with(HeldFakeManager(), ChangingFakeManager())
     result = invoke("install", "fake-pkg-theta")
     assert result.exit_code == 0
@@ -339,8 +352,10 @@ def test_install_stops_at_a_cooldown_hold(invoke, patch_pool_with):
 def test_install_refuses_an_ambiguous_exact_search(
     invoke, changing_fake_pool, monkeypatch
 ):
-    """An exact search answering two packages is a bug of the manager, which the
-    install stops on rather than pick one of them."""
+    """An exact search answering two packages stops the install.
+
+    It is a bug of the manager, and the install does not pick one of them.
+    """
 
     def search(manager, query, extended, exact):
         yield manager.package(id=query, latest_version="1.0.0")
@@ -390,16 +405,15 @@ def test_single_manager_install_and_remove(invoke, manager_id, package_id):
 
     ```{note}
 
-    Managers that cannot complete a real install in a given environment are not
-    skipped: they are listed in `INSTALL_REMOVE_BLOCKED_WHEN`
-    (`destructive_plan.py`) and
-    driven anyway. The blocked `install` is capped at `SHORT_FAILURE_TIMEOUT`
-    and asserted to fail the stable mpm way (exit `1` plus a ``Could not
-    install:` message). It runs at `--verbosity INFO``: the minimum level at
-    which the `Installation priority` dispatch signal is visible (the default
-    `WARNING` would hide it and make {meth}`~tests.test_cli.check_manager_selection` pass
-    vacuously). No follow-up `remove`: the failed install left nothing to
-    remove, and the working managers already cover the removal path.
+    Managers that cannot complete a real install in a given environment are not skipped:
+    they are listed in `INSTALL_REMOVE_BLOCKED_WHEN` (`destructive_plan.py`) and driven
+    anyway. The blocked `install` is capped at `SHORT_FAILURE_TIMEOUT` and asserted to
+    fail the stable mpm way (exit `1` plus a ``Could not install:` message). It runs at
+    `--verbosity INFO``: the minimum level at which the `Installation priority` dispatch
+    signal is visible (the default `WARNING` would hide it and make
+    {meth}`~tests.test_cli.check_manager_selection` pass vacuously). No follow-up
+    `remove`: the failed install left nothing to remove, and the working managers
+    already cover the removal path.
 
     A manager in `REMOVE_REFUSES_INSTALLED` is the other way round: its
     install succeeds and its `remove` is refused on purpose, so both legs

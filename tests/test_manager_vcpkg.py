@@ -59,7 +59,7 @@ SEARCH_COLUMN_OUTPUT = """\
 cpr                      1.14.2           C++ Requests is a simple wrapper around libcurl
 cpr[ssl]                                  Enable SSL support
 duckdb[excel]                             Statically link the excel extension into DuckDB
-freexl                   2.0.0#2          FreeXL is an open source library to extract valid data"""
+freexl                   2.0.0#2          FreeXL is an open source library to extract valid data"""  # noqa: E501
 """`vcpkg --classic search excel`, as the docstring of
 {meth}`~meta_package_manager.managers.vcpkg.VCPKG.search` shows it."""
 
@@ -67,7 +67,7 @@ SEARCH_LONG_NAMES_OUTPUT = """\
 azure-security-keyvault-administration-cpp 4.0.0-beta.5#3 Microsoft Azure Key Vault Administration SDK for C++
 azure-security-keyvault-certificates-cpp 4.2.1#5 Microsoft Azure Key Vault Certificates SDK for C++
 azure-security-keyvault-keys-cpp 4.4.1#5  Microsoft Azure Key Vault Keys SDK for C++
-azure-security-keyvault-secrets-cpp 4.2.1#5 Microsoft Azure Key Vault Secrets SDK for C++"""
+azure-security-keyvault-secrets-cpp 4.2.1#5 Microsoft Azure Key Vault Secrets SDK for C++"""  # noqa: E501
 """The rows of `vcpkg --classic search keyvault` for the ports of the `2026.07.29`
 registry, each name longer than the 24 columns vcpkg pads it to.
 
@@ -86,8 +86,10 @@ captured from a vcpkg run.
     ),
 )
 def test_installed_reads_the_json_listing(stub_run_cli, output, expected):
-    """The package is its full specification, and a non-zero port revision
-    joins the version the way `vcpkg` renders it."""
+    """The package is its full specification.
+
+    A non-zero port revision joins the version the way `vcpkg` renders it.
+    """
     manager = VCPKG()
     stub_run_cli(manager, output)
     packages = [(p.id, str(p.installed_version)) for p in manager.installed]
@@ -132,8 +134,10 @@ def test_installed_skips_what_is_not_a_record(stub_run_cli, output):
     ),
 )
 def test_search_reads_the_column_listing(capture_run_cli, query, output, expected):
-    """A port gives its name and version, and the rows of its features are
-    skipped. A name longer than its column still ends at the space after it."""
+    """A port gives its name and version, and the rows of its features are skipped.
+
+    A name longer than its column still ends at the space after it.
+    """
     manager = VCPKG()
     calls = capture_run_cli(manager, output)
     packages = [

@@ -34,7 +34,7 @@ import io
 import json
 import logging
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import cast
 
 from boltons.ecoutils import get_profile
@@ -237,10 +237,10 @@ class SPDX(SBOM):
 
         self.seen_ids = set()
         # `(manager_id, package_id) -> SPDX docid` lookup used by
-        # {meth}`~meta_package_manager.sbom.base.SBOM.finalize` to resolve declared dependencies into
-        # `Relationship` entries. Populated by every {meth}`add_package`
-        # call so cross-package edges can be wired up at the end of the scan
-        # regardless of the order managers report their packages in.
+        # {meth}`~meta_package_manager.sbom.base.SBOM.finalize` to resolve declared
+        # dependencies into `Relationship` entries. Populated by every
+        # {meth}`add_package` call so cross-package edges can be wired up at the end
+        # of the scan regardless of the order managers report their packages in.
         self.name_index = {}
         # `purl string -> docid` and `docid -> SPDXPackage` indexes used
         # to attach vulnerability data (keyed by purl) onto the right
@@ -274,7 +274,7 @@ class SPDX(SBOM):
                     f"v{__version__}/{profile['guid']}"
                 ),
                 creators=[Actor(ActorType.TOOL, f"meta-package-manager-{__version__}")],
-                created=datetime.now(tz=timezone.utc),
+                created=datetime.now(tz=UTC),
                 data_license="CC0-1.0",
             )
         )
@@ -688,8 +688,10 @@ class SPDX(SBOM):
         return base
 
     def export(self) -> str:
-        """Similar to `spdx_tools.spdx.writer.write_anything.write_file` but write
-        directly to provided stream instead of file path.
+        """Write an SPDX document directly to the provided stream.
+
+        Like `spdx_tools.spdx.writer.write_anything.write_file`, but with a stream
+        instead of a file path.
         """
         stream = io.StringIO()
 

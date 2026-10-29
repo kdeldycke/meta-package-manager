@@ -84,9 +84,8 @@ import signal
 import sys
 import threading
 from collections import Counter
-from collections.abc import Iterable
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from functools import partial
 from pathlib import Path
 from textwrap import dedent
@@ -148,7 +147,6 @@ from .dispatch import trail_label
 from .execution import PLAN_RECORDER, CLIError, operation_subject
 from .logo import env_summary, version_screen_params
 from .manager import INVOCATION_CACHES, PackageManager
-from .package import Package
 from .pool import pool
 from .shell_env import import_shell_env
 from .specifier import VERSION_SEP, Specifier
@@ -166,7 +164,7 @@ from .version import TokenizedString, diff_versions
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Callable, Collection, Iterator, Mapping
+    from collections.abc import Callable, Collection, Iterable, Iterator, Mapping
     from types import FrameType
     from typing import Any
 
@@ -174,6 +172,7 @@ if TYPE_CHECKING:
     from click_extra import ColumnSpec, Context, Parameter
 
     from .manager import CooldownHold
+    from .package import Package
 
 
 # Subcommand sections.
@@ -330,7 +329,8 @@ def update_manager_selection(
 ) -> None:
     """Update global selection list of managers in the context.
 
-    Accumulate and merge all manager selectors to form the initial population enforced by the user.
+    Accumulate and merge all manager selectors to form the initial population enforced
+    by the user.
     """
     # Option has not been called: an unset flag reads as None, and an unset
     # option collecting several occurrences as an empty tuple.
@@ -700,8 +700,9 @@ def group_params() -> list[Parameter]:
         is_flag=True,
         default=False,
         help="Force evaluation of all managers implemented by mpm, including those "
-        "not supported by the current platform or unmaintained. Still applies filtering "
-        "by --<manager-id> / --no-<manager-id> options before calling the subcommand.",
+        "not supported by the current platform or unmaintained. Still applies "
+        "filtering by --<manager-id> / --no-<manager-id> options before calling the "
+        "subcommand.",
     ),
     option(
         "-x",
@@ -1341,8 +1342,9 @@ def package_task(
     operation: str,
     record_failure: Callable[[Specifier], None],
 ) -> Callable[[], tuple[bool, str]]:
-    """Build one per-package task for
-    {func}`~meta_package_manager.dispatch.collect_per_package`.
+    """Build one per-package task.
+
+    For {func}`~meta_package_manager.dispatch.collect_per_package`.
 
     Runs the attempt through {func}`run_manager_action` and returns
     `(ok, message)` for the `✓`/`✘` trail. On failure it appends the spec to a
@@ -1388,8 +1390,9 @@ def package_task(
 
 
 def fail_unless_zero_exit(ctx: Context, message: str) -> None:
-    """Print the durable `critical: {message}` record, then exit `1` unless
-    `-0`/`--zero-exit` opted out of the gate.
+    """Print the durable `critical: {message}` record, then exit `1`.
+
+    `-0`/`--zero-exit` opts out of the exit.
 
     The shared failure gate of the action commands ({func}`exit_on_failures`)
     and `doctor`: the summary always prints, following the linter convention
@@ -1431,11 +1434,10 @@ def _versioned(inventory: Mapping[str, Package]) -> bool:
 
 
 def _instant(moment: datetime | None) -> str | None:
-    """A timestamp as the change report carries it: ISO 8601, in UTC, to the
-    second."""
+    """A timestamp as the change report carries it: ISO 8601, in UTC, to the second."""
     if moment is None:
         return None
-    return moment.astimezone(timezone.utc).isoformat(timespec="seconds")
+    return moment.astimezone(UTC).isoformat(timespec="seconds")
 
 
 def _day(instant: object) -> str:
@@ -1455,7 +1457,9 @@ def _outcome_row(
     status: PackageOutcome,
     hold: CooldownHold | None = None,
 ) -> dict[str, object]:
-    """One row of the change report, in the field vocabulary of
+    """One row of the change report.
+
+    In the field vocabulary of
     {data}`~meta_package_manager.tables.CHANGE_REPORT_COLUMNS`.
 
     The status travels as its bare string, the payload being serialized by
@@ -1667,8 +1671,11 @@ class ChangeReport:
     """
 
     def __init__(self, managers: Iterable[PackageManager] = ()) -> None:
-        """`managers` fixes the order of the report up front, for a fan-out whose
-        managers finish in any order. A manager opened later joins at the end."""
+        """`managers` fixes the order of the report up front.
+
+        This serves a fan-out whose managers finish in any order. A manager opened later
+        joins at the end.
+        """
         self._lock = threading.Lock()
         self._order: list[str] = [manager.id for manager in managers]
         self._opened: dict[
@@ -1717,8 +1724,9 @@ class ChangeReport:
         return expected
 
     def close(self, manager: PackageManager) -> list[dict[str, object]] | None:
-        """Take the reading after `manager` changed its inventory, and file the
-        difference as the manager's rows of the report.
+        """Read `manager` after it changed its inventory, and file the difference.
+
+        The difference becomes the rows of the manager in the report.
 
         Returns the rows, or `None` when the manager stays out of the report: it
         was never open, its second reading failed, or a reading carries no
@@ -1743,8 +1751,11 @@ class ChangeReport:
         return rows
 
     def close_all(self) -> None:
-        """Close every manager still open: the sequential `install` path opens
-        each manager on its first attempt and closes them all at the end."""
+        """Close every manager still open.
+
+        The sequential `install` path opens each manager on its first attempt and closes
+        them all at the end.
+        """
         with self._lock:
             managers = [
                 manager for manager, _before, _expected in self._opened.values()
@@ -1799,8 +1810,10 @@ class ChangeReport:
         last: bool,
         among: Collection[str] | None,
     ) -> Callable[[], tuple[bool, str]]:
-        """Run `task`, opening `manager` before it when `first` and closing it
-        after when `last`."""
+        """Run `task`, opening and closing `manager` around it as needed.
+
+        The manager opens before the task when `first`, and closes after it when `last`.
+        """
 
         def framed() -> tuple[bool, str]:
             if first:
@@ -1823,8 +1836,10 @@ class ChangeReport:
             }
 
     def show(self, ctx: Context) -> None:
-        """Print the report through {func}`print_change_report`, when any manager
-        could be read on both sides of the command."""
+        """Print the report through {func}`print_change_report`.
+
+        Only when a manager could be read on both sides of the command.
+        """
         payload = self.payload
         if payload:
             print_change_report(ctx, payload)

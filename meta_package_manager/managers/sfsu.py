@@ -31,9 +31,9 @@ if TYPE_CHECKING:
 
 
 class SFSU(PackageManager):
-    """sfsu (Stupid Fast Scoop Utils) is a Rust reimplementation of
-    Scoop's slower read paths, working against the same buckets and `~/scoop`
-    install tree.
+    """sfsu (Stupid Fast Scoop Utils) reimplements slow Scoop reads in Rust.
+
+    It works against the same buckets and `~/scoop` install tree.
 
     mpm reaches for sfsu only where it is both faster than Scoop and speaks
     JSON: `installed`, `outdated` and `search` all pass `--json` and are

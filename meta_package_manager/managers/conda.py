@@ -65,12 +65,12 @@ class Conda(PackageManager):
 
     requirement = ">=4.6.0"
     """`4.6.0` is a conservative floor. By this release ``conda update
-    --dry-run --json` reports `actions` as a single mapping whose `LINK`` /
-    `UNLINK` values are lists of package dicts: the exact shape
-    {meth}`~meta_package_manager.manager.PackageManager.outdated` parses. Much older conda wrapped `actions` in a list
-    and emitted bare `channel::name-version-build` strings instead of dicts,
-    which the parser below does not handle. The `--json` output of `list` and
-    `search` predates this floor by years.
+    --dry-run --json` reports `actions` as a single mapping whose `LINK`` / `UNLINK`
+    values are lists of package dicts: the exact shape
+    {meth}`~meta_package_manager.manager.PackageManager.outdated` parses. Much older
+    conda wrapped `actions` in a list and emitted bare `channel::name-version-build`
+    strings instead of dicts, which the parser below does not handle. The `--json`
+    output of `list` and `search` predates this floor by years.
 
     See [4.6.0 release](https://github.com/conda/conda/releases/tag/4.6.0).
     """

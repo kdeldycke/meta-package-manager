@@ -42,9 +42,10 @@ def _pwsh_quote(value: str) -> str:
 
 
 class PWSH_Gallery(PackageManager):
-    """PowerShell Gallery client, driven through the modern
-    [Microsoft.PowerShell.PSResourceGet](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.psresourceget/)
-    module.
+    """PowerShell Gallery client, driven through the PSResourceGet module.
+
+    See
+    [Microsoft.PowerShell.PSResourceGet](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.psresourceget/).
 
     ```{note}
     Only `pwsh` (PowerShell 7+) is supported. Legacy Windows PowerShell 5.1
@@ -227,7 +228,7 @@ class PWSH_Gallery(PackageManager):
         [{"Name":"PSReadLine","Version":"2.3.6",
           "Description":"Great command line editing..."}]
         ```
-        """
+        """  # noqa: E501
         pattern = query if exact else f"*{query}*"
         output = self.run_cli(
             f"Find-PSResource -Name {_pwsh_quote(pattern)}"

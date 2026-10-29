@@ -160,7 +160,7 @@ class Zef(PackageManager):
         0 |Zef::Repository::Ecosystems<fez>|JSON::Fast:ver<0.20>:auth<zef:timo>  |A naive, fast json parser and serializer
         1 |Zef::Repository::Ecosystems<fez>|JSON::Fast:ver<0.20.1>:auth<zef:timo>|A naive, fast json parser and serializer
         ```
-        """
+        """  # noqa: E501
         output = self.run_cli("search", query)
         rows = (
             (
@@ -224,7 +224,7 @@ class Zef(PackageManager):
         ===> Uninstalled from inst#/opt/homebrew/Cellar/rakudo-star/2026.07/share/perl6/site
         JSON::Fast::Hyper:ver<0.0.11>:auth<zef:lizmat>
         ```
-        """
+        """  # noqa: E501
         return self.run_cli("uninstall", package_id)
 
     def sync(self) -> None:

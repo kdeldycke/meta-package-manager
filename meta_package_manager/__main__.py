@@ -43,8 +43,9 @@ def _stream_speaks_utf8(stream: TextIO) -> bool:
 
 
 def force_unicode_output() -> None:
-    """Make the standard streams carry the glyphs mpm prints, or degrade instead
-    of raising.
+    """Make the standard streams carry the glyphs mpm prints, or degrade.
+
+    A stream that cannot encode a glyph degrades instead of raising.
 
     Windows resolves a *redirected* stream's encoding from the legacy code page,
     `cp1252` on a Western install, and that page has no `✓` (`U+2713`), no `✘`,
@@ -106,12 +107,12 @@ def main():
     # dynamic --<id> selectors enumerate them as first-class flags alongside the
     # built-ins. Best-effort and local-only; the authoritative registration happens
     # during config loading (config.register_config_managers_from_context).
-    from meta_package_manager.config import register_eager_config_managers
-    from meta_package_manager.pool import pool
+    from meta_package_manager.config import register_eager_config_managers  # noqa: PLC0415
+    from meta_package_manager.pool import pool  # noqa: PLC0415
 
     register_eager_config_managers(pool)
 
-    from meta_package_manager.cli import mpm
+    from meta_package_manager.cli import mpm  # noqa: PLC0415
 
     mpm(prog_name=mpm.name)
 

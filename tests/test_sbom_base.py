@@ -31,12 +31,12 @@ from meta_package_manager.summary import sbom_summary
 
 
 def test_writer_unavailable_reason_separates_absent_from_outdated():
-    """The two failure modes need opposite remedies, so they cannot share a
-    message. A distribution shipping a writer library below the floor already
-    satisfies `[sbom-offline]`, so telling its user to install that extra
-    strands them: they install it again, nothing changes, and the only clue
-    left is a symbol name belonging to no package they can name. NixOS carries
-    exactly such a `cyclonedx-python-lib`.
+    """The two failure modes need opposite remedies, so they cannot share a message.
+
+    A distribution shipping a writer library below the floor already satisfies
+    `[sbom-offline]`, so telling its user to install that extra strands them: they
+    install it again, nothing changes, and the only clue left is a symbol name belonging
+    to no package they can name. NixOS carries exactly such a `cyclonedx-python-lib`.
     """
     absent = writer_unavailable_reason(
         "no-such-distribution", ImportError("No module named 'nope'")

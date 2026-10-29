@@ -134,8 +134,8 @@ class CycloneDX(SBOM):
         doc_url = "https://mpm.run"
         self.document = Bom()
         # `(manager_id, package_id) -> Component` lookup, used by
-        # {meth}`~meta_package_manager.sbom.base.SBOM.finalize` to wire declared-dependency edges to their
-        # already-emitted Component instances.
+        # {meth}`~meta_package_manager.sbom.base.SBOM.finalize` to wire
+        # declared-dependency edges to their already-emitted Component instances.
         self.component_index = {}
         # `(source_component, manager_id, target_id)` queue: dependency
         # edges deferred because the target may not have been added yet.
@@ -230,8 +230,9 @@ class CycloneDX(SBOM):
     def _supplier_for(
         manager: PackageManager, metadata: PackageMetadata
     ) -> OrganizationalEntity:
-        """Map metadata's supplier (or the manager itself) to a CycloneDX
-        `OrganizationalEntity`.
+        """Map the supplier to a CycloneDX `OrganizationalEntity`.
+
+        The supplier of the metadata, or else the manager itself.
         """
         if metadata.supplier:
             urls = [XsUri(metadata.supplier.url)] if metadata.supplier.url else None
@@ -240,8 +241,9 @@ class CycloneDX(SBOM):
 
     @staticmethod
     def _hashes_for(metadata: PackageMetadata) -> list:
-        """Build CycloneDX `HashType` objects from the portable
-        `Checksum` list, dropping algorithms unsupported by 1.7.
+        """Build CycloneDX `HashType` objects from the portable `Checksum` list.
+
+        Algorithms that 1.7 does not support are dropped.
         """
         out = []
         for c in metadata.checksums:
@@ -301,8 +303,9 @@ class CycloneDX(SBOM):
 
     @staticmethod
     def _iter_spdx_identifiers(node) -> Iterator[str]:
-        """Walk a `license_expression` AST and yield each leaf SPDX
-        identifier as a string.
+        """Walk a `license_expression` AST and yield each leaf SPDX identifier.
+
+        Each identifier is a string.
 
         `parsed.symbols` on the top-level expression collapses a
         `LicenseWithExceptionSymbol` into a single symbol whose key is
@@ -577,13 +580,12 @@ class CycloneDX(SBOM):
 
         ```{note}
 
-        Unlike {meth}`meta_package_manager.sbom.spdx.SPDX.export`, the generated document is not
-        validated against its schema here. CycloneDX schema validation
-        relies on `cyclonedx-python-lib`'s `[validation]` extra, which
-        pulls in `jsonschema` and, transitively, `rfc3987-syntax`,
-        `lark`, and `lxml`. To keep that stack out of `mpm`'s runtime
-        dependencies, the validation runs in the test suite instead. See
-        `tests/test_cli_sbom.py`.
+        Unlike {meth}`meta_package_manager.sbom.spdx.SPDX.export`, the generated
+        document is not validated against its schema here. CycloneDX schema validation
+        relies on `cyclonedx-python-lib`'s `[validation]` extra, which pulls in
+        `jsonschema` and, transitively, `rfc3987-syntax`, `lark`, and `lxml`. To keep
+        that stack out of `mpm`'s runtime dependencies, the validation runs in the test
+        suite instead. See `tests/test_cli_sbom.py`.
         ```
         """
         if self.export_format == ExportFormat.JSON:

@@ -145,7 +145,7 @@ class WinGet(PackageManager):
     `--no-progress`:
         Disable progress bar rendering, keeping spinner characters out of the
         output `mpm` captures.
-    """
+    """  # noqa: E501
 
     version_regexes = (r"v(?P<version>\S+)",)
     """
@@ -270,7 +270,7 @@ class WinGet(PackageManager):
             yield name, package_id, version, upgrades
 
     def _parse_table(self, output: str) -> Iterator[Generator[str, None, None]]:
-        """Parse a table from the output of a winget command and returns a generator of cells."""
+        """Parse a table from the output of a winget command, as generators of cells."""
         # Extract table.
         table_start = "Name "
         if table_start not in output:
@@ -354,7 +354,7 @@ class WinGet(PackageManager):
 
         `--source winget` lists every installed package the `winget` catalog
         matches, whatever installed it, and leaves out the others.
-        """
+        """  # noqa: E501
         output = self.run_cli("list", "--source", "winget", "--details")
 
         for name, package_id, installed_version, _ in self._parse_details(output):
@@ -389,7 +389,7 @@ class WinGet(PackageManager):
         Returns every package with an upgrade from the `winget` source, whatever
         installed it: `winget update --all` upgrades all of them. A package only
         `msstore` offers an upgrade for is left out.
-        """
+        """  # noqa: E501
         output = self.run_cli("list", "--upgrade-available", "--details")
 
         for name, package_id, installed_version, upgrades in self._parse_details(
@@ -477,7 +477,7 @@ class WinGet(PackageManager):
         --------------------------------------------
         Codium Alex313031.Codium 1.86.2.24053 winget
         ```
-        """
+        """  # noqa: E501
         results: list[Package] = []
 
         # Default search is extended to all metadata: id, name, moniker and tag.
@@ -521,7 +521,7 @@ class WinGet(PackageManager):
           ██████████████████████████████  100%
         Successfully installed
         ```
-        """
+        """  # noqa: E501
         args = ["install", "--id", package_id, "--accept-package-agreements"]
         if version:
             args += ["--version", version]
@@ -556,7 +556,7 @@ class WinGet(PackageManager):
 
         (...)
         ```
-        """
+        """  # noqa: E501
         return self.build_cli("update", "--all", "--accept-package-agreements")
 
     def upgrade_one_cli(
@@ -587,7 +587,7 @@ class WinGet(PackageManager):
         A newer version was found, but the install technology is different from the current version installed. Please uninstall the package and install the newer version.
         ```
         :::
-        """
+        """  # noqa: E501
         args = ["install", "--id", package_id, "--accept-package-agreements"]
         if version:
             args += ["--version", version]
@@ -604,7 +604,7 @@ class WinGet(PackageManager):
           ██████████████████████████████  100%
         Successfully uninstalled
         ```
-        """
+        """  # noqa: E501
         return self.run_cli("uninstall", "--id", package_id, "--source", "winget")
 
     def sync(self) -> None:
@@ -614,5 +614,5 @@ class WinGet(PackageManager):
 
         > winget source update --accept-source-agreements --disable-interactivity --no-progress
         ```
-        """
+        """  # noqa: E501
         self.run_cli("source", "update")

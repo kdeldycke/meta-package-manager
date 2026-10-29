@@ -266,7 +266,7 @@ class Scoop(PackageManager):
         Creating shim for 'hyperfine'.
         'hyperfine' (1.18.0) was installed successfully!
         ```
-        """
+        """  # noqa: E501
         return self.run_cli(
             "install", f"{package_id}@{version}" if version else package_id
         )

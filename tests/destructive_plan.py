@@ -453,10 +453,10 @@ def destructive_group(manager_id: str) -> str:
 SHORT_FAILURE_TIMEOUT = 10
 """Seconds to cap a destructive operation that is *expected* to fail.
 
-The managers in {data}`INSTALL_REMOVE_BLOCKED_WHEN` cannot complete a real install in the
-test environment, and those in {data}`UPGRADE_ALL_BLOCKED_WHEN` cannot complete a full
-upgrade. Most installs fail within a second (a permission error, a missing remote, an
-empty search), but a few (`scoop` and `sfsu` on Windows, `pwsh-gallery` on macOS)
+The managers in {data}`INSTALL_REMOVE_BLOCKED_WHEN` cannot complete a real install in
+the test environment, and those in {data}`UPGRADE_ALL_BLOCKED_WHEN` cannot complete a
+full upgrade. Most installs fail within a second (a permission error, a missing remote,
+an empty search), but a few (`scoop` and `sfsu` on Windows, `pwsh-gallery` on macOS)
 hang with no error until the state-change timeout would otherwise elapse, and a blocked
 upgrade always does. Capping their CLI calls keeps the doomed attempts cheap: long
 enough for the fast failures to surface, short enough that the genuine hangs do not
@@ -789,10 +789,11 @@ INSTALL_REMOVE_BLOCKED_WHEN: dict[str, bool | Callable[[], bool]] = {
     # pnpm add --global needs a PNPM_HOME (from `pnpm setup`) the runners do not set up.
     "pnpm": is_github_ci,
     # pwsh-gallery's PSResourceGet lookup is unreliable on the runners: Find-PSResource
-    # hangs on the macOS image and returns a case-mismatched name on Linux, so the install
-    # never resolves the package.
+    # hangs on the macOS image and returns a case-mismatched name on Linux, so the
+    # install never resolves the package.
     "pwsh-gallery": is_github_ci,
-    # scoop install hangs until the timeout on the GitHub Windows runners; sfsu wraps it.
+    # scoop install hangs until the timeout on the GitHub Windows runners; sfsu wraps
+    # it.
     "scoop": is_github_ci,
     "sfsu": is_github_ci,
     # mpm sudo-escalates snap (snapd rejects unprivileged state changes), so the
@@ -801,7 +802,8 @@ INSTALL_REMOVE_BLOCKED_WHEN: dict[str, bool | Callable[[], bool]] = {
     # round-trip exactly as a runner does.
     "snap": snap_sudo_unavailable,
     # steamcmd can only install titles owned by an authenticated account; the runners'
-    # anonymous session is not logged in, so the install fails. No environment satisfies it.
+    # anonymous session is not logged in, so the install fails. No environment
+    # satisfies it.
     "steamcmd": True,
 }
 """Managers that cannot complete a real install, mapped to the condition under which
@@ -814,20 +816,21 @@ weighed and dropped: every entry but the two constants is naturally phrased as "
 when X", so inverting would spell them all as negation lambdas to spare those two.
 
 Rather than skip these managers (which would also drop their dispatch coverage and any
-signal that they still fail the *expected* way), the destructive install/remove test drives
-each one's `install` anyway, caps the doomed CLI call with
-{data}`SHORT_FAILURE_TIMEOUT`, and asserts that mpm reports the stable failure: exit code
-`1` and a ``Could not install: {package}`` critical message. The follow-up `remove` is
-skipped, since the failed install left nothing to remove and the working managers already
-cover the removal path.
+signal that they still fail the *expected* way), the destructive install/remove test
+drives each one's `install` anyway, caps the doomed CLI call with
+{data}`SHORT_FAILURE_TIMEOUT`, and asserts that mpm reports the stable failure: exit
+code `1` and a ``Could not install: {package}`` critical message. The follow-up `remove`
+is skipped, since the failed install left nothing to remove and the working managers
+already cover the removal path.
 
 A condition is either a plain `True` for the managers no environment can install, or a
 zero-argument callable evaluated per host: `is_github_ci` for GitHub Actions only (a
 configured local box can still install), or a live probe like `gh_unauthenticated` or
-`rpm_distro_missing` when installability hinges on host state rather than platform. Prefer
-a probe: a platform test blocks every machine of that platform, including the ones where
-the round-trip would have worked. Resolve one through {func}`install_remove_blocked` rather than calling it
-directly, which is what keeps the constants from needing a `lambda` wrapper.
+`rpm_distro_missing` when installability hinges on host state rather than platform.
+Prefer a probe: a platform test blocks every machine of that platform, including the
+ones where the round-trip would have worked. Resolve one through
+{func}`install_remove_blocked` rather than calling it directly, which is what keeps the
+constants from needing a `lambda` wrapper.
 
 ```{note}
 

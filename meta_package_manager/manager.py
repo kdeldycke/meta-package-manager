@@ -36,7 +36,7 @@ import logging
 import re
 from collections.abc import Iterator
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from functools import cached_property, wraps
 from types import FunctionType, MappingProxyType
@@ -63,7 +63,7 @@ if TYPE_CHECKING:
     from .version import TokenizedString
 
 
-COOLDOWN_EXEMPT = datetime.min.replace(tzinfo=timezone.utc)
+COOLDOWN_EXEMPT = datetime.min.replace(tzinfo=UTC)
 """Sentinel a {meth}`PackageManager.release_date` probe returns for a package
 outside the cooldown gate's scope.
 
@@ -192,8 +192,9 @@ def _json_field(item: dict, selector: str) -> Any:
 
 @dataclass(frozen=True)
 class CooldownHold:
-    """A package the release-age cooldown holds back, as
-    {meth}`PackageManager.cooldown_hold` reports it.
+    """A package the release-age cooldown holds back.
+
+    As {meth}`PackageManager.cooldown_hold` reports it.
 
     Both timestamps are `None` for a release the probe could not date, which
     the gate holds fail-closed.
@@ -209,8 +210,7 @@ class CooldownHold:
 
     @property
     def reason(self) -> str:
-        """Why the package is held, as the clause closing a `Hold {package}:`
-        message."""
+        """Why the package is held, as the clause closing a `Hold {package}:` line."""
         if self.released is None:
             return "its latest release cannot be dated (fail-closed)"
         return (
@@ -290,8 +290,7 @@ class MetaPackageManager(type):
     """Custom metaclass used as a class factory for package managers."""
 
     def __init__(cls, name, bases, dct) -> None:
-        """Sets some class defaults, but only if they're not redefined in the final
-        manager class.
+        """Set class defaults that the final manager class does not redefine.
 
         Also normalize list of platform, by ungrouping groups, deduplicate entries and
         freeze them into a set of unique platforms.
@@ -355,9 +354,9 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     dependencies.
 
     Defaults to {attr}`ManagerScope.SYSTEM`, which covers every manager maintained
-    today: they install and query software machine-wide. Project-scoped managers (Poetry,
-    Bundler, Maven, ...) resolve dependencies confined to a working tree and are not
-    supported yet.
+    today: they install and query software machine-wide. Project-scoped managers
+    (Poetry, Bundler, Maven, ...) resolve dependencies confined to a working tree and
+    are not supported yet.
     """
 
     unmaintained: bool = False
@@ -578,8 +577,8 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     )
     """List of platforms supported by the manager.
 
-    Allows for a mishmash of platforms and groups of platforms. Will be normalized into a
-    `frozenset` of `Platform` instances at instantiation.
+    Allows for a mishmash of platforms and groups of platforms. Will be normalized into
+    a `frozenset` of `Platform` instances at instantiation.
     """
 
     requirement: str | None = None
@@ -737,14 +736,14 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     def brewfile_entry(
         self, package: Package
     ) -> tuple[str, dict[str, object] | None] | None:
-        """Return `(entry_name, entry_options)` for a Brewfile line, or `None`
-        to skip the package.
+        """Return `(entry_name, entry_options)` for a Brewfile line.
 
-        Default: emit {attr}`meta_package_manager.package.Package.id` as the entry name with no options.
-        Override on managers whose Brewfile DSL counterpart expects a different
-        shape: `mas` uses the app name with `id: ADAM_ID`, `flatpak` adds
-        `with: ["remote"]`. Only called when {attr}`brewfile_entry_type` is
-        set.
+        Or `None` to skip the package.
+
+        Default: emit {attr}`meta_package_manager.package.Package.id` as the entry name
+        with no options. Override on managers whose Brewfile DSL counterpart expects a
+        different shape: `mas` uses the app name with `id: ADAM_ID`, `flatpak` adds
+        `with: ["remote"]`. Only called when {attr}`brewfile_entry_type` is set.
         """
         return package.id, None
 
@@ -799,8 +798,9 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
 
     @property
     def unavailable_reason(self) -> str | None:
-        """Short, human-readable explanation of why {attr}`available` is
-        `False`, or `None` if the manager is available.
+        """Why {attr}`available` is `False`, or `None` if the manager is available.
+
+        A short, human-readable explanation.
 
         Returned in priority order so the most actionable cause is reported
         first: platform support, then CLI lookup, then executable bit, then
@@ -852,8 +852,9 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         raise NotImplementedError
 
     def installed_or_empty(self) -> tuple[Package, ...]:
-        """Materialized {attr}`~meta_package_manager.manager.PackageManager.installed`,
-        or an empty tuple on CLI failure.
+        """Materialized installed packages, or an empty tuple on CLI failure.
+
+        See {attr}`~meta_package_manager.manager.PackageManager.installed`.
 
         Best-effort inventory snapshot for the `installed`, `dump` and
         `sbom` subcommands, and for the {attr}`installed_ids` lookup behind
@@ -895,8 +896,9 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
 
     @cached_property
     def installed_version_map(self) -> dict[str, TokenizedString | str | None]:
-        """Installed versions keyed by package ID, materialized once from
-        {meth}`~meta_package_manager.manager.PackageManager.installed`.
+        """Installed versions keyed by package ID, materialized once.
+
+        Read from {meth}`~meta_package_manager.manager.PackageManager.installed`.
 
         Convenience for `outdated` parsers that report each package's latest version
         but not its currently-installed one, and so must look the latter up by ID
@@ -960,15 +962,15 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         self,
         packages: Iterable[Package],
     ) -> Iterator[tuple[Package, PackageMetadata]]:
-        """Yield `(package, metadata)` pairs enriched with whatever rich
-        per-package data this manager can surface.
+        """Yield `(package, metadata)` pairs, enriched where possible.
 
-        Called by `mpm sbom` in `--bundled` mode to populate licenses,
-        checksums, download URLs, supplier/originator, and the declared
-        dependency graph. The base implementation yields
-        {data}`meta_package_manager.package.EMPTY_METADATA` for each package and stays compatible
-        with managers that do not (yet) expose richer metadata: their SBOM
-        entries stay at the minimal `Package` level, matching the
+        The metadata carries whatever rich per-package data this manager can surface.
+
+        Called by `mpm sbom` in `--bundled` mode to populate licenses, checksums,
+        download URLs, supplier/originator, and the declared dependency graph. The base
+        implementation yields {data}`meta_package_manager.package.EMPTY_METADATA` for
+        each package and stays compatible with managers that do not (yet) expose richer
+        metadata: their SBOM entries stay at the minimal `Package` level, matching the
         historical and `--minimal` modes.
 
         Manager subclasses override this with their native query path:
@@ -980,11 +982,11 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
           (pip's `.dist-info` directories, Homebrew's per-formula
           `sbom.spdx.json`, dpkg's `.md5sums`).
 
-        The yielded pairs do not need to preserve the input order; the SBOM
-        renderer matches by `Package` identity. Implementations are
-        expected to swallow per-package extraction errors and yield
-        {data}`meta_package_manager.package.EMPTY_METADATA` for the affected packages rather than
-        failing the whole scan: a single misbehaving formula must not abort
+        The yielded pairs do not need to preserve the input order; the SBOM renderer
+        matches by `Package` identity. Implementations are expected to swallow
+        per-package extraction errors and yield
+        {data}`meta_package_manager.package.EMPTY_METADATA` for the affected packages
+        rather than failing the whole scan: a single misbehaving formula must not abort
         an enrichment pass spanning hundreds of packages.
 
         ```{todo}
@@ -1014,8 +1016,9 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
 
     @property
     def refiltered_outdated(self) -> Iterator[Package]:
-        """Wraps {meth}`~meta_package_manager.manager.PackageManager.outdated` with a
-        version-equality filter.
+        """Wrap the `outdated` property with a version-equality filter.
+
+        See {meth}`~meta_package_manager.manager.PackageManager.outdated`.
 
         Some package managers report packages as outdated when the version
         strings differ at the character level but are numerically equal after
@@ -1166,8 +1169,8 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         # The contract wants an aware datetime; absorb a naive one as UTC
         # rather than crash the comparison below on a misimplemented probe.
         if published.tzinfo is None:
-            published = published.replace(tzinfo=timezone.utc)
-        cutoff = datetime.now(tz=timezone.utc) - self.cooldown
+            published = published.replace(tzinfo=UTC)
+        cutoff = datetime.now(tz=UTC) - self.cooldown
         if published <= cutoff:
             return None
         return CooldownHold(released=published, eligible=published + self.cooldown)
@@ -1207,8 +1210,7 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         extended: bool,
         exact: bool,
     ) -> Iterator[Package]:
-        """Returns search results with extra manual refiltering to refine gross
-        matchings.
+        """Return search results, refiltered to refine gross matches.
 
         Some package managers returns unbounded results, and/or don't support fine
         search criterions. In which case we use this method to manually refilters

@@ -38,8 +38,10 @@ Use prescribed default version(s)? (Y/n):"""
 
 
 def test_outdated_reads_the_declined_upgrade(monkeypatch):
-    """Each candidate gives its first local version and the default it can
-    move to, read from an upgrade that the piped `n` declines."""
+    """Each candidate gives its first local version and its default.
+
+    The default it can move to, read from an upgrade that the piped `n` declines.
+    """
     manager = SDKMAN()
     monkeypatch.setattr(
         manager,

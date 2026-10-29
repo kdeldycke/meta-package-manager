@@ -315,8 +315,9 @@ class ManagerPool:
 
     @cached_property
     def overridden_fields(self) -> dict[str, set[str]]:
-        """Per-manager attribute names that the user explicitly overrode via
-        `[mpm.overrides.<id>]`.
+        """Per-manager attribute names the user overrode.
+
+        Via `[mpm.overrides.<id>]`.
 
         Populated by {func}`meta_package_manager.config.apply_manager_overrides`.
         Read by `_select_managers` to skip the global `--<flag>` defaults
@@ -442,8 +443,10 @@ class ManagerPool:
         implements_operation: Operations | None = None,
         **extra_options: bool | int | timedelta | CooldownPolicy | None,
     ) -> Iterator[PackageManager]:
-        """Utility method to extract a subset of the manager pool based on selection
-        list (`keep` parameter) and exclusion list (`drop` parameter) criterion.
+        """Extract a subset of the manager pool.
+
+        The `keep` parameter is the selection list, and the `drop` parameter the
+        exclusion list.
 
         By default, only the managers supported by the current platform are selected.
         Unless `keep_unsupported` is set to `True`, in which case all managers
@@ -510,8 +513,9 @@ class ManagerPool:
         for manager_id in selected_ids:
             manager = self.register[manager_id]
             if implements_operation and not implements(manager, implements_operation):
-                # An unsupported operation is narration, not a problem: keep it at INFO
-                # (matching the not-available skip below), hidden by the WARNING default.
+                # An unsupported operation is narration, not a problem: keep it at
+                # INFO (matching the not-available skip below), hidden by the WARNING
+                # default.
                 logging.log(
                     logging.INFO if explicit_selection else logging.DEBUG,
                     f"Does not implement {implements_operation}.",

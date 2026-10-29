@@ -136,12 +136,12 @@ def sbom(ctx, spdx, export_format, overwrite, bundled, query, exact, export_path
     # Deferred on purpose: these two modules carry the heavy writer libraries, and
     # importing them at module level would tax every other subcommand. See the
     # module docstring for the measurement and the rule it deliberately breaks.
-    from .sbom.cyclonedx import (
+    from .sbom.cyclonedx import (  # noqa: PLC0415
         CycloneDX,
         cyclonedx_support,
         cyclonedx_unavailable_reason,
     )
-    from .sbom.spdx import SPDX, spdx_support, spdx_unavailable_reason
+    from .sbom.spdx import SPDX, spdx_support, spdx_unavailable_reason  # noqa: PLC0415
 
     standard = "SPDX" if spdx else "CycloneDX"
 
@@ -255,8 +255,12 @@ def _scan_and_attach_vulnerabilities(sbom: SBOM) -> None:
     aborting the export. The heavy network imports are deferred to here
     so the offline path never pays for them.
     """
-    from .sbom._network import NetworkClient, NetworkError, network_support
-    from .sbom.vulnerabilities import scan_vulnerabilities
+    from .sbom._network import (  # noqa: PLC0415
+        NetworkClient,
+        NetworkError,
+        network_support,
+    )
+    from .sbom.vulnerabilities import scan_vulnerabilities  # noqa: PLC0415
 
     if not network_support:
         logging.warning(

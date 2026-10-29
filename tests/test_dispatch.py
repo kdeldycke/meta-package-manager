@@ -752,8 +752,9 @@ def test_lock_family_lane_shares_a_run_cache():
 def test_internal_escalator_runs_in_a_sequential_tail(
     monkeypatch, operation, escalates_in, warm, resets, held_back
 ):
-    """A manager escalating internally is held back and run once the concurrent batch
-    is done, so its hidden `sudo` prompt lands on a terminal nothing else writes to.
+    """A manager escalating internally runs once the concurrent batch is done.
+
+    So its hidden `sudo` prompt lands on a terminal nothing else writes to.
 
     The tail runs at `jobs=1`, which `run_lanes` executes inline, so the held-back
     manager is the one that ran on the calling thread. An operation in which the
@@ -806,8 +807,10 @@ def test_internal_escalator_runs_in_a_sequential_tail(
 
 
 def test_sequential_tail_reports_one_batch_wide_finisher(monkeypatch):
-    """Two phases, one finisher: the tail closes the batch with the whole run's
-    tally, so a held-back manager never reads as a second run of its own."""
+    """Two phases, one finisher: the tail closes the batch with the whole tally.
+
+    So a held-back manager never reads as a second run of its own.
+    """
     assert not _SUDO_CACHE_WARM.is_set()
     monkeypatch.setattr(meta_package_manager.dispatch, "SPINNER_DELAY", 0.0)
     tty = TTYStringIO()

@@ -156,7 +156,7 @@ class Guix(PackageManager):
         glib           	2.83.3	bin	/gnu/store/06w4p65r8hli2qnsdsnp0l8r1zghz5qr-glib-2.83.3-bin
         glib-networking	2.78.1	out	/gnu/store/n4nicicydz8d24m2qi3ddwlcxlr534qn-glib-networking-2.78.1
         ```
-        """
+        """  # noqa: E501
         output = self.run_cli("package", "--list-installed")
 
         for line in output.splitlines():

@@ -116,8 +116,9 @@ A `Requires-Dist` entry whose marker compares `extra`, like
 
 
 class Pip(PackageManager):
-    """The pip package installer for Python, driven as a module (`python -m pip`)
-    rather than through the `pip` executable.
+    """The pip package installer for Python, driven as `python -m pip`.
+
+    Not through the `pip` executable.
 
     Calling the module through the interpreter lets `pip` upgrade itself, an
     advantage on Windows in particular: see
@@ -164,7 +165,8 @@ class Pip(PackageManager):
     operation_notes: ClassVar = {
         "search": (
             "PyPI disabled its server-side search API in 2020 "
-            "([pypa/pip#5216](https://github.com/pypa/pip/issues/5216#issuecomment-744605466)), "
+            "([pypa/pip#5216]"
+            "(https://github.com/pypa/pip/issues/5216#issuecomment-744605466)), "
             "so `pip search` no longer works."
         ),
     }
@@ -576,8 +578,9 @@ class Pip(PackageManager):
     def _distribution_metadata(
         dist: importlib.metadata.Distribution,
     ) -> PackageMetadata:
-        """Translate an `importlib.metadata.Distribution` into
-        {class}`~meta_package_manager.package.PackageMetadata`.
+        """Translate an `importlib.metadata.Distribution` into package metadata.
+
+        The result is a {class}`~meta_package_manager.package.PackageMetadata`.
         """
         # `Distribution.metadata` returns an `email.message.Message` at
         # runtime, but the typeshed protocol omits `.get()` on the older

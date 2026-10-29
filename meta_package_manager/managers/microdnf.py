@@ -219,7 +219,7 @@ class MicroDNF(PackageManager):
         kernel-modules-6.12.0-211.47.1.el10_2.aarch64
         kernel-modules-core-6.12.0-211.47.1.el10_2.aarch64
         ```
-        """
+        """  # noqa: E501
         output = self.run_cli(
             "--assumeno", "upgrade", must_succeed=True, auto_extra_args=True
         )

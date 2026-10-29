@@ -61,7 +61,11 @@ class Homebrew(PackageManager):
     logo = "homebrew"
 
     platforms = LINUX_LIKE, MACOS
-    """Homebrew core is now compatible with [Linux and Windows Subsystem for Linux (WSL) 2](https://docs.brew.sh/Homebrew-on-Linux)."""
+    """Homebrew core is now compatible with Linux and WSL 2.
+
+    See [Homebrew on Linux](https://docs.brew.sh/Homebrew-on-Linux), which also
+    covers the Windows Subsystem for Linux (WSL) 2.
+    """
 
     requirement = ">=6.0.0"
     """Vanilla `brew` and `cask` CLIs now shares the same version.
@@ -311,8 +315,9 @@ class Homebrew(PackageManager):
                 yield package, EMPTY_METADATA
 
     def _formula_metadata(self, formula: dict) -> PackageMetadata:
-        """Map one entry from `brew info --json=v2`'s `formulae` array
-        into the portable {class}`~meta_package_manager.package.PackageMetadata`.
+        """Map one `formulae` entry of `brew info --json=v2` to package metadata.
+
+        The result is a portable {class}`~meta_package_manager.package.PackageMetadata`.
         """
         installed_entries = formula.get("installed") or ()
         installed = installed_entries[-1] if installed_entries else {}
@@ -1004,12 +1009,13 @@ class Brew(Homebrew):
     for macOS applications; a forced `--formula` selector keeps every call on
     the formula side. Homebrew core runs on macOS and on [Linux and WSL](https://docs.brew.sh/Homebrew-on-Linux).
 
-    mpm drives `brew` non-interactively and pins its environment: analytics and
-    setup hints are silenced, and `HOMEBREW_NO_AUTO_UPDATE` keeps `brew` from
-    folding a metadata refresh into every command, since mpm runs that as a
-    separate `sync` ([asked for since mpm's early days](https://github.com/kdeldycke/meta-package-manager/issues/36)). Outdated
-    packages come from `--json=v2`; the installed and search listings are
-    parsed from their plain-text columns.
+    mpm drives `brew` non-interactively and pins its environment: analytics and setup
+    hints are silenced, and `HOMEBREW_NO_AUTO_UPDATE` keeps `brew` from folding a
+    metadata refresh into every command, since mpm runs that as a separate `sync`
+    ([asked for since mpm's early
+    days](https://github.com/kdeldycke/meta-package-manager/issues/36)). Outdated
+    packages come from `--json=v2`; the installed and search listings are parsed from
+    their plain-text columns.
 
     ```{note}
 

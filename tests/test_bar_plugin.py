@@ -94,9 +94,11 @@ def test_check_mpm_missing_binary():
 
 
 def test_ranked_mpm_orders_candidates(monkeypatch):
-    """Candidates rank on runnability, freshness and version, whatever their other
-    fields hold: two failed probes carry exceptions, which do not compare, and a
-    runnable probe with no version sits beside one with a version."""
+    """Candidates rank on runnability, freshness and version only.
+
+    Whatever their other fields hold: two failed probes carry exceptions, which do not
+    compare, and a runnable probe with no version sits beside one with a version.
+    """
     candidates = {
         ("a",): bar_plugin.Candidate(("a",), error=FileNotFoundError("a")),
         ("b",): bar_plugin.Candidate(("b",), error=FileNotFoundError("b")),
@@ -138,8 +140,11 @@ def test_check_mpm_keeps_the_release_suffix():
 
 
 def test_search_mpm_stops_at_home(monkeypatch, tmp_path):
-    """The venv walk stops at Home, so a lockfile sitting in a shared parent
-    above it is never mistaken for the plugin's own project."""
+    """The venv walk stops at Home.
+
+    So a lockfile sitting in a shared parent above it is never mistaken for the plugin's
+    own project.
+    """
     home = tmp_path / "home"
     project = home / "project"
     project.mkdir(parents=True)
@@ -327,9 +332,11 @@ def test_print_honors_a_color_opt_out_off_the_main_thread(
 def test_renderer_version_diff_colors_by_appearance(
     monkeypatch, align_columns, os_appearance, present, absent
 ):
-    """Package lines carry the appearance-appropriate version-diff colors with
-    `ansi=true`; the prefix gray is constant and non-package lines stay free of
-    escape codes."""
+    """Package lines carry the version-diff colors with `ansi=true`.
+
+    The colors match the appearance. The prefix gray is constant and non-package lines
+    stay free of escape codes.
+    """
     _pin_plugin_env(monkeypatch, align_columns, os_appearance=os_appearance)
     output = BarPluginRenderer().render(_outdated_fixture())
 
@@ -418,9 +425,11 @@ def test_elide_versions(old, new, expected):
 
 
 def test_elide_versions_keeps_the_diff_boundary():
-    """The `…` lands where the gray prefix hands over to the colored suffix, so
-    the elision and {func}`~meta_package_manager.version.diff_versions` agree
-    on one split point."""
+    """The `…` lands where the gray prefix hands over to the colored suffix.
+
+    So the elision and {func}`~meta_package_manager.version.diff_versions` agree on one
+    split point.
+    """
     old, new = elide_versions("1.0.0+build.20260101", "1.0.0+build.20260102", 16)
     assert (old, new) == ("1.0.0+\u2026.20260101", "1.0.0+\u2026.20260102")
     # The whole diverging token survives on both sides, so the eye lands on the
@@ -431,8 +440,10 @@ def test_elide_versions_keeps_the_diff_boundary():
 
 @pytest.mark.parametrize("swiftbar", (True, False))
 def test_renderer_caps_version_cells(monkeypatch, swiftbar):
-    """An over-long version is elided in the menu line, and SwiftBar alone gets
-    the tooltip holding what was dropped."""
+    """An over-long version is elided in the menu line.
+
+    SwiftBar alone gets the tooltip holding what was dropped.
+    """
     _pin_plugin_env(monkeypatch, align_columns=True)
     if swiftbar:
         monkeypatch.setenv("SWIFTBAR", "1")
@@ -471,9 +482,11 @@ def test_renderer_caps_version_cells(monkeypatch, swiftbar):
     (("0", False), ("1", False), ("24", True), ("not-a-number", True)),
 )
 def test_renderer_version_cap_is_configurable(monkeypatch, value, capped):
-    """`VAR_MAX_VERSION_WIDTH` overrides the cap; a width leaving no room for
-    the ellipsis turns it off, and a value that is not a number falls back to
-    the default."""
+    """`VAR_MAX_VERSION_WIDTH` overrides the cap.
+
+    A width leaving no room for the ellipsis turns it off, and a value that is not a
+    number falls back to the default.
+    """
     _pin_plugin_env(monkeypatch, align_columns=True)
     monkeypatch.setenv("VAR_MAX_VERSION_WIDTH", value)
     fixture = _outdated_fixture()
@@ -520,8 +533,10 @@ def test_renderer_elides_long_payload_versions(monkeypatch):
 
 
 def test_renderer_sanitizes_error_lines(monkeypatch):
-    """ANSI codes captured from a manager's output are stripped from error
-    lines, which are marked `ansi=false` and would render them as raw text."""
+    """ANSI codes from a manager's output are stripped from error lines.
+
+    Error lines are marked `ansi=false`, which would render the codes as raw text.
+    """
     _pin_plugin_env(monkeypatch, align_columns=True)
     output = BarPluginRenderer().render(
         _outdated_fixture(errors=["\x1b[31mboom\x1b[0m went wrong"]),
@@ -556,8 +571,11 @@ def test_renderer_sanitizes_error_lines(monkeypatch):
 def test_renderer_section_header(
     monkeypatch, is_swiftbar, group_by_manager, align_columns, outdated, expected
 ):
-    """The section header carries an actionable count badge and an accordion
-    toggle on SwiftBar, and the labelled count everywhere else."""
+    """The section header carries a count badge and a toggle on SwiftBar.
+
+    The badge is actionable and the toggle an accordion. Everywhere else, the header
+    carries the labelled count.
+    """
     _pin_plugin_env(monkeypatch, align_columns=align_columns)
     monkeypatch.setenv("VAR_GROUP_BY_MANAGER", str(group_by_manager))
     if is_swiftbar:
@@ -582,8 +600,10 @@ def test_renderer_section_header(
     ),
 )
 def test_renderer_hides_when_up_to_date(monkeypatch, hide, errors, renders):
-    """An empty rendering is what makes the host drop the menu bar icon, so it
-    is produced only when asked for and only when there is nothing to say."""
+    """An empty rendering is produced only when asked and with nothing to say.
+
+    An empty rendering is what makes the host drop the menu bar icon.
+    """
     _pin_plugin_env(monkeypatch, align_columns=True)
     monkeypatch.setenv("VAR_ALWAYS_VISIBLE", str(not hide))
 
@@ -608,8 +628,10 @@ def test_renderer_hides_when_up_to_date(monkeypatch, hide, errors, renders):
     ),
 )
 def test_plugin_empty_mpm_output(monkeypatch, capsys, hide, reports_error):
-    """An `mpm` producing nothing is a failure to report, unless the user asked
-    for the icon to vanish while everything is up to date."""
+    """An `mpm` producing nothing is a failure to report.
+
+    Unless the user asked for the icon to vanish while everything is up to date.
+    """
     monkeypatch.delenv("SWIFTBAR", raising=False)
     monkeypatch.setenv("VAR_ALWAYS_VISIBLE", str(not hide))
     monkeypatch.setattr(
@@ -646,8 +668,10 @@ def test_plugin_empty_mpm_output(monkeypatch, capsys, hide, reports_error):
 def test_plugin_failure_reads_the_exit_code(
     monkeypatch, capsys, returncode, stderr, reports_error
 ):
-    """A refresh fails on the exit code of `mpm`, whatever it wrote to
-    `<stderr>`: a log line never hides the package list."""
+    """A refresh fails on the exit code of `mpm`, whatever it wrote to `<stderr>`.
+
+    A log line never hides the package list.
+    """
     monkeypatch.delenv("SWIFTBAR", raising=False)
     monkeypatch.setenv("VAR_ALWAYS_VISIBLE", "true")
     listing = "\U0001f4e6✓ | dropdown=false"
@@ -672,9 +696,11 @@ def test_plugin_failure_reads_the_exit_code(
 
 
 def test_plugin_options_reach_every_call(monkeypatch):
-    """`VAR_MPM_OPTIONS` lands after the plugin's own options and before the
-    subcommand on the sync and outdated calls, keeps its case, and never
-    reaches the version probe."""
+    """`VAR_MPM_OPTIONS` lands between the plugin options and the subcommand.
+
+    On the sync and outdated calls. It keeps its case, and never reaches the version
+    probe.
+    """
     _pin_plugin_env(monkeypatch, align_columns=True)
     monkeypatch.setenv("VAR_MPM_OPTIONS", "--verbosity INFO --no-cpan")
     calls: list[tuple[str, ...]] = []
@@ -719,9 +745,11 @@ def test_plugin_options_reach_every_call(monkeypatch):
     ],
 )
 def test_plugin_shell_env_follows_the_mpm_version(monkeypatch, version, passes):
-    """`--shell-env` reaches the sync and outdated calls of an `mpm` that accepts
-    it, right after the command and ahead of `VAR_MPM_OPTIONS`, and never reaches
-    an older one."""
+    """`--shell-env` reaches the sync and outdated calls of an `mpm` that has it.
+
+    It goes right after the command and ahead of `VAR_MPM_OPTIONS`, and never reaches an
+    older one.
+    """
     _pin_plugin_env(monkeypatch, align_columns=True)
     monkeypatch.setenv("VAR_MPM_OPTIONS", "--no-shell-env")
     calls: list[tuple[str, ...]] = []
@@ -748,16 +776,20 @@ def test_plugin_shell_env_follows_the_mpm_version(monkeypatch, version, passes):
 
 
 def test_renderer_actions_carry_the_options(monkeypatch):
-    """The upgrade commands the menu embeds carry the same options, read from
-    the environment the `outdated` call inherits."""
+    """The embedded upgrade commands carry the same options.
+
+    Read from the environment the `outdated` call inherits.
+    """
     _pin_plugin_env(monkeypatch, align_columns=True)
     monkeypatch.setenv("VAR_MPM_OPTIONS", "--dry-run")
     assert BarPluginRenderer().mpm_cli[-1] == "--dry-run"
 
 
 def test_renderer_ties_each_upgrade_to_its_manager(monkeypatch):
-    """A package's upgrade command names it with a pURL of its section's manager, so
-    `mpm` upgrades it without first looking for it in the installed packages."""
+    """An upgrade command names its package with a pURL of the section manager.
+
+    So `mpm` upgrades it without first looking for it in the installed packages.
+    """
     _pin_plugin_env(monkeypatch, align_columns=True)
     data = BarPluginRenderer().add_upgrade_cli({
         "npm": {"packages": [{"id": "@babel/core"}]},
@@ -771,8 +803,10 @@ def test_renderer_ties_each_upgrade_to_its_manager(monkeypatch):
 
 
 def test_plugin_version_matches_the_package():
-    """The `<xbar.version>` header is kept in lockstep with the package by
-    bump-my-version, like the GNOME extension's `version-name`."""
+    """The `<xbar.version>` header follows the package version.
+
+    bump-my-version keeps it in lockstep, like the GNOME extension's `version-name`.
+    """
     assert bar_plugin.MPMPlugin().plugin_version == __version__
 
 
@@ -945,9 +979,10 @@ shell_python_args = pytest.mark.parametrize(
 def _subcmd_args(
     invoke_args: tuple[str, ...] | None, *subcmd_args: str
 ) -> tuple[str, ...]:
-    """Cleanup args and eventually concatenate all `subcmd_args` items to a space
-    separated string if `invoke_args` is defined and its last argument is equal to
-    `-c`."""
+    """Clean up args, and join `subcmd_args` into a string after a `-c`.
+
+    The join happens if `invoke_args` is defined and its last argument is `-c`.
+    """
     raw_args: list[str] = []
     if invoke_args:
         raw_args.extend(invoke_args)
@@ -1141,8 +1176,7 @@ class TestBarPlugin:
 
     @shell_python_args
     def test_python_shell_invocation(self, shell_args, python_args):
-        """Test any Python shell invocation is properly configured and all are
-        compatible with plugin requirements."""
+        """Every Python shell invocation is configured and fits the plugin."""
         process = subprocess.run(
             _subcmd_args(shell_args, *python_args, "--version"),
             capture_output=True,

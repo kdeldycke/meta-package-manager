@@ -32,9 +32,9 @@ if TYPE_CHECKING:
 
 
 class ASDF(PackageManager):
-    """asdf manages parallel versions of multiple developer tools (Node.js,
-    Ruby, Python, Erlang, ...) through a plugin ecosystem, exposing all of
-    them behind a single CLI.
+    """asdf manages parallel versions of developer tools through plugins.
+
+    Node.js, Ruby, Python, Erlang and others sit behind a single CLI.
 
     mpm targets the `0.16.0` Go rewrite and later: it calls the space-separated
     subcommands (`asdf list all`, `asdf plugin add`) that replaced the
@@ -108,8 +108,7 @@ class ASDF(PackageManager):
     )
 
     def _parse_list(self) -> Iterator[tuple[str, str, bool]]:
-        """Parse `asdf list` output into `(plugin, version, is_current)`
-        tuples.
+        """Parse `asdf list` output into `(plugin, version, is_current)` tuples.
 
         Non-indented lines are plugin headers. Lines that start with two
         spaces are installed-but-not-current versions; lines that start

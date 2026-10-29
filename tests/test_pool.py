@@ -52,8 +52,7 @@ from .conftest import (
 
 
 def test_manager_definition_inventory():
-    """Check all classes implementing a package manager are accounted for in the
-    pool."""
+    """Check every class implementing a package manager is in the pool."""
     found_classes = set()
 
     # Search for manager definitions in the managers subfolder.
@@ -133,8 +132,9 @@ def test_lock_families_nest_in_label_groups():
 
 
 def test_delegating_managers_share_their_target_lock():
-    """A manager delegating an operation to another's CLI runs that manager's own
-    binary against that manager's own state, so the two must serialize.
+    """A manager delegating to another's CLI serializes with it.
+
+    It runs that manager's own binary against that manager's own state.
 
     The delegation is declared in the class body
     ({class}`~meta_package_manager.capabilities.Delegate`), which makes this derivable
@@ -157,8 +157,9 @@ def test_delegating_managers_share_their_target_lock():
 
 
 def test_pacman_subclasses_share_the_pacman_lock():
-    """Every manager inheriting from `Pacman` drives pacman's own database, so it
-    must serialize with the rest of that family.
+    """Every manager inheriting from `Pacman` serializes with that family.
+
+    Each drives pacman's own database.
 
     `dkp-pacman` is the sole exemption: devkitPro ships it to sit beside a
     distribution's `pacman` with its own repositories and database, so it contends
@@ -374,8 +375,7 @@ selection_cases = {
     ),
 )
 def test_select_managers(kwargs, expected):
-    """We use tuple everywhere so we can check that select_managers() conserve the
-    original order."""
+    """Tuples everywhere check that `select_managers()` keeps the order."""
     if callable(expected):
         # Availability-dependent case: see the comment atop selection_cases.
         expected = expected()
@@ -391,12 +391,12 @@ def test_select_managers_allow_empty_lets_an_empty_selection_through():
 
 
 def test_select_managers_timeout_stamping():
-    """The user's `--timeout` lands on every selected manager even when
-    unavailable ones are kept (`mpm managers`), whose version probes fire
-    lazily at rendering time, after selection: an unstamped instance would fall
-    back to the read-only default and let a wedged binary hold each table row
-    for 120 seconds. A per-manager `[mpm.overrides.<id>]` override keeps
-    precedence over the global option.
+    """The user's `--timeout` lands on every selected manager.
+
+    Even when unavailable ones are kept (`mpm managers`), whose version probes fire
+    lazily at rendering time, after selection: an unstamped instance would fall back to
+    the read-only default and let a wedged binary hold each table row for 120 seconds. A
+    per-manager `[mpm.overrides.<id>]` override keeps precedence over the global option.
     """
     originals = {mid: pool[mid].timeout for mid in ("gem", "uv")}
     try:
@@ -423,10 +423,12 @@ def test_select_managers_timeout_stamping():
 
 
 def test_select_managers_cooldown_policy_keeps_precedence():
-    """A per-manager `cooldown_policy` override pins that manager's enforcement
-    posture, so the global policy resolved from `--cooldown` must not clobber
-    it: `[mpm.overrides.<id>] cooldown_policy = "best-effort"` keeps running
-    that one manager unguarded while the rest stay fail-closed.
+    """A per-manager `cooldown_policy` override survives the global policy.
+
+    The override pins that manager's enforcement posture, so the global policy resolved
+    from `--cooldown` must not clobber it: `[mpm.overrides.<id>] cooldown_policy =
+    "best-effort"` keeps running that one manager unguarded while the rest stay
+    fail-closed.
     """
     manager = pool["gem"]
     original = manager.cooldown_policy
@@ -549,9 +551,11 @@ def test_merge_into_probe_lanes_partitions_the_whole_pool():
 
 
 def test_warm_availability_shares_one_cache_within_a_lane():
-    """A lane's managers probe against one shared `run_cache`, then get their own
-    value back: that dict is what collapses `brew` and `cask` both running
-    `brew --version` into a single subprocess."""
+    """A lane's managers probe against one shared `run_cache`.
+
+    Then each gets its own value back: that dict is what collapses `brew` and `cask`
+    both running `brew --version` into a single subprocess.
+    """
     accessed: list = []
     twins = [_RecordingManager(accessed, probe="shared-cli") for _ in range(2)]
     loner = _RecordingManager(accessed)

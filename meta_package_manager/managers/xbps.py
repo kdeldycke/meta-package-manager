@@ -127,7 +127,7 @@ class XBPS(PackageManager):
         ii acpid-2.0.34_4                     ACPI Daemon (acpid) With Netlink Support
         ii alsa-firmware-1.2.4_1              Advanced Linux Sound Architecture (ALSA) firmware
         ```
-        """
+        """  # noqa: E501
         output = self.run_cli(
             "--list-pkgs",
             override_cli_path=self.sibling_cli("xbps-query", same_dir=True),
@@ -147,8 +147,9 @@ class XBPS(PackageManager):
         """Fetch outdated packages.
 
         ```{caution}
-        Reads from the local repository cache. Run {meth}`~meta_package_manager.manager.PackageManager.sync` first
-        to refresh the index.
+        Reads from the local repository cache. Run
+        {meth}`~meta_package_manager.manager.PackageManager.sync` first to refresh the
+        index.
         ```
 
         ```{code-block} shell-session
@@ -210,7 +211,7 @@ class XBPS(PackageManager):
         [-] firefox-155.0_1                         Mozilla Firefox web browser
         [-] firefox-esr-140.14.0_1                  Mozilla Firefox web browser - Extended Support Release
         ```
-        """
+        """  # noqa: E501
         output = self.run_cli(
             # `-R` has no long form of its own: `--repository` is a different
             # option taking a URL, so it consumes the `--search` that follows

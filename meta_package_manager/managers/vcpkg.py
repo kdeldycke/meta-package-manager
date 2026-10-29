@@ -125,7 +125,8 @@ class VCPKG(PackageManager):
     """
 
     _OUTDATED_REGEXP = re.compile(
-        r"^\t(?P<package_id>\S+)\s+(?P<installed_version>\S+) -> (?P<latest_version>\S+)$",
+        r"^\t(?P<package_id>\S+)\s+(?P<installed_version>\S+)"
+        r" -> (?P<latest_version>\S+)$",
     )
     """One upgradable package. Unlike the installed listing this one is written
     with a literal separator and no truncation, so it is parsed as text.
@@ -252,7 +253,7 @@ class VCPKG(PackageManager):
         duckdb[excel]                             Statically link the excel extension into DuckDB
         freexl                   2.0.0#2          FreeXL is an open source library to extract valid data
         ```
-        """
+        """  # noqa: E501
         yield from self._parse_column_listing(self.run_cli("search", query))
 
     @version_not_implemented

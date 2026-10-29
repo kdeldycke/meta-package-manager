@@ -140,7 +140,7 @@ class PEAR(PackageManager):
     Zend Engine Version: 4.4.24
     Running on: Linux debian 6.12.94+deb13-arm64 #1 SMP Debian 6.12.94-1 (2026-06-20) aarch64
     ```
-    """
+    """  # noqa: E501
 
     # Both parsers key on the bare package name, the spelling `pear install`
     # takes: PEAR identities are really channel-qualified

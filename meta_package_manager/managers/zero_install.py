@@ -241,5 +241,5 @@ class ZeroInstall(PackageManager):
         Space freed up : 40 bytes (0.00%)
         Optimisation complete.
         ```
-        """
+        """  # noqa: E501
         self.run_cli("store", "optimise")

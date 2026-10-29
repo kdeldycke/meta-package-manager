@@ -150,8 +150,10 @@ def test_doctor_verdict(monkeypatch, code, stdout, stderr, verdict):
 
 
 def test_doctor_incomplete_run_stays_an_error(monkeypatch):
-    """A spawn that never completed (timeout, interrupt) is a genuine plumbing
-    error: unhealthy, and its `CLIError` stays in the tally."""
+    """A spawn that never completed is a plumbing error.
+
+    Like a timeout or an interrupt: unhealthy, and its `CLIError` stays in the tally.
+    """
     manager = _doctor_with_stubbed_run(
         monkeypatch, code=0, stdout="", stderr="", completed=False
     )
@@ -219,8 +221,10 @@ def test_doctor_opens_on_the_escalation_report(invoke, patch_pool_with):
 
 
 def test_doctor_without_diagnostic_verb_still_reports(invoke, monkeypatch):
-    """Selected managers that all lack a diagnostic verb are no selection error:
-    the escalation report is the whole diagnosis, as on SliTaz with `tazpkg`."""
+    """Selected managers that all lack a diagnostic verb are no selection error.
+
+    The escalation report is the whole diagnosis, as on SliTaz with `tazpkg`.
+    """
     fake = FakeManager()
     assert not implements(fake, Operations.doctor)
 
@@ -236,8 +240,10 @@ def test_doctor_without_diagnostic_verb_still_reports(invoke, monkeypatch):
 
 
 def test_doctor_with_no_manager_selected_fails_after_reporting(invoke, monkeypatch):
-    """No manager selected at all stays the usual error, once the escalation
-    report is out."""
+    """No manager selected at all stays the usual error.
+
+    It comes once the escalation report is out.
+    """
     monkeypatch.setattr(pool, "_select_managers", lambda *args, **kwargs: iter(()))
     result = invoke("doctor")
     assert result.exit_code == 2
@@ -255,8 +261,10 @@ def test_doctor_unhealthy_exits_nonzero(invoke, patch_pool_with):
 
 @pytest.mark.parametrize("flag", ("--zero-exit", "-0"))
 def test_doctor_zero_exit_opt_out(invoke, patch_pool_with, flag):
-    """-0/--zero-exit keeps the exit code at 0; the critical summary stays as the
-    durable record."""
+    """-0/--zero-exit keeps the exit code at 0.
+
+    The critical summary stays as the durable record.
+    """
     fake = patch_pool_with(SickDoctorFakeManager())
     result = invoke(flag, "doctor")
     assert result.exit_code == 0
@@ -264,8 +272,10 @@ def test_doctor_zero_exit_opt_out(invoke, patch_pool_with, flag):
 
 
 def test_doctor_silent_healthy_prints_no_section(invoke, patch_pool_with):
-    """A healthy manager with an empty report gets no stdout section: the trail
-    already says everything."""
+    """A healthy manager with an empty report gets no stdout section.
+
+    The trail already says everything.
+    """
     fake = patch_pool_with(SilentDoctorFakeManager())
     result = invoke("doctor")
     assert result.exit_code == 0

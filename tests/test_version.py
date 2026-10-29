@@ -234,8 +234,10 @@ def test_token_format():
 
 
 def test_token_mixed_type_not_equal():
-    """Integer and string tokens are never equal, even if the string is
-    digit-like when compared cross-type."""
+    """Integer and string tokens are never equal.
+
+    Even if the string is digit-like when compared cross-type.
+    """
     assert Token(0) != Token("a")
     assert Token("beta") != Token(1)
 
@@ -355,8 +357,8 @@ def test_tokenized_string_comparison_edge_cases():
     assert v >= None
     assert not (v < None)
     assert not (v <= None)
-    assert v.__eq__(None) is False
-    assert v.__ne__(None) is True
+    assert v.__eq__(None) is False  # noqa: PLC2801
+    assert v.__ne__(None) is True  # noqa: PLC2801
     # Unsupported types: __eq__/__ne__ fall back to identity.
     assert v != "1.0"
     assert v != "1.0"

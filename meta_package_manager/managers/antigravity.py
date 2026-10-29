@@ -57,7 +57,9 @@ class Antigravity_CLI_Plugins(PackageManager):
             "browsed in the Antigravity application."
         ),
         "upgrade": "No update command: the Antigravity application updates plugins.",
-        "upgrade_all": "No update command: the Antigravity application updates plugins.",
+        "upgrade_all": (
+            "No update command: the Antigravity application updates plugins."
+        ),
     }
 
     name = "Antigravity CLI plugins"

@@ -34,12 +34,13 @@ class APM(PackageManager):
     apm installed packages and themes for GitHub's Atom editor, exposing an
     npm-style CLI whose queries mpm parses from `--json` output.
 
-    Atom was [sunset on December 15, 2022](https://github.blog/2022-06-08-sunsetting-atom/), so apm is flagged
-    unmaintained here. mpm keeps the wrapper while doing so stays cheap: the
-    community fork [atom-community/apm](https://github.com/atom-community/apm)
-    has been floated but never produced a usable drop-in, and per the project's
-    stability policy an unmaintained manager may be dropped without notice once it
-    becomes a burden to maintain.
+    Atom was [sunset on December 15,
+    2022](https://github.blog/2022-06-08-sunsetting-atom/), so apm is flagged
+    unmaintained here. mpm keeps the wrapper while doing so stays cheap: the community
+    fork [atom-community/apm](https://github.com/atom-community/apm) has been floated
+    but never produced a usable drop-in, and per the project's stability policy an
+    unmaintained manager may be dropped without notice once it becomes a burden to
+    maintain.
     """
 
     unmaintained = True

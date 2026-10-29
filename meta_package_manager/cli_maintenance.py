@@ -76,7 +76,6 @@ from .dispatch import (
     warn_jobs_ignored,
 )
 from .execution import CLIError, elapsed_clock, operation_subject
-from .manager import PackageManager
 from .pool import pool
 from .specifier import Solver, Specifier
 from .sudo import diagnose_escalation, inspect_install_root, prime_sudo
@@ -87,6 +86,8 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
     from click_extra import Context
+
+    from .manager import PackageManager
 
 
 UPGRADE_RESULTS = (
@@ -282,8 +283,9 @@ def _dispatch_sourced_operation(
 
     # Collect every (package, manager) attempt that genuinely failed, to exit non-zero.
     failures: list[str] = []
-    # Group every (package, manager) pair by manager: managers run in parallel while each
-    # manager's own packages are processed one at a time (see collect_per_package).
+    # Group every (package, manager) pair by manager: managers run in parallel while
+    # each manager's own packages are processed one at a time (see
+    # collect_per_package).
     failures_lock = threading.Lock()
     tasks: list[tuple[PackageManager, Callable[[], tuple[bool, str]]]] = []
     # The package IDs each manager acts on, the ones an upgrade expects to move.
@@ -333,7 +335,8 @@ def _dispatch_sourced_operation(
         # Announce the managers we will act with (also the non-TTY signal).
         logging.info(
             f"{verb.capitalize()} {package_id} "
-            f"with {', '.join(map(theme().invoked_command, sorted(source_manager_ids)))}",
+            "with "
+            + ", ".join(map(theme().invoked_command, sorted(source_manager_ids))),
         )
         # One task per (package, manager); a package acted on by two managers tallies as
         # two. For upgrade, skip a manager that cannot honor an active cooldown.

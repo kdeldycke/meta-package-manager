@@ -673,12 +673,17 @@ through the same service as GitHub.
 """
 
 NO_UPSTREAM = {
-    "antigravity-cli-plugins": "Google ships the Antigravity CLI as a proprietary binary.",
+    "antigravity-cli-plugins": (
+        "Google ships the Antigravity CLI as a proprietary binary."
+    ),
     "apt-mint": "Ships in a distribution package with no public repository.",
     "gcloud": "Google publishes the Cloud SDK as a binary; its source is not.",
     "opkg": "Hosted on the Yocto Project's cgit, which serves no API.",
     "pkgit": "Hosted on Symlinx's cgit, which serves no API.",
-    "prt-get": "Hosted on CRUX's Gitea, behind an anti-scraper gate that answers automated requests with a challenge page.",
+    "prt-get": (
+        "Hosted on CRUX's Gitea, behind an anti-scraper gate that answers automated "
+        "requests with a challenge page."
+    ),
     "steamcmd": "Valve ships SteamCMD as a proprietary binary.",
     "sun-tools": "Oracle Solaris packaging tools are proprietary.",
     "tazpkg": "Hosted on SliTaz's Mercurial server, which serves no API.",
@@ -1602,8 +1607,10 @@ def manager_card(manager_id: str) -> str:
         f"{{bdg-link-secondary}}`{MANAGER_LABELS[manager_id]} "
         f"<{manager_label_url(manager_id)}>`"
     )
-    facts.append(("Issues and PRs", badge))
-    facts.append(("Source", f"[`{source_file}`]({source_url})"))
+    facts.extend((
+        ("Issues and PRs", badge),
+        ("Source", f"[`{source_file}`]({source_url})"),
+    ))
 
     # A definition list, so each fact reads as a labelled row of the box.
     rows = "\n\n".join(f"**{label}**\n: {value}" for label, value in facts)
@@ -2153,7 +2160,8 @@ def manager_operations(manager_id: str) -> str:
                 notes.append("The `--orphans` flag runs the system-wide orphan sweep.")
             elif cleanup_orphan_is_synthesized(m):
                 notes.append(
-                    "The `--orphans` sweep is [backfilled by `mpm`](../augmentations.md)."
+                    "The `--orphans` sweep is "
+                    "[backfilled by `mpm`](../augmentations.md)."
                 )
         # The glyph follows the benchmark's vocabulary: ❌ marks an absence
         # the note beside it documents, mirroring the benchmark's rule that ❌
@@ -2229,12 +2237,14 @@ def manager_version_probe(manager_id: str) -> str:
         "python",
     )
 
-    parts = []
+    parts: list[str] = []
     if version_sample:
         transcript = version_sample.strip("\n")
-        parts.append("The version is probed by running:")
-        parts.append(_fenced(f"$ {probe}\n{transcript}", "shell-session"))
-        parts.append(f"and extracted with{regex_suffix}:")
+        parts.extend((
+            "The version is probed by running:",
+            _fenced(f"$ {probe}\n{transcript}", "shell-session"),
+            f"and extracted with{regex_suffix}:",
+        ))
     else:
         parts.append(
             f"The version is extracted from the output of `{probe}` "
@@ -2248,9 +2258,10 @@ def manager_version_probe(manager_id: str) -> str:
 def _config_template(manager_id: str) -> str:
     """Render the block `mpm config-template <id>` prints, for a manager's page.
 
-    The command's own composition ({func}`~meta_package_manager.config.dump_manager_overrides`
-    wrapped in its `[mpm.overrides]` table), so a page shows the bytes the CLI
-    prints and doubles as that command's reference output.
+    The command's own composition
+    ({func}`~meta_package_manager.config.dump_manager_overrides` wrapped in its
+    `[mpm.overrides]` table), so a page shows the bytes the CLI prints and doubles as
+    that command's reference output.
 
     One difference: a path under the builder's home collapses to `~`, the rule
     {func}`_collapse_home` applies to the infobox's search paths. An overridable
@@ -2408,12 +2419,16 @@ def manager_concurrency(manager_id: str) -> str:
         else f"{', '.join(siblings[:-1])} or {siblings[-1]}"
     )
     return "\n\n".join((
-        f"`mpm` never runs `{manager_id}` at the same time as {joined}: "
-        f"{family.contention}. Each mutating operation waits for the previous one, "
-        "even with a higher `--jobs`, while managers outside this group keep "
-        "running in parallel.",
-        "Only mutations are held back. The read-only queries (`installed`, "
-        "`outdated`, `search`) take no backend lock and stay fully concurrent.",
+        (
+            f"`mpm` never runs `{manager_id}` at the same time as {joined}: "
+            f"{family.contention}. Each mutating operation waits for the previous one, "
+            "even with a higher `--jobs`, while managers outside this group keep "
+            "running in parallel."
+        ),
+        (
+            "Only mutations are held back. The read-only queries (`installed`, "
+            "`outdated`, `search`) take no backend lock and stay fully concurrent."
+        ),
     ))
 
 

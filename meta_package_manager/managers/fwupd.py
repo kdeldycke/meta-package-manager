@@ -394,7 +394,7 @@ class FWUPD(PackageManager):
           ]
         }
         ```
-        """
+        """  # noqa: E501
         output = self.run_cli("get-devices", "--json", must_succeed=True)
 
         for device_id, device in self._updatable_devices(output):
@@ -569,7 +569,7 @@ class FWUPD(PackageManager):
           ]
         }
         ```
-        """
+        """  # noqa: E501
         output = self.run_cli("get-updates", "--json", must_succeed=True)
 
         for device_id, device in self._updatable_devices(output):
@@ -612,7 +612,7 @@ class FWUPD(PackageManager):
         Scheduling…              [***************************************]
         362301da643102b9f38477387e2193e57abaa590 is already scheduled to be updated
         ```
-        """
+        """  # noqa: E501
         # A None version is discarded by the args-flattening pipeline, so the
         # device ID and the release version each stay their own argv element.
         return self.run_cli("install", package_id, version)
@@ -643,7 +643,7 @@ class FWUPD(PackageManager):
         Scheduling…              [ -                                     ]
         362301da643102b9f38477387e2193e57abaa590 is already scheduled to be updated
         ```
-        """
+        """  # noqa: E501
         return self.build_cli("update", package_id)
 
     def sync(self) -> None:

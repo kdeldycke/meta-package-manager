@@ -265,8 +265,9 @@ class SBOM:
 
     @staticmethod
     def autodetect_export_format(file_path: Path) -> ExportFormat | None:
-        """Better version of `spdx_tools.spdx.formats.file_name_to_format` which is
-        based on `Path` objects and is case-insensitive.
+        """Case-insensitive `file_name_to_format` that works on `Path` objects.
+
+        Replaces `spdx_tools.spdx.formats.file_name_to_format`.
 
         ```{todo}
         Contribute generic autodetection method to Click Extra?

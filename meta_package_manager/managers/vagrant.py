@@ -213,7 +213,7 @@ class Vagrant(PackageManager):
         * 'ubuntu/jammy64' for 'virtualbox' is outdated! Current: 20230914.0.0. Latest: 20240126.0.0
         * 'ubuntu/jammy64' for 'virtualbox' is outdated! Current: 20230616.0.0. Latest: 20240126.0.0
         ```
-        """
+        """  # noqa: E501
         output = self.run_cli("box", "outdated", "--global")
         yield from self._newest_per_box(
             (

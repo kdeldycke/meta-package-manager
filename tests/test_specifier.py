@@ -55,7 +55,8 @@ def test_purl_map():
             purl_managers = PURL_MAP[manager_id]
             if purl_managers is not None:
                 assert manager_id in purl_managers, (
-                    f"Manager ID '{manager_id}' is not registered with itself in PURL_MAP."
+                    f"Manager ID '{manager_id}' is not registered with itself in "
+                    "PURL_MAP."
                 )
 
 
@@ -210,8 +211,10 @@ Shell extension's builder to the same strings."""
 
 @pytest.mark.parametrize("case", PURL_CASES, ids=lambda case: case["purl"])
 def test_manager_purl_reads_back(case):
-    """A manager-tied pURL renders as the shared table says, and reads back to the
-    same manager and package."""
+    """A manager-tied pURL renders as the shared table says.
+
+    It reads back to the same manager and package.
+    """
     manager_id, package_id, purl = case["manager_id"], case["package_id"], case["purl"]
     assert manager_purl(manager_id, package_id) == purl
 
@@ -224,16 +227,20 @@ def test_manager_purl_reads_back(case):
 
 
 def test_package_purl_carries_the_namespace():
-    """A scoped npm package's pURL object holds its scope as the namespace, as the npm
-    type definition expects."""
+    """The pURL object of a scoped npm package holds its scope as namespace.
+
+    As the npm type definition expects.
+    """
     purl = Package(id="@babel/core", manager_id="npm", installed_version="7.26.0").purl
     assert (purl.namespace, purl.name) == ("@babel", "core")
     assert purl.to_string() == "pkg:npm/%40babel/core@7.26.0"
 
 
 def test_purl_quote_encodes_a_slash():
-    """A slash inside a segment is encoded, where packageurl-python leaves the one in a
-    name alone."""
+    """A slash inside a segment is encoded.
+
+    packageurl-python leaves the one in a name alone.
+    """
     assert purl_quote("a/b:c") == "a%2Fb:c"
 
 
@@ -406,8 +413,10 @@ def test_reduce_specs(spec_strings, target_managers, expected):
     ),
 )
 def test_resolve_package_specs(spec_strings, manager_priority, expected):
-    """Distinct explicit managers each survive as their own target, while alias
-    pURLs, version constraints and manager-less specs still reduce to one."""
+    """Distinct explicit managers each survive as their own target.
+
+    Alias pURLs, version constraints and manager-less specs still reduce to one.
+    """
     solver = Solver(spec_strings, manager_priority=manager_priority)
     resolved = {str(spec) for _package_id, spec in solver.resolve_package_specs()}
     assert resolved == expected

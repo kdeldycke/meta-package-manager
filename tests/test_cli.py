@@ -41,7 +41,6 @@ import re
 import signal
 import subprocess
 import sys
-from collections.abc import Callable, Collection, Iterable, Iterator
 from functools import partial
 from pathlib import Path
 from textwrap import dedent
@@ -62,6 +61,10 @@ from meta_package_manager.sudo import UNANSWERED_PROMPT_DETAIL
 
 from .conftest import default_manager_ids
 from .fake_manager import FakeManager
+
+TYPE_CHECKING = False
+if TYPE_CHECKING:
+    from collections.abc import Callable, Collection, Iterable, Iterator
 
 TEST_CONF_FILE = """\
 # Comment
@@ -171,8 +174,10 @@ def report_rows(stdout: str) -> dict[str, str]:
 
 
 def check_report(stdout: str, expected: dict[str, tuple[str, ...]]) -> None:
-    """Assert the change report holds exactly the `expected` rows, each carrying
-    its words."""
+    """Assert the change report holds exactly the `expected` rows.
+
+    Each row carries its words.
+    """
     rows = report_rows(stdout)
     assert set(rows) == set(expected)
     for package_id, words in expected.items():
@@ -302,9 +307,10 @@ def test_timeout(invoke, slow_fake_pool):
 def test_failed_maintenance_names_its_cause_on_the_trail(
     invoke, fake_pool, monkeypatch, command, method, detail, expected
 ):
-    """The `✘` line of a failed `sync` or `cleanup` closes on the cause its error
-    carries, after the details of the command. A failure with no known cause
-    keeps those details alone.
+    """The `✘` line of a failed `sync` or `cleanup` closes on its cause.
+
+    The cause comes from its error, after the details of the command. A failure with no
+    known cause keeps those details alone.
     """
 
     def failing(manager):
@@ -342,9 +348,10 @@ def test_summary(invoke, fake_pool, summary_arg, active_summary):
 def test_fatal_message_reaches_stderr_in_every_format(
     invoke, monkeypatch, table_format
 ):
-    """A run stopping on a critical message reports it, serialized output included:
-    the payload goes to `<stdout>` and logs to `<stderr>`, so neither spoils the
-    other."""
+    """A run stopping on a critical message reports it, in serialized output too.
+
+    The payload goes to `<stdout>` and logs to `<stderr>`, so neither spoils the other.
+    """
     monkeypatch.setattr(pool, "_select_managers", lambda *args, **kwargs: iter(()))
     result = invoke("--table-format", table_format, "installed")
     assert_no_manager_selected(result)
@@ -354,8 +361,10 @@ def test_fatal_message_reaches_stderr_in_every_format(
 def test_serialized_output_notes_ignored_columns(
     invoke, fake_pool, table_format, noted
 ):
-    """A serialized document carries every field, so a `--columns` selection is
-    reported as ignored there, and applied to a table."""
+    """A serialized document carries every field.
+
+    So a `--columns` selection is reported as ignored there, and applied to a table.
+    """
     result = invoke(
         "--verbosity",
         "INFO",
@@ -724,8 +733,8 @@ class CLITableTests:
     def test_json_output(self, invoke, subcmd):
         """JSON output is expected to be parseable if read from `<stdout>`.
 
-        Debug level messages are redirected to <stderr> and are not supposed to interfere
-        with this behavior.
+        Debug level messages are redirected to <stderr> and are not supposed to
+        interfere with this behavior.
 
         The one serialization case kept on the real pool, deliberately: it is
         what proves a live inventory survives serialization, whatever package

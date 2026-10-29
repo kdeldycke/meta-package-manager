@@ -26,7 +26,7 @@ from __future__ import annotations
 import json
 import logging
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta, timezone
 from functools import partial
 
 import pytest
@@ -479,9 +479,10 @@ def test_upgrade_all_reports_what_moved(invoke, changing_fake_pool):
 def test_failed_upgrade_all_names_its_cause_on_the_trail(
     invoke, changing_fake_pool, monkeypatch, detail, expected
 ):
-    """The `✘` line of a failed full upgrade closes on the cause its error
-    carries, after the count of what moved. A failure with no known cause
-    keeps the count alone.
+    """The `✘` line of a failed full upgrade closes on its cause.
+
+    The cause comes from its error, after the count of what moved. A failure with no
+    known cause keeps the count alone.
     """
 
     def failing_upgrade(manager, package_id=None, version=None, outdated_ids=None):
@@ -596,8 +597,7 @@ def test_upgrade_all_simulation_skips_the_report(invoke, changing_fake_pool, mod
 
 
 class ProbedFakeManager(ChangingFakeManager):
-    """Variant the cooldown gates package by package, through the release-date
-    probe.
+    """Variant the cooldown gates package by package, through the release-date probe.
 
     The latest release of the pinned package is one day old, and every other
     one a month older.
@@ -605,7 +605,7 @@ class ProbedFakeManager(ChangingFakeManager):
 
     def __init__(self) -> None:
         super().__init__()
-        self.pinned_release = datetime.now(tz=timezone.utc) - timedelta(days=1)
+        self.pinned_release = datetime.now(tz=UTC) - timedelta(days=1)
         """When the latest release of the pinned package was published."""
         self.probed: list[str] = []
         """The package of each probe, in the order they ran."""
@@ -619,14 +619,15 @@ class ProbedFakeManager(ChangingFakeManager):
 
 @pytest.fixture
 def probed_fake_pool(patch_pool_with):
-    """Yield a {class}`ProbedFakeManager`, whose pinned package a week of
-    cooldown holds back."""
+    """Yield a fake manager whose pinned package a week of cooldown holds back.
+
+    A {class}`ProbedFakeManager`.
+    """
     return patch_pool_with(ProbedFakeManager())
 
 
 def test_upgrade_all_dates_a_held_package(invoke, probed_fake_pool):
-    """A package the cooldown holds reports when its release was published and
-    when it clears the window."""
+    """A held package reports its publication and when it clears the window."""
     result = invoke("--cooldown", "7 days", "upgrade", "--all")
     assert result.exit_code == 0
     mid = probed_fake_pool.id
@@ -684,16 +685,20 @@ def test_upgrade_all_dates_a_held_package_serialized(invoke, probed_fake_pool):
     ),
 )
 def test_upgrade_probes_each_release_once(invoke, probed_fake_pool, packages):
-    """The report reads the verdict the upgrade reached: it probes no package a
-    second time."""
+    """The report reads the verdict the upgrade reached.
+
+    It probes no package a second time.
+    """
     result = invoke("--cooldown", "7 days", "upgrade", *packages)
     assert result.exit_code == 0
     assert sorted(probed_fake_pool.probed) == ["fake-pkg-alpha", "fake-pkg-beta"]
 
 
 def test_cooldown_verdicts_last_one_invocation(invoke, probed_fake_pool):
-    """Each invocation probes a release again: a verdict never outlives the
-    invocation that reached it."""
+    """Each invocation probes a release again.
+
+    A verdict never outlives the invocation that reached it.
+    """
     for _ in range(2):
         result = invoke("--cooldown", "7 days", "upgrade", "fake-pkg-beta")
         assert result.exit_code == 0
@@ -790,8 +795,11 @@ def lock_family_pool(patch_pool_with, monkeypatch, tmp_path):
 def test_upgrade_reports_each_member_of_a_lock_family(
     invoke, lock_family_pool, packages, statuses
 ):
-    """A lane shared by a lock family never serves a manager the listing it took
-    before its upgrade: each member reports what its own upgrade moved."""
+    """A lane shared by a lock family never serves a stale listing.
+
+    Each member reports what its own upgrade moved, never the listing the lane took
+    before its upgrade.
+    """
     result = invoke("--table-format", "json", "upgrade", *packages)
     assert result.exit_code == 0
     report = json.loads(result.stdout)

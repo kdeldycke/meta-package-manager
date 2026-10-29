@@ -154,7 +154,7 @@ class Nimble(PackageManager):
         ├── @0.7.2 (2a9fb57ef1f6460fd61b1cfab2d83af44f788a25) (/Users/kde/.nimble/pkgs2/parsetoml-0.7.2-2a9fb57ef1f6460fd61b1cfab2d83af44f788a25)
         └── @0.7.1 (586fe63467a674008c4445ed1b8ac882177d7103) (/Users/kde/.nimble/pkgs2/parsetoml-0.7.1-586fe63467a674008c4445ed1b8ac882177d7103)
         ```
-        """
+        """  # noqa: E501
         output = self.run_cli("list", "--installed", "--ver")
 
         newest: dict[str, str] = {}

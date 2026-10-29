@@ -108,8 +108,9 @@ class Tazpkg(PackageManager):
                 yield match.group("package_id"), match.group("version")
 
     def _raise_self_upgrade_refusal(self, output: str) -> None:
-        """Raise the refusal TazPkg reports with exit code `0` while it waits to
-        upgrade itself.
+        """Raise the refusal TazPkg reports with exit code `0`.
+
+        TazPkg refuses while it waits to upgrade itself.
 
         The failure is relayed at `WARNING` and recorded in
         {attr}`~meta_package_manager.execution.CLIExecutor.cli_errors`, as the

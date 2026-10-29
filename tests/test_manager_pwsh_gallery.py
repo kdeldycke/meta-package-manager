@@ -152,7 +152,8 @@ def test_install_with_version_appends_flag(manager, capture_run_cli):
 
 def test_upgrade_all_cli_does_not_constrain_scope(manager):
     cli = manager.upgrade_all_cli()
-    # Pre-args order: pwsh path, then -NoProfile -NonInteractive -Command, then expression.
+    # Pre-args order: pwsh path, then -NoProfile -NonInteractive -Command, then the
+    # expression.
     assert "-Command" in cli
     expression = cli[-1]
     assert expression.startswith("Update-PSResource")

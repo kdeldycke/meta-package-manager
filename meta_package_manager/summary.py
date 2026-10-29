@@ -130,8 +130,9 @@ def package_counts(payload: Mapping[str, Mapping]) -> Counter[str]:
 
 
 def sbom_summary(sbom: SBOM, bundled: bool) -> tuple[Counter, list[str]]:
-    """Adapt {meth}`meta_package_manager.sbom.base.SBOM.stats` to the
-    {func}`print_summary` shape.
+    """Adapt `SBOM.stats` to the {func}`print_summary` shape.
+
+    See {meth}`meta_package_manager.sbom.base.SBOM.stats`.
 
     SBOM stats live on the renderer because the renderer knows what
     actually landed in the document (after dedup, after merge). This

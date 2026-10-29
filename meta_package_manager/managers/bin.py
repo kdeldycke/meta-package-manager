@@ -94,9 +94,12 @@ class Bin(PackageManager):
     platforms = LINUX_LIKE, MACOS, WINDOWS
 
     requirement = ">=0.27.0"
-    """The release whose listing layout {meth}`~meta_package_manager.manager.PackageManager.installed` reproduces: it reserves
-    a leading column of the version field for the pin marker. The parser tolerates
-    the older unreserved layout too, but the floor tracks what is verified.
+    """The release whose listing layout the installed parser reproduces.
+
+    The parser is {meth}`~meta_package_manager.manager.PackageManager.installed`.
+    The layout reserves a leading column of the version field for the pin marker.
+    The parser tolerates the older unreserved layout too, but the floor tracks what
+    is verified.
     """
 
     extra_env: ClassVar = {
@@ -167,7 +170,7 @@ class Bin(PackageManager):
         /home/user/.local/bin/rg          14.1.1   https://github.com/BurntSushi/ripgrep/releases/tag/14.1.1  OK
         /home/user/.local/bin/terraform  *1.5.7    releases.hashicorp.com/terraform                           OK
         ```
-        """
+        """  # noqa: E501
         output = self.run_cli("list")
         yield from self.parse_regex_lines(self._INSTALLED_REGEXP, output)
 
@@ -204,7 +207,7 @@ class Bin(PackageManager):
         ever checked, so it never appears here. That matches the listing, which
         marks it with a `*`.
         ```
-        """
+        """  # noqa: E501
         before = len(self.cli_errors)
         self.run_cli("update", "--dry-run")
 

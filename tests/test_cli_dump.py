@@ -96,8 +96,10 @@ def test_dump_brewfile_rejects_toml_only_flags(invoke, fake_pool, flag):
 
 
 def test_dump_brewfile_to_stdout(invoke, brewfile_pool):
-    """Only the mapped manager reaches the Brewfile, and the summary counts its
-    entries by type."""
+    """Only the mapped manager reaches the Brewfile.
+
+    The summary counts its entries by type.
+    """
     result = invoke(
         "--verbosity", "INFO", "dump", "--brewfile", "--no-header", "--overwrite"
     )
@@ -109,8 +111,10 @@ def test_dump_brewfile_to_stdout(invoke, brewfile_pool):
 
 
 def test_dump_brewfile_header_tallies_skipped_managers(invoke, brewfile_pool):
-    """The header counts the packages of an unmapped manager, which also gets its
-    warning, and leaves out the manager whose inventory failed."""
+    """The header counts the packages of an unmapped manager.
+
+    That manager also gets its warning. The manager whose inventory failed is left out.
+    """
     result = invoke("dump", "--brewfile")
     assert result.exit_code == 0
     assert result.stdout.endswith(f"\n\n{BREW_LINES}")

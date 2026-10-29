@@ -21,7 +21,7 @@ import os
 import re
 import shutil
 import tempfile
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from functools import cached_property
 from importlib import resources
 from pathlib import Path
@@ -213,8 +213,9 @@ class Pacman(PackageManager):
     def orphans(self) -> Iterator[Package]:
         """Fetch packages installed as dependencies that nothing requires anymore.
 
-        Same `<name> <version>` listing shape as {meth}`~meta_package_manager.manager.PackageManager.installed`, narrowed
-        by `--deps --unrequired` (`-Qtd`) to the orphan set.
+        Same `<name> <version>` listing shape as
+        {meth}`~meta_package_manager.manager.PackageManager.installed`, narrowed by
+        `--deps --unrequired` (`-Qtd`) to the orphan set.
 
         ```{code-block} shell-session
 
@@ -385,9 +386,9 @@ class Pacman(PackageManager):
 class Aura(Pacman):
     """AUR helper wrapping `pacman`, driven through the `aura` binary.
 
-    Aura reuses every parser and query of `Pacman` unchanged, but not its
-    forced arguments and not its {meth}`~meta_package_manager.manager.PackageManager.outdated`: those are the two places
-    where a v4 aura differs from the helpers around it.
+    Aura reuses every parser and query of `Pacman` unchanged, but not its forced
+    arguments and not its {meth}`~meta_package_manager.manager.PackageManager.outdated`:
+    those are the two places where a v4 aura differs from the helpers around it.
 
     ```{note}
     Every v4 subcommand answers to a long name, a pacman letter and a long
@@ -397,14 +398,14 @@ class Aura(Pacman):
     ```
 
     ```{important}
-    Repository upgrades and AUR upgrades are two commands here, where `yay` and
-    `paru` fold both into one `--query --upgrades`. Aura's `-Qu` reads the
-    local ALPM database against the sync databases, so it reports the official
-    repositories alone and an out-of-date AUR package stays invisible to it.
-    The AUR half lives behind `--aursync --sysupgrade --dryrun`, which reports
-    without acting. {meth}`~meta_package_manager.manager.PackageManager.outdated` runs both and concatenates them, so mpm
-    reports what an `aura -Syu` followed by an `aura -Au` would actually
-    upgrade.
+    Repository upgrades and AUR upgrades are two commands here, where `yay` and `paru`
+    fold both into one `--query --upgrades`. Aura's `-Qu` reads the local ALPM database
+    against the sync databases, so it reports the official repositories alone and an
+    out-of-date AUR package stays invisible to it. The AUR half lives behind `--aursync
+    --sysupgrade --dryrun`, which reports without acting.
+    {meth}`~meta_package_manager.manager.PackageManager.outdated` runs both and
+    concatenates them, so mpm reports what an `aura -Syu` followed by an `aura -Au`
+    would actually upgrade.
     ```
     """
 
@@ -635,7 +636,7 @@ class Paru(Pacman):
     ```
     """
 
-    _AUR_INFO_ENV = {"LC_ALL": "C.UTF-8", "TZ": "UTC"}
+    _AUR_INFO_ENV: ClassVar = {"LC_ALL": "C.UTF-8", "TZ": "UTC"}
     """Locale and timezone forced on the release-date probe below.
 
     paru localizes the `Repository` and `Last Modified` field labels and
@@ -699,7 +700,7 @@ class Paru(Pacman):
             except ValueError:
                 return None
             # The probe forced TZ=UTC, so the naive rendering is UTC.
-            return parsed.replace(tzinfo=timezone.utc)
+            return parsed.replace(tzinfo=UTC)
         return None
 
     def upgrade_all_cli_excluding(
@@ -931,9 +932,10 @@ class Yay(Pacman):
 
     Held while {meth}`cooldown_env` resolves {attr}`supports_cooldown`, whose
     {attr}`version <meta_package_manager.execution.CLIExecutor.version>` lookup runs
-    `yay --version` through {meth}`~meta_package_manager.execution.CLIExecutor.run`, which calls straight back into
-    {meth}`cooldown_env`. The nested call returns early so the probe runs without a
-    cooldown env instead of recursing until the stack overflows.
+    `yay --version` through {meth}`~meta_package_manager.execution.CLIExecutor.run`,
+    which calls straight back into {meth}`cooldown_env`. The nested call returns early
+    so the probe runs without a cooldown env instead of recursing until the stack
+    overflows.
     """
 
     @property
@@ -979,7 +981,7 @@ class Yay(Pacman):
         try:
             if not self.supports_cooldown:
                 return {}
-            cutoff = datetime.now(tz=timezone.utc) - self.cooldown
+            cutoff = datetime.now(tz=UTC) - self.cooldown
             # Clamp to the Unix epoch: a cooldown reaching before 1970 yields a
             # negative timestamp, and yay's Lua (gopher-lua) parses that back to nil,
             # which silently drops the gate. Epoch 0 keeps the floor effective (every

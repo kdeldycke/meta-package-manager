@@ -204,7 +204,7 @@ class Spack(PackageManager):
            "dependencies": {"build": ["gnuconfig", "cxx", "gmake", "ninja", "c", "cmake"], "link": [], "run": [], "test": []}}
         ]
         ```
-        """
+        """  # noqa: E501
         args = ["list", "--format", "version_json"]
         if extended:
             args.append("--search-description")
@@ -230,7 +230,7 @@ class Spack(PackageManager):
         [ ] 3iyb7mz zlib@1.3.1 install (2s)
         [+] 3iyb7mz zlib@1.3.1 /opt/homebrew/Cellar/spack/1.2.2/opt/spack/darwin-m1/zlib-1.3.1-3iyb7mzv7ij3w2o43t4nb2pq25az6pt7 (2s)
         ```
-        """
+        """  # noqa: E501
         spec = package_id if version is None else f"{package_id}@{version}"
         return self.run_cli("install", spec)
 
@@ -248,7 +248,7 @@ class Spack(PackageManager):
         ==> Successfully uninstalled zlib@1.3.1+optimize+pic+shared build_system=makefile platform=darwin os=tahoe target=m1/3iyb7mz
         ==> Successfully uninstalled zlib@1.3.2+optimize+pic+shared build_system=makefile platform=darwin os=tahoe target=m1/7ib3y53
         ```
-        """
+        """  # noqa: E501
         return self.run_cli("uninstall", "--yes-to-all", "--all", package_id)
 
     def sync(self) -> None:
@@ -278,7 +278,7 @@ class Spack(PackageManager):
         ==> Successfully uninstalled apple-clang@21.0.0 build_system=bundle platform=darwin os=tahoe target=aarch64/ti7wjie
         ==> Successfully uninstalled compiler-wrapper@1.1.0 build_system=generic platform=darwin os=tahoe target=m1/2eppidz
         ```
-        """
+        """  # noqa: E501
         self.run_cli("gc", "--yes-to-all")
 
     def cleanup_cache(self) -> None:

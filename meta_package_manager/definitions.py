@@ -592,8 +592,8 @@ class OperationSpec:
     """Mapping of recognized package field (`package_id`, `installed_version`,
     `latest_version`) to its JSON selector, in `"json"` mode.
 
-    A selector is a key name with an optional `[N]` list index
-    (`versions[0]`); see {data}`~meta_package_manager.manager.JSON_FIELD_SELECTOR_REGEX`.
+    A selector is a key name with an optional `[N]` list index (`versions[0]`); see
+    {data}`~meta_package_manager.manager.JSON_FIELD_SELECTOR_REGEX`.
     """
 
 
@@ -1217,8 +1217,7 @@ def _make_install(spec: OperationSpec) -> Callable[..., str]:
 
 
 def _make_package_command(spec: OperationSpec) -> Callable[..., str]:
-    """Build a per-package command method substituting ``{package_id}`` into the
-    args.
+    """Build a per-package command method substituting ``{package_id}`` into the args.
 
     Serves `remove`, `remove_orphan` and `mark_explicit`, whose synthesized
     methods are identical: only the namespace key they land under differs.
@@ -1235,8 +1234,10 @@ def _make_package_command(spec: OperationSpec) -> Callable[..., str]:
 
 
 def _make_void(spec: OperationSpec) -> Callable[..., None]:
-    """Build a `sync` or `cleanup_*` category method that runs the CLI and discards
-    its output."""
+    """Build a `sync` or `cleanup_*` method that runs the CLI.
+
+    The method discards the output of the CLI.
+    """
 
     def operation(self: PackageManager) -> None:
         self.run_cli(
@@ -1267,10 +1268,10 @@ def _make_upgrade_one_cli(spec: OperationSpec) -> Callable[..., tuple[str, ...]]
 def _make_cli_builder(spec: OperationSpec) -> Callable[..., tuple[str, ...]]:
     """Build a no-argument `*_cli` method returning the operation's command line.
 
-    Serves both `doctor_cli` (the read-only diagnostic invocation) and
-    `upgrade_all_cli` (the upgrade-everything invocation), whose synthesized
-    methods are identical: only the namespace key they land under differs. The
-    base class then drives them through its own {meth}`~meta_package_manager.manager.PackageManager.doctor` and
+    Serves both `doctor_cli` (the read-only diagnostic invocation) and `upgrade_all_cli`
+    (the upgrade-everything invocation), whose synthesized methods are identical: only
+    the namespace key they land under differs. The base class then drives them through
+    its own {meth}`~meta_package_manager.manager.PackageManager.doctor` and
     {meth}`~meta_package_manager.manager.PackageManager.upgrade` orchestrators.
     """
 
@@ -1314,8 +1315,9 @@ lands on `doctor_cli`, `upgrade_one` on `upgrade_one_cli` and `upgrade_all` on
 
 
 def build_manager_class(definition: ManagerDefinition) -> type[ConfigDrivenManager]:
-    """Synthesize a {class}`~meta_package_manager.manager.PackageManager` subclass
-    from a validated definition.
+    """Synthesize a package manager subclass from a validated definition.
+
+    The result is a {class}`~meta_package_manager.manager.PackageManager` subclass.
 
     Assembles a class namespace from the definition's identity and CLI fields, then
     adds one method (or property) per declared operation. The operations marked
@@ -1369,14 +1371,15 @@ def build_manager_class(definition: ManagerDefinition) -> type[ConfigDrivenManag
 
 # Bundled manager definitions.
 #
-# mpm ships a few managers as data rather than Python classes: a TOML file per manager
-# under meta_package_manager/managers/, each a single [mpm.overrides.<id>] section in the
-# exact schema a user would write. They are parsed and built through the same
-# parse_manager_definition / build_manager_class path as any user definition, then loaded
-# into the pool at construction time (ManagerPool.register), so they are always available
-# and earn first-class --<id> flags. The trust gate guarding user definitions (see
-# meta_package_manager.config) does not apply: package data shipped in the wheel is
-# read-only and as trusted as the Python modules beside it.
+# mpm ships a few managers as data rather than Python classes: a TOML file per
+# manager under meta_package_manager/managers/, each a single [mpm.overrides.<id>]
+# section in the exact schema a user would write. They are parsed and built through
+# the same parse_manager_definition / build_manager_class path as any user
+# definition, then loaded into the pool at construction time (ManagerPool.register),
+# so they are always available and earn first-class --<id> flags. The trust gate
+# guarding user definitions (see meta_package_manager.config) does not apply:
+# package data shipped in the wheel is read-only and as trusted as the Python
+# modules beside it.
 #
 # Each bundled file also carries a top-level [samples] table: source-derived output
 # fixtures locking the version probe and the declared parsers, the config-defined twin
@@ -1401,10 +1404,10 @@ def load_bundled_definitions() -> tuple[tuple[ManagerDefinition, str], ...]:
     `source` is the repo-relative path used to link the manager's documentation. Cached
     because the shipped files never change at runtime.
 
-    A malformed bundled file is a packaging bug, but it is logged and skipped rather than
-    raised so one bad resource cannot break `mpm` startup for everyone. The hermetic
-    `test_bundled_inventory` and `test_bundled_registered` keep the shipped files
-    valid.
+    A malformed bundled file is a packaging bug, but it is logged and skipped rather
+    than raised so one bad resource cannot break `mpm` startup for everyone. The
+    hermetic `test_bundled_inventory` and `test_bundled_registered` keep the shipped
+    files valid.
     """
     definitions: list[tuple[ManagerDefinition, str]] = []
     resources = importlib.resources.files(BUNDLED_DEFINITIONS_PACKAGE)
@@ -1425,7 +1428,8 @@ def load_bundled_definitions() -> tuple[tuple[ManagerDefinition, str], ...]:
                 )
             except ValidationError as ex:
                 logging.warning(
-                    f"Skipping invalid bundled manager {manager_id!r} in {source}: {ex}",
+                    f"Skipping invalid bundled manager {manager_id!r} in {source}: "
+                    f"{ex}",
                 )
     return tuple(definitions)
 

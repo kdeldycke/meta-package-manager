@@ -14,11 +14,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-"""Tests for the per-manager override mechanism driven by the
-`[mpm.overrides.<id>]` configuration section."""
+"""Tests for the per-manager override mechanism.
+
+Driven by the `[mpm.overrides.<id>]` configuration section.
+"""
 
 from __future__ import annotations
 
+import urllib.parse
 from dataclasses import fields
 from pathlib import Path
 from textwrap import dedent
@@ -51,6 +54,7 @@ from meta_package_manager.definitions import (
     buildable_operations,
     parse_operation_overrides,
 )
+from meta_package_manager.manager import PackageManager
 from meta_package_manager.pool import pool
 
 from .conftest import all_manager_ids, tomllib
@@ -99,18 +103,16 @@ def test_overridable_fields_match_base_attributes():
     the base class is silent at runtime (`setattr` happily creates new attributes)
     so this test acts as the safety net.
     """
-    from meta_package_manager.manager import PackageManager
-
     for field in OVERRIDABLE_FIELDS:
         assert hasattr(PackageManager, field), (
-            f"OVERRIDABLE_FIELDS lists {field!r} but PackageManager has no such attribute"
+            f"OVERRIDABLE_FIELDS lists {field!r} but PackageManager has no such "
+            "attribute"
         )
 
 
 @pytest.mark.parametrize("section", (None, {}), ids=("none", "empty"))
 def test_empty_section_is_noop(reset_overrides, section):
-    """An absent or empty `[mpm.overrides]` section applies and validates as a
-    no-op."""
+    """An absent or empty `[mpm.overrides]` section applies and validates as a no-op."""
     apply_manager_overrides(pool, section)
     validate_manager_overrides_section(section, pool=pool)
     assert OVERRIDE_TARGET not in pool.overridden_fields
@@ -183,8 +185,10 @@ def test_non_dict_manager_section_raises():
     ),
 )
 def test_override_rejects(reset_overrides, field, value, message):
-    """A field mpm does not know, or a value of the wrong type, stops the override
-    with an error that names what the field accepts."""
+    """An unknown field or a value of the wrong type stops the override.
+
+    The error names what the field accepts.
+    """
     with pytest.raises(ValidationError, match=message):
         apply_manager_overrides(pool, {OVERRIDE_TARGET: {field: value}})
 
@@ -224,8 +228,10 @@ def test_str_tuple_override_coerces_list_to_tuple(reset_overrides):
     ),
 )
 def test_override_applies(reset_overrides, field, value, expected):
-    """An override of the right type sets the field on the manager, as the type
-    the field holds."""
+    """An override of the right type sets the field on the manager.
+
+    As the type the field holds.
+    """
     apply_manager_overrides(pool, {OVERRIDE_TARGET: {field: value}})
     applied = getattr(pool[OVERRIDE_TARGET], field)
     assert applied == expected
@@ -241,9 +247,11 @@ def test_dict_override(reset_overrides):
 
 
 def test_dict_override_adds_to_shipped_variables():
-    """An `extra_env` override adds its variables to those the manager ships,
-    and its value wins for a name both set. Each application starts again from
-    the shipped variables, so a name a later configuration drops is gone."""
+    """An `extra_env` override adds its variables to those the manager ships.
+
+    Its value wins for a name both set. Each application starts again from the shipped
+    variables, so a name a later configuration drops is gone.
+    """
     manager = pool["cask"]
     shipped = dict(type(manager).extra_env)
     try:
@@ -308,8 +316,10 @@ def test_cached_property_evicted_on_override(reset_overrides):
 def test_per_manager_override_beats_global_default(
     reset_overrides, field, override, global_value
 ):
-    """A per-manager override must survive the global `setattr` loop in
-    `_select_managers`: the most specific value wins."""
+    """A per-manager override survives the global `setattr` loop.
+
+    The loop in `_select_managers`: the most specific value wins.
+    """
     apply_manager_overrides(pool, {OVERRIDE_TARGET: {field: override}})
     selected = list(
         pool._select_managers(
@@ -334,9 +344,12 @@ def test_per_manager_override_beats_global_default(
 def test_timeout_binds_detection_phase(
     reset_overrides, monkeypatch, override, expected
 ):
-    """`_select_managers` binds the version-detection probes to the resolved timeout
-    *before* `warm_availability` runs them: the global `--timeout` reaches a plain
-    candidate, while a per-manager override still keeps precedence."""
+    """`_select_managers` binds the probes to the resolved timeout first.
+
+    The version-detection probes are bound *before* `warm_availability` runs them: the
+    global `--timeout` reaches a plain candidate, while a per-manager override still
+    keeps precedence.
+    """
     if override is not None:
         apply_manager_overrides(pool, {OVERRIDE_TARGET: {"timeout": override}})
 
@@ -344,8 +357,10 @@ def test_timeout_binds_detection_phase(
     recorded: dict[str, int | None] = {}
 
     class _StopProbe(Exception):
-        """Halt the generator right after the recording point, so the test never
-        reaches the real availability loop and stays hermetic."""
+        """Halt the generator right after the recording point.
+
+        So the test never reaches the real availability loop and stays hermetic.
+        """
 
     def fake_warm(managers):
         for manager in managers:
@@ -382,8 +397,11 @@ def test_global_default_still_applies_without_override():
 
 
 def test_sudo_is_a_risky_override_field():
-    """`[mpm.overrides.<id>] sudo = true` from an untrusted source can run a binary as
-    root, so it must trip the untrusted-source warning like pre_cmds."""
+    """An untrusted `sudo = true` override trips the untrusted-source warning.
+
+    `[mpm.overrides.<id>] sudo = true` from an untrusted source can run a binary as
+    root, like pre_cmds.
+    """
     assert "sudo" in RISKY_OVERRIDE_FIELDS
 
 
@@ -405,8 +423,9 @@ def test_sudo_is_a_risky_override_field():
 def test_risky_override_from_untrusted_source_warns(
     monkeypatch, caplog, source, is_url, trusted, origin
 ):
-    """One warning per shipped manager whose override sets a risky field, when
-    the configuration comes from a remote URL or an unsafe file.
+    """One warning per shipped manager whose override sets a risky field.
+
+    When the configuration comes from a remote URL or an unsafe file.
 
     The source and its trust are stubbed, so the test reads the same on every
     platform. An unknown ID and a section that is not a table carry no field to
@@ -457,8 +476,11 @@ def test_operations_override_sets_extra_args(reset_overrides):
 
 
 def test_operations_override_reaches_its_command_alone(reset_overrides):
-    """The override, the stamp of the operation method and `build_cli` put the
-    arguments on the commands of their operation, and nowhere else."""
+    """Operation arguments reach the commands of their operation alone.
+
+    The override, the stamp of the operation method and `build_cli` put them there, and
+    nowhere else.
+    """
     apply_manager_overrides(
         pool,
         {OVERRIDE_TARGET: {"operations": {"upgrade_one": {"extra_args": ["--user"]}}}},
@@ -509,8 +531,10 @@ def test_removed_auto_updates_field_names_replacement(reset_overrides):
 
 
 def test_unknown_manager_with_override_operations_reads_as_typo():
-    """A section whose operations only add arguments is a mistyped override, not a
-    definition missing its platforms."""
+    """A section whose operations only add arguments is a mistyped override.
+
+    Not a definition missing its platforms.
+    """
     with pytest.raises(ValidationError, match=r"unknown manager ID 'caks'"):
         apply_manager_overrides(
             pool,
@@ -525,8 +549,7 @@ CONFIG_TEMPLATE = dedent("""\
 
 
 def test_cli_loads_manager_overrides(invoke, create_config, reset_overrides):
-    """End-to-end: `mpm --config <path>` applies overrides from
-    `[mpm.overrides.<id>]`."""
+    """End-to-end: `mpm --config <path>` applies `[mpm.overrides.<id>]` overrides."""
     conf_path = create_config(
         "conf.toml", CONFIG_TEMPLATE.format(manager_id=OVERRIDE_TARGET)
     )
@@ -551,8 +574,10 @@ def test_cli_warns_on_risky_override_from_untrusted_file(
 
 
 def test_cli_warns_on_stale_overrides_section(invoke, create_config, reset_overrides):
-    """A table under `[mpm.managers]`, the old home of the overrides, is named
-    in a warning and left unapplied, rather than dropped in silence."""
+    """A table under `[mpm.managers]` is named in a warning and not applied.
+
+    That was the old home of the overrides. The table is not dropped in silence.
+    """
     conf_path = create_config(
         "conf.toml",
         dedent("""\
@@ -571,9 +596,11 @@ def test_cli_warns_on_stale_overrides_section(invoke, create_config, reset_overr
 
 
 def test_cli_fails_on_unknown_manager_in_config(invoke, create_config):
-    """A typo'd manager ID in the config aborts the CLI with a precise dotted
-    path. Permissive warn-and-skip behavior was removed: the same validator
-    that powers `--validate-config` runs at normal load time."""
+    """A typo'd manager ID in the config aborts the CLI with a precise dotted path.
+
+    Permissive warn-and-skip behavior was removed: the same validator that powers
+    `--validate-config` runs at normal load time.
+    """
     conf_path = create_config(
         "conf.toml",
         dedent("""\
@@ -588,8 +615,10 @@ def test_cli_fails_on_unknown_manager_in_config(invoke, create_config):
 
 
 def test_cli_include_auto_updates_names_replacement(invoke):
-    """The removed flag that asked for auto-updating casks stops the run and names
-    the configuration that replaces it."""
+    """The removed flag for auto-updating casks stops the run.
+
+    It names the configuration that replaces it.
+    """
     result = invoke("--include-auto-updates", "managers")
     assert result.exit_code == 2
     assert "--include-auto-updates was removed" in result.stderr
@@ -639,8 +668,10 @@ def test_apply_returns_hint_for_detection_field(reset_overrides):
 
 
 def test_apply_returns_no_hint_for_preference_field(reset_overrides):
-    """Overriding a preference field (timeout) must not generate a hint: it's not
-    a detection bug signal."""
+    """Overriding a preference field (timeout) generates no hint.
+
+    It is not a detection bug signal.
+    """
     hints = apply_manager_overrides(pool, {OVERRIDE_TARGET: {"timeout": 42}})
     assert hints == []
 
@@ -652,7 +683,9 @@ def test_apply_returns_no_hint_when_overrides_empty():
 
 def test_apply_raises_on_unknown_manager_so_no_hint_emitted():
     """Apply aborts on unknown manager IDs via the validator, so no hints leak.
-    The validator runs before any side effects, so the pool is unchanged."""
+
+    The validator runs before any side effects, so the pool is unchanged.
+    """
     with pytest.raises(ValidationError, match=r"unknown manager ID"):
         apply_manager_overrides(
             pool, {"definitely-not-a-manager": {"cli_search_path": ["/x"]}}
@@ -660,8 +693,10 @@ def test_apply_raises_on_unknown_manager_so_no_hint_emitted():
 
 
 def test_apply_returns_hints_for_each_detection_field(reset_overrides):
-    """Multiple detection-related overrides on the same manager produce one hint
-    per field."""
+    """Several detection-related overrides on one manager make one hint each.
+
+    One hint per field.
+    """
     hints = apply_manager_overrides(
         pool,
         {
@@ -697,8 +732,10 @@ def test_build_issue_url_targets_bug_template():
 
 
 def test_build_issue_url_asserts_on_oversize_url():
-    """A pathological override value must trip the URL-length assertion rather
-    than silently producing a URL that GitHub would truncate."""
+    """A pathological override value trips the URL-length assertion.
+
+    Rather than silently producing a URL that GitHub would truncate.
+    """
     # 10 KiB of path entries is well past the 8 KiB cap.
     pathological_value = tuple(f"/very/long/path/{i:05d}" for i in range(500))
     hint = ContributionHint(
@@ -712,10 +749,10 @@ def test_build_issue_url_asserts_on_oversize_url():
 
 
 def test_build_issue_url_url_decodes_back_to_useful_body():
-    """Round-trip: the URL-encoded body must decode back to text mentioning the
-    manager id, the field, and the user's value."""
-    import urllib.parse
+    """The URL-encoded body decodes back to text naming the override.
 
+    Round-trip: it mentions the manager id, the field, and the user's value.
+    """
     hint = ContributionHint(
         manager_id="winget",
         field="cli_names",
@@ -740,8 +777,6 @@ def test_build_issue_url_includes_detected_cli_path_when_available():
         detected_cli_path="/opt/homebrew/bin/brew",
     )
     url = _build_issue_url(hint)
-    import urllib.parse
-
     body = dict(urllib.parse.parse_qsl(urllib.parse.urlparse(url).query))[
         "bug-description"
     ]
@@ -828,8 +863,10 @@ def test_format_contribution_hints_lists_each_with_url():
 def test_cli_contribution_hint(
     invoke, create_config, reset_overrides, config, args, hinted
 ):
-    """End to end: the configuration decides whether the contribution hint,
-    and the issue link it carries, reach `<stderr>`."""
+    """The configuration decides whether the contribution hint is printed.
+
+    End to end: the hint and the issue link it carries reach `<stderr>` or not.
+    """
     conf_path = create_config("conf.toml", dedent(config))
     result = invoke("--config", str(conf_path), *args, "managers")
     assert result.exit_code == 0
@@ -871,8 +908,10 @@ def test_dump_manager_overrides_keys_are_alphabetical():
 
 
 def test_dump_manager_overrides_lists_buildable_operations(reset_overrides):
-    """The template names each operation an override can reach, with its current
-    `extra_args`."""
+    """The template names each operation an override can reach.
+
+    With its current `extra_args`.
+    """
     apply_manager_overrides(
         pool,
         {OVERRIDE_TARGET: {"operations": {"install": {"extra_args": ["--user"]}}}},
@@ -886,10 +925,12 @@ def test_dump_manager_overrides_lists_buildable_operations(reset_overrides):
 
 @all_manager_ids
 def test_config_template_round_trips(manager_id):
-    """For every manager, dump → tomli_w → tomllib → converter yields the same
-    value. Catches schema drift between
-    {data}`~meta_package_manager.definitions.OVERRIDABLE_FIELDS` converters and
-    the live attribute types."""
+    """For every manager, dump → tomli_w → tomllib → converter yields the same value.
+
+    Catches schema drift between
+    {data}`~meta_package_manager.definitions.OVERRIDABLE_FIELDS` converters and the live
+    attribute types.
+    """
     manager = pool[manager_id]
     dumped = dump_manager_overrides(manager)
     serialized = tomli_w.dumps(dumped)
@@ -944,8 +985,11 @@ def test_cli_config_template_unknown_manager_errors(invoke):
 
 
 def test_cli_config_template_output_is_applicable(invoke, reset_overrides):
-    """End-to-end: pipe `mpm config-template <id>` output back through
-    `apply_manager_overrides` and confirm the pool is unchanged."""
+    """A `config-template` output fed back through the overrides is a no-op.
+
+    End-to-end: pipe `mpm config-template <id>` output back through
+    `apply_manager_overrides` and confirm the pool is unchanged.
+    """
     manager = pool[OVERRIDE_TARGET]
     before = {field: getattr(manager, field) for field in OVERRIDABLE_FIELDS}
 

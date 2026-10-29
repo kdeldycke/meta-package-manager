@@ -201,7 +201,7 @@ class DotNet(PackageManager):
         dotnet-format                           4.1.131201          Microsoft                                                                   496746
         bsoa.generator                          1.0.0               Microsoft                                                                   533
         ```
-        """
+        """  # noqa: E501
         output = self.run_cli("search", query)
         yield from self.parse_regex_lines(self._SEARCH_REGEXP, output)
 

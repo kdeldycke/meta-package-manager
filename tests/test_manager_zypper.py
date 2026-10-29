@@ -37,7 +37,7 @@ ONE_UPDATE = """<?xml version='1.0'?>
 <update kind="package" name="libopenh264-8" edition="2.6.0-2.suse1699.10" arch="aarch64" edition-old="2.6.0~noopenh264-1.5"><summary>H.264 codec library</summary><license/><source url="http://codecs.opensuse.org/openh264/openSUSE_Tumbleweed" alias="repo-openh264"/></update></update-list>
 </update-status>
 </stream>
-"""
+"""  # noqa: E501
 """`zypper --xmlout list-updates` on a host that is one package behind."""
 
 NO_UPDATES = """<?xml version='1.0'?>
@@ -63,7 +63,7 @@ ONE_SOLVABLE = """<?xml version='1.0'?>
 </solvable-list>
 </search-result>
 </stream>
-"""
+"""  # noqa: E501
 """`zypper --xmlout search --details --type package --match-exact gzip`: the
 ordinary shape of an exact search, not a corner case."""
 
@@ -83,7 +83,7 @@ MANY_SOLVABLES = """<?xml version='1.0'?>
 </solvable-list>
 </search-result>
 </stream>
-"""
+"""  # noqa: E501
 """`zypper --xmlout search --details --type package gzip`."""
 
 NO_SOLVABLE = """<?xml version='1.0'?>
@@ -114,8 +114,10 @@ NO_SOLVABLE = """<?xml version='1.0'?>
     ),
 )
 def test_xml_items_normalises_every_shape(parent, expected):
-    """`xmltodict` renders repeated elements in three shapes, and only one of
-    them is iterable as a list of children."""
+    """`xmltodict` renders repeated elements in three shapes.
+
+    Only one of them is iterable as a list of children.
+    """
     assert _xml_items(parent, "k") == expected
 
 

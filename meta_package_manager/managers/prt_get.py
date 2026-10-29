@@ -163,9 +163,9 @@ class PrtGet(PackageManager):
         """Fetch outdated packages.
 
         ```{caution}
-        Compares the installed packages against the local ports tree, so it
-        reports what the last {meth}`~meta_package_manager.manager.PackageManager.sync` fetched and not what CRUX publishes
-        right now.
+        Compares the installed packages against the local ports tree, so it reports what
+        the last {meth}`~meta_package_manager.manager.PackageManager.sync` fetched and
+        not what CRUX publishes right now.
         ```
 
         ```{code-block} shell-session
@@ -232,7 +232,7 @@ class PrtGet(PackageManager):
 
         prt-get: installed successfully
         ```
-        """
+        """  # noqa: E501
         return self.run_cli("depinst", package_id, sudo=True)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:

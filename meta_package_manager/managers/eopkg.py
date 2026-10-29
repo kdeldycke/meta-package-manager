@@ -311,7 +311,7 @@ class EOPKG(PackageManager):
         imagemagick-devel   - Development files for imagemagick
         imagemagick-docs    - Documentation for imagemagick
         ```
-        """
+        """  # noqa: E501
         # Extended search is the default behavior, so it adds no flag at all:
         # an empty string would be passed through as an empty argv element.
         # Non-extended search restricts matching to the package name.
@@ -407,7 +407,8 @@ class EOPKG(PackageManager):
         self.run_cli("update-repo", sudo=True)
 
     def cleanup_cache(self) -> None:
-        """Removes things we don't need anymore:
+        """Removes things we don't need anymore.
+
         - orphaned packages,
         - outdated package locks
         - package cache and package manager cache

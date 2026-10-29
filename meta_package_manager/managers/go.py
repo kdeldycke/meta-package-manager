@@ -157,7 +157,7 @@ class Go(PackageManager):
                 build	GOOS=darwin
                 build	GOARM64=v8.0
         ```
-        """
+        """  # noqa: E501
         package_id = None
         for line in self.run_cli("version", "-m", self.bin_dir).splitlines():
             # A record header names the file and carries no tab, so it both ends

@@ -184,7 +184,7 @@ class DNF(PackageManager):
         installed as `1:1.56.1-2.fc44`, and neither its epoch nor its release
         reaches this listing. `outdated` below reports ``%{evr}`` instead, which
         carries both.
-        """
+        """  # noqa: E501
         qf = ["%{name}", "%{version}", "%{summary}", "%{arch}\n"]
         output = self.run_cli(
             "repoquery", "--userinstalled", "--qf", self.DELIMITER.join(qf)
@@ -245,7 +245,7 @@ class DNF(PackageManager):
         openldap___MPM___2.6.14-1.fc44___MPM___LDAP support libraries___MPM___aarch64
         wireless-regdb___MPM___2026.09.03-1.fc44___MPM___Regulatory database for 802.11 wireless networking___MPM___noarch
         ```
-        """
+        """  # noqa: E501
         qf = ["%{name}", "%{evr}", "%{summary}", "%{arch}\n"]
         query_format = self.DELIMITER.join(qf)
 
@@ -462,8 +462,7 @@ class DNF(PackageManager):
 
 
 class DNF5(DNF):
-    """The `dnf5` rewrite of DNF, Fedora's reference package manager since
-    Fedora 41.
+    """The `dnf5` rewrite of DNF, Fedora's reference package manager since Fedora 41.
 
     Inherits every operation and parser from `DNF`. Its forced arguments drop
     `--color=never` (`dnf5` rejects that option), keeping only `--quiet`.

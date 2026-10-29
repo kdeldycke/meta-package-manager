@@ -112,7 +112,8 @@ References
   assuming any single format (falsehoods 4, 8, 13) and handling mixed
   numeric/string tokens (falsehoods 2, 3).
 
-- [Gentoo Perl version scheme](https://wiki.gentoo.org/wiki/Project:Perl/Version-Scheme) —
+- [Gentoo Perl version scheme](https://wiki.gentoo.org/wiki/Project:Perl/Version-Scheme)
+  —
   illustrates how two incompatible formats (dotted-decimal and
   floating-point) require careful mapping. A reminder that version
   comparison cannot be reduced to "split on dots, compare integers."
@@ -265,8 +266,7 @@ class Token:
         return value, integer
 
     def __init__(self, value: str | int) -> None:
-        """Instantiates a `Token` from an alphanumeric string or a non-negative
-        integer."""
+        """Instantiate a `Token` from an alphanumeric string or a non-negative int."""
         # Check provided value.
         if isinstance(value, str):
             if not value.isalnum():
@@ -365,13 +365,11 @@ class TokenizedString:
     """Comparison tokens with the epoch removed. See `_split_epoch()`."""
 
     def __hash__(self):
-        """A `TokenizedString` is made unique by its original string and tuple of
-        parsed tokens."""
+        """A `TokenizedString` is unique by its original string and parsed tokens."""
         return hash((self.string, self.separators, self.tokens))
 
     def __new__(cls, value, *args, **kwargs):
-        """Return same object if a `TokenizedString` parameter is used at
-        instantiation.
+        """Return same object if a `TokenizedString` parameter is used at instantiation.
 
         ```{hint}
 
@@ -449,8 +447,7 @@ class TokenizedString:
         return self.string.__format__(format_spec)
 
     def pretty_print(self) -> str:
-        """Reconstruct the tokenized string using original-case segments and
-        separators."""
+        """Rebuild the tokenized string from original-case segments and separators."""
         parts: list[str] = []
         for i, segment in enumerate(self.original_segments):
             parts.append(segment)
@@ -535,8 +532,7 @@ class TokenizedString:
     # nor pure-integer tuple comparison achieves.
 
     def __iter__(self):
-        """`TokenizedString` are essentially a wrapper around a tuple of `Token`
-        objects."""
+        """`TokenizedString` wraps a tuple of `Token` objects."""
         return iter(self.tokens)
 
     @staticmethod

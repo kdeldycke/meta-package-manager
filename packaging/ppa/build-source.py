@@ -39,7 +39,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 SPEC_DIR = Path(__file__).parent
@@ -198,7 +198,7 @@ def build_vendor_tree(version: str, project: Path, target: Path) -> None:
 
 
 def write_changelog(tree: Path, deb_version: str, series: str, version: str) -> None:
-    stamp = email.utils.format_datetime(datetime.now(timezone.utc))
+    stamp = email.utils.format_datetime(datetime.now(UTC))
     (tree / "debian" / "changelog").write_text(
         f"meta-package-manager ({deb_version}) {series}; urgency=medium\n"
         f"\n"

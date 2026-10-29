@@ -106,8 +106,10 @@ def _installer_dist(installer):
     ),
 )
 def test_running_from_bundled_app(prefix, distribution, bundled):
-    """A bundle is told by its `sys.prefix` and by the `INSTALLER` record of the
-    `mpm` distribution."""
+    """A bundle is told by its `sys.prefix` and by an `INSTALLER` record.
+
+    The `INSTALLER` record of the `mpm` distribution.
+    """
     with patch(PATCH_PREFIX, prefix), patch(PATCH_DIST, **distribution):
         assert Pip._running_from_bundled_app() is bundled
 

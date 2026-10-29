@@ -37,10 +37,13 @@ from meta_package_manager.brewfile import (
     quote,
     tap_from_package_id,
 )
-from meta_package_manager.manager import PackageManager
 from meta_package_manager.managers.mas import MAS
 from meta_package_manager.package import Package
 from meta_package_manager.pool import pool
+
+TYPE_CHECKING = False
+if TYPE_CHECKING:
+    from meta_package_manager.manager import PackageManager
 
 
 @dataclass
@@ -277,9 +280,11 @@ def test_mas_brewfile_entry_falls_back_to_id_when_name_missing():
 
 
 def test_vscodium_brewfile_skip_warning_set():
-    """VSCodium's definition declares no `brewfile_entry_type` so its extensions
-    are not silently emitted as `vscode` (which would install to VS Code instead
-    of VSCodium). The warning is the audible signal."""
+    """VSCodium's definition declares no `brewfile_entry_type`.
+
+    So its extensions are not silently emitted as `vscode`, which would install to VS
+    Code instead of VSCodium. The warning is the audible signal.
+    """
     assert pool["vscode"].brewfile_entry_type == "vscode"
     assert pool["vscodium"].brewfile_entry_type is None
     assert pool["vscodium"].brewfile_skip_warning is not None
@@ -287,9 +292,11 @@ def test_vscodium_brewfile_skip_warning_set():
 
 
 def test_phase_2_to_4_managers_have_brewfile_entry_types():
-    """Every brew-bundle-supported manager except `go` and `krew` has a
-    mapping. Catches regressions if a manager's class is reorganized (or converted
-    to a bundled definition) and the attribute is dropped."""
+    """Every brew-bundle-supported manager except `go` and `krew` has a mapping.
+
+    Catches regressions if a manager's class is reorganized (or converted to a bundled
+    definition) and the attribute is dropped.
+    """
     expected_entry_types = {
         "brew": "brew",
         "cargo": "cargo",
@@ -340,8 +347,9 @@ def test_build_brewfile_round_trip_format_is_parseable_by_ruby_inspect():
     reason="`brew` not on PATH; cannot validate Brewfile round-trip.",
 )
 def test_brew_bundle_check_parses_generated_brewfile(tmp_path):
-    """Pipe {func}`~meta_package_manager.brewfile.build_brewfile` output through `brew bundle check` to
-    catch DSL drift early.
+    """Pipe a generated Brewfile through `brew bundle check` to catch DSL drift.
+
+    The Brewfile comes from {func}`~meta_package_manager.brewfile.build_brewfile`.
 
     Uses a synthetic package set so the test runs in milliseconds rather than
     iterating the real manager pool. The point of the check is format validity

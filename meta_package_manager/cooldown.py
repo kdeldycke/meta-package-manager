@@ -64,11 +64,12 @@ as the single enumeration both the parser and the error messages read."""
 class CooldownPolicy(StrEnum):
     """Enforcement posture of an active release-age cooldown window.
 
-    Only applies to managers without native release-age support; managers
-    that can enforce the window natively always do, whatever the policy.
-    The values double as the CLI keywords of the `--cooldown` option and
-    (except {attr}`~meta_package_manager.cooldown.CooldownPolicy.off`) as the `policy` values of the `[mpm.cooldown]`
-    configuration table, so they spell exactly like the user types them.
+    Only applies to managers without native release-age support; managers that can
+    enforce the window natively always do, whatever the policy. The values double as the
+    CLI keywords of the `--cooldown` option and (except
+    {attr}`~meta_package_manager.cooldown.CooldownPolicy.off`) as the `policy` values of
+    the `[mpm.cooldown]` configuration table, so they spell exactly like the user types
+    them.
 
     Strength words (`strict`, `soft`, `full`, `partial`) stay out of the keyword
     set: they read as a weaker window, where a policy changes the scope of the
@@ -237,12 +238,13 @@ def resolve_cooldown(
 ) -> tuple[timedelta | None, CooldownPolicy]:
     """Merge the parsed `--cooldown` flag with the configuration settings.
 
-    Axis-by-axis precedence: a flag duration overrides the configured window
-    but inherits the configured policy; a flag policy overrides the
-    configured policy but inherits the configured window ({attr}`~meta_package_manager.cooldown.CooldownPolicy.off`
-    forces the window off too); an unset flag inherits both axes. Returns
-    the effective `(window, policy)` pair, the policy defaulted to
-    {attr}`CooldownPolicy.enforce` when neither side sets it.
+    Axis-by-axis precedence: a flag duration overrides the configured window but
+    inherits the configured policy; a flag policy overrides the configured policy but
+    inherits the configured window
+    ({attr}`~meta_package_manager.cooldown.CooldownPolicy.off` forces the window off
+    too); an unset flag inherits both axes. Returns the effective `(window, policy)`
+    pair, the policy defaulted to {attr}`CooldownPolicy.enforce` when neither side sets
+    it.
     """
     configured_policy = settings.policy or CooldownPolicy.enforce
     if flag is None or isinstance(flag, timedelta):

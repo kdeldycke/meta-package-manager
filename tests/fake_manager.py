@@ -15,12 +15,12 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """In-memory package manager for CLI plumbing tests.
 
-Real-manager iteration leaks the host environment into the test suite: a
-runner without `apk` skips it, a runner without `brew` skips it, and
-assertions about package counts or table rendering become a function of which
-binaries happen to be on PATH. The {class}`~tests.fake_manager.FakeManager` below sidesteps
-that by reporting as available on every platform and yielding a fixed catalog
-of packages without ever invoking a subprocess.
+Real-manager iteration leaks the host environment into the test suite: a runner without
+`apk` skips it, a runner without `brew` skips it, and assertions about package counts or
+table rendering become a function of which binaries happen to be on PATH. The
+{class}`~tests.fake_manager.FakeManager` below sidesteps that by reporting as available
+on every platform and yielding a fixed catalog of packages without ever invoking a
+subprocess.
 
 Tests opt in via the `fake_pool` fixture in {mod}`tests.conftest`, which
 monkeypatches {meth}`meta_package_manager.pool.ManagerPool.select_managers`

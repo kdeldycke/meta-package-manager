@@ -81,16 +81,18 @@ class APK(PackageManager):
     )
 
     requirement = ">=2.10.0"
-    """The `list` applet, used by {meth}`~meta_package_manager.manager.PackageManager.installed` and {meth}`~meta_package_manager.manager.PackageManager.outdated`,
-    was introduced in version `2.10.0`.
+    """The `list` applet was introduced in version `2.10.0`.
+
+    {meth}`~meta_package_manager.manager.PackageManager.installed` and
+    {meth}`~meta_package_manager.manager.PackageManager.outdated` use it.
     """
 
     query_requirement = ">=3.0.0"
     """Minimum apk version answering the `query` applet.
 
-    `apk-tools` 3 added `query`, which reports the same inventory as `list` does
-    but in `json` or `yaml`, so {meth}`~meta_package_manager.manager.PackageManager.installed` reads names and versions
-    outright instead of recovering them from a line's shape.
+    `apk-tools` 3 added `query`, which reports the same inventory as `list` does but in
+    `json` or `yaml`, so {meth}`~meta_package_manager.manager.PackageManager.installed`
+    reads names and versions outright instead of recovering them from a line's shape.
 
     Kept apart from {attr}`requirement` (`>=2.10.0`), following
     {attr}`Yay.cooldown_requirement
@@ -138,10 +140,11 @@ class APK(PackageManager):
     def _has_query_applet(self) -> bool:
         """Whether this apk is known to answer the `query` applet.
 
-        An undetectable version answers `False`, which only picks the `list`
-        dialect of {meth}`~meta_package_manager.manager.PackageManager.installed`: a manager whose version never resolved
-        fails {attr}`~meta_package_manager.manager.PackageManager.fresh` and so
-        runs no operation on a real host.
+        An undetectable version answers `False`, which only picks the `list` dialect of
+        {meth}`~meta_package_manager.manager.PackageManager.installed`: a manager whose
+        version never resolved fails
+        {attr}`~meta_package_manager.manager.PackageManager.fresh` and so runs no
+        operation on a real host.
         """
         if self.version is None:
             return False
@@ -224,8 +227,9 @@ class APK(PackageManager):
         """Fetch outdated packages.
 
         ```{caution}
-        Reads from the local repository cache. Run {meth}`~meta_package_manager.manager.PackageManager.sync` first
-        to refresh the index.
+        Reads from the local repository cache. Run
+        {meth}`~meta_package_manager.manager.PackageManager.sync` first to refresh the
+        index.
         ```
 
         ```{code-block} shell-session
@@ -234,7 +238,7 @@ class APK(PackageManager):
         acl-2.3.1-r0 x86_64 {acl} (LGPL-2.1-or-later) [upgradable from: acl-2.2.53-r0]
         python3-3.11.7-r0 x86_64 {python3} (PSF-2.0) [upgradable from: python3-3.11.6-r0]
         ```
-        """
+        """  # noqa: E501
         output = self.run_cli("list", "--upgradable")
 
         for match in self._OUTDATED_REGEXP.finditer(output):

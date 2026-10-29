@@ -72,9 +72,10 @@ def test_xkcd_set():
 
 @all_managers
 def test_unmaintained(manager):
-    """An unmaintained manager must document itself with a non-empty
-    `unmaintained_message`, and any URL embedded in that markdown message must be a
-    well-formed `http(s)` link.
+    """An unmaintained manager documents itself with `unmaintained_message`.
+
+    The message must be non-empty, and any URL embedded in that markdown message must be
+    a well-formed `http(s)` link.
 
     Conversely, an `unmaintained_message` is only meaningful on an unmaintained
     manager.
@@ -94,8 +95,9 @@ def test_unmaintained(manager):
 
 @all_managers
 def test_maintenance_note(manager):
-    """A `maintenance_note` is a MyST markdown block whose embedded URLs must be
-    well-formed `http(s)` links.
+    """A `maintenance_note` is MyST markdown with well-formed URLs.
+
+    Its embedded URLs must be well-formed `http(s)` links.
 
     It is mutually exclusive with the `unmaintained` flag: a confirmed-dead manager
     documents itself with an `unmaintained_message` instead of a watch note.
@@ -115,8 +117,7 @@ def test_maintenance_note(manager):
 
 @all_managers
 def test_operation_notes(manager):
-    """Every declared operation note keys a real operation and stays one full
-    sentence.
+    """Every declared operation note keys a real operation and stays one full sentence.
 
     The *Notes* column of the manager pages renders each entry verbatim beside
     its operation row, so a key outside the `Operations` vocabulary
@@ -182,8 +183,9 @@ def _privileged_methods(cls: type[PackageManager]) -> set[str]:
 
 @all_managers
 def test_privileged_operations(manager):
-    """`privileged_operations` names exactly the operations whose methods carry a
-    `sudo=True` marker.
+    """`privileged_operations` names exactly the `sudo=True` operations.
+
+    The operations whose methods carry a `sudo=True` marker.
 
     `prime_sudo` reads the set to choose the managers of the up-front password
     prompt. A missing operation lets an escalated command meet a cold cache
@@ -610,36 +612,40 @@ def test_eopkg_outdated_joins_the_upgrade_candidate(monkeypatch):
     (
         (
             "not installed: repository section only",
-            "htop package is not installed\n"
-            "Package found in Solus repository:\n"
-            "Name                : htop, version: 3.5.3, release: 30\n"
-            "Summary             : htop (interactive process viewer for Linux)\n"
-            "Description         : htop is an interactive process viewer for Linux.\n"
-            "Licenses            : GPL-2.0-or-later\n"
-            "Component           : system.utils\n"
-            "Dependencies        : ncurses glibc libcap2 lm_sensors \n"
-            "Distribution        : Solus, Dist. Release: 1\n"
-            "Architecture        : x86_64, Installed Size: 397.03 KB, "
-            "Package Size: 159.05\n"
-            "                      KB\n"
-            "Reverse Dependencies: htop-dbginfo \n",
+            (
+                "htop package is not installed\n"
+                "Package found in Solus repository:\n"
+                "Name                : htop, version: 3.5.3, release: 30\n"
+                "Summary             : htop (interactive process viewer for Linux)\n"
+                "Description         : htop is an interactive process viewer for Linux.\n"  # noqa: E501
+                "Licenses            : GPL-2.0-or-later\n"
+                "Component           : system.utils\n"
+                "Dependencies        : ncurses glibc libcap2 lm_sensors \n"
+                "Distribution        : Solus, Dist. Release: 1\n"
+                "Architecture        : x86_64, Installed Size: 397.03 KB, "
+                "Package Size: 159.05\n"
+                "                      KB\n"
+                "Reverse Dependencies: htop-dbginfo \n"
+            ),
             [("htop", "3.5.3", "30")],
         ),
         (
             "installed: both sections, only the repository one counts",
-            "Installed package:\n"
-            "Name                : bash, version: 5.3.15, release: 91\n"
-            "Summary             : bash (sh-compatible shell)\n"
-            "Licenses            : GPL-3.0-or-later\n"
-            "Component           : system.base\n"
-            "Dependencies        : readline glibc \n"
-            "Distribution        : Solus, Dist. Release: 1\n"
-            "Architecture        : x86_64, Installed Size: 9.51 MB\n"
-            "Reverse Dependencies: \n"
-            "\n"
-            "Package found in Solus repository:\n"
-            "Name                : bash, version: 5.3.15, release: 91\n"
-            "Summary             : bash (sh-compatible shell)\n",
+            (
+                "Installed package:\n"
+                "Name                : bash, version: 5.3.15, release: 91\n"
+                "Summary             : bash (sh-compatible shell)\n"
+                "Licenses            : GPL-3.0-or-later\n"
+                "Component           : system.base\n"
+                "Dependencies        : readline glibc \n"
+                "Distribution        : Solus, Dist. Release: 1\n"
+                "Architecture        : x86_64, Installed Size: 9.51 MB\n"
+                "Reverse Dependencies: \n"
+                "\n"
+                "Package found in Solus repository:\n"
+                "Name                : bash, version: 5.3.15, release: 91\n"
+                "Summary             : bash (sh-compatible shell)\n"
+            ),
             [("bash", "5.3.15", "91")],
         ),
     ),
@@ -950,8 +956,9 @@ props_ref = tuple(collect_props_ref())
 
 
 def test_operation_order():
-    """Double check operation IDs are ordered and aligned to the base manager class and
-    CLI implementation.
+    """Operation IDs are ordered and aligned to the base class and CLI.
+
+    Aligned to the base manager class and the CLI implementation.
 
     The subcommands span two section modules: the read-only queries in
     `cli_explore`, the state changers and diagnostics in `cli_maintenance`.
@@ -1090,8 +1097,6 @@ def test_argv_literals_carry_no_shell_quoting():
     The check is cheap because the population is small and static: every string
     constant handed to `run_cli`, `build_cli` or `run` across the package.
     """
-    import ast
-
     offenders = []
     for path in sorted(Path(inspect.getfile(managers_module)).parent.rglob("*.py")):
         tree = ast.parse(path.read_text(encoding="UTF-8"))
@@ -1220,8 +1225,10 @@ def test_reads_inside_mutating_methods_survive_plan_mode():
 
 
 def test_operation_vocabularies_agree():
-    """The method-to-operation map, the capability map and the definition schema
-    name the same methods and operations.
+    """The operation, capability and schema maps name the same methods.
+
+    The method-to-operation map, the capability map and the definition schema name the
+    same methods and operations.
 
     `OPERATION_KEYS_BY_METHOD` decides which `operations` entry a command takes its
     `extra_args` from. A method it misses builds commands that no entry reaches, and
@@ -1235,8 +1242,9 @@ def test_operation_vocabularies_agree():
 
 
 def test_extra_args_call_sites_are_explicit():
-    """Each CLI call that may not be the command of its operation says whether it
-    takes the user's `extra_args`.
+    """Each CLI call says whether it takes the user's `extra_args`.
+
+    Each call that may not be the command of its operation.
 
     `build_cli` adds the `extra_args` of the operation in flight to every command
     an operation method builds, the calls of the helpers it reaches included. A
@@ -1304,8 +1312,9 @@ def test_extra_args_call_sites_are_explicit():
 
 @all_managers
 def test_build_cli_adds_extra_args(manager, monkeypatch):
-    """Every manager's `build_cli` adds the `extra_args` of the operation in
-    flight, and leaves them out on request.
+    """`build_cli` adds the `extra_args` of the operation in flight.
+
+    Every manager's `build_cli` does, and leaves them out on request.
 
     The shell-plugin managers override `build_cli` to wrap their command in a
     `bash -c` or `fish -c` string, without calling the base one: they splice the

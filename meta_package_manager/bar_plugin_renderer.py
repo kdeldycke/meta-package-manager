@@ -13,8 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-"""Renderer on the `mpm` side, which builds the SwiftBar and Xbar plugin
-output.
+"""Renderer on the `mpm` side, which builds the SwiftBar and Xbar plugin output.
 
 This code is in its own module. {mod}`meta_package_manager.bar_plugin` uses
 the Python standard library only, because its
@@ -33,7 +32,6 @@ import contextlib
 import sys
 from functools import cached_property
 from io import StringIO
-from pathlib import Path
 
 from boltons.iterutils import flatten
 from boltons.strutils import strip_ansi
@@ -46,6 +44,10 @@ from .capabilities import Operations, implements
 from .package import manager_purl
 from .pool import pool
 from .version import common_prefix_length, diff_versions
+
+TYPE_CHECKING = False
+if TYPE_CHECKING:
+    from pathlib import Path
 
 MAX_VERSION_WIDTH = 18
 """Maximum width of a version in a menu line, in characters.
@@ -118,8 +120,7 @@ lower ratio, and a brighter red looks orange. See
 
 
 def elide_versions(old: str, new: str, width: int) -> tuple[str, str]:
-    """Shorten a pair of versions to `width` characters, and keep the two
-    versions different.
+    """Shorten a pair of versions to `width` characters, and keep them different.
 
     The function removes the end of each version first. The end holds the part
     that nobody reads: a commit SHA, a platform triple, or Homebrew's
@@ -187,8 +188,7 @@ class BarPluginRenderer(MPMPlugin):
 
     @cached_property
     def fold_sections(self) -> bool:
-        """Render the manager sections as inline accordions instead of
-        sub-menus.
+        """Render the manager sections as inline accordions instead of sub-menus.
 
         SwiftBar `2.1.0` renders an item with `fold=true` and its
         `--`-prefixed children as one collapsible section. A click on the
@@ -215,8 +215,9 @@ class BarPluginRenderer(MPMPlugin):
 
     @cached_property
     def max_version_width(self) -> int:
-        """Maximum width of a rendered version, in characters, before the
-        renderer shortens it.
+        """Maximum width of a rendered version, before the renderer shortens it.
+
+        In characters.
 
         The value comes from the `VAR_MAX_VERSION_WIDTH` environment variable,
         and its default is {data}`MAX_VERSION_WIDTH`. A value lower than `2`
@@ -228,8 +229,7 @@ class BarPluginRenderer(MPMPlugin):
 
     @cached_property
     def menu_diff_colors(self) -> dict[str, int]:
-        """Colors of the version-diff suffixes, adapted to the menu
-        appearance.
+        """Colors of the version-diff suffixes, adapted to the menu appearance.
 
         SwiftBar maps the default SGR `31` and `32` suffixes of
         {func}`meta_package_manager.version.diff_versions` to the adaptive
@@ -301,8 +301,9 @@ class BarPluginRenderer(MPMPlugin):
 
     @property
     def shell_env_options(self) -> tuple[str, ...]:
-        """`--shell-env` when the run rendering the menu adopted the login shell
-        environment, nothing otherwise.
+        """`--shell-env` if the menu run adopted the login shell environment.
+
+        Nothing otherwise.
 
         An action starts the way the plugin does, outside a terminal, so it
         needs the environment the menu was rendered from. The flag is read off
@@ -345,8 +346,7 @@ class BarPluginRenderer(MPMPlugin):
         self.pp(*args, "terminal=false", "alternate=true")
 
     def print_upgrade_all_item(self, manager: dict, submenu: str = "") -> None:
-        """Print the menu entry that upgrades every outdated package of one
-        manager."""
+        """Print the menu entry that upgrades every outdated package of one manager."""
         if manager.get("upgrade_all_cli"):
             if self.group_by_manager:
                 print("-----")
@@ -393,8 +393,7 @@ class BarPluginRenderer(MPMPlugin):
         return rows
 
     def version_tooltip(self, old: str, new: str, elided: tuple[str, str]) -> str:
-        """Return the full version pair for a menu item whose cells were
-        shortened.
+        """Return the full version pair for a menu item whose cells were shortened.
 
         SwiftBar shows a `tooltip` when the pointer is above the item, so the
         user can still read the characters that {meth}`max_version_width`
@@ -426,8 +425,7 @@ class BarPluginRenderer(MPMPlugin):
     def align_managers(
         self, rows_by_manager: dict[str, list[tuple[tuple[str, ...], str, str]]]
     ) -> dict[str, list[str]]:
-        """Align the rows of every manager, in one table or in one table per
-        manager.
+        """Align the rows of every manager, in one table or in one table per manager.
 
         One table serves the layouts where the managers share a column: the
         flat layout and the SwiftBar accordion. A table sized for one manager
@@ -567,8 +565,7 @@ class BarPluginRenderer(MPMPlugin):
         return capture.getvalue()
 
     def add_upgrade_cli(self, outdated_data):
-        """Add the upgrade commands to the data of `mpm outdated`, for the bar
-        plugin.
+        """Add the upgrade commands to the data of `mpm outdated`, for the bar plugin.
 
         Every menu action is one {attr}`mpm_cli` call limited to the manager of
         the section (`mpm --brew upgrade wget`). It is never the native command

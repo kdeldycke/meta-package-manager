@@ -29,10 +29,10 @@ import pytest
 from meta_package_manager.managers.guix import Guix
 
 LIST_INSTALLED = (
-    "hello          \t2.12.2\tout\t/gnu/store/8qjzxdk26p8c5nyj98s3321vbkmv9za0-hello-2.12.2\n"
-    "lua            \t5.1.5 \tout\t/gnu/store/sq2sj9gj8bqzgv493249xd8gzhhw1f0x-lua-5.1.5\n"
-    "glib           \t2.83.3\tout\t/gnu/store/h95r1yvlbrlqap6l8fsdzp7lpxair7sv-glib-2.83.3\n"
-    "glib           \t2.83.3\tbin\t/gnu/store/06w4p65r8hli2qnsdsnp0l8r1zghz5qr-glib-2.83.3-bin\n"
+    "hello          \t2.12.2\tout\t/gnu/store/8qjzxdk26p8c5nyj98s3321vbkmv9za0-hello-2.12.2\n"  # noqa: E501
+    "lua            \t5.1.5 \tout\t/gnu/store/sq2sj9gj8bqzgv493249xd8gzhhw1f0x-lua-5.1.5\n"  # noqa: E501
+    "glib           \t2.83.3\tout\t/gnu/store/h95r1yvlbrlqap6l8fsdzp7lpxair7sv-glib-2.83.3\n"  # noqa: E501
+    "glib           \t2.83.3\tbin\t/gnu/store/06w4p65r8hli2qnsdsnp0l8r1zghz5qr-glib-2.83.3-bin\n"  # noqa: E501
     "glib-networking\t2.78.1\tout\t/gnu/store/n4nicicydz8d24m2qi3ddwlcxlr534qn-glib-networking-2.78.1\n"
 )
 """`guix package --list-installed`, with the `bin` output of `glib` installed."""

@@ -19,7 +19,8 @@
 Two managers share this module because they share the FreeBSD ecosystem and
 the same on-disk install database:
 
-- {class}`~meta_package_manager.managers.pkg.PKG` wraps the binary `pkg` frontend, which fetches
+- {class}`~meta_package_manager.managers.pkg.PKG` wraps the binary `pkg` frontend, which
+  fetches
   pre-compiled artifacts from the official FreeBSD repository.
 - {class}`Ports` wraps the source-build workflow rooted at `/usr/ports`,
   driving {command}`make` recipes directly and delegating registry queries
@@ -60,8 +61,9 @@ it, but every tool and consumer in the wild assumes this default.
 
 
 class PKG(PackageManager):
-    """FreeBSD's binary pkg frontend, fetching pre-compiled artifacts from the
-    official FreeBSD repository.
+    """FreeBSD's binary pkg frontend.
+
+    It fetches pre-compiled artifacts from the official FreeBSD repository.
 
     Only root may modify the package database, so mutating operations escalate
     through `sudo` by default, like the {class}`Ports` sibling.
@@ -281,7 +283,7 @@ class PKG(PackageManager):
         $ pkg search --raw --raw-format json-compact \
           --search name --search comment --search description nyancat
         ```
-        """
+        """  # noqa: E501
         # The `search` subcommand is part of the command, not implied: without
         # it `pkg` reads `--raw` as a global argument and refuses to run.
         search_args = [
@@ -469,12 +471,11 @@ class Ports(PackageManager):
     """FreeBSD ports tree: the source-build workflow rooted at `/usr/ports`.
 
     ```{note}
-    Coexists with {class}`~meta_package_manager.managers.pkg.PKG` on the same system: both share the install
-    database maintained by `pkg`. `Ports` builds and tracks ports compiled
-    from source under `/usr/ports`, while `PKG` handles binary packages
-    from the FreeBSD repository. Listing operations may overlap because `pkg`
-    does not distinguish ports-built from binary-installed packages once they
-    are registered.
+    Coexists with {class}`~meta_package_manager.managers.pkg.PKG` on the same system:
+    both share the install database maintained by `pkg`. `Ports` builds and tracks ports
+    compiled from source under `/usr/ports`, while `PKG` handles binary packages from
+    the FreeBSD repository. Listing operations may overlap because `pkg` does not
+    distinguish ports-built from binary-installed packages once they are registered.
     ```
 
     ```{note}
@@ -564,7 +565,8 @@ class Ports(PackageManager):
     """BSD make reports its version as a date-like integer (e.g. `20240218`)."""
 
     _OUTDATED_REGEXP = re.compile(
-        r"^(?P<package_id>\S+)\s+<\s+needs updating\s+\(port has (?P<latest_version>\S+)\)",
+        r"^(?P<package_id>\S+)\s+<\s+needs updating\s+"
+        r"\(port has (?P<latest_version>\S+)\)",
         re.MULTILINE,
     )
     """Match outdated entries from `pkg version -vPL=` output.

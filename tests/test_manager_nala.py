@@ -64,8 +64,10 @@ def test_installed(stub_run_cli):
     ),
 )
 def test_outdated(stub_run_cli, output):
-    """The candidate comes from the status branch, the installed version from
-    the first line, whichever glyphs draw the branches."""
+    """The candidate comes from the status branch.
+
+    The installed version comes from the first line, whichever glyphs draw the branches.
+    """
     manager = Nala()
     stub_run_cli(manager, output)
     packages = [
@@ -83,8 +85,9 @@ def test_outdated_skips_a_record_without_candidate(stub_run_cli):
 
 
 def test_search(stub_run_cli):
-    """A search result is a record like those of `list`, its version the
-    latest available.
+    """A search result is a record like those of `list`.
+
+    Its version is the latest available.
 
     The docstring of {meth}`~meta_package_manager.managers.nala.Nala.search`
     documents the command alone, so the record of `list` stands in for its

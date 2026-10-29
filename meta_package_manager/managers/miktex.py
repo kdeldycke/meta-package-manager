@@ -159,7 +159,7 @@ class MiKTeX(PackageManager):
         false zwpagelayout
         true fancyhdr 4.0.3
         ```
-        """
+        """  # noqa: E501
         output = self.run_cli(
             "--disable-installer",
             "packages",

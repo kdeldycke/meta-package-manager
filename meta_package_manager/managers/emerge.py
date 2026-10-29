@@ -83,8 +83,10 @@ class Emerge(PackageManager):
     pre_args = ("--quiet", "--color", "n", "--nospinner")
 
     _PARSED_PRE_ARGS = tuple(arg for arg in pre_args if arg != "--quiet")
-    """{attr}`~meta_package_manager.execution.CLIExecutor.pre_args` without `--quiet`, for the operations whose output a
-    regex reads instead of a person.
+    """The pre-arguments without `--quiet`, for output a regex reads.
+
+    {attr}`~meta_package_manager.execution.CLIExecutor.pre_args` without `--quiet`,
+    for the operations whose output a regex reads instead of a person.
 
     `--quiet` changes the shape of what emerge prints, beyond dropping noise.
     `--search` collapses each hit to a bare `*  category/name` line,
@@ -158,7 +160,7 @@ class Emerge(PackageManager):
     $ emerge --version
     Portage 3.0.81.3 (python 3.14.7-final-0, default/linux/arm64/23.0, gcc-15, glibc-2.43-r2, 6.18.48-gentoo-dist-bin aarch64)
     ```
-    """
+    """  # noqa: E501
 
     @property
     def installed(self) -> Iterator[Package]:
@@ -210,7 +212,7 @@ class Emerge(PackageManager):
         [ebuild     U  ] sys-process/htop                                      [3.5.3]                      [3.5.1]
         [binary    gU  ] app-editors/nano                                      [9.2-1]                      [9.1]
         ```
-        """
+        """  # noqa: E501
         output = self.run_cli(
             "--update",
             "--deep",

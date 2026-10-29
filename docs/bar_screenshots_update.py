@@ -69,7 +69,7 @@ from meta_package_manager.bar_plugin_renderer import BarPluginRenderer
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Iterator, Mapping
+    from collections.abc import Generator, Mapping
 
 PROJECT_ROOT = Path(__file__).parent.parent
 
@@ -656,7 +656,7 @@ class Shot(NamedTuple):
                 "rendering",
                 self.appearance,
             ))
-        return "-".join((self.host.name.lower(), self.subject, self.appearance))
+        return f"{self.host.name.lower()}-{self.subject}-{self.appearance}"
 
     @property
     def path(self) -> Path:
@@ -711,11 +711,11 @@ SHOTS = (
 )
 """Every combination the plugin's page documents.
 
-Both hosts, both layout switches, and both system appearances: the appearance is
-worth an axis of its own because the version diff has to stay legible on each,
-which is what {meth}`~meta_package_manager.bar_plugin_renderer.BarPluginRenderer.menu_diff_colors`
-picks its palette for. Then, on SwiftBar alone and in the default layout, the
-About submenu and the preferences pane, each in both appearances.
+Both hosts, both layout switches, and both system appearances: the appearance is worth
+an axis of its own because the version diff has to stay legible on each, which is what
+{meth}`~meta_package_manager.bar_plugin_renderer.BarPluginRenderer.menu_diff_colors`
+picks its palette for. Then, on SwiftBar alone and in the default layout, the About
+submenu and the preferences pane, each in both appearances.
 """
 
 
@@ -883,7 +883,7 @@ def png_rows(target: Path) -> Frame:
 
 
 def settle_frame(fresh: Path, target: Path) -> None:
-    """Put a fresh capture in place of the committed frame, unless it is the same picture.
+    """Put a fresh capture in place of the committed frame, unless it is the same.
 
     Kept when the capture differs from the frame by no more than
     {data}`FRAME_TOLERANCE_LEVELS` on fewer than {data}`FRAME_TOLERANCE_SHARE`
@@ -947,7 +947,7 @@ def install(host: Host) -> Path:
 
 
 def clang(source: str, folder: Path, name: str) -> Path:
-    """Compile an Objective-C snippet into `folder`, for the private CoreGraphics classes.
+    """Compile an Objective-C snippet into `folder`, for private CoreGraphics classes.
 
     `swift` cannot name a class the SDK has no header for, and these have none.
     """
@@ -980,13 +980,13 @@ def display_scale() -> float:
         import CoreGraphics
         let display = CGMainDisplayID()
         print(Double(CGDisplayPixelsWide(display)) / Double(CGDisplayBounds(display).width))
-        """
+        """  # noqa: E501
         )
     )
 
 
 @contextmanager
-def virtual_display() -> Iterator[None]:
+def virtual_display() -> Generator[None, None, None]:
     """Hold a {data}`DISPLAY_SCALE` display under everything photographed in the block.
 
     Nothing is created over a main display already at that scale, which is what
@@ -1432,7 +1432,7 @@ tell application "System Events"
         return "none"
     end tell
 end tell
-"""
+"""  # noqa: E501
 """Locates the plugin's own status item and returns its centre.
 
 Matched on the title rather than taken as item 1: a developer running this
@@ -1815,7 +1815,7 @@ for (let i = 0; i < list.count; i++) {
     rows.push(`layer=${layer} owner=${owner} x=${b.X} y=${b.Y} w=${b.Width} h=${b.Height}`);
 }
 rows.join(String.fromCharCode(10));
-""",
+""",  # noqa: E501
         language="JXA",
     )
     print(f"  windows at {label}:")
@@ -1871,7 +1871,7 @@ tell application "System Events"
         return "none"
     end tell
 end tell
-""")
+""")  # noqa: E501
     )
     if reply == "none":
         return None
@@ -2030,7 +2030,7 @@ tell application "System Events"
         return "none"
     end tell
 end tell
-""")
+""")  # noqa: E501
     )
     if reply != "pressed":
         msg = f"{host.name} shows no {label!r} toolbar item"

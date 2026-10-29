@@ -60,9 +60,11 @@ class TestManagers(CLITableTests):
 
     @unsupported_manager_ids
     def test_unsupported_managers(self, invoke, subcmd, manager_id):
-        """A manager named by the user is reported whatever its state: the default
-        view widens to `supported` on an explicit selection, so the row spelling out
-        why `mpm` cannot use it is the answer the selector asked for."""
+        """A manager named by the user is reported whatever its state.
+
+        The default view widens to `supported` on an explicit selection, so the row
+        spelling out why `mpm` cannot use it is the answer the selector asked for.
+        """
         result = invoke(f"--{manager_id}", subcmd, color=False)
         assert result.exit_code == 0
         check_selection(result, set())
@@ -110,8 +112,10 @@ class TestManagers(CLITableTests):
         assert set(json.loads(result.stdout)) == set(pool.all_manager_ids)
 
     def test_default_view_drops_constant_columns(self, invoke, subcmd):
-        """`Supported` and `Executable` are a ✓ on every detected row, so the
-        default view leaves them out and the wider ones bring them back."""
+        """The default view leaves out `Supported` and `Executable`.
+
+        Both are a ✓ on every detected row. The wider views bring them back.
+        """
         labels = {spec.id: spec.label for spec, _ in MANAGERS_COLUMNS}
         dropped = (labels["supported"], labels["executable"])
 
@@ -170,11 +174,12 @@ class TestManagers(CLITableTests):
 
 
 def test_managers_stamps_global_timeout(invoke):
-    """The version probes behind the table's detection columns fire in the pool's
-    warm-up round, right after selection, so the `managers` subcommand must forward
-    the global `--timeout` for the pool to bind it on each candidate beforehand.
-    An unstamped instance falls back to the 120-second read-only default, letting a
-    wedged binary hold the whole round for that long.
+    """The `managers` subcommand forwards the global `--timeout` to the pool.
+
+    The version probes behind the table's detection columns fire in the pool's warm-up
+    round, right after selection, so the pool must bind the timeout on each candidate
+    beforehand. An unstamped instance falls back to the 120-second read-only default,
+    letting a wedged binary hold the whole round for that long.
     """
     original = pool["pip"].timeout
     try:

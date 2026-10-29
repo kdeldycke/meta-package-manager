@@ -37,10 +37,10 @@ if TYPE_CHECKING:
 class NPM(PackageManager):
     """The Node.js package manager.
 
-    mpm drives npm in global mode: every call forces `--global` so packages land
-    in the shared prefix instead of the current working directory. Per-scope
-    targeting and multi-binary discovery (several node versions through nvm) are
-    tracked in [#1725](https://github.com/kdeldycke/meta-package-manager/issues/1725). Command
+    mpm drives npm in global mode: every call forces `--global` so packages land in the
+    shared prefix instead of the current working directory. Per-scope targeting and
+    multi-binary discovery (several node versions through nvm) are tracked in
+    [#1725](https://github.com/kdeldycke/meta-package-manager/issues/1725). Command
     equivalences with the sibling JS managers are listed in
     [antfu-collective/ni](https://github.com/antfu-collective/ni?tab=readme-ov-file#ni).
 
@@ -127,8 +127,9 @@ class NPM(PackageManager):
     """
 
     def cooldown_env_value(self) -> str:
-        """Render {attr}`meta_package_manager.execution.CLIExecutor.cooldown` as an
-        integer day count for npm's `min-release-age`.
+        """Render the cooldown as a day count for the `min-release-age` of npm.
+
+        See {attr}`meta_package_manager.execution.CLIExecutor.cooldown`.
 
         Sub-day cooldowns round up so the gate over-protects rather than silently
         collapses to `0` (the "no cooldown" sentinel).
@@ -293,7 +294,7 @@ class NPM(PackageManager):
         $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
             search --json --no-description python | jq
         ```
-        """
+        """  # noqa: E501
         search_args = []
         if not extended:
             search_args.append("--no-description")

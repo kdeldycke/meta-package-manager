@@ -56,9 +56,9 @@ from .sudo import _hidden_prompt_risk
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
+    from typing import Self
 
     from click import Context
-    from typing_extensions import Self
 
     from .manager import PackageManager
 
@@ -692,10 +692,11 @@ def dispatch(
         *,
         last: bool,
     ) -> None:
-        """Drive one phase's lanes through its own trail, finishing the batch on the
-        last one. A held-back phase runs at `jobs=1`, which leaves the trail with no
-        aggregate indicator: its outcomes echo as plain lines and the terminal stays
-        still for a prompt.
+        """Drive the lanes of one phase through its own trail.
+
+        The batch finishes on the last one. A held-back phase runs at `jobs=1`, which
+        leaves the trail with no aggregate indicator: its outcomes echo as plain lines
+        and the terminal stays still for a prompt.
         """
         nonlocal ok
         with OperationTrail(

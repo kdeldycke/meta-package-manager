@@ -202,8 +202,9 @@ def catalog(ref: str = SIMPLE_ICONS_VERSION) -> dict[str, dict]:
 
 
 def relative_luminance(hex_color: str) -> float:
-    """Compute the [WCAG relative
-    luminance](https://www.w3.org/WAI/GL/wiki/Relative_luminance) of an RGB color.
+    """Compute the WCAG relative luminance of an RGB color.
+
+    See the [WCAG definition](https://www.w3.org/WAI/GL/wiki/Relative_luminance).
     """
     channels = []
     for offset in (0, 2, 4):

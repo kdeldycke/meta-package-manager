@@ -17,7 +17,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, cast
 
@@ -58,7 +58,6 @@ from cyclonedx.validation import make_schemabased_validator
 from cyclonedx.validation.json import JsonStrictValidator
 from packageurl import PackageURL
 
-from meta_package_manager.manager import PackageManager
 from meta_package_manager.package import (
     EMPTY_METADATA,
     Checksum,
@@ -74,6 +73,10 @@ from meta_package_manager.sbom.base import SBOM, ExportFormat
 from meta_package_manager.sbom.cyclonedx import CycloneDX
 from meta_package_manager.sbom.spdx import SPDX
 from meta_package_manager.sbom.vulnerabilities import Vulnerability
+
+TYPE_CHECKING = False
+if TYPE_CHECKING:
+    from meta_package_manager.manager import PackageManager
 
 
 class _StubManager:
@@ -233,9 +236,10 @@ def _rich_metadata() -> PackageMetadata:
 
 
 def test_minimal_mode_emits_bare_spdx_payload():
-    """Minimal mode must reproduce the legacy bare output: rich
-    metadata is ignored, no relationships beyond `DESCRIBES` are
-    emitted, and `download_location` falls back to `NOASSERTION`.
+    """Minimal mode reproduces the legacy bare output.
+
+    Rich metadata is ignored, no relationships beyond `DESCRIBES` are emitted, and
+    `download_location` falls back to `NOASSERTION`.
     """
     s = SPDX()
     s.init_doc()
@@ -252,9 +256,11 @@ def test_minimal_mode_emits_bare_spdx_payload():
 
 
 def test_bundled_mode_spdx_populates_rich_fields():
-    """A populated {class}`~meta_package_manager.package.PackageMetadata` flows into the SPDX
-    document: license, supplier override, originator, checksum, and a
-    dependency relationship resolved at {meth}`~meta_package_manager.sbom.base.SBOM.finalize` time.
+    """A populated package metadata flows into the SPDX document.
+
+    A {class}`~meta_package_manager.package.PackageMetadata` gives the license, supplier
+    override, originator, checksum, and a dependency relationship resolved at
+    {meth}`~meta_package_manager.sbom.base.SBOM.finalize` time.
     """
     s = SPDX()
     s.init_doc()
@@ -276,8 +282,9 @@ def test_bundled_mode_spdx_populates_rich_fields():
 
 
 def test_bundled_mode_cyclonedx_populates_rich_fields():
-    """CycloneDX renderer projects the same metadata into hashes,
-    licenses, supplier, external references, and dependency edges.
+    """The CycloneDX renderer projects the same metadata.
+
+    Into hashes, licenses, supplier, external references, and dependency edges.
     """
     c = CycloneDX()
     c.init_doc()
@@ -323,8 +330,9 @@ def test_bundled_mode_cyclonedx_populates_rich_fields():
 def test_cyclonedx_compound_license_expression_details(
     expression, expected_identifiers
 ):
-    """Compound expressions emit `LicenseExpression.details` with a
-    canonical SPDX URL per identifier, deduped and sorted by identifier.
+    """Compound expressions emit `LicenseExpression.details`.
+
+    With a canonical SPDX URL per identifier, deduped and sorted by identifier.
     """
     c = CycloneDX()
     c.init_doc()
@@ -364,8 +372,9 @@ def test_cyclonedx_compound_license_expression_details(
     ),
 )
 def test_spdx_license_normalization(declared, expected_present):
-    """The SPDX renderer must produce a document that validates against
-    the SPDX schema for every input it accepts.
+    """The SPDX renderer produces a document valid against the SPDX schema.
+
+    For every input it accepts.
     """
     s = SPDX()
     s.init_doc()
@@ -385,8 +394,9 @@ def test_spdx_license_normalization(declared, expected_present):
 
 
 def test_spdx_merges_external_per_package_sbom(tmp_path):
-    """The renderer adopts transitive deps from a per-package upstream
-    SPDX file and records the merge in `externalDocumentRefs`.
+    """The renderer adopts transitive deps from an upstream SPDX file.
+
+    A per-package upstream file, and it records the merge in `externalDocumentRefs`.
 
     The fixture mirrors the shape of Homebrew's
     `<prefix>/Cellar/<formula>/<version>/sbom.spdx.json`.
@@ -546,8 +556,8 @@ def _sample_vulnerability():
         aliases=("CVE-2021-99999",),
         references=("https://example.com/advisory",),
         fixed_versions=("1.0.1",),
-        published_date=datetime(2021, 1, 1, tzinfo=timezone.utc),
-        modified_date=datetime(2021, 6, 1, tzinfo=timezone.utc),
+        published_date=datetime(2021, 1, 1, tzinfo=UTC),
+        modified_date=datetime(2021, 6, 1, tzinfo=UTC),
         advisory_url="https://osv.dev/vulnerability/GHSA-aaaa-bbbb-cccc",
     )
 
@@ -755,8 +765,10 @@ def test_cyclonedx_advisory_found_under_an_alias_affects_the_formula():
 
 
 def test_shared_advisory_deduplicated_in_cyclonedx():
-    """One advisory affecting two components yields a single record with
-    two affects targets."""
+    """One advisory affecting two components yields a single record.
+
+    The record has two affects targets.
+    """
     c = CycloneDX()
     c.init_doc()
     manager = _as_manager(_StubManager("pip", "Python pip"))

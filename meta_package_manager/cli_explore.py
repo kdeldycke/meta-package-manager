@@ -79,7 +79,6 @@ from .config import dump_manager_overrides
 from .definitions import OVERRIDES_SECTION
 from .dispatch import collect_from_managers
 from .execution import SPINNER_DELAY, CLIError, highlight_cli_name
-from .manager import PackageManager
 from .package import Package, packages_asdict
 from .platforms import MAIN_PLATFORMS
 from .pool import pool
@@ -103,6 +102,8 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
 
     from click_extra import Context
+
+    from .manager import PackageManager
 
 
 MANAGER_VIEWS: Final[tuple[str, ...]] = ("detected", "supported", "all")
@@ -155,9 +156,9 @@ def managers(ctx, view):
     selects here.
 
     User's own selection configuration are intentionally ignored, so a manager dropped
-    from regular operations is still visible here for troubleshooting. To narrow down the
-    report to a subset of managers, pass the same selectors as for other subcommands (like
-    `--pip` or `--no-apt`).
+    from regular operations is still visible here for troubleshooting. To narrow down
+    the report to a subset of managers, pass the same selectors as for other subcommands
+    (like `--pip` or `--no-apt`).
     """
     if ctx.obj.user_drops:
         dropped = ", ".join(map(theme().invoked_command, sorted(ctx.obj.user_drops)))
@@ -240,7 +241,8 @@ def managers(ctx, view):
             highlight_cli_name(manager.cli_path, manager.cli_names)
             if manager.cli_path
             else (
-                f"{', '.join(map(theme().invoked_command, manager.cli_names))} not found"
+                ", ".join(map(theme().invoked_command, manager.cli_names))
+                + " not found"
             ),
         )
 
@@ -760,7 +762,7 @@ def which(ctx, cli_names):
             # Resolve symlinks and highlight the CLI name.
             symlink = ""
             if found_cli.is_symlink():
-                # resolve() always returns a Path, so highlight_cli_name won't return None.
+                # resolve() returns a Path, so highlight_cli_name never returns None.
                 resolved = highlight_cli_name(found_cli.resolve(), cli_names)
                 assert resolved is not None
                 symlink = f"→ {resolved}"
@@ -795,8 +797,7 @@ def which(ctx, cli_names):
 )
 @pass_context
 def config_template(ctx, manager_ids):
-    """Print the overridable attributes of one or more managers as a TOML config
-    template.
+    """Print the overridable attributes of managers as a TOML config template.
 
     Each block is a valid `[mpm.overrides.<id>]` section ready to paste into a
     standalone config file or a `[tool.mpm]` `pyproject.toml` block. The output

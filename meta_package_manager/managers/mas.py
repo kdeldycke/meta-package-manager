@@ -93,8 +93,9 @@ class MAS(PackageManager):
     """
 
     def brewfile_entry(self, package):
-        """Emit the app's display name, with its numeric adamID as the `id:`
-        keyword `brew bundle` installs from.
+        """Emit the display name of the app, with its adamID as the `id:` keyword.
+
+        `brew bundle` installs from the numeric `id:`.
 
         Returns `None` (silently skip) for any package whose ID is not such a
         number: without it the entry cannot round-trip, and a half-broken
@@ -109,8 +110,9 @@ class MAS(PackageManager):
 
     @staticmethod
     def _parse_json_stream(output: str) -> Iterator[dict]:
-        """Parse mas `--json` output as a stream of concatenated JSON objects,
-        one per app.
+        """Parse mas `--json` output as a stream of concatenated JSON objects.
+
+        One object per app.
 
         ```{note}
         `mas` emits one JSON object per record but does not escape control
@@ -146,7 +148,7 @@ class MAS(PackageManager):
         {"adamID":1295203466,"bundleID":"com.microsoft.rdc.macos","name":"Microsoft Remote Desktop","version":"10.7.6"}
         {"adamID":409183694,"bundleID":"com.apple.iWork.Keynote","name":"Keynote","version":"12.0"}
         ```
-        """
+        """  # noqa: E501
         output = self.run_cli("list", "--json")
 
         for app in self._parse_json_stream(output):
@@ -178,8 +180,9 @@ class MAS(PackageManager):
             )
 
     def release_date(self, package_id: str) -> datetime | None:
-        """Publication timestamp of the latest release of an app, read from the
-        App Store catalog.
+        """Publication timestamp of the latest release of an app.
+
+        Read from the App Store catalog.
 
         `mas lookup --json` relays the App Store's own catalog record, whose
         `currentVersionReleaseDate` is stamped by the store when the version
@@ -199,7 +202,7 @@ class MAS(PackageManager):
             raw_date = record.get("currentVersionReleaseDate")
             if raw_date:
                 try:
-                    return datetime.fromisoformat(str(raw_date).replace("Z", "+00:00"))
+                    return datetime.fromisoformat(str(raw_date))
                 except ValueError:
                     return None
         return None
@@ -283,5 +286,5 @@ class MAS(PackageManager):
         Password:
         Uninstalled '/Applications/SimpleLogin.app' to '/Users/kde/.Trash/SimpleLogin.app'
         ```
-        """
+        """  # noqa: E501
         return self.run_cli("uninstall", package_id)

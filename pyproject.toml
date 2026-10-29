@@ -528,7 +528,7 @@ packages.find.include = [ "meta_package_manager*" ]
 package-data."meta_package_manager.managers" = [ "*.lua", "*.toml" ]
 
 [tool.uv]
-required-version = ">=0.11.15"
+required-version = ">=0.12.22"
 # The docs group resolves for 3.14 alone, well above the project's own 3.10
 # floor. Nothing builds the documentation below it: docs.yaml, the logo audit
 # and tests/test_sphinx_crossrefs.py all run on the newest supported Python.

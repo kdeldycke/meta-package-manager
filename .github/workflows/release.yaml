@@ -27,7 +27,6 @@ concurrency:
         (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
         && github.run_id
       )
-      || github.event.pull_request.number
       || (
         (startsWith(github.event.head_commit.message, '[changelog] Release')
         || startsWith(github.event.head_commit.message, '[changelog] Post-release'))
@@ -52,7 +51,7 @@ env:
 jobs:
 
   build:
-    uses: kdeldycke/repomatic/.github/workflows/_release-build.yaml@d4e5f1199c8756fe04b12d5e864c2535fd9f3739 # v7.18.0
+    uses: kdeldycke/repomatic/.github/workflows/_release-build.yaml@8ddfc918229f98cf10ca9cf809c4b53ec84274cd # v8.0.0
     permissions:
       id-token: write
       issues: write
@@ -81,16 +80,19 @@ jobs:
       # create-release job, so this lane needs no write access to the repo.
       id-token: write
     steps:
-      - uses: kdeldycke/repomatic/.github/actions/publish-pypi@d4e5f1199c8756fe04b12d5e864c2535fd9f3739 # v7.18.0
+      - uses: kdeldycke/repomatic/.github/actions/publish-pypi@8ddfc918229f98cf10ca9cf809c4b53ec84274cd # v8.0.0
         with:
           artifact-name: ${{ github.event.repository.name }}-${{ matrix.short_sha }}
 
   release:
-    uses: kdeldycke/repomatic/.github/workflows/_release-engine.yaml@d4e5f1199c8756fe04b12d5e864c2535fd9f3739 # v7.18.0
+    uses: kdeldycke/repomatic/.github/workflows/_release-engine.yaml@8ddfc918229f98cf10ca9cf809c4b53ec84274cd # v8.0.0
     needs:
       - build
       - build-gnome-extension
+    with:
+      metadata: ${{ needs.build.outputs.metadata }}
     permissions:
+      actions: write
       attestations: write
       contents: write
       id-token: write
@@ -235,7 +237,7 @@ jobs:
           GH_TOKEN: ${{ secrets.REPOMATIC_PAT || github.token }}
           VERSION: ${{ steps.check.outputs.version }}
         run: >
-          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.18.0'
+          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==8.0.0'
           pr-sync --template-file .github/pr-templates/update-package-spec.md
           --template-arg channel=Guix
           --template-arg version="${VERSION}"
@@ -325,7 +327,7 @@ jobs:
           GH_TOKEN: ${{ secrets.REPOMATIC_PAT || github.token }}
           VERSION: ${{ steps.check.outputs.version }}
         run: >
-          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.18.0'
+          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==8.0.0'
           pr-sync --template-file .github/pr-templates/update-package-spec.md
           --template-arg channel=Nix
           --template-arg version="${VERSION}"

@@ -27,18 +27,18 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+    - uses: astral-sh/setup-uv@18d369b23da25a81e9458561248e1aafff6a70fa # v10.3.1
       with:
         enable-cache: false
         # Downstream callers invoke this action without a checkout (the codegen drops it: see
         # _render_publish_pypi_job in repomatic/github/workflow_sync.py), so the empty workdir
         # is by design and setup-uv's warning about it is noise.
         ignore-empty-workdir: true
-        version: "0.12.17"
+        version: "0.13.4"
 
     - name: Download build artifact
       id: download
-      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+      uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
       with:
         name: ${{ inputs.artifact-name }}
         path: dist/
@@ -55,35 +55,16 @@ runs:
         fi
         uv "${args[@]}" "${DOWNLOAD_PATH}"/*
 
-    # `uv publish` above only confirms the upload was accepted; PyPI's index/CDN
-    # can take up to a few minutes to make the new version resolvable everywhere.
-    # Downstream automation that reacts immediately to this workflow completing
-    # (a caller bumping a pin to the version just published, or a
-    # self-referential project like repomatic syncing its own workflow refs
-    # against itself) can race that propagation window and fail with a spurious
-    # "no version of X==Y" resolution error. Block here until the published
-    # version is actually visible, so nothing downstream inherits the race.
+    # `uv publish` above only confirms the upload was accepted. Block until PyPI
+    # serves the published version, so nothing downstream races its propagation:
+    # see wait_for_release in repomatic/pypi.py. A downstream caller checks
+    # nothing out, so the CLI runs from the source tree this action was fetched
+    # with, at the action's own ref, three levels above the action directory.
     - name: Wait for PyPI propagation
       if: inputs.repository-url == ''
       env:
         DOWNLOAD_PATH: ${{ steps.download.outputs.download-path }}
       shell: bash
-      run: |
-        sdist=$(ls "${DOWNLOAD_PATH}"/*.tar.gz | head -1)
-        base=$(basename "${sdist}" .tar.gz)
-        pkg_version="${base##*-}"
-        pkg_name="${base%-*}"
-        echo "Waiting for ${pkg_name} ${pkg_version} to become visible on PyPI..."
-        for attempt in $(seq 1 20); do
-          if curl --fail --silent --show-error --output /dev/null \
-              "https://pypi.org/pypi/${pkg_name}/${pkg_version}/json"; then
-            echo "Visible after ${attempt} attempt(s) (~$(( (attempt - 1) * 15 ))s)."
-            exit 0
-          fi
-          sleep 15
-        done
-        msg="${pkg_name} ${pkg_version} was not visible on PyPI within 5 minutes of publishing."
-        msg="${msg} Downstream automation pinning to this version may fail transiently"
-        msg="${msg} until propagation catches up."
-        echo "::error::${msg}" >&2
-        exit 1
+      run: >
+        uv --no-progress run --frozen --project "${GITHUB_ACTION_PATH}/../../.."
+        -- repomatic wait-pypi --dir "${DOWNLOAD_PATH}"

@@ -56,9 +56,22 @@ name: 🔬 Tests
 
 permissions: {}
 
+# A release push lands in a group of its own, keyed on its SHA, so no later push
+# cancels the one post-merge run of the release tree. `cancel-in-progress` alone
+# cannot spare it: GitHub reads that value from the newer run. Its head commit is
+# the post-release bump, which follows the release commit in the same push.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: ${{ !startsWith(github.event.head_commit.message, '[changelog] Release') }}
+  group: >-
+    ${{ github.workflow }}-${{
+      github.event.pull_request.number
+      || (
+        (startsWith(github.event.head_commit.message, '[changelog] Release')
+        || startsWith(github.event.head_commit.message, '[changelog] Post-release'))
+        && github.sha
+      )
+      || github.ref
+    }}
+  cancel-in-progress: true
 
 # Supply-chain cooldown: no package published within the window can be resolved by
 # any command in this workflow. Set here, not per command, so it also covers the
@@ -110,7 +123,7 @@ jobs:
       - name: Run repomatic show-metadata
         id: metadata
         run: >
-          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==7.18.0' show-metadata
+          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==8.0.0' show-metadata
           --format github-json --output "$GITHUB_OUTPUT"
           test_matrix test_matrix_pr
 

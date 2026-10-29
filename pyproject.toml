@@ -1050,7 +1050,6 @@ manpages.script = "meta_package_manager.cli:mpm"
 # `meta-package-manager-manpages.tar.gz`) when omitted; `mpm-manpages.tar.gz`
 # matches the CLI name and shortens the asset URL on every release.
 manpages.asset-name = "mpm-manpages"
-# Content-based labeller rules. See repomatic's labels.content-rules schema.
 # One chart per documentation page embedding one, in the filenames the
 # pages already reference. `only` keeps the five tracked series to
 # themselves: the default would plot all hundred-odd subjects. The benchmark

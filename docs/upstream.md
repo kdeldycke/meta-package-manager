@@ -156,6 +156,7 @@ Reports filed while vetting tools for the [benchmark's queue](benchmark.md):
 ### CI infrastructure
 
 - [Cyberboss/install-winget#12](https://github.com/Cyberboss/install-winget/issues/12): runner compatibility for the action installing [`winget`](managers/winget.md) on `mpm`'s Windows test lane.
+- [pypi/warehouse#20854](https://github.com/pypi/warehouse/issues/20854): the CDN cached a cut-off uncompressed copy of the `meta-package-manager` JSON API response, so the setup guide read the package as never released and reopened [#1728](https://github.com/kdeldycke/meta-package-manager/issues/1728). PyPI purged it, and the issue stays open while the CDN vendor investigates.
 
 ### Project listings
 

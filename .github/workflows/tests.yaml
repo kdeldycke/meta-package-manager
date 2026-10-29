@@ -124,7 +124,7 @@ jobs:
         id: metadata
         run: >
           uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==8.0.0' show-metadata
-          --format github-json --output "$GITHUB_OUTPUT"
+          --output-format github-json --output "$GITHUB_OUTPUT"
           test_matrix test_matrix_pr
 
   tests:
@@ -654,9 +654,19 @@ jobs:
           -m "not once"
           --cov
           --cov-report=term
-          --numprocesses=auto --dist=loadgroup --maxschedchunk=1
+          --cov-report=json:${{ runner.temp }}/coverage.json
+          --numprocesses=logical --dist=loadgroup --maxschedchunk=1
           --run-non-destructive --skip-destructive
           --deselect=tests/test_bar_plugin.py::TestBarPlugin
+
+      - name: Check the coverage floor
+        # Warns when the floor sits more than two points under the coverage total of the step above, so the ratchet
+        # gets raised instead of drifting. `!cancelled()` reads the report after a failed test too: its total stays
+        # sound.
+        if: ${{ !cancelled() }}
+        run: >
+          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==8.0.0' lint-coverage
+          --report "${{ runner.temp }}/coverage.json" --no-fatal
 
       # The end-to-end bar plugin tests call way too many external commands to be run in parallel, and need macOS.
       # `--cov-fail-under=0` opts this slice out of the coverage ratchet: a single test class covers a fraction of the

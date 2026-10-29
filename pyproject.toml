@@ -738,6 +738,10 @@ addopts = [
 markers = [
   "once: Tests that only need to run once, not across the full CI matrix.",
 ]
+# A config key pytest does not know, and a marker nothing declares, fail
+# collection instead of printing a warning that scrolls past.
+strict_config = true
+strict_markers = true
 # Only tests/ holds test modules; keep a bare `pytest` from walking docs/ and packaging/.
 testpaths = [ "tests" ]
 # Make sure tests that are expected to fail do not resurect and start working all of a sudden.
@@ -916,7 +920,8 @@ docs/_linkcheck/
 # either plugin.
 lint-repo.declined.pytest.addopts."--cov-report=term" = "tests.yaml passes it, so packagers need no pytest-cov."
 lint-repo.declined.pytest.addopts."--durations=10" = "--durations=25 replaces it, to show the tail of slow tests."
-lint-repo.declined.pytest.addopts."--numprocesses=auto" = "tests.yaml passes it, so packagers need no pytest-xdist."
+lint-repo.declined.pytest.addopts."--dist=loadgroup" = "tests.yaml passes it, so packagers need no pytest-xdist."
+lint-repo.declined.pytest.addopts."--numprocesses=logical" = "tests.yaml passes it, so packagers need no pytest-xdist."
 # Extension zip packed by release.yaml's build-gnome-extension job and attached
 # to every GitHub release by the engine's extra-assets job (repomatic >= 7.4.2).
 release-assets = [ "mpm-gnome-shell-extension.zip" ]
@@ -996,11 +1001,11 @@ test-matrix.remove.os = [ "macos-26-intel" ]
 # interpreter their channel ships, while macOS and Windows users install a
 # Nuitka binary carrying a pinned one.
 #
-# Prerelease 3.15 rides on that same reasoning and keeps repomatic's built-in
-# `unstable` flag. Free-threaded 3.14t needs no entry: it is not a value of the
+# Prerelease 3.16 rides on that same reasoning and keeps repomatic's built-in
+# `unstable` flag. Free-threaded 3.15t needs no entry: it is not a value of the
 # `python-version` axis, so an exclude naming it matches nothing and is dropped
 # with a warning. repomatic already lands it on ubuntu-26.04-arm alone, and
-# marks it stable (3.14's free-threaded build is supported).
+# marks it stable (3.15's free-threaded build is supported).
 #
 # A failing cell has no same-OS twin left to tell a bug from a host artifact:
 # run it again before diagnosing it. Ask the measured question again before
@@ -1018,11 +1023,15 @@ test-matrix.exclude = [
   { os = "macos-26", python-version = "3.10" },
   { os = "windows-2025", python-version = "3.10" },
   { os = "windows-11-arm", python-version = "3.10" },
-  { os = "ubuntu-26.04", python-version = "3.15" },
-  { os = "macos-26", python-version = "3.15" },
-  { os = "windows-2025", python-version = "3.15" },
-  { os = "windows-11-arm", python-version = "3.15" },
+  { os = "ubuntu-26.04", python-version = "3.16" },
+  { os = "macos-26", python-version = "3.16" },
+  { os = "windows-2025", python-version = "3.16" },
+  { os = "windows-11-arm", python-version = "3.16" },
 ]
+# repomatic's axis starts at 3.11, its own floor, whatever `requires-python`
+# declares. Swap that floor for this project's, so the excludes above and
+# `tests/test_metadata.py` see the version `requires-python` names.
+test-matrix.replace.python-version = { "3.11" = "3.10" }
 # One more cell on the floor runner and Python installs every direct dependency
 # at the lowest version its specifier allows, where the lockfile holds the
 # newest. Distribution packagers build against the releases their channel

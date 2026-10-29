@@ -148,7 +148,7 @@ def test_matrix_python_floor_matches_requires_python():
                 "repomatic=P0D",
                 f"repomatic=={_pinned_repomatic()}",
                 "show-metadata",
-                "--format",
+                "--output-format",
                 "json",
                 "test_matrix",
                 "test_matrix_pr",

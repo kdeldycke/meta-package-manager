@@ -38,7 +38,8 @@ agnoster      bobthefish    default       scorphish"""
 
 def test_installed_reads_every_column(capture_run_cli):
     """Every name of both sections is a package, in the order printed, and the
-    two section headers are not."""
+    two section headers are not.
+    """
     manager = OhMyFish()
     calls = capture_run_cli(manager, LIST_OUTPUT)
     packages = list(manager.installed)

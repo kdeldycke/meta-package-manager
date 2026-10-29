@@ -19,7 +19,7 @@ from __future__ import annotations
 import gc
 import logging
 import threading
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -80,7 +80,7 @@ def test_release_anchored_cutoff_math(
     release timestamps (idna 3.6 / 3.7 on PyPI) and a frozen 'today' so the
     arithmetic stays deterministic.
     """
-    fake_now = datetime(2024, 4, 15, tzinfo=timezone.utc)
+    fake_now = datetime(2024, 4, 15, tzinfo=UTC)
     cooldown = Duration().convert(cooldown_input, None, None)
     assert cooldown is not None
     cutoff = fake_now - cooldown
@@ -125,7 +125,7 @@ def test_timestamp_based_managers_inject_cutoff(manager_class):
     env = manager.cooldown_env()
     assert set(env) == {manager.cooldown_env_var}
     cutoff = datetime.fromisoformat(env[manager.cooldown_env_var])
-    now = datetime.now(tz=timezone.utc)
+    now = datetime.now(tz=UTC)
     # The cutoff sits roughly one cooldown in the past (a minute of slack).
     assert abs((now - cutoff) - timedelta(days=7)) < timedelta(minutes=1)
 
@@ -238,8 +238,8 @@ def test_yay_cooldown_overlay(tmp_path, monkeypatch):
     # The cutoff sits roughly one cooldown in the past (a minute of slack).
     epoch = env["MPM_COOLDOWN_EPOCH"]
     assert epoch is not None
-    cutoff = datetime.fromtimestamp(int(epoch), tz=timezone.utc)
-    now = datetime.now(tz=timezone.utc)
+    cutoff = datetime.fromtimestamp(int(epoch), tz=UTC)
+    now = datetime.now(tz=UTC)
     assert abs((now - cutoff) - timedelta(days=7)) < timedelta(minutes=1)
 
     # The overlay carries the generated policy and a symlink back to the real config.
@@ -426,13 +426,13 @@ def test_hold_inactive_without_cooldown(monkeypatch):
 
 
 def test_hold_passes_aged_release(monkeypatch):
-    aged = datetime.now(tz=timezone.utc) - timedelta(days=30)
+    aged = datetime.now(tz=UTC) - timedelta(days=30)
     manager = _probed_flatpak(monkeypatch, {"org.example.Fig": aged})
     assert manager.cooldown_hold("org.example.Fig") is None
 
 
 def test_hold_dates_fresh_release(monkeypatch):
-    fresh = datetime.now(tz=timezone.utc) - timedelta(days=1)
+    fresh = datetime.now(tz=UTC) - timedelta(days=1)
     manager = _probed_flatpak(monkeypatch, {"org.example.Kiwi": fresh})
     hold = manager.cooldown_hold("org.example.Kiwi")
     assert hold == CooldownHold(released=fresh, eligible=fresh + timedelta(days=7))
@@ -492,16 +492,16 @@ def test_hold_dry_run_skips_probe(monkeypatch):
 
 
 def test_hold_naive_datetime_read_as_utc(monkeypatch):
-    fresh_naive = datetime.now(tz=timezone.utc).replace(tzinfo=None) - timedelta(days=1)
+    fresh_naive = datetime.now(tz=UTC).replace(tzinfo=None) - timedelta(days=1)
     manager = _probed_flatpak(monkeypatch, {"org.example.Kiwi": fresh_naive})
     hold = manager.cooldown_hold("org.example.Kiwi")
     assert hold is not None
-    assert hold.released == fresh_naive.replace(tzinfo=timezone.utc)
+    assert hold.released == fresh_naive.replace(tzinfo=UTC)
 
 
 def test_hold_probes_each_package_once(monkeypatch):
     """A verdict is reused whatever it says: held, cleared or undatable."""
-    fresh = datetime.now(tz=timezone.utc) - timedelta(days=1)
+    fresh = datetime.now(tz=UTC) - timedelta(days=1)
     dates = {
         "org.example.Fig": fresh - timedelta(days=30),
         "org.example.Kiwi": fresh,
@@ -528,10 +528,11 @@ def test_hold_probes_each_package_once(monkeypatch):
 
 def test_synthesized_gate_reroutes_upgrade_all(monkeypatch):
     """An active probe-backed cooldown swaps the native one-shot upgrade for the
-    per-package path: eligible packages upgrade, too-fresh ones are held."""
+    per-package path: eligible packages upgrade, too-fresh ones are held.
+    """
     manager = Flatpak()
     manager.cooldown = timedelta(days=7)
-    now = datetime.now(tz=timezone.utc)
+    now = datetime.now(tz=UTC)
     dates = {
         "org.example.Fig": now - timedelta(days=30),
         "org.example.Kiwi": now - timedelta(days=1),
@@ -581,7 +582,7 @@ def test_flatpak_release_date_reads_installed_origin(monkeypatch):
 
     monkeypatch.setattr(manager, "run_cli", fake_run_cli)
     published = manager.release_date("org.gnome.Dictionary")
-    assert published == datetime(2020, 12, 8, 12, 0, 26, tzinfo=timezone.utc)
+    assert published == datetime(2020, 12, 8, 12, 0, 26, tzinfo=UTC)
 
 
 def test_flatpak_release_date_probes_every_remote_for_a_new_app(monkeypatch):
@@ -598,7 +599,7 @@ def test_flatpak_release_date_probes_every_remote_for_a_new_app(monkeypatch):
 
     monkeypatch.setattr(manager, "run_cli", fake_run_cli)
     published = manager.release_date("org.gnome.Dictionary")
-    assert published == datetime(2020, 12, 8, 12, 0, 26, tzinfo=timezone.utc)
+    assert published == datetime(2020, 12, 8, 12, 0, 26, tzinfo=UTC)
 
 
 def test_flatpak_release_date_none_without_date_line(monkeypatch):
@@ -639,7 +640,7 @@ Build Date      : Tue, 22 Jul 2025 09:14:02
         pytest.param(
             "paru",
             _PARU_AUR_INFO_OUTPUT,
-            datetime(2025, 7, 12, 14, 52, 15, tzinfo=timezone.utc),
+            datetime(2025, 7, 12, 14, 52, 15, tzinfo=UTC),
             id="aur-last-modified",
         ),
         pytest.param(
@@ -647,7 +648,7 @@ Build Date      : Tue, 22 Jul 2025 09:14:02
             _PARU_AUR_INFO_OUTPUT.replace(
                 "Sat, 12 Jul 2025 14:52:15", "Wed,  2 Jul 2025 08:01:02"
             ),
-            datetime(2025, 7, 2, 8, 1, 2, tzinfo=timezone.utc),
+            datetime(2025, 7, 2, 8, 1, 2, tzinfo=UTC),
             id="space-padded-day",
         ),
         pytest.param(
@@ -669,7 +670,8 @@ Build Date      : Tue, 22 Jul 2025 09:14:02
 )
 def test_paru_release_date(stub_run_cli, package_id, output, expected):
     """An AUR package is dated by its `Last Modified` field, a repository package
-    is exempt, and an answer with no readable date dates nothing."""
+    is exempt, and an answer with no readable date dates nothing.
+    """
     manager = Paru()
     stub_run_cli(manager, output)
     published = manager.release_date(package_id)
@@ -685,10 +687,11 @@ def test_hold_passes_exempt_sentinel(monkeypatch):
 
 def test_paru_gated_upgrade_all_rides_the_ignore_flag(monkeypatch):
     """Held AUR packages are excluded from the single `--sysupgrade`
-    transaction instead of rerouting to per-package upgrades."""
+    transaction instead of rerouting to per-package upgrades.
+    """
     manager = Paru()
     manager.cooldown = timedelta(days=7)
-    now = datetime.now(tz=timezone.utc)
+    now = datetime.now(tz=UTC)
     dates = {
         "fig": COOLDOWN_EXEMPT,
         "kiwi": now - timedelta(days=1),
@@ -707,7 +710,7 @@ def test_paru_gated_upgrade_all_rides_the_ignore_flag(monkeypatch):
 def test_paru_gated_upgrade_all_without_holds_keeps_native_cli(monkeypatch):
     manager = Paru()
     manager.cooldown = timedelta(days=7)
-    aged = datetime.now(tz=timezone.utc) - timedelta(days=30)
+    aged = datetime.now(tz=UTC) - timedelta(days=30)
     monkeypatch.setattr(
         manager, "release_date", {"fig": COOLDOWN_EXEMPT, "plum": aged}.get
     )
@@ -724,7 +727,7 @@ def test_paru_gated_upgrade_all_without_holds_keeps_native_cli(monkeypatch):
         pytest.param(
             '{"adamID":999999999,"currentVersionReleaseDate":'
             '"2020-03-18T17:39:23Z","name":"Papaya","version":"2.0"}',
-            datetime(2020, 3, 18, 17, 39, 23, tzinfo=timezone.utc),
+            datetime(2020, 3, 18, 17, 39, 23, tzinfo=UTC),
             id="catalog-record",
         ),
         pytest.param('{"adamID":999999999,"name":"Papaya"}', None, id="no-date-field"),
@@ -737,7 +740,8 @@ def test_paru_gated_upgrade_all_without_holds_keeps_native_cli(monkeypatch):
 )
 def test_mas_release_date(capture_run_cli, output, expected):
     """The release date is the `currentVersionReleaseDate` of the catalog record
-    `mas lookup` prints, and `None` when the record holds no readable date."""
+    `mas lookup` prints, and `None` when the record holds no readable date.
+    """
     manager = MAS()
     calls = capture_run_cli(manager, output)
     assert manager.release_date("999999999") == expected
@@ -751,7 +755,7 @@ def test_attempt_install_reports_cooldown_status(monkeypatch):
 
 
 def test_package_task_holds_fresh_release(monkeypatch):
-    fresh = datetime.now(tz=timezone.utc) - timedelta(days=1)
+    fresh = datetime.now(tz=UTC) - timedelta(days=1)
     manager = _probed_flatpak(monkeypatch, {"org.example.Kiwi": fresh})
     spec = Specifier(raw_spec="org.example.Kiwi", package_id="org.example.Kiwi")
     task = package_task(

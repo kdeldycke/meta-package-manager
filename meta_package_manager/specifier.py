@@ -304,7 +304,8 @@ class EmptyReduction(Exception):
 
 class Solver:
     """Combine a set of `Specifier` and allow for the solving of the constraints they
-    represent."""
+    represent.
+    """
 
     manager_priority: Sequence[str] = ()
 

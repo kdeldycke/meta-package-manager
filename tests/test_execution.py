@@ -77,7 +77,8 @@ _NON_UNIX_PLATFORM = next(p for p in ALL_PLATFORMS if p not in UNIX)
 
 def test_operation_timeouts_cover_all_operations():
     """Every routable operation must have a per-operation timeout default, so the
-    map and the `Operations` enum never drift apart."""
+    map and the `Operations` enum never drift apart.
+    """
     for operation in Operations:
         assert operation.name in OPERATION_TIMEOUTS
 
@@ -112,7 +113,8 @@ def test_read_only_tier_is_shorter_than_mutating_tier():
 @pytest.mark.parametrize("active_operation", (None, "version", "search", "install"))
 def test_resolve_timeout_explicit_wins(active_operation):
     """An explicit timeout (`--timeout` or per-manager override) wins for every
-    operation, including unknown ones."""
+    operation, including unknown ones.
+    """
     manager = FakeManager()
     manager.timeout = 42
     manager._active_operation = active_operation
@@ -385,7 +387,8 @@ FAIL_ON_STDERR = "import sys; sys.stderr.write('boom'); sys.exit(8)"
 )
 def test_run_failure_gate(stop_on_error, must_succeed, script, expectation):
     """The failure gate decides raise / accumulate / tolerate from the exit code,
-    the `<stderr>` content, and the `stop_on_error`/`must_succeed` context."""
+    the `<stderr>` content, and the `stop_on_error`/`must_succeed` context.
+    """
     manager = FakeManager()
     manager.stop_on_error = stop_on_error
 
@@ -479,7 +482,8 @@ def _numbered_lines(stop, start=0):
 )
 def test_cli_error_diagnosis(error, output, expected):
     """`CLIError.diagnosis` prefers `<stderr>`, falls back on `<stdout>`, states a
-    silent death, and keeps the head and the tail around a truncation counter."""
+    silent death, and keeps the head and the tail around a truncation counter.
+    """
     assert CLIError(8, output, error).diagnosis == expected
 
 
@@ -534,7 +538,8 @@ def test_cli_error_diagnosis_keeps_an_opening_error():
 )
 def test_failed_run_relays_diagnosis(stop_on_error, script, expected, caplog):
     """The failure gate logs the diagnosis at WARNING, tagged with the manager ID,
-    for accumulated and raised failures alike."""
+    for accumulated and raised failures alike.
+    """
     manager = FakeManager()
     manager.stop_on_error = stop_on_error
     with caplog.at_level(logging.INFO):
@@ -565,7 +570,8 @@ def test_failed_run_relays_diagnosis(stop_on_error, script, expected, caplog):
 )
 def test_no_diagnosis_relay(script, level, caplog):
     """No WARNING relay without a genuine failure, nor when DEBUG already streamed
-    the raw output inline."""
+    the raw output inline.
+    """
     manager = FakeManager()
     with caplog.at_level(level):
         manager.run_cli("-c", script)
@@ -575,7 +581,8 @@ def test_no_diagnosis_relay(script, level, caplog):
 @pytest.mark.parametrize("operation", sorted(_DIAGNOSIS_EXEMPT_OPERATIONS))
 def test_exempt_operations_skip_diagnosis_relay(operation, caplog):
     """Version probes (fired per candidate on selection) and doctor (which relays
-    its report verbatim) fail without the WARNING relay."""
+    its report verbatim) fail without the WARNING relay.
+    """
     manager = FakeManager()
     with caplog.at_level(logging.INFO), manager.acting_as(operation):
         manager.run_cli("-c", FAIL_ON_STDERR)
@@ -608,7 +615,8 @@ def test_version_probe_failure_stays_out_of_cli_errors():
 
 def test_version_probe_incomplete_run_stays_an_error():
     """A probe that never completed is plumbing, not a verdict: it stays in the
-    tally, mirroring `doctor`'s own split."""
+    tally, mirroring `doctor`'s own split.
+    """
     manager = FakeManager()
     manager.timeout = 1
     with manager.acting_as(VERSION_PROBE):
@@ -1040,7 +1048,8 @@ def test_build_cli_escalation_follows_the_escalator_not_the_platform():
 
 def test_build_cli_no_escalation_without_an_escalator():
     """A host carrying none runs unprivileged rather than crashing on a missing
-    binary, on any platform."""
+    binary, on any platform.
+    """
     manager = FakeManager()
     manager.sudo = True
     with (
@@ -1068,7 +1077,8 @@ def test_build_cli_marker_required_for_escalation():
 
 def test_npm_sudo_marker_dormant_until_opted_in():
     """npm marks its global installs privileged, but stays unescalated until the user
-    opts in via --sudo / config (default_sudo is False)."""
+    opts in via --sudo / config (default_sudo is False).
+    """
     from meta_package_manager.managers.npm import NPM
 
     manager = NPM()
@@ -1086,7 +1096,8 @@ def test_npm_sudo_marker_dormant_until_opted_in():
 def test_dormant_marker_permission_failure_hints_the_opt_in(caplog):
     """An operation carrying a dormant privileged marker that dies on a
     permission error draws the hint naming the scoped opt-in, labeled and
-    placed after the tool's own account of the refusal."""
+    placed after the tool's own account of the refusal.
+    """
     manager = FakeManager()
     assert manager.sudo is None and manager.default_sudo is False
     script = (
@@ -1122,7 +1133,8 @@ def test_dormant_marker_permission_failure_hints_the_opt_in(caplog):
 )
 def test_dormant_marker_hint_negative_gates(caplog, marker, stderr, euid):
     """Each gate individually silences the hint: no privileged marker, a
-    failure that is not a permission refusal, or a process already root."""
+    failure that is not a permission refusal, or a process already root.
+    """
     manager = FakeManager()
     script = f"import sys; sys.stderr.write({stderr!r}); sys.exit(1)"
     with (
@@ -1333,7 +1345,8 @@ def test_run_forwards_a_forced_environment_across_run0():
 
 def test_run_forwards_nothing_across_an_escalator_that_needs_no_help():
     """`sudo` resets the environment through a `sudoers` policy the host owns,
-    so mpm splices nothing of its own."""
+    so mpm splices nothing of its own.
+    """
     manager = FakeManager()
     manager.sudo = True
     with (
@@ -1361,7 +1374,8 @@ def test_run_forwards_nothing_across_an_escalator_that_needs_no_help():
 )
 def test_mutating_subcommands_prime_sudo(invoke, fake_pool, args):
     """Every mutating subcommand authenticates sudo up front, so a future command
-    cannot silently skip the priming."""
+    cannot silently skip the priming.
+    """
     with patch("meta_package_manager.cli_maintenance.prime_sudo") as prime:
         invoke("--dry-run", *args)
     assert prime.called, f"`mpm {args[0]}` did not call prime_sudo"

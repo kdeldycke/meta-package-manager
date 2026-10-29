@@ -74,7 +74,8 @@ def get_latest_version() -> str:
 
 def nar_chunk(data: bytes) -> bytes:
     """Serialize a byte string as a NAR chunk: an 8-byte little-endian length,
-    the payload, then zero-padding up to the next multiple of 8."""
+    the payload, then zero-padding up to the next multiple of 8.
+    """
     return len(data).to_bytes(8, "little") + data + b"\x00" * (-len(data) % 8)
 
 

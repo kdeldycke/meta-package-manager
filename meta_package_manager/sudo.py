@@ -927,7 +927,8 @@ def _resolved_sudo(manager: CLIExecutor) -> bool:
     """Whether `manager` escalates: its
     {attr}`~meta_package_manager.execution.CLIExecutor.sudo` override if set,
     else its built-in
-    {attr}`~meta_package_manager.execution.CLIExecutor.default_sudo`."""
+    {attr}`~meta_package_manager.execution.CLIExecutor.default_sudo`.
+    """
     return manager.sudo if manager.sudo is not None else manager.default_sudo
 
 

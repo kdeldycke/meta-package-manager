@@ -25,7 +25,7 @@ from __future__ import annotations
 
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 
@@ -167,7 +167,8 @@ def test_network_client_works_without_a_cache(tmp_path):
 
 def test_network_client_reports_a_client_that_cannot_start(client, monkeypatch):
     """An HTTP client that fails to build, like one behind a SOCKS proxy with no
-    `socksio`, fails as `NetworkError` rather than as the raw `ImportError`."""
+    `socksio`, fails as `NetworkError` rather than as the raw `ImportError`.
+    """
 
     def refuse(**kwargs):
         raise ImportError("socksio")
@@ -358,7 +359,7 @@ def test_parse_purls_skips_an_unparsable_purl():
     (
         (None, None),
         ("", None),
-        ("2021-06-01T00:00:00Z", datetime(2021, 6, 1, tzinfo=timezone.utc)),
+        ("2021-06-01T00:00:00Z", datetime(2021, 6, 1, tzinfo=UTC)),
         ("2021-06-01", datetime(2021, 6, 1)),
         ("June 2021", None),
     ),

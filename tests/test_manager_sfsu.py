@@ -31,7 +31,8 @@ from meta_package_manager.managers.sfsu import SFSU
 
 def test_install_runs_the_scoop_binary(monkeypatch, tmp_path):
     """The delegated install runs `scoop`, without the `--no-color` that `sfsu`
-    appends to its own commands. The override ends with the call."""
+    appends to its own commands. The override ends with the call.
+    """
     manager = SFSU()
     calls: list[tuple] = []
 
@@ -50,7 +51,8 @@ def test_install_runs_the_scoop_binary(monkeypatch, tmp_path):
 
 def test_delegated_operation_reads_as_its_descriptor_on_the_class():
     """Read from the class, a delegated operation is the descriptor, which keeps
-    the documentation of the method it delegates to."""
+    the documentation of the method it delegates to.
+    """
     descriptor = SFSU.install
     assert isinstance(descriptor, DelegatedMethod)
     assert descriptor.cli_name == "scoop"

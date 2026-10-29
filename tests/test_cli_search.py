@@ -53,7 +53,8 @@ class TestSearch(CLITableTests):
 
     def test_description_column_selection(self, invoke, fake_pool):
         """The description column hides by default, appears with `--description`,
-        and an explicit `--columns` selection is authoritative either way."""
+        and an explicit `--columns` selection is authoritative either way.
+        """
         # Hidden by default.
         result = invoke("search", "match-me", color=False)
         assert result.exit_code == 0

@@ -51,7 +51,7 @@ from click_extra.table import AUTO_WIDTH, SERIALIZATION_FORMATS
 if sys.version_info >= (3, 11):
     from enum import StrEnum
 else:
-    from backports.strenum import StrEnum
+    from enum import StrEnum
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
@@ -108,7 +108,8 @@ class PackageOutcome(StrEnum):
     @property
     def label(self) -> str:
         """The outcome as the report table shows it: its glyph from
-        {data}`PACKAGE_OUTCOME_GLYPHS`, then its word."""
+        {data}`PACKAGE_OUTCOME_GLYPHS`, then its word.
+        """
         return f"{PACKAGE_OUTCOME_GLYPHS[self]} {self.value}"
 
 
@@ -424,7 +425,8 @@ WHICH_COLUMNS: tuple[TColumn, ...] = (
 
 def column_specs(columns: Sequence[TColumn]) -> tuple[ColumnSpec, ...]:
     """Extract the bare {class}`~click_extra.columns.ColumnSpec` tuple from a column
-    registry."""
+    registry.
+    """
     return tuple(spec for spec, _ in columns)
 
 

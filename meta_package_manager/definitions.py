@@ -1241,7 +1241,8 @@ def _make_package_command(spec: OperationSpec) -> Callable[..., str]:
 
 def _make_void(spec: OperationSpec) -> Callable[..., None]:
     """Build a `sync` or `cleanup_*` category method that runs the CLI and discards
-    its output."""
+    its output.
+    """
 
     def operation(self: PackageManager) -> None:
         self.run_cli(

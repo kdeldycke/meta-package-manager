@@ -373,7 +373,8 @@ def search_capabilities(extended_support: bool = True, exact_support: bool = Tru
 def version_not_implemented(func: Callable[P, T]) -> Callable[P, T]:
     """Decorator to be used on `install()` or `upgrade_one_cli()` operations to
     signal that a particular operation does not implement (yet) the version specifier
-    parameter."""
+    parameter.
+    """
 
     @wraps(func)
     def print_warning(*args: P.args, **kwargs: P.kwargs) -> T:

@@ -115,7 +115,8 @@ NO_SOLVABLE = """<?xml version='1.0'?>
 )
 def test_xml_items_normalises_every_shape(parent, expected):
     """`xmltodict` renders repeated elements in three shapes, and only one of
-    them is iterable as a list of children."""
+    them is iterable as a list of children.
+    """
     assert _xml_items(parent, "k") == expected
 
 

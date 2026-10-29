@@ -41,7 +41,7 @@ import json
 import logging
 import time
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 network_support = True
@@ -58,8 +58,7 @@ except ImportError:
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Mapping
-
-    from typing_extensions import Self
+    from typing import Self
 
 
 DEFAULT_TIMEOUT = 30.0
@@ -229,7 +228,7 @@ class NetworkClient:
             )
         except (ValueError, KeyError, OSError):
             return None
-        if not entry.is_fresh(datetime.now(tz=timezone.utc)):
+        if not entry.is_fresh(datetime.now(tz=UTC)):
             return None
         return entry.body
 
@@ -243,7 +242,7 @@ class NetworkClient:
         if path is None:
             return
         payload = {
-            "fetched_at": datetime.now(tz=timezone.utc).isoformat(),
+            "fetched_at": datetime.now(tz=UTC).isoformat(),
             "ttl": ttl,
             "body": body,
         }

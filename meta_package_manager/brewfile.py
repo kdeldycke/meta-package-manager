@@ -36,7 +36,7 @@ from __future__ import annotations
 
 import json
 from collections import Counter
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from . import __version__
 
@@ -123,7 +123,7 @@ def format_header(
     platform: str,
 ) -> str:
     """Render the comment block at the top of a Brewfile dump."""
-    timestamp = datetime.now(tz=timezone.utc).isoformat(timespec="seconds")
+    timestamp = datetime.now(tz=UTC).isoformat(timespec="seconds")
     coverage_line = (
         ", ".join(f"{mid}={n}" for mid, n in sorted(coverage.items())) or "(empty)"
     )

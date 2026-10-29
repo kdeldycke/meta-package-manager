@@ -26,7 +26,7 @@ from __future__ import annotations
 import json
 import logging
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta, timezone
 from functools import partial
 
 import pytest
@@ -605,7 +605,7 @@ class ProbedFakeManager(ChangingFakeManager):
 
     def __init__(self) -> None:
         super().__init__()
-        self.pinned_release = datetime.now(tz=timezone.utc) - timedelta(days=1)
+        self.pinned_release = datetime.now(tz=UTC) - timedelta(days=1)
         """When the latest release of the pinned package was published."""
         self.probed: list[str] = []
         """The package of each probe, in the order they ran."""
@@ -620,13 +620,15 @@ class ProbedFakeManager(ChangingFakeManager):
 @pytest.fixture
 def probed_fake_pool(patch_pool_with):
     """Yield a {class}`ProbedFakeManager`, whose pinned package a week of
-    cooldown holds back."""
+    cooldown holds back.
+    """
     return patch_pool_with(ProbedFakeManager())
 
 
 def test_upgrade_all_dates_a_held_package(invoke, probed_fake_pool):
     """A package the cooldown holds reports when its release was published and
-    when it clears the window."""
+    when it clears the window.
+    """
     result = invoke("--cooldown", "7 days", "upgrade", "--all")
     assert result.exit_code == 0
     mid = probed_fake_pool.id
@@ -685,7 +687,8 @@ def test_upgrade_all_dates_a_held_package_serialized(invoke, probed_fake_pool):
 )
 def test_upgrade_probes_each_release_once(invoke, probed_fake_pool, packages):
     """The report reads the verdict the upgrade reached: it probes no package a
-    second time."""
+    second time.
+    """
     result = invoke("--cooldown", "7 days", "upgrade", *packages)
     assert result.exit_code == 0
     assert sorted(probed_fake_pool.probed) == ["fake-pkg-alpha", "fake-pkg-beta"]
@@ -693,7 +696,8 @@ def test_upgrade_probes_each_release_once(invoke, probed_fake_pool, packages):
 
 def test_cooldown_verdicts_last_one_invocation(invoke, probed_fake_pool):
     """Each invocation probes a release again: a verdict never outlives the
-    invocation that reached it."""
+    invocation that reached it.
+    """
     for _ in range(2):
         result = invoke("--cooldown", "7 days", "upgrade", "fake-pkg-beta")
         assert result.exit_code == 0
@@ -791,7 +795,8 @@ def test_upgrade_reports_each_member_of_a_lock_family(
     invoke, lock_family_pool, packages, statuses
 ):
     """A lane shared by a lock family never serves a manager the listing it took
-    before its upgrade: each member reports what its own upgrade moved."""
+    before its upgrade: each member reports what its own upgrade moved.
+    """
     result = invoke("--table-format", "json", "upgrade", *packages)
     assert result.exit_code == 0
     report = json.loads(result.stdout)

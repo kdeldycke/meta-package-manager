@@ -87,7 +87,8 @@ captured from a vcpkg run.
 )
 def test_installed_reads_the_json_listing(stub_run_cli, output, expected):
     """The package is its full specification, and a non-zero port revision
-    joins the version the way `vcpkg` renders it."""
+    joins the version the way `vcpkg` renders it.
+    """
     manager = VCPKG()
     stub_run_cli(manager, output)
     packages = [(p.id, str(p.installed_version)) for p in manager.installed]
@@ -133,7 +134,8 @@ def test_installed_skips_what_is_not_a_record(stub_run_cli, output):
 )
 def test_search_reads_the_column_listing(capture_run_cli, query, output, expected):
     """A port gives its name and version, and the rows of its features are
-    skipped. A name longer than its column still ends at the space after it."""
+    skipped. A name longer than its column still ends at the space after it.
+    """
     manager = VCPKG()
     calls = capture_run_cli(manager, output)
     packages = [

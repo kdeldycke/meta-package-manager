@@ -53,7 +53,8 @@ BASE_SEARCH_ARGS = ["search", "--raw", "--raw-format", "json-compact"]
 )
 def test_search(capture_run_cli, exact, extended, search_fields):
     """A match gives its name, comment and version, whichever of the three
-    documented searches produced it."""
+    documented searches produced it.
+    """
     manager = PKG()
     calls = capture_run_cli(manager, SEARCH_OUTPUT)
     packages = [
@@ -72,7 +73,8 @@ def test_search(capture_run_cli, exact, extended, search_fields):
 
 def test_search_without_match(stub_run_cli):
     """A search matching nothing prints an empty array, which yields no
-    package."""
+    package.
+    """
     manager = PKG()
     stub_run_cli(manager, "[]")
     assert list(manager.search("nyancat", extended=False, exact=False)) == []

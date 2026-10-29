@@ -29,7 +29,7 @@ from importlib.metadata import PackageNotFoundError, version
 if sys.version_info >= (3, 11):
     from enum import StrEnum
 else:
-    from backports.strenum import StrEnum
+    from enum import StrEnum
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:

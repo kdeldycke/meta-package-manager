@@ -400,7 +400,8 @@ def test_metadata_failure_falls_back_to_minimal_data(invoke, patch_pool_with):
 
 def test_network_attaches_the_advisories_of_an_alias(invoke, patch_pool_with, osv):
     """`--network` queries OSV with the PyPI alias of each package, and attaches
-    the advisory reported for an alias to the package behind it."""
+    the advisory reported for an alias to the package behind it.
+    """
     patch_pool_with(AliasedFakeManager())
     batch = osv.post("/v1/querybatch").respond(
         json={"results": [{"vulns": [{"id": "GHSA-aaaa-bbbb-cccc"}]}, {}]},

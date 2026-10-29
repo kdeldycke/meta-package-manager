@@ -150,7 +150,8 @@ def test_target_must_be_a_toml_file(invoke, subcmd, fake_pool):
 @pytest.mark.parametrize("flag", ("--overwrite", "--force", "--replace"))
 def test_existing_target_needs_overwrite(invoke, subcmd, fake_pool, flag):
     """An existing snapshot survives a dump, unless one of the overwrite flags is
-    passed."""
+    passed.
+    """
     target = Path("mpm-packages.toml")
     target.write_text('[fakemanager]\nfake-pkg-gamma = "0.1.0"\n', encoding="UTF-8")
 
@@ -171,7 +172,8 @@ def test_existing_target_needs_overwrite(invoke, subcmd, fake_pool, flag):
 def test_merge_adds_new_entries(invoke, subcmd, fake_pool, overwrite):
     """A merge writes each installed package at its installed version, and keeps
     the entries of the packages that are not installed. It removes nothing, so an
-    overwrite flag is inert."""
+    overwrite flag is inert.
+    """
     target = Path("mpm-packages.toml")
     target.write_text(
         '[fakemanager]\nfake-pkg-alpha = "0.9.0"\nfake-pkg-gamma = "0.1.0"\n',
@@ -197,7 +199,8 @@ def test_merge_adds_new_entries(invoke, subcmd, fake_pool, overwrite):
 
 def test_update_version_refreshes_listed_entries(invoke, subcmd, fake_pool):
     """An update refreshes the version of each listed package that is installed,
-    and adds nothing: `fake-pkg-beta` is installed but not listed."""
+    and adds nothing: `fake-pkg-beta` is installed but not listed.
+    """
     target = Path("mpm-packages.toml")
     target.write_text(
         '[fakemanager]\nfake-pkg-alpha = "0.9.0"\nfake-pkg-gamma = "0.1.0"\n',

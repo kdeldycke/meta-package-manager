@@ -66,7 +66,8 @@ class TestInstalled(CLITableTests, CLIQueryTests):
 
 class OverlappingFakeManager(FakeManager):
     """A second fake, sharing one of its two packages with
-    {class}`~tests.fake_manager.FakeManager`."""
+    {class}`~tests.fake_manager.FakeManager`.
+    """
 
     @property
     def installed(self):

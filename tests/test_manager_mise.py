@@ -106,7 +106,8 @@ def test_search_parses_table(manager, stub_run_cli):
 def test_search_keeps_descriptions_with_inner_spaces(manager, stub_run_cli):
     """A description containing single-space-separated words is preserved
     intact: the regex only treats the run of 2+ spaces between columns as a
-    delimiter."""
+    delimiter.
+    """
     output = "ripgrep            line-oriented search tool\n"
     stub_run_cli(manager, output)
     packages = list(manager.search("rg", extended=False, exact=False))

@@ -65,7 +65,8 @@ def test_installed(stub_run_cli):
 )
 def test_outdated(stub_run_cli, output):
     """The candidate comes from the status branch, the installed version from
-    the first line, whichever glyphs draw the branches."""
+    the first line, whichever glyphs draw the branches.
+    """
     manager = Nala()
     stub_run_cli(manager, output)
     packages = [

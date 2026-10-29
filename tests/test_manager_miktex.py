@@ -50,7 +50,8 @@ true fancyhdr 4.0.3"""
 )
 def test_installed_filters_the_catalog(capture_run_cli, output, expected):
     """Only the rows flagged as installed are packages, and an empty version
-    is no version."""
+    is no version.
+    """
     manager = MiKTeX()
     calls = capture_run_cli(manager, output)
     packages = [

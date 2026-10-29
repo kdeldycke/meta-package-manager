@@ -807,7 +807,8 @@ def test_internal_escalator_runs_in_a_sequential_tail(
 
 def test_sequential_tail_reports_one_batch_wide_finisher(monkeypatch):
     """Two phases, one finisher: the tail closes the batch with the whole run's
-    tally, so a held-back manager never reads as a second run of its own."""
+    tally, so a held-back manager never reads as a second run of its own.
+    """
     assert not _SUDO_CACHE_WARM.is_set()
     monkeypatch.setattr(meta_package_manager.dispatch, "SPINNER_DELAY", 0.0)
     tty = TTYStringIO()

@@ -53,7 +53,8 @@ from .conftest import (
 
 def test_manager_definition_inventory():
     """Check all classes implementing a package manager are accounted for in the
-    pool."""
+    pool.
+    """
     found_classes = set()
 
     # Search for manager definitions in the managers subfolder.
@@ -375,7 +376,8 @@ selection_cases = {
 )
 def test_select_managers(kwargs, expected):
     """We use tuple everywhere so we can check that select_managers() conserve the
-    original order."""
+    original order.
+    """
     if callable(expected):
         # Availability-dependent case: see the comment atop selection_cases.
         expected = expected()
@@ -551,7 +553,8 @@ def test_merge_into_probe_lanes_partitions_the_whole_pool():
 def test_warm_availability_shares_one_cache_within_a_lane():
     """A lane's managers probe against one shared `run_cache`, then get their own
     value back: that dict is what collapses `brew` and `cask` both running
-    `brew --version` into a single subprocess."""
+    `brew --version` into a single subprocess.
+    """
     accessed: list = []
     twins = [_RecordingManager(accessed, probe="shared-cli") for _ in range(2)]
     loner = _RecordingManager(accessed)

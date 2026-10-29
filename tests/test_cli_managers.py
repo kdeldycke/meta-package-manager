@@ -62,7 +62,8 @@ class TestManagers(CLITableTests):
     def test_unsupported_managers(self, invoke, subcmd, manager_id):
         """A manager named by the user is reported whatever its state: the default
         view widens to `supported` on an explicit selection, so the row spelling out
-        why `mpm` cannot use it is the answer the selector asked for."""
+        why `mpm` cannot use it is the answer the selector asked for.
+        """
         result = invoke(f"--{manager_id}", subcmd, color=False)
         assert result.exit_code == 0
         check_selection(result, set())
@@ -111,7 +112,8 @@ class TestManagers(CLITableTests):
 
     def test_default_view_drops_constant_columns(self, invoke, subcmd):
         """`Supported` and `Executable` are a ✓ on every detected row, so the
-        default view leaves them out and the wider ones bring them back."""
+        default view leaves them out and the wider ones bring them back.
+        """
         labels = {spec.id: spec.label for spec, _ in MANAGERS_COLUMNS}
         dropped = (labels["supported"], labels["executable"])
 

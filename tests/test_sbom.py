@@ -17,7 +17,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, cast
 
@@ -546,8 +546,8 @@ def _sample_vulnerability():
         aliases=("CVE-2021-99999",),
         references=("https://example.com/advisory",),
         fixed_versions=("1.0.1",),
-        published_date=datetime(2021, 1, 1, tzinfo=timezone.utc),
-        modified_date=datetime(2021, 6, 1, tzinfo=timezone.utc),
+        published_date=datetime(2021, 1, 1, tzinfo=UTC),
+        modified_date=datetime(2021, 6, 1, tzinfo=UTC),
         advisory_url="https://osv.dev/vulnerability/GHSA-aaaa-bbbb-cccc",
     )
 
@@ -756,7 +756,8 @@ def test_cyclonedx_advisory_found_under_an_alias_affects_the_formula():
 
 def test_shared_advisory_deduplicated_in_cyclonedx():
     """One advisory affecting two components yields a single record with
-    two affects targets."""
+    two affects targets.
+    """
     c = CycloneDX()
     c.init_doc()
     manager = _as_manager(_StubManager("pip", "Python pip"))

@@ -32,7 +32,8 @@ from meta_package_manager.managers.cpan import CPAN
 
 def fake_cpan(monkeypatch, manager, inc, listings):
     """Answer the `@INC` probe with `inc`, and each `cpan -l` run with the next of
-    `listings`. Returns the `(args, kwargs)` of every call."""
+    `listings`. Returns the `(args, kwargs)` of every call.
+    """
     calls: list[tuple[tuple, dict]] = []
     runs = iter(listings)
 
@@ -49,7 +50,8 @@ def fake_cpan(monkeypatch, manager, inc, listings):
 @pytest.mark.skipif(is_any_windows(), reason="A symlink needs privileges on Windows.")
 def test_installed_adds_modules_behind_symlinked_inc(tmp_path, monkeypatch):
     """Modules in a symlinked `@INC` directory come from a second `cpan -l`, which
-    never replaces a row of the first."""
+    never replaces a row of the first.
+    """
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir()
     (bin_dir / "perl").touch()
@@ -103,7 +105,8 @@ def test_installed_lists_once_without_symlinked_inc(
     tmp_path, monkeypatch, sibling_perl, expected_calls
 ):
     """A single `cpan -l` runs when no `@INC` entry is a symlink, and the probe is
-    skipped when no `perl` sits beside `cpan` to ask."""
+    skipped when no `perl` sits beside `cpan` to ask.
+    """
     if sibling_perl:
         (tmp_path / "perl").touch()
     site = tmp_path / "site"
@@ -121,7 +124,8 @@ def test_installed_lists_once_without_symlinked_inc(
 
 def test_outdated_ignores_index_refresh_lines(stub_run_cli):
     """The progress lines `CPAN::FTP` prints while it refreshes its index are not
-    packages."""
+    packages.
+    """
     manager = CPAN()
     stub_run_cli(
         manager,

@@ -279,7 +279,8 @@ def test_documented_output_still_parses(
 )
 def test_documented_ids_read_back_from_their_purl(manager, member, output, monkeypatch):
     """Every package ID a manager documents reads back from the pURL a menu action
-    passes to `mpm upgrade`, tied to the same manager."""
+    passes to `mpm upgrade`, tied to the same manager.
+    """
     _neutralize_binaries(manager, monkeypatch)
     for package in _documented_packages(manager, member, output, monkeypatch):
         purl = manager_purl(manager.id, package.id)
@@ -538,7 +539,8 @@ def _matches(
 
 def _mutation_fixtures():
     """Yield one `pytest.param` per manager mutation member with literal
-    documented commands."""
+    documented commands.
+    """
     for manager in pool.values():
         for member in MUTATION_MEMBERS:
             documented = _documented_commands(
@@ -700,7 +702,8 @@ def _class_command_map(cls: type) -> list[tuple[list[str], str]]:
 
 def _query_fixtures():
     """Yield one `pytest.param` per manager query member with literal
-    documented commands."""
+    documented commands.
+    """
     for manager in pool.values():
         for member in QUERY_MEMBERS:
             documented = _documented_commands(

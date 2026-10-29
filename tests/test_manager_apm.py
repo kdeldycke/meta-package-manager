@@ -113,7 +113,8 @@ marker that truncates the array there."""
 )
 def test_search(capture_run_cli, extended, search_args):
     """Each result gives its name, description and version, and only an
-    extended search lets `apm` match the descriptions."""
+    extended search lets `apm` match the descriptions.
+    """
     manager = APM()
     calls = capture_run_cli(manager, SEARCH_OUTPUT)
     packages = [

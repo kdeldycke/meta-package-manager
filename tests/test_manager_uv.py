@@ -38,7 +38,8 @@ def capture_uv_run_cli(capture_run_cli):
 
 def test_cleanup_cache_skipped_under_uv(monkeypatch, caplog, capture_uv_run_cli):
     """Launched by `uv run`, the cache commands are skipped with a warning: they
-    would deadlock on the parent's cache lock until `UV_LOCK_TIMEOUT`."""
+    would deadlock on the parent's cache lock until `UV_LOCK_TIMEOUT`.
+    """
     monkeypatch.setenv("UV", "/fake/bin/uv")
     with caplog.at_level(logging.WARNING):
         pool["uv"].cleanup_cache()

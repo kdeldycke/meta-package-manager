@@ -21,7 +21,7 @@ import os
 import re
 import shutil
 import tempfile
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from functools import cached_property
 from importlib import resources
 from pathlib import Path
@@ -699,7 +699,7 @@ class Paru(Pacman):
             except ValueError:
                 return None
             # The probe forced TZ=UTC, so the naive rendering is UTC.
-            return parsed.replace(tzinfo=timezone.utc)
+            return parsed.replace(tzinfo=UTC)
         return None
 
     def upgrade_all_cli_excluding(
@@ -979,7 +979,7 @@ class Yay(Pacman):
         try:
             if not self.supports_cooldown:
                 return {}
-            cutoff = datetime.now(tz=timezone.utc) - self.cooldown
+            cutoff = datetime.now(tz=UTC) - self.cooldown
             # Clamp to the Unix epoch: a cooldown reaching before 1970 yields a
             # negative timestamp, and yay's Lua (gopher-lua) parses that back to nil,
             # which silently drops the gate. Epoch 0 keeps the floor effective (every

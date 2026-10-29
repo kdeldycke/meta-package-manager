@@ -59,7 +59,8 @@ class FakeStream:
 )
 def test_legacy_stream_is_promoted_to_utf8(monkeypatch, encoding):
     """A stream that cannot carry mpm's glyphs is reconfigured to UTF-8, and so
-    is a stream reporting an encoding Python does not know."""
+    is a stream reporting an encoding Python does not know.
+    """
     out, err = FakeStream(encoding), FakeStream(encoding)
     monkeypatch.setattr("sys.stdout", out)
     monkeypatch.setattr("sys.stderr", err)
@@ -76,7 +77,8 @@ def test_legacy_stream_is_promoted_to_utf8(monkeypatch, encoding):
 @pytest.mark.parametrize("encoding", ("utf-8", "UTF-8", "utf8"))
 def test_utf8_stream_is_left_alone(monkeypatch, encoding):
     """Reconfiguration never fires on a stream that already speaks UTF-8,
-    whatever spelling it reports."""
+    whatever spelling it reports.
+    """
     out, err = FakeStream(encoding), FakeStream(encoding)
     monkeypatch.setattr("sys.stdout", out)
     monkeypatch.setattr("sys.stderr", err)
@@ -89,7 +91,8 @@ def test_utf8_stream_is_left_alone(monkeypatch, encoding):
 
 def test_a_refusing_stream_never_raises(monkeypatch):
     """A stream refusing reconfiguration is left as the platform made it, rather
-    than taking the whole CLI down before it has printed anything."""
+    than taking the whole CLI down before it has printed anything.
+    """
     out = FakeStream("cp1252", refuse=True)
     monkeypatch.setattr("sys.stdout", out)
     monkeypatch.setattr("sys.stderr", FakeStream("utf-8"))
@@ -101,7 +104,8 @@ def test_a_refusing_stream_never_raises(monkeypatch):
 
 def test_a_stream_without_reconfigure_is_skipped(monkeypatch):
     """Not every object standing in for a stream carries `reconfigure`: a
-    captured `io.StringIO` does not, and must not crash the entry point."""
+    captured `io.StringIO` does not, and must not crash the entry point.
+    """
     import io
 
     monkeypatch.setattr("sys.stdout", io.StringIO())

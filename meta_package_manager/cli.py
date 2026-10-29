@@ -86,7 +86,7 @@ import threading
 from collections import Counter
 from collections.abc import Iterable
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from functools import partial
 from pathlib import Path
 from textwrap import dedent
@@ -1432,10 +1432,11 @@ def _versioned(inventory: Mapping[str, Package]) -> bool:
 
 def _instant(moment: datetime | None) -> str | None:
     """A timestamp as the change report carries it: ISO 8601, in UTC, to the
-    second."""
+    second.
+    """
     if moment is None:
         return None
-    return moment.astimezone(timezone.utc).isoformat(timespec="seconds")
+    return moment.astimezone(UTC).isoformat(timespec="seconds")
 
 
 def _day(instant: object) -> str:
@@ -1668,7 +1669,8 @@ class ChangeReport:
 
     def __init__(self, managers: Iterable[PackageManager] = ()) -> None:
         """`managers` fixes the order of the report up front, for a fan-out whose
-        managers finish in any order. A manager opened later joins at the end."""
+        managers finish in any order. A manager opened later joins at the end.
+        """
         self._lock = threading.Lock()
         self._order: list[str] = [manager.id for manager in managers]
         self._opened: dict[
@@ -1744,7 +1746,8 @@ class ChangeReport:
 
     def close_all(self) -> None:
         """Close every manager still open: the sequential `install` path opens
-        each manager on its first attempt and closes them all at the end."""
+        each manager on its first attempt and closes them all at the end.
+        """
         with self._lock:
             managers = [
                 manager for manager, _before, _expected in self._opened.values()
@@ -1800,7 +1803,8 @@ class ChangeReport:
         among: Collection[str] | None,
     ) -> Callable[[], tuple[bool, str]]:
         """Run `task`, opening `manager` before it when `first` and closing it
-        after when `last`."""
+        after when `last`.
+        """
 
         def framed() -> tuple[bool, str]:
             if first:
@@ -1824,7 +1828,8 @@ class ChangeReport:
 
     def show(self, ctx: Context) -> None:
         """Print the report through {func}`print_change_report`, when any manager
-        could be read on both sides of the command."""
+        could be read on both sides of the command.
+        """
         payload = self.payload
         if payload:
             print_change_report(ctx, payload)

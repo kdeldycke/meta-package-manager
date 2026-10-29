@@ -279,7 +279,8 @@ def test_mas_brewfile_entry_falls_back_to_id_when_name_missing():
 def test_vscodium_brewfile_skip_warning_set():
     """VSCodium's definition declares no `brewfile_entry_type` so its extensions
     are not silently emitted as `vscode` (which would install to VS Code instead
-    of VSCodium). The warning is the audible signal."""
+    of VSCodium). The warning is the audible signal.
+    """
     assert pool["vscode"].brewfile_entry_type == "vscode"
     assert pool["vscodium"].brewfile_entry_type is None
     assert pool["vscodium"].brewfile_skip_warning is not None
@@ -289,7 +290,8 @@ def test_vscodium_brewfile_skip_warning_set():
 def test_phase_2_to_4_managers_have_brewfile_entry_types():
     """Every brew-bundle-supported manager except `go` and `krew` has a
     mapping. Catches regressions if a manager's class is reorganized (or converted
-    to a bundled definition) and the attribute is dropped."""
+    to a bundled definition) and the attribute is dropped.
+    """
     expected_entry_types = {
         "brew": "brew",
         "cargo": "cargo",

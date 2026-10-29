@@ -36,7 +36,7 @@ import logging
 import re
 from collections.abc import Iterator
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from functools import cached_property, wraps
 from types import FunctionType, MappingProxyType
@@ -63,7 +63,7 @@ if TYPE_CHECKING:
     from .version import TokenizedString
 
 
-COOLDOWN_EXEMPT = datetime.min.replace(tzinfo=timezone.utc)
+COOLDOWN_EXEMPT = datetime.min.replace(tzinfo=UTC)
 """Sentinel a {meth}`PackageManager.release_date` probe returns for a package
 outside the cooldown gate's scope.
 
@@ -210,7 +210,8 @@ class CooldownHold:
     @property
     def reason(self) -> str:
         """Why the package is held, as the clause closing a `Hold {package}:`
-        message."""
+        message.
+        """
         if self.released is None:
             return "its latest release cannot be dated (fail-closed)"
         return (
@@ -1166,8 +1167,8 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         # The contract wants an aware datetime; absorb a naive one as UTC
         # rather than crash the comparison below on a misimplemented probe.
         if published.tzinfo is None:
-            published = published.replace(tzinfo=timezone.utc)
-        cutoff = datetime.now(tz=timezone.utc) - self.cooldown
+            published = published.replace(tzinfo=UTC)
+        cutoff = datetime.now(tz=UTC) - self.cooldown
         if published <= cutoff:
             return None
         return CooldownHold(released=published, eligible=published + self.cooldown)

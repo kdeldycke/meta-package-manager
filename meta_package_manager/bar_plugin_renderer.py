@@ -349,7 +349,8 @@ class BarPluginRenderer(MPMPlugin):
 
     def print_upgrade_all_item(self, manager: dict, submenu: str = "") -> None:
         """Print the menu entry that upgrades every outdated package of one
-        manager."""
+        manager.
+        """
         if manager.get("upgrade_all_cli"):
             if self.group_by_manager:
                 print("-----")

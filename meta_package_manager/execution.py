@@ -57,7 +57,7 @@ import subprocess
 import sys
 import threading
 from contextlib import contextmanager
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from functools import cached_property
 from pathlib import Path
 from textwrap import dedent, indent, shorten
@@ -1144,7 +1144,7 @@ class CLIExecutor:
         this.
         """
         assert self.cooldown is not None
-        cutoff = datetime.now(tz=timezone.utc) - self.cooldown
+        cutoff = datetime.now(tz=UTC) - self.cooldown
         return cutoff.isoformat()
 
     def cooldown_rounded_up(self, unit_seconds: int) -> str:

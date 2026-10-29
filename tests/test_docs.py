@@ -21,7 +21,7 @@ import csv
 import importlib.util
 import re
 import shutil
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from itertools import permutations
 from pathlib import Path
 from textwrap import indent
@@ -318,7 +318,8 @@ def test_new_package_manager_issue_template():
 
 def test_extra_labels_in_pyproject():
     """Check the generated `[tool.repomatic.labels.extra]` block in
-    `pyproject.toml` is consistent with the `LABELS` registry."""
+    `pyproject.toml` is consistent with the `LABELS` registry.
+    """
     pyproject = PROJECT_ROOT / "pyproject.toml"
     data = tomllib.loads(pyproject.read_text(encoding="utf-8"))
     extra_labels = data["tool"]["repomatic"]["labels"]["extra"]
@@ -898,7 +899,7 @@ def test_metrics_store_well_formed():
     rows = _load_metrics_store()
     assert rows, "no metric reading recorded yet"
 
-    today = datetime.now(tz=timezone.utc).date()
+    today = datetime.now(tz=UTC).date()
     star_days = set()
     attributes = set()
     releases = set()

@@ -172,7 +172,8 @@ def report_rows(stdout: str) -> dict[str, str]:
 
 def check_report(stdout: str, expected: dict[str, tuple[str, ...]]) -> None:
     """Assert the change report holds exactly the `expected` rows, each carrying
-    its words."""
+    its words.
+    """
     rows = report_rows(stdout)
     assert set(rows) == set(expected)
     for package_id, words in expected.items():
@@ -344,7 +345,8 @@ def test_fatal_message_reaches_stderr_in_every_format(
 ):
     """A run stopping on a critical message reports it, serialized output included:
     the payload goes to `<stdout>` and logs to `<stderr>`, so neither spoils the
-    other."""
+    other.
+    """
     monkeypatch.setattr(pool, "_select_managers", lambda *args, **kwargs: iter(()))
     result = invoke("--table-format", table_format, "installed")
     assert_no_manager_selected(result)
@@ -355,7 +357,8 @@ def test_serialized_output_notes_ignored_columns(
     invoke, fake_pool, table_format, noted
 ):
     """A serialized document carries every field, so a `--columns` selection is
-    reported as ignored there, and applied to a table."""
+    reported as ignored there, and applied to a table.
+    """
     result = invoke(
         "--verbosity",
         "INFO",

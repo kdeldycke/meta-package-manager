@@ -23,13 +23,8 @@ is safe even when the optional `[sbom-offline]` extra is not installed.
 from __future__ import annotations
 
 import logging
-import sys
+from enum import StrEnum
 from importlib.metadata import PackageNotFoundError, version
-
-if sys.version_info >= (3, 11):
-    from enum import StrEnum
-else:
-    from backports.strenum import StrEnum
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:

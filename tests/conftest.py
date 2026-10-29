@@ -17,19 +17,14 @@
 
 from __future__ import annotations
 
-import sys
+# Re-exported for the whole test suite.
+import tomllib  # noqa: F401
 from concurrent.futures import ThreadPoolExecutor
 from functools import partial
 from operator import attrgetter
 from pathlib import Path
 
 import pytest
-
-# Shared version-gated TOML reader, re-exported for the whole test suite.
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib  # type: ignore[import-not-found]  # noqa: F401
 
 # Pre-load invocation helpers to be used as pytest's fixture.
 from click_extra.pytest import create_config, runner  # noqa: F401

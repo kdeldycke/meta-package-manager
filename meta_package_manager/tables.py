@@ -41,17 +41,12 @@ from __future__ import annotations
 
 import logging
 import shutil
-import sys
 from contextlib import contextmanager
+from enum import StrEnum
 
 from click_extra import ColumnSpec, print_data, select_columns, select_row
 from click_extra.context import COLUMNS, TABLE_FORMAT
 from click_extra.table import AUTO_WIDTH, SERIALIZATION_FORMATS
-
-if sys.version_info >= (3, 11):
-    from enum import StrEnum
-else:
-    from backports.strenum import StrEnum
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:

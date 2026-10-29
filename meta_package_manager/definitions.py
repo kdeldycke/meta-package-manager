@@ -48,7 +48,7 @@ from __future__ import annotations
 import importlib.resources
 import logging
 import re
-import sys
+import tomllib
 from dataclasses import dataclass
 from functools import cache
 from typing import cast
@@ -59,11 +59,6 @@ from extra_platforms import ALL_GROUP_IDS, ALL_PLATFORMS, traits_from_ids
 from .capabilities import METHOD_OPERATIONS, Operations, implements_method
 from .cooldown import CooldownPolicy, parse_policy_token
 from .manager import JSON_FIELD_SELECTOR_REGEX, MetaPackageManager, PackageManager
-
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib  # type: ignore[import-not-found]
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:

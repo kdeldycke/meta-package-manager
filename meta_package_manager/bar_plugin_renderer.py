@@ -278,9 +278,7 @@ class BarPluginRenderer(MPMPlugin):
         puts that folder first. An action started from a source checkout would
         then import that source tree, with the dependencies of the installed
         version. A `7.6.1` interpreter that read an `8.0.0.dev0` tree stopped
-        on `from click_extra.table import AUTO_WIDTH`. The flag needs Python
-        `3.11`. The interpreter that renders the menu is the one that the
-        action starts, so its own version decides.
+        on `from click_extra.table import AUTO_WIDTH`.
 
         ```{note}
         This code does not reuse the candidates that
@@ -293,10 +291,9 @@ class BarPluginRenderer(MPMPlugin):
         options = (*self.shell_env_options, *self.mpm_options)
         if "__compiled__" in globals():
             return (sys.executable, *options)
-        safe_path = ("-P",) if sys.version_info >= (3, 11) else ()
         return (
             sys.executable,
-            *safe_path,
+            "-P",
             "-m",
             "meta_package_manager",
             *options,

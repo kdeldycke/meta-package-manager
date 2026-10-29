@@ -28,6 +28,7 @@ from __future__ import annotations
 import logging
 import sys
 import threading
+import tomllib
 from collections import Counter
 from datetime import datetime, timezone
 
@@ -71,11 +72,6 @@ from .specifier import VERSION_SEP, Specifier
 from .sudo import prime_sudo
 from .summary import print_summary
 from .tables import CHANGE_REPORT_COLUMNS, column_specs
-
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib  # type: ignore[import-not-found]
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:

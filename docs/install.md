@@ -287,7 +287,7 @@ $ sudo zypper install meta-package-manager
 `````
 
 `````{tab-item} Ubuntu
-Install from [my PPA](https://launchpad.net/~kdeldycke/+archive/ubuntu/mpm), on Ubuntu `22.04` and later:
+Install from [my PPA](https://launchpad.net/~kdeldycke/+archive/ubuntu/mpm), on Ubuntu `24.04` and later:
 
 ```{code-block} shell-session
 $ sudo add-apt-repository ppa:kdeldycke/mpm

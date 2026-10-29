@@ -11,13 +11,6 @@ Files: *
 Copyright: Copyright 2016-2026 Kevin Deldycke <kevin@deldycke.com> and contributors
 License: GPL-2+
 
-Files: vendor/backports/*
- vendor/backports.py
- vendor/backports-*
-Copyright: Copyright Chris L. Barnes
-License: MIT
-Comment: backports-strenum ships no year in its license.
-
 Files: vendor/boltons/*
  vendor/boltons.py
  vendor/boltons-*
@@ -77,12 +70,6 @@ Files: vendor/tabulate/*
  vendor/tabulate.py
  vendor/tabulate-*
 Copyright: Copyright (c) 2011-2020 Sergey Astanin and contributors
-License: MIT
-
-Files: vendor/tomli/*
- vendor/tomli.py
- vendor/tomli-*
-Copyright: Copyright (c) 2021 Taneli Hukkinen
 License: MIT
 
 Files: vendor/tomli_w/*

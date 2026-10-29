@@ -65,7 +65,7 @@ from __future__ import annotations
 import csv
 import inspect
 import re
-import sys
+import tomllib
 from collections import Counter
 from functools import cache
 from itertools import groupby
@@ -110,12 +110,6 @@ from meta_package_manager.labels import MANAGER_LABELS
 from meta_package_manager.platforms import MAIN_PLATFORMS
 from meta_package_manager.pool import pool
 from meta_package_manager.specifier import PURL_MAP
-
-# Version-gated TOML reader, following the same pattern as `tests/conftest.py`.
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib  # type: ignore[import-not-found]
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:

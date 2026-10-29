@@ -250,7 +250,7 @@ No package built against the Ubuntu archive could work. Ubuntu ships neither `cl
 
 The build runs no test suite, the one channel that does not: what it installs is the published wheels, which `mpm`'s own test matrix already covered. Its check phase exercises the vendoring instead, the one thing assembled here and tested nowhere else, by importing the private tree and building the CLI's command graph. A dependency left out, a module mangled by the shebang strip or an unreachable private directory all surface there. The `ppa-source` job then drives the installed CLI against the host `apt`, which a builder could not do.
 
-Install from [the PPA](https://launchpad.net/~kdeldycke/+archive/ubuntu/mpm), on Ubuntu `22.04` and later:
+Install from [the PPA](https://launchpad.net/~kdeldycke/+archive/ubuntu/mpm), on Ubuntu `24.04` and later:
 
 ```{code-block} shell-session
 $ sudo add-apt-repository ppa:kdeldycke/mpm
@@ -278,7 +278,7 @@ $ debuild -S -sa
 $ dput ppa:kdeldycke/mpm ../meta-package-manager_8.1.2ppa1~noble1_source.changes
 ```
 
-The `~{series}` suffixes sort in release order, the Ubuntu codenames happening to be alphabetical, so a machine upgrading from one series to the next picks the newer build up on its own. The targets are `jammy`, `noble`, `resolute` and `stonking`; `questing` reached its end of life in July 2026.
+The `~{series}` suffixes sort in release order, the Ubuntu codenames happening to be alphabetical, so a machine upgrading from one series to the next picks the newer build up on its own. The targets are `noble`, `resolute` and `stonking`. `questing` reached its end of life in July 2026, and `jammy` is left out because its `python3` is `3.10`, below the floor of `mpm`.
 
 ```{note}
 Each release is uploaded by hand, once per series, so the PPA can trail the newest version by a few days: `mpm`'s own supply-chain cooldown refuses a release younger than a week, which is what the assembly step resolves against. [`apt`](managers/apt.md) is itself one of the managers `mpm` drives.

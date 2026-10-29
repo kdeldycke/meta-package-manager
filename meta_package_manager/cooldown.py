@@ -45,19 +45,13 @@ only owns the input grammar and the merge rules.
 
 from __future__ import annotations
 
-import sys
 from dataclasses import dataclass
 from datetime import timedelta
+from enum import StrEnum
 from typing import Any
 
 import click
 from click_extra import Duration
-
-if sys.version_info >= (3, 11):
-    from enum import StrEnum
-else:
-    from backports.strenum import StrEnum
-
 
 POLICY_CONFIG_KEYS = ("period", "policy")
 """Recognized keys of the `[mpm.cooldown]` configuration table.

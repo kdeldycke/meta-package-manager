@@ -280,7 +280,7 @@ license = "GPL-2.0-or-later"
 license-files = [ "license" ]
 authors = [ { name = "Kevin Deldycke", email = "kevin@deldycke.com" } ]
 # Python versions and their status: https://devguide.python.org/versions/
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 classifiers = [
   # See: https://pypi.org/pypi?%3Aaction=list_classifiers
   "Development Status :: 5 - Production/Stable",
@@ -297,7 +297,6 @@ classifiers = [
   "Operating System :: POSIX :: BSD :: OpenBSD",
   "Operating System :: POSIX :: Linux",
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
@@ -323,10 +322,7 @@ classifiers = [
 # - aligns minimal Python requirements to ours,
 # - adds new explicit support Python version.
 dependencies = [
-  # Backports enum.StrEnum to Python < 3.11 (cli.SortableField, sbom.ExportFormat);
-  # the class ships in every 1.x release.
-  "backports-strenum>=1; python_version<'3.11'",
-  # boltons 25.0.0 dropped Python 3.9, matching our requires-python >= 3.10.
+  # boltons 25.0.0 dropped Python 3.9, below our requires-python floor.
   "boltons>=25",
   # click-extra 9.3 renamed the `Spinner` argument `enabled` to `live`, which
   # `CLIExecutor._make_spinner` in execution.py passes by keyword. Below it every
@@ -341,9 +337,6 @@ dependencies = [
   # Below it, parsing any pURL spec raises TypeError and tests/test_specifier.py
   # fails to collect.
   "packageurl-python>=0.17.6",
-  # tomllib is stdlib from Python 3.11; on 3.10 we parse TOML via tomli.loads()
-  # (cli.py), an API stable since 2.0. The marker keeps tomli off 3.11+.
-  "tomli>=2; python_version<'3.11'",
   # config.py and cli.py serialize config and installed-package TOML via
   # tomli_w.dumps(), an API stable since 1.0.
   "tomli-w>=1",
@@ -415,7 +408,7 @@ scripts.mpm = "meta_package_manager.__main__:main"
 test = [
   "click-extra[pytest]",
   "click-extra[toml]",
-  # coverage 7.11.0 dropped Python 3.9, matching our requires-python >= 3.10.
+  # coverage 7.11.0 dropped Python 3.9, below our requires-python floor.
   "coverage[toml]>=7.11",
   # The [validation] extra provides the jsonschema-based validators used to assert
   # generated CycloneDX SBOMs are schema-valid. Kept test-only (not a runtime dep) so
@@ -457,11 +450,9 @@ docs = [
   # furo 2025.9.25 is a recent CalVer release supporting Sphinx 8.
   "furo>=2025.9.25",
   # attrs_block, attrs_inline and colon_fence (enabled in docs/conf.py) ship in
-  # myst-parser 4.0+; the `alert` extension needs 5.1. The flat floor only resolves
-  # because this group declares its own requires-python: on the project's 3.10
-  # floor, uv caps myst-parser at 4.0.1.
+  # myst-parser 4.0+; the `alert` extension needs 5.1.
   "myst-parser>=5.1",
-  # Sphinx 8.0.0 is the first version to drop Python 3.9, matching requires-python.
+  # Sphinx 8.0.0 is the first version to drop Python 3.9, below our requires-python floor.
   "sphinx>=8",
   # sphinx-autodoc-typehints 2.4.0 is the first release aligned to Python >= 3.10.
   "sphinx-autodoc-typehints>=2.4",
@@ -494,11 +485,6 @@ docs = [
 # symbol against, so each floor is the release current when the stub was
 # declared. Raise one only when mypy reports a symbol the older stub lacks.
 typing = [
-  # Gated on `python_version<'3.11'` at runtime, so mypy's 3.14 runner lacks it
-  # while `--python-version 3.10` follows the backport branch of every `StrEnum`
-  # import and resolves it to `Any`. Declared unconditionally to keep the stub on
-  # disk whatever the interpreter.
-  "backports-strenum>=1",
   # Declared for boltons, imported across the package. Floor is the stub current
   # when it was declared.
   "types-boltons>=25.0.0.20250919",
@@ -529,12 +515,12 @@ package-data."meta_package_manager.managers" = [ "*.lua", "*.toml" ]
 
 [tool.uv]
 required-version = ">=0.12.22"
-# The docs group resolves for 3.14 alone, well above the project's own 3.10
+# The docs group resolves for 3.14 alone, well above the project's own 3.11
 # floor. Nothing builds the documentation below it: docs.yaml, the logo audit
 # and tests/test_sphinx_crossrefs.py all run on the newest supported Python.
 # Narrowing the group is what lets its members carry a flat floor instead of a
-# marker split holding a second, older resolution alive for a 3.10 interpreter
-# that never renders a page (myst-parser is the case in point: 5.1 needs 3.11+).
+# marker split holding a second, older resolution alive for an interpreter that
+# never renders a page.
 dependency-groups.docs = { requires-python = ">= 3.14" }
 # Cooldown period.
 exclude-newer = "1 week"
@@ -709,7 +695,7 @@ warn_unreachable = true
 pretty = true
 warn_unused_configs = true
 # Sphinx >= 9.1 uses PEP 695 `type` statements, which mypy rejects under the
-# project's --python-version 3.10 floor. tests/test_docs.py imports
+# project's --python-version 3.11 floor. tests/test_docs.py imports
 # click_extra.sphinx.matrix (which imports sphinx), so skip following imports
 # into sphinx instead of analyzing its 3.12+ source. The entry is the one
 # repomatic's bundled `mypy.toml` carries.
@@ -1019,19 +1005,15 @@ test-matrix.remove.os = [ "macos-26-intel" ]
 # by its apparmor comment.
 # See repomatic's test-matrix guide.
 test-matrix.exclude = [
-  { os = "ubuntu-26.04", python-version = "3.10" },
-  { os = "macos-26", python-version = "3.10" },
-  { os = "windows-2025", python-version = "3.10" },
-  { os = "windows-11-arm", python-version = "3.10" },
+  { os = "ubuntu-26.04", python-version = "3.11" },
+  { os = "macos-26", python-version = "3.11" },
+  { os = "windows-2025", python-version = "3.11" },
+  { os = "windows-11-arm", python-version = "3.11" },
   { os = "ubuntu-26.04", python-version = "3.16" },
   { os = "macos-26", python-version = "3.16" },
   { os = "windows-2025", python-version = "3.16" },
   { os = "windows-11-arm", python-version = "3.16" },
 ]
-# repomatic's axis starts at 3.11, its own floor, whatever `requires-python`
-# declares. Swap that floor for this project's, so the excludes above and
-# `tests/test_metadata.py` see the version `requires-python` names.
-test-matrix.replace.python-version = { "3.11" = "3.10" }
 # One more cell on the floor runner and Python installs every direct dependency
 # at the lowest version its specifier allows, where the lockfile holds the
 # newest. Distribution packagers build against the releases their channel
@@ -1039,7 +1021,7 @@ test-matrix.replace.python-version = { "3.11" = "3.10" }
 # on. The `Resolve again` step of tests.yaml reads the `resolution` key. The PR
 # matrix ignores `full-include` rows, so pull requests do not run this cell.
 test-matrix.full-include = [
-  { os = "ubuntu-26.04-arm", python-version = "3.10", resolution = "lowest-direct" },
+  { os = "ubuntu-26.04-arm", python-version = "3.11", resolution = "lowest-direct" },
 ]
 # Sync optional-dependencies into the build venv so the Nuitka binary ships
 # every feature gated behind try/except imports in click-extra and mpm:

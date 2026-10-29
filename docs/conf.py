@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import os
 import re
+import tomllib
 from datetime import date, datetime, timezone
 from pathlib import Path
 
-import tomllib  # type: ignore[import-not-found]  # stdlib >=3.11; docs require >=3.12.
 from docutils import nodes
 from docutils.transforms import Transform
 from docutils.transforms.references import PropagateTargets

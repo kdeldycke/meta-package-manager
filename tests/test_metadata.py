@@ -48,7 +48,7 @@ def _load_pyproject() -> dict:
     """Parse the project's `pyproject.toml` into a dictionary."""
     path = PROJECT_ROOT.joinpath("pyproject.toml")
     content = path.read_text(encoding="UTF-8")
-    return tomllib.loads(content)  # type: ignore[no-any-return]
+    return tomllib.loads(content)
 
 
 def _major_minor(version: str) -> tuple[int, int]:

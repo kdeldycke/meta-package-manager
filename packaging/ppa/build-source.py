@@ -16,9 +16,8 @@ upgrade `click` for every Python application on any machine that adds the PPA.
 
 Resolution happens here rather than on the builder: a Launchpad builder has no
 network, so the wheels have to be unpacked into the tarball first. Markers are
-resolved against `mpm`'s own `requires-python` floor, which pulls in the
-`tomli` and `backports-strenum` shims the oldest series needs and which the
-newest simply ignores.
+resolved against `mpm`'s own `requires-python` floor, so the tree carries every
+shim the oldest series needs, and the newest simply ignores them.
 
 Building and uploading the assembled trees:
 
@@ -46,11 +45,12 @@ from pathlib import Path
 SPEC_DIR = Path(__file__).parent
 REPO_DIR = SPEC_DIR.parent.parent
 
-# Every Ubuntu series still receiving updates, plus the development one. The
-# `~{series}` suffixes sort in release order because the codenames happen to
-# be alphabetical, which is what upgrades a machine moving from one series to
-# the next.
-SERIES = ("jammy", "noble", "resolute", "stonking")
+# Every Ubuntu series still receiving updates, plus the development one, minus
+# `jammy`: its `python3` is 3.10, below `requires-python`. The `~{series}`
+# suffixes sort in release order because the codenames happen to be
+# alphabetical, which is what upgrades a machine moving from one series to the
+# next.
+SERIES = ("noble", "resolute", "stonking")
 
 MAINTAINER = "Kevin Deldycke <kevin@deldycke.com>"
 
@@ -129,7 +129,7 @@ def export_tag_metadata(version: str, workdir: Path) -> Path:
 
 
 def python_floor(project: Path) -> str:
-    """Read `requires-python` and return its bare floor, like `3.10`."""
+    """Read `requires-python` and return its bare floor, like `3.11`."""
     content = (project / "pyproject.toml").read_text(encoding="UTF-8")
     match = re.search(
         r'^requires-python\s*=\s*"[^0-9]*([0-9]+\.[0-9]+)', content, re.MULTILINE

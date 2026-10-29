@@ -706,7 +706,8 @@ jobs:
   # https://launchpad.net/~kdeldycke/+archive/ubuntu/mpm
   # https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/ppa
   # Assemble and build the in-repo Debian source package on every Ubuntu series
-  # still receiving updates, plus the development one. Ubuntu ships neither
+  # still receiving updates, plus the development one, minus jammy, whose python3 is
+  # below requires-python. Ubuntu ships neither
   # click-extra nor extra-platforms, and its click and deepmerge are older than
   # click-extra accepts, so the package carries its whole dependency tree and
   # depends on python3 alone. That is what the job asserts: a Depends naming an
@@ -721,8 +722,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - series: jammy
-            image: ubuntu:22.04
           - series: noble
             image: ubuntu:24.04
           - series: resolute

@@ -158,10 +158,6 @@ def test_search_mpm_stops_at_home(monkeypatch, tmp_path):
     assert uv_candidate(tmp_path) not in candidates
 
 
-@pytest.mark.skipif(
-    sys.version_info < (3, 11),
-    reason="python -P was added in 3.11",
-)
 def test_mpm_cli_ignores_the_spawn_directory(tmp_path):
     """A menu action imports the installed `mpm`, wherever it is spawned from.
 
@@ -1161,7 +1157,7 @@ class TestBarPlugin:
         # We need to parse the version to account for alpha release,
         # like Python `3.12.0a4`.
         # The bar plugin itself must run on macOS system Python (3.9+), even though
-        # mpm requires 3.10+. The check_mpm() runnability test catches the gap.
+        # mpm requires 3.11+. The check_mpm() runnability test catches the gap.
         python_version = process.stdout.split()[1]
         assert parse_version(python_version) >= parse_version(
             "3.9",

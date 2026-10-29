@@ -3,35 +3,32 @@ flowchart LR
 
     subgraph primary-deps [Primary dependencies]
         click_extra{{"`click-extra`"}}
-        tomli{{"`tomli`"}}
         xmltodict{{"`xmltodict`"}}
         boltons{{"`boltons`"}}
         extra_platforms{{"`extra-platforms`"}}
         packageurl_python{{"`packageurl-python`"}}
-        backports_strenum{{"`backports-strenum`"}}
         tomli_w{{"`tomli-w`"}}
     end
 
     jsonschema(["`jsonschema`"])
-    typing_extensions(["`typing-extensions`"])
     referencing(["`referencing`"])
+    typing_extensions(["`typing-extensions`"])
     pygments(["`pygments`"])
     requests(["`requests`"])
-    anyio(["`anyio`"])
     idna(["`idna`"])
     jinja2(["`jinja2`"])
+    anyio(["`anyio`"])
     arrow(["`arrow`"])
     beautifulsoup4(["`beautifulsoup4`"])
     certifi(["`certifi`"])
     click_0(["`click`"])
     cloup(["`cloup`"])
     docutils(["`docutils`"])
-    exceptiongroup(["`exceptiongroup`"])
     httpcore(["`httpcore`"])
     license_expression(["`license-expression`"])
     markdown_it_py(["`markdown-it-py`"])
     packaging(["`packaging`"])
-    rdflib(["`rdflib`"])
+    python_dateutil(["`python-dateutil`"])
     accessible_pygments(["`accessible-pygments`"])
     attrs(["`attrs`"])
     colorama(["`colorama`"])
@@ -40,7 +37,7 @@ flowchart LR
     mdit_py_plugins(["`mdit-py-plugins`"])
     pluggy(["`pluggy`"])
     py_serializable(["`py-serializable`"])
-    python_dateutil(["`python-dateutil`"])
+    rdflib(["`rdflib`"])
     rfc3339_validator(["`rfc3339-validator`"])
     rfc3987_syntax(["`rfc3987-syntax`"])
     rpds_py(["`rpds-py`"])
@@ -48,6 +45,7 @@ flowchart LR
     sphinx_basic_ng(["`sphinx-basic-ng`"])
     sphinx_last_updated_by_git(["`sphinx-last-updated-by-git`"])
     tabulate(["`tabulate`"])
+    tzdata(["`tzdata`"])
     wcmatch(["`wcmatch`"])
     wcwidth(["`wcwidth`"])
     alabaster(["`alabaster`"])
@@ -64,7 +62,6 @@ flowchart LR
     hjson(["`hjson`"])
     imagesize(["`imagesize`"])
     iniconfig(["`iniconfig`"])
-    isodate(["`isodate`"])
     json_with_comments(["`json-with-comments`"])
     json5(["`json5`"])
     jsonpointer(["`jsonpointer`"])
@@ -87,7 +84,7 @@ flowchart LR
     sphinxcontrib_jsmath(["`sphinxcontrib-jsmath`"])
     sphinxcontrib_qthelp(["`sphinxcontrib-qthelp`"])
     sphinxcontrib_serializinghtml(["`sphinxcontrib-serializinghtml`"])
-    tzdata(["`tzdata`"])
+    tomli(["`tomli`"])
     uri_template(["`uri-template`"])
     uritools(["`uritools`"])
     urllib3(["`urllib3`"])
@@ -141,12 +138,10 @@ flowchart LR
     end
 
     meta_package_manager ==>|" >=9.3 "| click_extra
-    meta_package_manager ==>|" >=2 "| tomli
     meta_package_manager ==>|" >=0.12 "| xmltodict
     meta_package_manager ==>|" >=25 "| boltons
     meta_package_manager ==>|" >=13.10 "| extra_platforms
     meta_package_manager ==>|" >=0.17.6 "| packageurl_python
-    meta_package_manager ==>|" >=1 "| backports_strenum
     meta_package_manager ==>|" >=1 "| tomli_w
     sphinx --> pygments
     sphinx --> requests
@@ -169,7 +164,6 @@ flowchart LR
     click_extra --> pytest
     click_extra --> pygments
     click_extra --> pyyaml
-    click_extra --> tomli
     click_extra --> click_0
     click_extra --> cloup
     click_extra --> docutils
@@ -185,8 +179,6 @@ flowchart LR
     click_extra --> json_with_comments
     click_extra --> json5
     pytest --> pygments
-    pytest --> tomli
-    pytest --> exceptiongroup
     pytest --> packaging
     pytest --> colorama
     pytest --> pluggy
@@ -194,15 +186,15 @@ flowchart LR
     spdx_tools --> pyyaml
     spdx_tools --> click_0
     spdx_tools --> license_expression
-    spdx_tools --> rdflib
     spdx_tools --> xmltodict
+    spdx_tools --> rdflib
     spdx_tools --> beartype
     spdx_tools --> ply
     spdx_tools --> semantic_version
     spdx_tools --> uritools
     cyclonedx_python_lib --> jsonschema
-    cyclonedx_python_lib --> typing_extensions
     cyclonedx_python_lib --> referencing
+    cyclonedx_python_lib --> typing_extensions
     cyclonedx_python_lib --> license_expression
     cyclonedx_python_lib --> packageurl_python
     cyclonedx_python_lib --> py_serializable
@@ -219,8 +211,8 @@ flowchart LR
     furo --> beautifulsoup4
     furo --> accessible_pygments
     furo --> sphinx_basic_ng
-    httpx --> anyio
     httpx --> idna
+    httpx --> anyio
     httpx --> certifi
     httpx --> httpcore
     pytest_cov --> pytest
@@ -266,24 +258,21 @@ flowchart LR
     requests --> certifi
     requests --> charset_normalizer
     requests --> urllib3
+    jinja2 --> markupsafe
     anyio --> typing_extensions
     anyio --> idna
-    anyio --> exceptiongroup
-    jinja2 --> markupsafe
     beautifulsoup4 --> typing_extensions
     beautifulsoup4 --> soupsieve
     cloup --> typing_extensions
     cloup --> click_0
-    exceptiongroup --> typing_extensions
     httpcore --> certifi
     httpcore --> h11
     license_expression --> boolean_py
     markdown_it_py --> mdurl
-    rdflib --> isodate
-    rdflib --> pyparsing
     accessible_pygments --> pygments
     mdit_py_plugins --> markdown_it_py
     py_serializable --> defusedxml
+    rdflib --> pyparsing
     sphinx_basic_ng --> sphinx
     sphinx_last_updated_by_git --> sphinx
     tabulate --> wcwidth
@@ -295,6 +284,7 @@ flowchart LR
     arrow --> python_dateutil
     arrow --> tzdata
     python_dateutil --> six
+    python_dateutil --> tzdata
     meta_package_manager -.-> ext_sbom-offline
     meta_package_manager -.-> ext_sbom-online
     meta_package_manager -.-> grp_docs
@@ -310,7 +300,6 @@ flowchart LR
     click arrow "https://pypi.org/project/arrow/" _blank
     click attrs "https://pypi.org/project/attrs/" _blank
     click babel "https://pypi.org/project/babel/" _blank
-    click backports_strenum "https://pypi.org/project/backports-strenum/" _blank
     click beartype "https://pypi.org/project/beartype/" _blank
     click beautifulsoup4 "https://pypi.org/project/beautifulsoup4/" _blank
     click boltons "https://pypi.org/project/boltons/" _blank
@@ -327,7 +316,6 @@ flowchart LR
     click deepmerge "https://pypi.org/project/deepmerge/" _blank
     click defusedxml "https://pypi.org/project/defusedxml/" _blank
     click docutils "https://pypi.org/project/docutils/" _blank
-    click exceptiongroup "https://pypi.org/project/exceptiongroup/" _blank
     click execnet "https://pypi.org/project/execnet/" _blank
     click extra_platforms "https://pypi.org/project/extra-platforms/" _blank
     click fqdn "https://pypi.org/project/fqdn/" _blank
@@ -339,7 +327,6 @@ flowchart LR
     click idna "https://pypi.org/project/idna/" _blank
     click imagesize "https://pypi.org/project/imagesize/" _blank
     click iniconfig "https://pypi.org/project/iniconfig/" _blank
-    click isodate "https://pypi.org/project/isodate/" _blank
     click isoduration "https://pypi.org/project/isoduration/" _blank
     click jinja2 "https://pypi.org/project/jinja2/" _blank
     click json_with_comments "https://pypi.org/project/json-with-comments/" _blank
@@ -427,7 +414,6 @@ flowchart LR
     click ext_sbom-online_httpx "https://pypi.org/project/httpx/" _blank
 
     style meta_package_manager stroke-width:3px
-    style backports_strenum stroke-width:3px
     style boltons stroke-width:3px
     style click_extra stroke-width:3px
     style coverage stroke-width:3px
@@ -456,7 +442,6 @@ flowchart LR
     style sphinxcontrib_jquery stroke-width:3px
     style sphinxcontrib_mermaid stroke-width:3px
     style sphinxext_opengraph stroke-width:3px
-    style tomli stroke-width:3px
     style tomli_w stroke-width:3px
     style tomlkit stroke-width:3px
     style types_boltons stroke-width:3px

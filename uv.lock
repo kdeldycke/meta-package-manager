@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.10"
 resolution-markers = [
     "python_full_version >= '3.14'",
@@ -1168,7 +1168,7 @@ wheels = [
 
 [[package]]
 name = "meta-package-manager"
-version = "8.2.1.dev0"
+version = "8.3.0.dev0"
 source = { editable = "." }
 dependencies = [
     { name = "backports-strenum", marker = "python_full_version < '3.11'" },
@@ -1250,6 +1250,9 @@ typing = [
     { name = "types-pyyaml" },
     { name = "types-xmltodict" },
 ]
+
+[package.group-requires-python]
+docs = ">=3.14"
 
 [package.metadata]
 requires-dist = [

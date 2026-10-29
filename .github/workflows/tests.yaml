@@ -202,7 +202,7 @@ jobs:
           # Held equal to `[tool.repomatic] minimum-release-age`, like the workflow's UV_EXCLUDE_NEWER.
           PIP_UPLOADED_PRIOR_TO: P7D
         run: >
-          uvx --no-progress 'pip==26.2.1' --python "$(python -c 'import sys; print(sys.executable)')"
+          uvx --no-progress 'pip==26.2.2' --python "$(python -c 'import sys; print(sys.executable)')"
           install --upgrade pip pipx setuptools
 
       # Homebrew
@@ -311,7 +311,7 @@ jobs:
       # Installed through npm, which the steps above set up on every OS (Node itself is
       # pre-installed on all GitHub-hosted runners), so one cross-platform step suffices.
       - name: pnpm - install
-        run: npm install --global pnpm@12.14.0 # zizmor: ignore[adhoc-packages]
+        run: npm install --global pnpm@12.15.0 # zizmor: ignore[adhoc-packages]
 
       # Cargo
       - name: Cargo - macOS install

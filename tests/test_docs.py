@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import ast
 import csv
+import functools
 import importlib.util
 import re
 import shutil
@@ -61,6 +62,7 @@ from meta_package_manager.tables import PackageOutcome
 from .conftest import PROJECT_ROOT, all_managers, tomllib
 
 
+@functools.cache
 def _load_docs_update():
     """Load `docs/docs_update.py` as a module without requiring `docs` to be a package.
 
@@ -76,7 +78,18 @@ def _load_docs_update():
     return module
 
 
-docs_update = _load_docs_update()
+@pytest.fixture
+def docs_update():
+    """The `docs/docs_update.py` module, or a skip when `tomlrt` is missing.
+
+    The script edits `pyproject.toml` with `tomlrt`, which most distributions do
+    not package. The skip keeps the hermetic layer free of it.
+    """
+    pytest.importorskip(
+        "tomlrt",
+        reason="tomlrt is optional; hermetic builds run without it",
+    )
+    return _load_docs_update()
 
 
 """ Test all non-code artifacts depending on manager definitions.
@@ -414,7 +427,9 @@ def test_label_rules_in_pyproject():
     assert checked_in_file == generate_file_rules()
 
 
-def test_pyproject_updates_are_pyproject_fmt_fixpoint(monkeypatch, tmp_path):
+def test_pyproject_updates_are_pyproject_fmt_fixpoint(
+    docs_update, monkeypatch, tmp_path
+):
     """The `pyproject.toml` writers must emit `pyproject-fmt`-canonical style.
 
     Any deviation makes the `update-docs` and `format-pyproject` autofix
@@ -447,7 +462,9 @@ def test_pyproject_updates_are_pyproject_fmt_fixpoint(monkeypatch, tmp_path):
     }),
 )
 @pytest.mark.parametrize("columns", (119, 120, 121))
-def test_string_array_wraps_where_pyproject_fmt_wraps(glyph, columns, tmp_path):
+def test_string_array_wraps_where_pyproject_fmt_wraps(
+    docs_update, glyph, columns, tmp_path
+):
     """`_string_array` must reach `pyproject-fmt`'s own inline-or-exploded verdict.
 
     The fixpoint test above only measures the arrays the pool happens to
@@ -479,7 +496,7 @@ def test_string_array_wraps_where_pyproject_fmt_wraps(glyph, columns, tmp_path):
     assert padding > 0, "glyph too wide to probe this column count"
     key = f'labels.file-rules."{glyph} {"n" * padding}"'
 
-    line = f"{key} = {docs_update._string_array(values, key=key).as_string()}"
+    line = f"{key} = {docs_update._string_array(values, key=key)}"
     assert wcswidth(line.splitlines()[0]) <= docs_update.COLUMN_WIDTH
 
     # Only the generated section is judged: `pyproject-fmt` also normalizes
@@ -755,7 +772,7 @@ def _load_metrics_store() -> list[dict]:
         return list(csv.DictReader(store))
 
 
-def test_manager_upstreams_cover_the_pool():
+def test_manager_upstreams_cover_the_pool(docs_update):
     """Check every wrapped manager is either measured upstream, or excused.
 
     The metrics subjects and the excuse map partition the pool, so a manager
@@ -787,7 +804,7 @@ def test_manager_upstreams_cover_the_pool():
 
 
 @pytest.mark.repo_maintenance
-def test_metrics_subjects_in_pyproject():
+def test_metrics_subjects_in_pyproject(docs_update):
     """Check the manager entries of the metrics subjects follow `repository_url`.
 
     Drift means a manager's repository changed without running

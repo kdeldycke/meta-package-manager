@@ -12,7 +12,7 @@ To install `mpm` on your own system, head to the [installation methods](install.
 
 The `mpm` test suite splits into two layers, separated by the `integration` and `host_environment` pytest markers:
 
-- A **hermetic layer** (everything marked neither `integration` nor `host_environment`) needs no network, no package managers and no writable `$HOME`. It runs cleanly inside a build sandbox. Beyond `pytest` it imports `pyyaml` and `tomlkit` (both pulled in by `tests/test_docs.py`); the SBOM tests additionally want the `[sbom-offline]` and `[sbom-online]` extras but **skip themselves when those are absent, or too old for the renderer**, so a lean build never has to ignore them. `pyproject-fmt` stays optional too, its formatting-fixpoint test auto-skipping when missing.
+- A **hermetic layer** (everything marked neither `integration` nor `host_environment`) needs no network, no package managers and no writable `$HOME`. It runs cleanly inside a build sandbox. Beyond `pytest` it imports `pyyaml`, pulled in by `tests/test_docs.py`; the SBOM tests additionally want the `[sbom-offline]` and `[sbom-online]` extras but **skip themselves when those are absent, or too old for the renderer**, so a lean build never has to ignore them. `pyproject-fmt` stays optional too, its formatting-fixpoint test auto-skipping when missing. So does `tomlrt`: the tests of `docs/docs_update.py` skip themselves without it, since most distributions do not package it.
 - An **integration layer** (marked `integration`: `tests/test_manager_*.py`, `tests/test_cli*.py`, any test *named* `test_cli_*` wherever it lives, and the SwiftBar/Xbar plugin suite) drives the ~150 real package managers ([`apt`](managers/apt.md), [`brew`](managers/brew.md), [`pip`](managers/pip.md), [`npm`](managers/npm.md), and more) and the `mpm` CLI end-to-end. It cannot run in a hermetic builder. Marked `host_environment` beside it is the smaller set needing something only a real host offers: a login shell, a passwd entry for the build user, or a sudo policy. Both are skipped together.
 
 Pick the skip path that fits the builder. Either way no per-module ignore list is needed, and the selection stays correct as test modules are added:
@@ -38,7 +38,7 @@ As of mpm > `7.3.0`, the PyPI sdist ships `tests/`, `docs/` and the `.github/` w
 ```
 
 ```{todo}
-Replace `tomlkit` with [`tomlrt`](https://dimbleby.github.io/tomlrt/) in `docs/docs_update.py` once `requires-python` reaches 3.11, the oldest Python `tomlrt` supports. Then name `tomlrt` in place of `tomlkit` in the `docs` dependency group, in the hermetic-layer imports above and in the `packaging/` recipes.
+When a recipe in `packaging/` moves to the first release after `8.2.0`, drop `tomlkit` from its test dependencies. The Nix recipe can name `tomlrt` in its place, since nixpkgs packages it.
 ```
 
 ## Dependencies

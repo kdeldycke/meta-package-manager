@@ -41,7 +41,8 @@ import re
 import sys
 from urllib.parse import urlparse
 
-import tomlkit
+import tomlrt
+from tomlrt import AoT, Table
 from wcwidth import wcswidth
 
 from meta_package_manager._docs import PROJECT_ROOT, manager_page_stub
@@ -125,22 +126,34 @@ repomatic's own `FORGE_APIS`. Every other host must be declared under
 `[tool.repomatic.metrics] forges`, and a repository elsewhere cannot be sampled.
 """
 
-_SUBJECT_LINE = re.compile(
-    r'^metrics\.subjects\.(?P<key>[\w-]+) = "(?P<url>[^"]*)"\n',
-    re.MULTILINE,
-)
-"""One `metrics.subjects.<name> = "<url>"` line, as `pyproject-fmt` writes it."""
+_BARE_KEY = re.compile(r"[A-Za-z0-9_-]+")
+"""A TOML key part that needs no quotes."""
 
 
-def _string_array(values: tuple[str, ...], key: str = "", multiline: bool = False):
-    """Render strings as a `tomlkit` array, one item per line when asked or long.
+def _toml_string(value: str) -> str:
+    """Render *value* as a TOML string, the way `tomlrt` writes it."""
+    return tomlrt.dumps({"v": value}).removeprefix("v = ").removesuffix("\n")
+
+
+def _toml_key(*parts: str) -> str:
+    """Render a dotted key, with quotes only on the parts that need them."""
+    return ".".join(
+        part if _BARE_KEY.fullmatch(part) else _toml_string(part) for part in parts
+    )
+
+
+def _string_array(
+    values: tuple[str, ...], key: str = "", multiline: bool = False
+) -> str:
+    """Render strings as a TOML array, one item per line when asked or long.
 
     Both layouts replicate `pyproject-fmt`'s canonical style: inline arrays
     are padded with spaces inside the brackets, exploded arrays get a 2-space
-    indent (`tomlkit`'s own `multiline()` hard-codes 4) and a trailing
-    comma. Any deviation is churn: the `format-pyproject` autofix job would
-    endlessly rewrite what the `update-docs` job regenerates.
+    indent and a trailing comma. Any deviation is churn: the `format-pyproject`
+    autofix job would endlessly rewrite what the `update-docs` job regenerates.
     `test_pyproject_updates_are_pyproject_fmt_fixpoint` guards the match.
+    `tomlrt` has no option for the inner padding, so the array is written as
+    text, then given to {func}`_parse_array`.
 
     The inline-or-exploded choice is `pyproject-fmt`'s own: it explodes an array
     whose whole line passes {data}`COLUMN_WIDTH` *display columns*, so *key* is
@@ -153,13 +166,39 @@ def _string_array(values: tuple[str, ...], key: str = "", multiline: bool = Fals
 
     :param key: Rendered key the array is assigned to, measured with it.
     :param multiline: Explode unconditionally, whatever the width.
+    :return: The array as TOML text.
     """
-    items = [tomlkit.item(value).as_string() for value in values]
+    items = [_toml_string(value) for value in values]
     inline = f"[ {', '.join(items)} ]"
     if not multiline and wcswidth(f"{key} = {inline}") <= COLUMN_WIDTH:
-        return tomlkit.array(inline)
+        return inline
     body = "".join(f"  {item},\n" for item in items)
-    return tomlkit.array(f"[\n{body}]")
+    return f"[\n{body}]"
+
+
+def _parse_array(text: str) -> tomlrt.Array:
+    """Parse a TOML array, keeping the layout *text* gives it.
+
+    `tomlrt` copies an array that belongs to another document with its
+    formatting, so the array is written in `pyproject.toml` exactly as *text*
+    spells it.
+    """
+    return tomlrt.loads(f"array = {text}\n").array("array")
+
+
+def _replace_entries(table: Table, entries: dict) -> None:
+    """Make the keys of *table* exactly those of *entries*, in their order.
+
+    The table is edited in place, so dotted keys stay dotted and the comments
+    of kept keys stay with them. New keys are set before stale keys are
+    deleted: `tomlrt` writes a table back as an inline table once it is empty.
+    """
+    for key, value in entries.items():
+        table[key] = value
+    for key in table.keys() - entries.keys():
+        del table[key]
+    order = list(entries)
+    table.sort(key=order.index)
 
 
 def _sync_file(path: Path, content: str, *, check: bool) -> bool:
@@ -190,78 +229,55 @@ def update_labels(*, check: bool = False) -> bool:
     `sync-labels` and labeller jobs read these inline definitions at run time.
 
     ```{note}
-    The edit is done with `tomlkit` round-trip so the rest of
+    The edit is done with a `tomlrt` round-trip so the rest of
     `pyproject.toml` (comments, key order, formatting) is preserved: only
     the three label arrays are regenerated. The per-entry layout matches what
     `pyproject-fmt` emits, so the result survives the autofix formatting
     pass without churn.
     ```
 
-    ```{caution}
-    `[[tool.repomatic.labels.extra]]` stays the last array-of-tables of
-    `[tool.repomatic]`: the labels subtree is dropped then appended at the end
-    of the section, and `test_pyproject_updates_are_pyproject_fmt_fixpoint`
-    fails on an array-of-tables placed after it. A setting that wants that shape
-    goes in as an inline array, like `[tool.repomatic.metrics] charts`.
-    ```
-
     :param check: Report only, leaving `pyproject.toml` untouched.
     :return: `True` when the label arrays are out of date.
     """
     pyproject = PROJECT_ROOT / "pyproject.toml"
-    doc = tomlkit.parse(pyproject.read_text(encoding="UTF-8"))
-    repomatic_table = doc["tool"]["repomatic"]
+    doc = tomlrt.loads(pyproject.read_text(encoding="UTF-8"))
+    labels = doc["tool"]["repomatic"]["labels"]
 
-    extra = tomlkit.aot()
-    for name, color, description in LABELS:
-        entry = tomlkit.table()
-        entry["name"] = name
-        # labelmaker/repomatic expect the bare hex color, without leading '#'.
-        entry["color"] = color.lstrip("#")
-        entry["description"] = description
-        # Carry a renamed label's predecessor, so `sync-labels` migrates it in place
-        # instead of stranding the issues filed against the old name.
-        if renamed_from := LABEL_RENAMES.get(name):
-            entry["rename-from"] = _string_array(renamed_from, key="rename-from")
-        extra.append(entry)
-
-    # The whole `labels` sub-tree is dropped and rebuilt, rather than assigned
-    # over in place: replacing an array-of-tables with a table leaves `tomlkit`'s
-    # internal table map holding indices into the section it just removed, and
-    # the next assignment to the same container dies on an out-of-range lookup.
-    del repomatic_table["labels"]
-
-    # The rule sets go in as dotted keys on `[tool.repomatic]`, which is what
-    # `pyproject-fmt` canonicalizes a table of scalars to, and what the rest of
-    # this section already reads like (`workflow.paths`, `manpages.script`).
-    # `extra` stays an array-of-tables, having no dotted-key form, and therefore
-    # has to be written last: TOML closes a table the moment a sub-table header
-    # opens, so a dotted key emitted after it would land inside `extra`.
+    # The rule sets are dotted keys on `[tool.repomatic]`, which is what
+    # `pyproject-fmt` canonicalizes a table of scalars to. Editing the existing
+    # tables in place keeps that form.
     for section, rules in (
         ("content-rules", generate_content_rules()),
         ("file-rules", generate_file_rules()),
     ):
-        for label, values in rules:
-            key = tomlkit.key(["labels", section, label])
-            repomatic_table[key] = _string_array(values, key=key.as_string())
+        _replace_entries(
+            labels[section],
+            {
+                label: _parse_array(
+                    _string_array(values, key=_toml_key("labels", section, label))
+                )
+                for label, values in rules
+            },
+        )
 
-    # `append()` rather than item assignment on both lines: assigning a super
-    # table over a key the dotted keys above just created discards them and
-    # re-roots the array-of-tables at the document top level, as `[[labels.extra]]`.
-    labels_table = tomlkit.table(is_super_table=True)
-    labels_table.append("extra", extra)
-    repomatic_table.append("labels", labels_table)
+    extra = AoT()
+    for name, color, description in LABELS:
+        entry = Table.section({
+            "name": name,
+            # labelmaker/repomatic expect the bare hex color, without leading '#'.
+            "color": color.lstrip("#"),
+            "description": description,
+        })
+        # Carry a renamed label's predecessor, so `sync-labels` migrates it in place
+        # instead of stranding the issues filed against the old name.
+        if renamed_from := LABEL_RENAMES.get(name):
+            entry["rename-from"] = _parse_array(
+                _string_array(renamed_from, key="rename-from")
+            )
+        extra.append(entry)
+    labels["extra"] = extra
 
-    # Separate the last `extra` entry from the following table with one blank line.
-    last_field = list(extra[-1].keys())[-1]
-    extra[-1][last_field].trivia.trail = "\n\n"
-
-    content = tomlkit.dumps(doc)
-    # tomlkit prefixes the inserted array-of-tables with two blank lines; collapse
-    # the section's leading separator to a single blank line.
-    header = "[[tool.repomatic.labels.extra]]"
-    content = content.replace(f"\n\n\n{header}", f"\n\n{header}", 1)
-    return _sync_file(pyproject, content, check=check)
+    return _sync_file(pyproject, tomlrt.dumps(doc), check=check)
 
 
 def update_keywords(*, check: bool = False) -> bool:
@@ -271,29 +287,31 @@ def update_keywords(*, check: bool = False) -> bool:
     PyPI without a hand edit: the pool's manager IDs, each manager's own
     {attr}`~meta_package_manager.manager.PackageManager.keywords` aliases, and the
     curated {data}`KEYWORDS_EXTRAS` for terms belonging to no manager in
-    particular. Same `tomlkit` round-trip as {func}`update_labels`.
+    particular. Same `tomlrt` round-trip as {func}`update_labels`.
 
     :param check: Report only, leaving `pyproject.toml` untouched.
     :return: `True` when the keywords are out of date.
     """
     pyproject = PROJECT_ROOT / "pyproject.toml"
-    doc = tomlkit.parse(pyproject.read_text(encoding="UTF-8"))
+    doc = tomlrt.loads(pyproject.read_text(encoding="UTF-8"))
 
     manager_keywords = {
         keyword for manager in pool.values() for keyword in manager.keywords
     }
 
-    doc["project"]["keywords"] = _string_array(
-        tuple(
-            sorted(
-                set(KEYWORDS_EXTRAS) | set(pool.all_manager_ids) | manager_keywords,
-                key=str.casefold,
+    doc["project"]["keywords"] = _parse_array(
+        _string_array(
+            tuple(
+                sorted(
+                    set(KEYWORDS_EXTRAS) | set(pool.all_manager_ids) | manager_keywords,
+                    key=str.casefold,
+                ),
             ),
-        ),
-        multiline=True,
+            multiline=True,
+        )
     )
 
-    return _sync_file(pyproject, tomlkit.dumps(doc), check=check)
+    return _sync_file(pyproject, tomlrt.dumps(doc), check=check)
 
 
 def generate_metrics_subjects(forges: dict[str, str]) -> dict[str, str]:
@@ -321,29 +339,23 @@ def update_metrics_subjects(*, check: bool = False) -> bool:
 
     The manager entries come from {func}`generate_metrics_subjects`; the others,
     naming projects that are not managers (`mpm` and its benchmarked peers), are
-    kept as written. The block is rewritten as text rather than through `tomlkit`,
-    whose proxy over these dotted keys fails to delete them, and it keeps the one
-    line per subject, sorted by name, that `pyproject-fmt` leaves alone.
+    kept as written. Same `tomlrt` round-trip as {func}`update_labels`, which keeps
+    the one line per subject, sorted by name, that `pyproject-fmt` leaves alone.
 
     :param check: Report only, leaving `pyproject.toml` untouched.
     :return: `True` when the subjects are out of date.
     """
     pyproject = PROJECT_ROOT / "pyproject.toml"
-    content = pyproject.read_text(encoding="UTF-8")
-    metrics = tomlkit.parse(content)["tool"]["repomatic"]["metrics"].unwrap()
+    doc = tomlrt.loads(pyproject.read_text(encoding="UTF-8"))
+    metrics = doc["tool"]["repomatic"]["metrics"]
 
-    lines = list(_SUBJECT_LINE.finditer(content))
-    start, end = lines[0].start(), lines[-1].end()
-    assert content[start:end] == "".join(line[0] for line in lines), (
-        "the metrics.subjects lines of pyproject.toml must form one block"
-    )
-
-    subjects = {line["key"]: line["url"] for line in lines if line["key"] not in pool}
+    subjects = {
+        name: url for name, url in metrics["subjects"].items() if name not in pool
+    }
     subjects |= generate_metrics_subjects(metrics.get("forges", {}))
-    block = "".join(
-        f'metrics.subjects.{name} = "{url}"\n' for name, url in sorted(subjects.items())
-    )
-    return _sync_file(pyproject, content[:start] + block + content[end:], check=check)
+    _replace_entries(metrics["subjects"], dict(sorted(subjects.items())))
+
+    return _sync_file(pyproject, tomlrt.dumps(doc), check=check)
 
 
 def update_manager_stubs(*, check: bool = False) -> bool:

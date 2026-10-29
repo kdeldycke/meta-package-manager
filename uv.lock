@@ -1103,7 +1103,7 @@ docs = [
     { name = "sphinxcontrib-jquery", marker = "python_full_version >= '3.14'" },
     { name = "sphinxcontrib-mermaid", marker = "python_full_version >= '3.14'" },
     { name = "sphinxext-opengraph", marker = "python_full_version >= '3.14'" },
-    { name = "tomlkit", marker = "python_full_version >= '3.14'" },
+    { name = "tomlrt", marker = "python_full_version >= '3.14'" },
 ]
 test = [
     { name = "click-extra", extra = ["pytest", "toml"] },
@@ -1120,6 +1120,7 @@ test = [
     { name = "pyyaml" },
     { name = "respx" },
     { name = "spdx-tools" },
+    { name = "tomlrt" },
 ]
 typing = [
     { name = "types-boltons" },
@@ -1166,7 +1167,7 @@ docs = [
     { name = "sphinxcontrib-jquery", marker = "python_full_version >= '3.14'", specifier = ">=4" },
     { name = "sphinxcontrib-mermaid", marker = "python_full_version >= '3.14'", specifier = ">=1.2.3" },
     { name = "sphinxext-opengraph", marker = "python_full_version >= '3.14'", specifier = ">=0.13" },
-    { name = "tomlkit", marker = "python_full_version >= '3.14'", specifier = ">=0.13" },
+    { name = "tomlrt", marker = "python_full_version >= '3.14'", specifier = ">=2" },
 ]
 test = [
     { name = "click-extra", extras = ["pytest"] },
@@ -1184,6 +1185,7 @@ test = [
     { name = "pyyaml", specifier = ">=6" },
     { name = "respx", specifier = ">=0.22" },
     { name = "spdx-tools" },
+    { name = "tomlrt", specifier = ">=2" },
 ]
 typing = [
     { name = "types-boltons", specifier = ">=25.0.0.20250919" },
@@ -2092,6 +2094,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/08/72/fc01563df95c189a9f65850096bdc205bc2fe37da6c740cd64afaf18d07e/tomlkit-0.15.2.tar.gz", hash = "sha256:83e32755ba1d20d9340bd069ee97e9f6232ba2346b63ffcba425de01f7e327a6", size = 190522, upload-time = "2026-10-16T04:07:08.166Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/da/46/7d84138a60a8bd796825b2d38ebe92d0d16501ca57d501b7c5d677401bbc/tomlkit-0.15.2-py3-none-any.whl", hash = "sha256:05562412163a3037b94497385fb7f9204c637bc605af7a48199e41cf2272f437", size = 52225, upload-time = "2026-10-16T04:07:09.216Z" },
+]
+
+[[package]]
+name = "tomlrt"
+version = "2.3.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "typing-extensions", marker = "python_full_version < '3.12'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/24/c9/20d73d14ad95e5644adcad09ce5cbccb6273e7d07ef72261c2eb648bf9c4/tomlrt-2.3.1.tar.gz", hash = "sha256:0be2fdc2fe920be471452a2d01acc9e7e24eedbdd850c8e1d9f5abf9f998df44", size = 135478, upload-time = "2026-10-17T13:26:03.084Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b5/5b/ead54c3d76df9ddc358d4bd063a2619911623f76b08ed9f9bccbf80c7813/tomlrt-2.3.1-py3-none-any.whl", hash = "sha256:2dbec2aaf1e953b5a45749c0575c6cd1c8b8215ca3c2fc71c194b32789bc6f0c", size = 149315, upload-time = "2026-10-17T13:26:01.665Z" },
 ]
 
 [[package]]

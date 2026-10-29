@@ -6,6 +6,7 @@
 > This version is **not released yet** and is under active development.
 
 - **Breaking:** [mpm] Drop Python `3.10`, past its end of life: `mpm` needs Python `3.11`. The PPA stops building for Ubuntu `22.04`, whose Python is `3.10`.
+- [mpm] Replace `tomlkit` with `tomlrt` in `docs/docs_update.py`. Packagers can drop `tomlkit` from the test dependencies: the tests that need `tomlrt` skip without it.
 
 ## [`8.2.0` (2026-10-25)](https://github.com/kdeldycke/meta-package-manager/compare/v8.1.2...v8.2.0)
 

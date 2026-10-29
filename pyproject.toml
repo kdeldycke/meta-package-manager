@@ -444,6 +444,9 @@ test = [
   # time so the SPDX-format and OSV-adapter tests in tests/test_cli_sbom.py
   # still import.
   "spdx-tools",
+  # tests/test_docs.py imports docs/docs_update.py, which edits pyproject.toml with
+  # tomlrt. 2.0.0 is the first release whose dumps() takes a plain mapping.
+  "tomlrt>=2",
 ]
 docs = [
   "click-extra[sphinx]",
@@ -473,9 +476,10 @@ docs = [
   "sphinxcontrib-mermaid>=1.2.3",
   # sphinxext-opengraph 0.13 stabilized OpenGraph metadata generation for Sphinx 8+.
   "sphinxext-opengraph>=0.13",
-  # tomlkit round-trips pyproject.toml edits (preserving comments and layout)
-  # for the GitHub label sync in docs/docs_update.py.
-  "tomlkit>=0.13",
+  # tomlrt round-trips the pyproject.toml edits of docs/docs_update.py, keeping
+  # comments and layout. 2.0.0 is the first release whose dumps() takes a plain
+  # mapping.
+  "tomlrt>=2",
 ]
 # Stubs for the untyped libraries mpm imports: boltons, xmltodict in
 # managers/zypper.py, docutils and PyYAML in tests/test_docs.py. mypy needs the

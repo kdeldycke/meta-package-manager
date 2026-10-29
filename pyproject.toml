@@ -554,7 +554,7 @@ build-backend.source-include = [
   "changelog.md",
   # Two tree-scanning tests read it for defect classes (a look-alike glyph, a
   # dead self-referencing URL), so a packager's plain pytest needs it.
-  "claude.md",
+  "AGENTS.md",
   "docs/**",
   # The GNOME Shell extension: sdist-only, so distribution packagers can ship
   # it from the same tarball as mpm itself.
@@ -649,7 +649,7 @@ default.extend-ignore-identifiers-re = [
   # a longer word keeps being checked.
   "^[0-9a-f]{7}$",
   # error: `buildd` should be `build`, `builds`
-  #     ╭▸ ./claude.md:118
+  #     ╭▸ ./AGENTS.md:118
   #     │
   # 118 │ (..) inside a hermetic builder (Guix, Nixpkgs, Debian buildd, RPM mock, etc.).
   #     ╰╴                                                       ━━━━━━
@@ -666,7 +666,7 @@ default.extend-ignore-identifiers-re = [
   # reads the first half as a misspelling of `Hash`.
   "HashiCorp",
   # error: `ist` should be `is`, `it`, `its`, `sit`, `list`
-  #     ╭▸ ./claude.md
+  #     ╭▸ ./AGENTS.md
   #     │
   #     │ - [chalk.ist](https://chalk.ist)
   #     ╰╴         ━━━
@@ -939,7 +939,7 @@ workflow.source-paths = [ "meta_package_manager" ]
 # authoritative and ignores source-paths). The canonical filter covers only the
 # package and tests/, but the suite also asserts on files outside both.
 # test_docs.py holds changelog.md, readme.md and the whole docs/ tree to
-# byte-identity with their generators, and scans claude.md, the bundled skills
+# byte-identity with their generators, and scans AGENTS.md, the bundled skills
 # and the new-manager issue template. test_gnome_extension.py holds the static
 # invariants of gnome-shell/, compares its license with the root one, and reads
 # the `--extra-source` lists of release.yaml and tests-gnome-extension.yaml.
@@ -951,8 +951,8 @@ workflow.paths."tests.yaml" = [
   ".github/workflows/release.yaml",
   ".github/workflows/tests-gnome-extension.yaml",
   ".github/workflows/tests.yaml",
+  "AGENTS.md",
   "changelog.md",
-  "claude.md",
   "docs/**",
   "gnome-shell/**",
   "license",

@@ -1879,7 +1879,7 @@ def test_trail_glyph_matches_the_emitted_one():
         *sorted((PROJECT_ROOT / "tests").glob("*.py")),
         *sorted((PROJECT_ROOT / "docs").glob("*.md")),
         *sorted((PROJECT_ROOT / ".claude" / "skills").rglob("*.md")),
-        PROJECT_ROOT / "claude.md",
+        PROJECT_ROOT / "AGENTS.md",
         PROJECT_ROOT / "readme.md",
     ]
     hits = []
@@ -1915,7 +1915,7 @@ def test_self_referencing_urls_name_a_file_the_tree_holds():
         *sorted((PROJECT_ROOT / "tests").glob("*.py")),
         *sorted((PROJECT_ROOT / "docs").glob("*.md")),
         *sorted((PROJECT_ROOT / ".claude" / "skills").rglob("*.md")),
-        PROJECT_ROOT / "claude.md",
+        PROJECT_ROOT / "AGENTS.md",
         PROJECT_ROOT / "readme.md",
     ]
     hits = []

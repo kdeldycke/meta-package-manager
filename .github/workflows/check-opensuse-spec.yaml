@@ -34,7 +34,7 @@ concurrency:
 # Nothing here resolves a version from a live registry: zypper reads the
 # openSUSE archive, which stages its own releases, and the source tarball is
 # fetched at the exact version the spec pins. The window is declared anyway so
-# that any step added later inherits it. See claude.md § Cooldown on every
+# that any step added later inherits it. See AGENTS.md § Cooldown on every
 # install.
 env:
   NPM_CONFIG_MIN_RELEASE_AGE: 7

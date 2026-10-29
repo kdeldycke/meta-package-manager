@@ -11,8 +11,8 @@ name: 🔬 Tests
       - .github/workflows/release.yaml
       - .github/workflows/tests-gnome-extension.yaml
       - .github/workflows/tests.yaml
+      - AGENTS.md
       - changelog.md
-      - claude.md
       - docs/**
       - gnome-shell/**
       - license
@@ -40,8 +40,8 @@ name: 🔬 Tests
       - .github/workflows/release.yaml
       - .github/workflows/tests-gnome-extension.yaml
       - .github/workflows/tests.yaml
+      - AGENTS.md
       - changelog.md
-      - claude.md
       - docs/**
       - gnome-shell/**
       - license

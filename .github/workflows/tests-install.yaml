@@ -68,7 +68,7 @@ concurrency:
 # the opt-out reads as a decision. Safe to scope this wide: every job inherits
 # `permissions: {}`, takes no secrets, and only runs `--version` on a throwaway
 # runner. The distro-archive jobs (apk, macports, nix, choco) are unaffected
-# either way, their archives staging releases on their own. See claude.md
+# either way, their archives staging releases on their own. See AGENTS.md
 # § Cooldown on every install.
 env:
   UV_EXCLUDE_NEWER: P0D

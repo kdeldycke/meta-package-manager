@@ -113,8 +113,8 @@ Which boils down to the following these rules of thumb regarding stability:
 
   Are exempt from the rules above. An unmaintained manager may be removed, in part or in full, in any release and without notice, once keeping it working becomes too burdensome. It is hidden from the default selection and kept out of the test matrices. The criteria for the flag are those of the {attr}`~meta_package_manager.manager.PackageManager.unmaintained` attribute, and each flagged manager states its evidence on its own page.
 
-## `claude.md` file
+## `AGENTS.md` file
 
-```{include} ../claude.md
+```{include} ../AGENTS.md
 :start-line: 2
 ```

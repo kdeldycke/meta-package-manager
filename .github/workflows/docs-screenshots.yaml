@@ -67,7 +67,7 @@ concurrency:
 
 # Supply-chain cooldown: no package published within the window can be resolved
 # by any command in this workflow. Held equal to `[tool.repomatic]
-# minimum-release-age`. See claude.md for the rationale.
+# minimum-release-age`. See AGENTS.md for the rationale.
 env:
   NPM_CONFIG_MIN_RELEASE_AGE: 7
   UV_EXCLUDE_NEWER: "1 week"

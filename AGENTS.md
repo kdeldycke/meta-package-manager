@@ -1,4 +1,4 @@
-# CLAUDE.md
+# AGENTS.md
 
 Project-specific guidance for working in this repository. The generic coding conventions load from the maintainer's machine configuration and are deliberately not duplicated here: this file carries only what is specific to `mpm`, and only what has no closer home.
 

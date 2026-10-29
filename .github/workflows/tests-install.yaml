@@ -657,7 +657,7 @@ jobs:
           # Pin what CI downloads: unpinned, setup-uv installs the newest uv
           # satisfying `required-version`. `sync-workflow-pins` bumps it once a
           # uv release clears the cooldown window.
-          version: "0.13.0"
+          version: "0.13.4"
       - name: Install Python
         run: uv --no-progress venv --python 3.14
       - name: Run CLI via pip
@@ -687,7 +687,7 @@ jobs:
           # Pin what CI downloads: unpinned, setup-uv installs the newest uv
           # satisfying `required-version`. `sync-workflow-pins` bumps it once a
           # uv release clears the cooldown window.
-          version: "0.13.0"
+          version: "0.13.4"
       - name: Install Python
         run: uv --no-progress venv --python 3.14
       - name: Run stable CLI via pipx
@@ -746,7 +746,7 @@ jobs:
         run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
       - uses: astral-sh/setup-uv@18d369b23da25a81e9458561248e1aafff6a70fa # v10.3.1
         with:
-          version: "0.13.0"
+          version: "0.13.4"
       - name: Assemble the source tree
         run: uv run --script ./packaging/ppa/build-source.py --series ${{ matrix.series }} --output ./dist
       # build-essential compiles nothing here, but dpkg-checkbuilddeps requires
@@ -848,7 +848,7 @@ jobs:
           # Pin what CI downloads: unpinned, setup-uv installs the newest uv
           # satisfying `required-version`. `sync-workflow-pins` bumps it once a
           # uv release clears the cooldown window.
-          version: "0.13.0"
+          version: "0.13.4"
       - name: Install Python
         run: uv --no-progress venv --python 3.14
       - name: Run stable CLI
@@ -930,7 +930,7 @@ jobs:
       # resource and patch downloads without verifying their SHA-256 first.
       - name: Install ZeroBrew
         run: >
-          gh release download v0.3.2
+          gh release download v0.4.2
           --repo lucasgelfond/zerobrew
           --pattern "${{ matrix.asset }}"
           --output /usr/local/bin/zb

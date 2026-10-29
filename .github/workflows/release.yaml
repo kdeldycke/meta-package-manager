@@ -215,7 +215,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python3 packaging/guix/update.py
-      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+      - uses: astral-sh/setup-uv@18d369b23da25a81e9458561248e1aafff6a70fa # v10.3.1
         if: steps.check.outputs.needs_update == 'true' || steps.check.outputs.existing != ''
         with:
           # Pin what CI downloads: unpinned, setup-uv installs the newest uv
@@ -306,7 +306,7 @@ jobs:
           for definition in click-extra extra-platforms package; do
           python3 packaging/nix/update.py "packaging/nix/${definition}.nix";
           done
-      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+      - uses: astral-sh/setup-uv@18d369b23da25a81e9458561248e1aafff6a70fa # v10.3.1
         if: steps.check.outputs.needs_update == 'true' || steps.check.outputs.existing != ''
         with:
           # Pin what CI downloads: unpinned, setup-uv installs the newest uv

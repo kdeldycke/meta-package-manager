@@ -877,9 +877,6 @@ environment satisfies it.
 UPGRADE_ALL_BLOCKED_WHEN: dict[str, bool | Callable[[], bool]] = {
     # cpan builds and tests hundreds of modules it cannot install on Linux runners.
     "cpan": cpan_upgrade_all_blocked,
-    # winget upgrades every outdated application of the runner image. On windows-2025
-    # on 2026-09-17, its 17 upgrades took 42 minutes, 23 of them for Visual Studio.
-    "winget": is_github_ci,
 }
 """Managers whose `upgrade --all` cannot complete within
 {data}`~meta_package_manager.execution.MUTATING_TIMEOUT`, mapped to the condition under
@@ -890,6 +887,8 @@ Read and resolved like {data}`INSTALL_REMOVE_BLOCKED_WHEN`, through
 timeout, and that wait sets the length of both destructive CI steps. The destructive
 upgrade tests drive it anyway, cap its CLI calls at {data}`SHORT_FAILURE_TIMEOUT`, and
 assert that mpm reports the timeout.
+
+A manager that the kill damages goes in {data}`UPGRADE_ALL_SKIPPED_WHEN` instead.
 """
 
 
@@ -901,6 +900,40 @@ def upgrade_all_blocked(manager_id: str) -> bool:
     entry is not blocked.
     """
     condition = UPGRADE_ALL_BLOCKED_WHEN.get(manager_id, False)
+    return condition() if callable(condition) else condition
+
+
+UPGRADE_ALL_SKIPPED_WHEN: dict[str, bool | Callable[[], bool]] = {
+    # winget upgrades every outdated application of the runner image. On windows-2025
+    # on 2026-09-17, its 17 upgrades took 42 minutes, 23 of them for Visual Studio.
+    "winget": is_github_ci,
+}
+"""Managers whose `upgrade --all` must not run, mapped to the condition under which
+that is true.
+
+Read and resolved like {data}`INSTALL_REMOVE_BLOCKED_WHEN`, through
+{func}`upgrade_all_skipped`. Such a manager cannot complete a full upgrade either, but
+the cap of {data}`UPGRADE_ALL_BLOCKED_WHEN` does not fit it. When mpm kills it at the
+cap, the kill can also stop the installer it runs, and leave that application half
+installed on the host. The destructive upgrade tests leave such a manager out.
+
+```{warning}
+On a runner, the damaged application can be one that the next steps of the job need.
+On a windows-2025 runner with an outdated Git for Windows (`2.56.0.windows.2`),
+`usr\\bin\\bash.exe` was missing after the capped run. Each later `shell: bash` step of
+the job then failed to start.
+```
+"""
+
+
+def upgrade_all_skipped(manager_id: str) -> bool:
+    """Whether the `upgrade --all` of `manager_id` must not run here.
+
+    Resolves the {data}`UPGRADE_ALL_SKIPPED_WHEN` condition, which is either a
+    constant or a callable evaluated against the running host. A manager with no
+    entry is not skipped.
+    """
+    condition = UPGRADE_ALL_SKIPPED_WHEN.get(manager_id, False)
     return condition() if callable(condition) else condition
 
 

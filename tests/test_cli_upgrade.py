@@ -44,7 +44,11 @@ from meta_package_manager.sudo import UNANSWERED_PROMPT_DETAIL
 from meta_package_manager.tables import PACKAGE_OUTCOME_GLYPHS, PackageOutcome
 
 from .conftest import default_manager_ids
-from .destructive_plan import SHORT_FAILURE_TIMEOUT, upgrade_all_blocked
+from .destructive_plan import (
+    SHORT_FAILURE_TIMEOUT,
+    upgrade_all_blocked,
+    upgrade_all_skipped,
+)
 from .fake_manager import ChangingFakeManager, FakeManager
 from .test_cli import (
     assert_no_manager_selected,
@@ -116,10 +120,13 @@ def test_all_managers_upgrade_all(invoke, monkeypatch):
     # concurrent dispatch engages: this is the one destructive exercise of
     # the concurrent `upgrade --all` path.
     #
+    # A manager in UPGRADE_ALL_SKIPPED_WHEN is left out of the selection.
+    #
     # A manager in UPGRADE_ALL_BLOCKED_WHEN would hold the run until the
     # mutating timeout, so its CLI calls are capped the way an
     # `[mpm.overrides.<id>] timeout` entry caps them.
-    capped = [mid for mid in pool.default_manager_ids if upgrade_all_blocked(mid)]
+    selected = [mid for mid in pool.default_manager_ids if not upgrade_all_skipped(mid)]
+    capped = [mid for mid in selected if upgrade_all_blocked(mid)]
     for mid in capped:
         monkeypatch.setattr(pool[mid], "timeout", SHORT_FAILURE_TIMEOUT)
         monkeypatch.setitem(
@@ -128,7 +135,7 @@ def test_all_managers_upgrade_all(invoke, monkeypatch):
             {*pool.overridden_fields.get(mid, ()), "timeout"},
         )
     result = invoke(
-        *(f"--{mid}" for mid in pool.default_manager_ids),
+        *(f"--{mid}" for mid in selected),
         "--verbosity",
         "INFO",
         "upgrade",
@@ -140,7 +147,7 @@ def test_all_managers_upgrade_all(invoke, monkeypatch):
     # toolchain gaps, network blips). The contract we test here is that
     # mpm dispatched to every selected manager and surfaced their output.
     assert result.exit_code in (0, 1)
-    check_selection(result)
+    check_selection(result, selected)
     timed_out = f"Timed out after {SHORT_FAILURE_TIMEOUT}s."
     for mid in capped:
         if f":{mid}.upgrade_all: Upgrade all outdated packages." in result.stderr:
@@ -171,6 +178,10 @@ def test_single_manager_dry_run_upgrade_all(invoke, manager_id, all_option):
 def test_single_manager_upgrade_all(invoke, manager_id):
     # Only the explicit `--all` spelling runs destructively: see
     # test_all_managers_upgrade_all.
+    if upgrade_all_skipped(manager_id):
+        pytest.skip(
+            f"A stopped {manager_id} upgrade can leave applications half installed"
+        )
     # A manager in UPGRADE_ALL_BLOCKED_WHEN cannot finish before the mutating
     # timeout: cap its calls and assert mpm reports the timeout instead.
     blocked = upgrade_all_blocked(manager_id)

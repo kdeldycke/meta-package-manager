@@ -582,13 +582,6 @@ windows-icon-from-ico = "docs/assets/icon.ico"
 # meta_package_manager.managers.pacman); without it the compiled binary would crash
 # on import. The wheel (uv_build) includes the file with no extra config.
 include-package-data = [ "click_extra", "meta_package_manager.managers:*.lua", "meta_package_manager.managers:*.toml" ]
-# Packages whose imports are gated behind try/except in click-extra (config
-# loader) and meta_package_manager.sbom: Nuitka skips these even when they
-# are installed, so force-include them. Pairs with `[tool.repomatic]
-# nuitka.extras` which syncs the corresponding mpm extras into the build
-# venv. xmltodict is already an mpm runtime dep, so it does not need an
-# entry here (Nuitka picks it up via the eager import in zypper.py).
-include-package = [ "cyclonedx", "hjson", "json5", "jsonc", "spdx_tools", "yaml" ]
 
 [tool.typos]
 # Correct capitalization for proper nouns, plus "PATCHed"
@@ -1036,8 +1029,9 @@ test-matrix.full-include = [
 #                  vulnerability data and caches responses on disk.
 #   - toml/yaml/json5/jsonc/hjson/xml: click-extra config-file readers, for
 #           `mpm --config <path>` and `mpm --table-format <fmt>` output.
-# Paired with `include-package` in [tool.nuitka] below to defeat Nuitka's
-# try/except import skip.
+# Nuitka follows these imports once the packages are installed. Do not add them
+# to [tool.nuitka] include-package: that bundles every submodule, test suites
+# included.
 nuitka.extras = [ "hjson", "json5", "jsonc", "sbom-offline", "sbom-online", "toml", "xml", "yaml" ]
 # Render the mpm Click command tree as roff `.1` files and attach them as
 # `mpm-manpages.tar.gz` to every GitHub release (handled by the `manpages` job

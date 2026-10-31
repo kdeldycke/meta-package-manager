@@ -238,8 +238,7 @@ exit_code = 0
 # Config-format coverage. Each fixture is a minimal valid `[mpm]` config; the
 # matching format reader is gated behind `try/except import <pkg>` in
 # click-extra, so a failing case here means the [pkg]-named extra is missing
-# from the binary (either not synced via [tool.repomatic] nuitka.extras or
-# not bundled via [tool.nuitka] include-package).
+# from the binary: [tool.repomatic] nuitka.extras did not sync it.
 [[cases]]
 cli_parameters = "--validate-config tests/cli-test-plan-config.toml"
 exit_code = 0

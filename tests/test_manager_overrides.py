@@ -29,8 +29,7 @@ from textwrap import dedent
 import click
 import pytest
 import tomli_w
-from boltons.strutils import strip_ansi
-from click_extra import ValidationError
+from click_extra import ValidationError, strip_ansi
 
 from meta_package_manager.config import (
     AUTO_UPDATES_REPLACEMENT,

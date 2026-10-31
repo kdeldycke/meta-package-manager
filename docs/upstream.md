@@ -30,7 +30,7 @@ The [bar plugin](bar-plugin.md) started its life inside the central plugin repos
 
 ### [boltons](https://github.com/mahmoud/boltons)
 
-`mpm` strips ANSI sequences out of manager output before parsing it, through `boltons.strutils.strip_ansi`:
+`mpm` stripped ANSI sequences out of manager output through `boltons.strutils.strip_ansi`, before `click_extra.strip_ansi` took over:
 
 - [mahmoud/boltons#257](https://github.com/mahmoud/boltons/issues/257) reported the function eating characters that were not ANSI codes, and [mahmoud/boltons#258](https://github.com/mahmoud/boltons/pull/258) rewrote the stripping with a regex and tests.
 

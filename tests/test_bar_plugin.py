@@ -27,8 +27,7 @@ from itertools import product
 from typing import ClassVar, cast
 
 import pytest
-from boltons.iterutils import flatten
-from boltons.strutils import strip_ansi
+from click_extra import strip_ansi
 from click_extra.color import COLOR_ENVVARS
 from click_extra.execution import args_cleanup
 from extra_platforms import is_any_windows
@@ -927,7 +926,7 @@ def _shell_invocation_matrix():
             # Env prefixes.
             (None, "/usr/bin/env"),
             # Naked and full binary paths.
-            flatten((bin_id, f"/bin/{bin_id}") for bin_id in ("bash", "zsh")),
+            ("bash", "/bin/bash", "zsh", "/bin/zsh"),
             # Options.
             ("-c", ("--login", "-c")),
         )

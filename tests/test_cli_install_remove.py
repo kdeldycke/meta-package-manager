@@ -25,7 +25,7 @@ import re
 from functools import partial
 
 import pytest
-from boltons.strutils import strip_ansi
+from click_extra import strip_ansi
 from extra_platforms import is_windows
 
 from meta_package_manager.execution import CLIError

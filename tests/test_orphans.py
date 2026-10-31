@@ -30,7 +30,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from boltons.strutils import strip_ansi
+from click_extra import strip_ansi
 
 from meta_package_manager.capabilities import (
     Operations,

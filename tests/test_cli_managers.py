@@ -21,7 +21,6 @@ import json
 from functools import partial
 
 import pytest
-from boltons.iterutils import same
 
 from meta_package_manager.pool import pool
 from meta_package_manager.tables import MANAGERS_COLUMNS
@@ -159,7 +158,7 @@ class TestManagers(CLITableTests):
 
             assert isinstance(info["errors"], list)
             if info["errors"]:
-                assert same(map(type, info["errors"]), str)
+                assert all(isinstance(error, str) for error in info["errors"])
 
             assert isinstance(info["executable"], bool)
             assert isinstance(info["fresh"], bool)

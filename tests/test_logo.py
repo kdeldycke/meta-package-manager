@@ -21,7 +21,7 @@ import re
 import shutil
 
 import pytest
-from boltons.strutils import strip_ansi
+from click_extra import strip_ansi
 
 from meta_package_manager import logo
 from meta_package_manager.logo import (

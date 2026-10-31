@@ -708,7 +708,7 @@ The `module:function` notation skips the `mpm` console-script entry point (which
 
 ## Extra dependencies
 
-By default, `mpm` supports TOML [configuration files](configuration.md) and all standard [table formats](https://kdeldycke.github.io/click-extra/table.html#table-formats). Optional extras unlock additional configuration file formats, table output formats, and SBOM generation:
+By default, `mpm` supports TOML, JSONC and XML [configuration files](configuration.md) and all standard [table formats](https://kdeldycke.github.io/click-extra/table.html#table-formats). Optional extras unlock additional configuration file formats, table output formats, and SBOM generation:
 
 ````{list-table}
 :header-rows: 1
@@ -727,11 +727,6 @@ By default, `mpm` supports TOML [configuration files](configuration.md) and all 
     $ uv pip install meta-package-manager[json5]
     ```
   - - [JSON5](https://kdeldycke.github.io/click-extra/config-formats.html#json5) config files: `--config mpm.json5`
-* - `jsonc`
-  - ```{code-block} shell-session
-    $ uv pip install meta-package-manager[jsonc]
-    ```
-  - - [JSONC](https://kdeldycke.github.io/click-extra/config-formats.html#jsonc) config files: `--config mpm.jsonc`
 * - `sbom-offline`
   - ```{code-block} shell-session
     $ uv pip install meta-package-manager[sbom-offline]
@@ -747,12 +742,6 @@ By default, `mpm` supports TOML [configuration files](configuration.md) and all 
     $ uv pip install meta-package-manager[toml]
     ```
   - - [`toml` table format](https://kdeldycke.github.io/click-extra/table.html#table-formats): `--table-format toml`
-* - `xml`
-  - ```{code-block} shell-session
-    $ uv pip install meta-package-manager[xml]
-    ```
-  - - [XML](https://kdeldycke.github.io/click-extra/config-formats.html#xml) config files: `--config mpm.xml`
-    - [`xml` table format](https://kdeldycke.github.io/click-extra/table.html#table-formats): `--table-format xml`
 * - `yaml`
   - ```{code-block} shell-session
     $ uv pip install meta-package-manager[yaml]
@@ -765,13 +754,13 @@ By default, `mpm` supports TOML [configuration files](configuration.md) and all 
 Install all extras at once with:
 
 ```{code-block} shell-session
-$ uv pip install meta-package-manager[hjson,json5,jsonc,sbom-offline,sbom-online,toml,xml,yaml]
+$ uv pip install meta-package-manager[hjson,json5,sbom-offline,sbom-online,toml,yaml]
 ```
 
 Or with `pip`:
 
 ```{code-block} shell-session
-$ pip install meta-package-manager[hjson,json5,jsonc,sbom-offline,sbom-online,toml,xml,yaml]
+$ pip install meta-package-manager[hjson,json5,sbom-offline,sbom-online,toml,yaml]
 ```
 
 When working from a cloned repository, [`uv sync`](https://docs.astral.sh/uv/reference/cli/#uv-sync) installs all runtime extras plus dev groups (`test`, `docs`, `typing`) in one shot:

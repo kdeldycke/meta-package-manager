@@ -20,7 +20,6 @@ from __future__ import annotations
 import logging
 from functools import cached_property
 
-from boltons.iterutils import unique
 from click_extra import get_current_context
 
 from . import definitions
@@ -489,7 +488,7 @@ class ManagerPool:
         assert self.ALLOWED_EXTRA_OPTION.issuperset(extra_options)
 
         # Reduce the set to the user's constraints.
-        selected_ids = [mid for mid in unique(keep) if mid not in drop]
+        selected_ids = [mid for mid in dict.fromkeys(keep) if mid not in drop]
 
         # Bind the version-detection probes to the user's --timeout before any can
         # fire, so a wedged binary cannot outlast the cap during detection the way

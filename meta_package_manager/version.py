@@ -63,8 +63,8 @@ Key rules:
   `("g", 6, "cd", 4, "c", 31)`. The 7-character floor matches
   `git`'s default abbreviated hash length (`core.abbrev`, the de
   facto standard on GitHub/GitLab/Bitbucket). The interleaving
-  requirement rejects coincidental hex strings like asciified Unicode
-  (`eeaccee231`), that have only one transition direction.
+  requirement rejects coincidental hex strings like `eeaccee231`, that
+  have only one transition direction.
 
 - **Digit/letter splitting is essential.** Splitting `ubuntu1` into
   `("ubuntu", 1)` enables natural numeric ordering of embedded version
@@ -132,7 +132,6 @@ import re
 from copy import deepcopy
 from functools import total_ordering
 
-from boltons import strutils
 from click_extra import style
 
 TYPE_CHECKING = False
@@ -497,7 +496,7 @@ class TokenizedString:
             ['', '4', '.', '2', '.', '1', '-', '5666', '.', '3', '']
              pre   m   sep   m   sep   m   sep    m     sep   m   suf
         """
-        normalized_str = strutils.asciify(string).lower().decode()
+        normalized_str = string.lower()
         parts = ALNUM_EXTRACTOR.split(normalized_str)
 
         # Normalize well-known pre-release aliases to their canonical short
@@ -521,7 +520,7 @@ class TokenizedString:
         else:
             orig_parts = ALNUM_EXTRACTOR_CI.split(string)
             orig_segments = tuple(orig_parts[i] for i in range(1, len(orig_parts), 2))
-            # Asciify changed the split structure: fall back to normalized.
+            # Lowercasing changed the split structure: fall back to normalized.
             if len(orig_segments) != len(tokens):
                 orig_segments = tuple(str(t) for t in tokens)
 

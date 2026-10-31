@@ -30,7 +30,7 @@ from datetime import UTC, datetime, timedelta, timezone
 from functools import partial
 
 import pytest
-from boltons.strutils import strip_ansi
+from click_extra import strip_ansi
 
 from meta_package_manager.capabilities import Operations
 from meta_package_manager.cli import outcome_detail, package_outcomes

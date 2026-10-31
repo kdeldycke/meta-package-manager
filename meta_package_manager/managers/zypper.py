@@ -20,8 +20,8 @@ import re
 from itertools import groupby
 from operator import itemgetter
 from typing import ClassVar
+from xml.etree import ElementTree
 
-import xmltodict
 from extra_platforms import UNIX_WITHOUT_MACOS
 
 from ..capabilities import version_not_implemented
@@ -31,7 +31,7 @@ from ..version import parse_version
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Iterator
-    from typing import Any, TypedDict
+    from typing import TypedDict
 
     from ..package import Package
     from ..version import TokenizedString
@@ -43,34 +43,15 @@ if TYPE_CHECKING:
         version: TokenizedString
 
 
-def _xml_items(parent: Any, key: str) -> list[Any]:
-    """Return the `key` children of `parent` as a list, whatever their number.
-
-    `xmltodict` renders a repeated element as a list, collapses a lone
-    occurrence to the bare mapping, and maps an empty parent to `None`. A caller
-    iterating the raw value walks the children in the first case, the *attribute
-    names* of the single child in the second, and raises on the third. zypper
-    reaches every shape from its ordinary output: `search --match-exact` matches
-    exactly one solvable, and a host that is one package behind reports exactly
-    one update.
-    """
-    children = parent.get(key) if parent else None
-    if children is None:
-        return []
-    if isinstance(children, list):
-        return children
-    return [children]
-
-
 class Zypper(PackageManager):
     """openSUSE's package manager.
 
-    `mpm` drives zypper in XML mode (`--xmlout`) and parses the result with
-    `xmltodict`: the most stable machine-readable output zypper offers. Every
-    call is pinned with `--no-color` and `--no-abbrev` (untruncated columns),
-    `--non-interactive` for unattended runs, and `--no-cd --no-refresh` so it
-    never touches removable media or auto-refreshes metadata (`mpm` refreshes
-    explicitly through `sync`).
+    `mpm` drives zypper in XML mode (`--xmlout`) and parses the result with the
+    standard library's `xml.etree.ElementTree`: the most stable machine-readable
+    output zypper offers. Every call is pinned with `--no-color` and
+    `--no-abbrev` (untruncated columns), `--non-interactive` for unattended runs,
+    and `--no-cd --no-refresh` so it never touches removable media or
+    auto-refreshes metadata (`mpm` refreshes explicitly through `sync`).
 
 
     Command equivalences with other managers are listed in
@@ -192,21 +173,20 @@ class Zypper(PackageManager):
         if not output:
             return
 
-        package_list = _xml_items(
-            xmltodict
-            .parse(output)
-            .get("stream", {})
-            .get("search-result", {})
-            .get("solvable-list", {}),
-            "solvable",
-        )
-
         # Group packages by ID.
-        key_func = itemgetter("@name")
+        key_func = itemgetter("name")
 
-        # Skip old packages reported in the results as 'other-version'.
+        # Skip old packages reported in the results as 'other-version'. The path
+        # yields a list for any number of solvables, an empty or missing list
+        # included.
         fresh_packages = sorted(
-            (p for p in package_list if p.get("@status") != "other-version"),
+            (
+                solvable.attrib
+                for solvable in ElementTree.fromstring(output).iterfind(
+                    "search-result/solvable-list/solvable",
+                )
+                if solvable.get("status") != "other-version"
+            ),
             key=key_func,
         )
 
@@ -215,7 +195,7 @@ class Zypper(PackageManager):
         for key, group in groupby(fresh_packages, key_func):
             yield {
                 "id": key,
-                "version": max(parse_version(p["@edition"]) for p in group),
+                "version": max(parse_version(p["edition"]) for p in group),
             }
 
     @property
@@ -259,20 +239,16 @@ class Zypper(PackageManager):
         if not output:
             return
 
-        update_list = (
-            xmltodict
-            .parse(output)
-            .get("stream", {})
-            .get("update-status", {})
-            .get("update-list", {})
+        updates = ElementTree.fromstring(output).iterfind(
+            "update-status/update-list/update",
         )
-
-        for package in _xml_items(update_list, "update"):
+        for update in updates:
             yield self.package(
-                id=package["@name"],
-                description=package.get("description"),
-                latest_version=package["@edition"],
-                installed_version=package["@edition-old"],
+                id=update.attrib["name"],
+                # An empty `<description/>` reads as no description.
+                description=(update.findtext("description") or "").strip() or None,
+                latest_version=update.attrib["edition"],
+                installed_version=update.attrib["edition-old"],
             )
 
     _ORPHANS_REGEXP = re.compile(

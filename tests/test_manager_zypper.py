@@ -18,15 +18,15 @@
 Every payload below is captured output, from openSUSE Tumbleweed `20260830`
 aarch64 running zypper `1.14.98`. The single-element ones are the point: a
 freshly installed host reports exactly one pending update and answers an exact
-search with exactly one solvable, and `xmltodict` renders a lone repeated
-element as a bare mapping instead of a one-item list.
+search with exactly one solvable, and the parser must read a lone element as a
+list of one.
 """
 
 from __future__ import annotations
 
 import pytest
 
-from meta_package_manager.managers.zypper import Zypper, _xml_items
+from meta_package_manager.managers.zypper import Zypper
 
 ONE_UPDATE = """<?xml version='1.0'?>
 <stream>
@@ -49,8 +49,8 @@ NO_UPDATES = """<?xml version='1.0'?>
 </update-status>
 </stream>
 """
-"""`zypper --xmlout list-updates` with nothing to upgrade: an empty element,
-which `xmltodict` maps to `None` rather than to an empty list."""
+"""`zypper --xmlout list-updates` with nothing to upgrade: an empty `update-list`
+element."""
 
 ONE_SOLVABLE = """<?xml version='1.0'?>
 <stream>
@@ -97,31 +97,6 @@ NO_SOLVABLE = """<?xml version='1.0'?>
 
 
 @pytest.mark.parametrize(
-    ("parent", "expected"),
-    (
-        pytest.param(None, [], id="parent-is-none"),
-        pytest.param({}, [], id="parent-is-empty"),
-        pytest.param({"other": "x"}, [], id="key-absent"),
-        pytest.param({"k": {"@name": "gzip"}}, [{"@name": "gzip"}], id="lone-mapping"),
-        pytest.param(
-            {"k": [{"@name": "gzip"}]}, [{"@name": "gzip"}], id="one-item-list"
-        ),
-        pytest.param(
-            {"k": [{"@name": "gzip"}, {"@name": "bgzip"}]},
-            [{"@name": "gzip"}, {"@name": "bgzip"}],
-            id="many",
-        ),
-    ),
-)
-def test_xml_items_normalises_every_shape(parent, expected):
-    """`xmltodict` renders repeated elements in three shapes.
-
-    Only one of them is iterable as a list of children.
-    """
-    assert _xml_items(parent, "k") == expected
-
-
-@pytest.mark.parametrize(
     ("output", "expected"),
     (
         pytest.param(ONE_UPDATE, ["libopenh264-8"], id="one-update"),
@@ -141,6 +116,25 @@ def test_outdated_reads_the_update_versions(stub_run_cli):
     package = next(iter(manager.outdated))
     assert str(package.latest_version) == "2.6.0-2.suse1699.10"
     assert str(package.installed_version) == "2.6.0~noopenh264-1.5"
+
+
+@pytest.mark.parametrize(
+    ("element", "expected"),
+    (
+        pytest.param(
+            "<description>\nH.264 codec\nlibrary.\n\n</description>",
+            "H.264 codec\nlibrary.",
+            id="padded-text",
+        ),
+        pytest.param("<description/>", None, id="empty-element"),
+        pytest.param("", None, id="no-element"),
+    ),
+)
+def test_outdated_reads_the_update_description(stub_run_cli, element, expected):
+    """The text of `<description>` loses its outer blank lines, and none is `None`."""
+    manager = Zypper()
+    stub_run_cli(manager, ONE_UPDATE.replace("<license/>", f"{element}<license/>"))
+    assert next(iter(manager.outdated)).description == expected
 
 
 @pytest.mark.parametrize(

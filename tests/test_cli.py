@@ -47,8 +47,7 @@ from textwrap import dedent
 from types import SimpleNamespace
 
 import pytest
-from boltons.iterutils import same
-from boltons.strutils import strip_ansi
+from click_extra import strip_ansi
 from click_extra.table import SERIALIZATION_FORMATS, TableFormat
 from extra_platforms import is_any_windows
 
@@ -677,7 +676,7 @@ def check_packages_payload(
 
         assert isinstance(info["errors"], list)
         if info["errors"]:
-            assert same(map(type, info["errors"]), str)
+            assert all(isinstance(error, str) for error in info["errors"])
         assert isinstance(info["id"], str)
         assert isinstance(info["name"], str)
 

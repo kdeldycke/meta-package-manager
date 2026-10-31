@@ -663,7 +663,6 @@ def group_params() -> list[Parameter]:
     # Swaps --version for the brand-mark screen, which degrades to the plain
     # message below whenever colors, width or accessibility rule it out.
     params=group_params,
-    version_fields={"env_info": env_summary()},
     examples=[
         ("List every package installed on the machine", "mpm installed"),
         ("Upgrade everything every manager reports as outdated", "mpm upgrade --all"),
@@ -1147,10 +1146,13 @@ def mpm(
     )
 
 
-# Extend --version output with Python and platform metadata.
+# Extend --version output with Python and platform metadata. The summary joins
+# the template as literal text, so its braces are doubled.
 version_option = search_params(mpm.params, VersionOption)
 if isinstance(version_option, VersionOption):
-    version_option.message = "{prog_name}, version {version}\n{env_info}"
+    version_option.message = "{prog_name}, version {version}\n" + (
+        env_summary().replace("{", "{{").replace("}", "}}")
+    )
 
 # Highlight placeholder option names that appear in the help text prose.
 mpm.extra_keywords = HelpKeywords(  # type: ignore[attr-defined]

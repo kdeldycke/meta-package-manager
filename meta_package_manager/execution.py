@@ -64,9 +64,7 @@ from textwrap import dedent, indent, shorten
 from types import MappingProxyType
 from typing import ClassVar, Final
 
-from boltons.iterutils import unique
-from boltons.strutils import strip_ansi
-from click_extra import Style, echo, style
+from click_extra import Style, echo, strip_ansi, style
 from click_extra.color import invocation_color, is_a_tty, resolve_color_env
 from click_extra.execution import (
     INDENT,
@@ -1242,7 +1240,9 @@ class CLIExecutor:
             # rather than crash the whole detection if a release drops it.
             win_pathext = getattr(shutil, "_WIN_DEFAULT_PATHEXT", WIN_DEFAULT_PATHEXT)
             pathext_source = os.getenv("PATHEXT") or win_pathext
-            pathext = unique(ext for ext in pathext_source.split(os.pathsep) if ext)
+            pathext = list(
+                dict.fromkeys(ext for ext in pathext_source.split(os.pathsep) if ext)
+            )
             search_filenames = []
             for cli_name in cli_names:
                 # See if the given file matches any of the expected path extensions.
@@ -1253,7 +1253,7 @@ class CLIExecutor:
                     search_filenames.append(cli_name)
                 else:
                     search_filenames.extend(f"{cli_name}{ext}" for ext in pathext)
-        search_filenames = unique(search_filenames)
+        search_filenames = list(dict.fromkeys(search_filenames))
 
         # Normalize only for deduplication; keep the original paths for discovery.
         search_path_list: list[Path] = []

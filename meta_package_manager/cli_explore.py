@@ -45,11 +45,10 @@ The strategies sketched out were:
 from __future__ import annotations
 
 import logging
-from functools import partial
+from functools import lru_cache, partial
 from typing import Final
 
 import tomli_w
-from boltons.cacheutils import LRI, cached
 from click_extra import (
     STRING,
     Choice,
@@ -376,7 +375,7 @@ def _query_highlighter(query: str | None) -> Callable[[str], str]:
     if not query:
         return lambda value: value
     patterns = {query}.union(Package.query_parts(query))
-    highlighter: Callable[[str], str] = cached(LRI(max_size=1000))(
+    highlighter: Callable[[str], str] = lru_cache(maxsize=1000)(
         partial(
             highlight,
             patterns=patterns,

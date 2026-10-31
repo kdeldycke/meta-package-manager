@@ -22,7 +22,7 @@ import operator
 import re
 
 import pytest
-from boltons.strutils import strip_ansi
+from click_extra import strip_ansi
 
 from meta_package_manager.version import (
     UNDERSCORE_POST_RELEASE_TAGS,
@@ -444,10 +444,7 @@ version_list = (
     ("4.2.1--5666.3", (4, 2, 1, 5666, 3)),
     ("4.2.1-#-5666.3", (4, 2, 1, 5666, 3)),
     ("4.2.1-ABC-5666.3", (4, 2, 1, "abc", 5666, 3)),
-    (
-        "4.2.1-éèàçÇÉÈ²³¼ÀÁÂÃÄ—ÅËÍÑÒÖÜÝåïš™-5666.3",
-        (4, 2, 1, "eeaccee", 231, 4, "aaaaae", "ainooeueyastm", 5666, 3),
-    ),
+    ("4.2.1-éèàçÇÉÈ²³¼ÀÁÂÃÄ—ÅËÍÑÒÖÜÝåïš™-5666.3", (4, 2, 1, 5666, 3)),
     ("1.3_1", (1, 3, 1)),
     ("2.40.20161221.0239", (2, 40, 20161221, 239)),
     ("latest", ("latest",)),

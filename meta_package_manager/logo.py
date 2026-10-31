@@ -182,9 +182,9 @@ Colors = tuple[int | None, int | None]
 def env_summary() -> str:
     """One-line interpreter and platform summary.
 
-    Feeds both the plain `--version` output (as click-extra's `env_info` template
-    field) and the version screen's own `Python` and `Platform` rows, so the two
-    renderings can never disagree on what they report.
+    Feeds both the plain `--version` output, appended to its message, and the
+    version screen's own `Python` and `Platform` rows, so the two renderings can
+    never disagree on what they report.
     """
     return f"Python {platform.python_version()}, {platform_label()}"
 

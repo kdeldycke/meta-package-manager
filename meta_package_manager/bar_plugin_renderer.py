@@ -21,9 +21,9 @@ the Python standard library only, because its
 the user installs as the bar plugin, and that script must have few
 dependencies.
 
-This module is the companion on the `mpm` side. It adds click_extra, boltons,
-the manager pool and the theme system to the plugin code, and produces the
-final output of `mpm outdated --plugin-output`.
+This module is the companion on the `mpm` side. It adds click_extra, the
+manager pool and the theme system to the plugin code, and produces the final
+output of `mpm outdated --plugin-output`.
 """
 
 from __future__ import annotations
@@ -33,9 +33,7 @@ import sys
 from functools import cached_property
 from io import StringIO
 
-from boltons.iterutils import flatten
-from boltons.strutils import strip_ansi
-from click_extra import echo, get_current_context
+from click_extra import echo, get_current_context, strip_ansi
 from click_extra.color import invocation_color
 from click_extra.table import TableFormat, render_table
 
@@ -329,7 +327,7 @@ class BarPluginRenderer(MPMPlugin):
         ```
         """
         plugin_params = []
-        for index, param_value in enumerate(map(str, flatten(cmd_args))):
+        for index, param_value in enumerate(map(str, cmd_args)):
             param_id = "shell" if index == 0 else f"param{index}"
             plugin_params.append(f"{param_id}={param_value}")
         return " ".join(plugin_params)

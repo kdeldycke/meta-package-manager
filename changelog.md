@@ -6,8 +6,16 @@
 > This version is **not released yet** and is under active development.
 
 - **Breaking:** [mpm] Drop Python `3.10`, past its end of life: `mpm` needs Python `3.11`. The PPA stops building for Ubuntu `22.04`, whose Python is `3.10`.
+- **Breaking:** [mpm] Remove the `jsonc` and `xml` extras: JSONC and XML configuration files and the `xml` table format need no extra dependency anymore.
 - [mpm] Replace `tomlkit` with `tomlrt` in `docs/docs_update.py`. Packagers can drop `tomlkit` from the test dependencies: the tests that need `tomlrt` skip without it.
+- [mpm] Drop the `boltons` dependency: version parsing, manager detection and the SPDX export use the standard library, and ANSI stripping comes from `click-extra`.
+- [mpm] Split a version string at its non-ASCII characters, instead of first spelling its accented letters in ASCII.
+- [mpm,zypper] Drop the `xmltodict` dependency: `mpm` reads the XML output of `zypper` with the standard library.
+- [mpm] Raise the `click-extra` floor to `10.0.0`: below it, `mpm` cannot import the `strip_ansi()` it applies to manager output.
 - [brew,cask,vcpkg] Run `vcpkg` one at a time with `brew` and `cask`, so a `brew upgrade` no longer deletes the `cmake` a `vcpkg` port build is using.
+- [mpm] Take a list that both layered configuration files set from the project file alone, as documented, instead of joining the two.
+- [mpm] Stop the SPDX export of `mpm sbom` from looking up the DNS name of the machine, which the document never used.
+- [bar-plugin,mpm] Strip a terminal hyperlink from manager output together with its URI, which stayed in the text.
 
 ## [`8.2.0` (2026-10-25)](https://github.com/kdeldycke/meta-package-manager/compare/v8.1.2...v8.2.0)
 

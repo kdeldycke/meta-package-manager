@@ -32,7 +32,7 @@ import threading
 import time
 
 import pytest
-from boltons.strutils import strip_ansi
+from click_extra import strip_ansi
 from click_extra.color import COLOR_ENVVARS
 from click_extra.context import JOBS, VERBOSITY_LEVEL
 from click_extra.logging import LogLevel

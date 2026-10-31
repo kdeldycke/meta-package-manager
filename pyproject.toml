@@ -322,12 +322,10 @@ classifiers = [
 # - aligns minimal Python requirements to ours,
 # - adds new explicit support Python version.
 dependencies = [
-  # boltons 25.0.0 dropped Python 3.9, below our requires-python floor.
-  "boltons>=25",
-  # click-extra 9.3 renamed the `Spinner` argument `enabled` to `live`, which
-  # `CLIExecutor._make_spinner` in execution.py passes by keyword. Below it every
-  # manager call raises `TypeError: unexpected keyword argument 'live'`.
-  "click-extra>=9.3",
+  # click-extra 10.0 added strip_ansi(), which execution.py applies to every
+  # manager output, and reads JSONC and XML configuration files with no extra.
+  # Below it the import fails and no mpm command runs.
+  "click-extra>=10.0.0.dev0",
   # extra-platforms 13.10 added shell_from_path(), which shell_argv() in
   # shell_env.py resolves the login shell's family with. Below it the import
   # fails and no mpm command runs.
@@ -340,15 +338,9 @@ dependencies = [
   # config.py and cli.py serialize config and installed-package TOML via
   # tomli_w.dumps(), an API stable since 1.0.
   "tomli-w>=1",
-  # xmltodict 0.12 stabilized the parse()/unparse() API we rely on in
-  # managers/zypper.py. 1.0.0 was a stability bump with no functional change.
-  # Keeping the floor low avoids forcing downstream packagers (Guix, Debian
-  # stable) to ship a newer xmltodict than they otherwise need.
-  "xmltodict>=0.12",
 ]
 optional-dependencies.hjson = [ "click-extra[hjson]" ]
 optional-dependencies.json5 = [ "click-extra[json5]" ]
-optional-dependencies.jsonc = [ "click-extra[jsonc]" ]
 # SBOM generation (`mpm sbom`) is split into two extras matching the two
 # usage modes:
 #
@@ -385,7 +377,6 @@ optional-dependencies.sbom-online = [ "httpx>=0.27", "platformdirs>=4" ]
 # Package referenced above and also featured in [project.optional-dependencies] or [dependency-groups]
 # will be set without version specifier as they are already constrained.
 optional-dependencies.toml = [ "click-extra[toml]" ]
-optional-dependencies.xml = [ "click-extra[xml]" ]
 optional-dependencies.yaml = [ "click-extra[yaml]" ]
 urls.Changelog = "https://github.com/kdeldycke/meta-package-manager/blob/main/changelog.md"
 # Canonical host of the documentation site, and the single source `docs/conf.py`
@@ -481,17 +472,14 @@ docs = [
   # mapping.
   "tomlrt>=2",
 ]
-# Stubs for the untyped libraries mpm imports: boltons, xmltodict in
-# managers/zypper.py, docutils and PyYAML in tests/test_docs.py. mypy needs the
-# docutils stub even though the library itself ships with the docs group alone.
+# Stubs for the untyped libraries the tests import: docutils and PyYAML in
+# tests/test_docs.py. mypy needs the docutils stub even though the library
+# itself ships with the docs group alone.
 # These floors are freshness markers rather than API minima: typeshed
 # republishes a stub on every upstream change and ships no changelog to pin a
 # symbol against, so each floor is the release current when the stub was
 # declared. Raise one only when mypy reports a symbol the older stub lacks.
 typing = [
-  # Declared for boltons, imported across the package. Floor is the stub current
-  # when it was declared.
-  "types-boltons>=25.0.0.20250919",
   # Declared for `docutils.nodes`, which mypy follows into tests/test_docs.py even
   # though the import there is guarded by `ImportError`. Floor is the stub current
   # when the missing-stub error first turned the Lint workflow red.
@@ -499,9 +487,6 @@ typing = [
   # Declared for PyYAML in tests/test_docs.py. Floor predates typeshed's
   # date-stamped versioning and no symbol mpm reads has needed a newer stub.
   "types-pyyaml>=6.0.12.9",
-  # Declared for xmltodict in managers/zypper.py. Floor is a 1.0 stub, matching
-  # the 1.x line the lock resolves.
-  "types-xmltodict>=1.0.1.20250920",
 ]
 
 [tool.setuptools]
@@ -526,6 +511,10 @@ required-version = ">=0.12.22"
 # marker split holding a second, older resolution alive for an interpreter that
 # never renders a page.
 dependency-groups.docs = { requires-python = ">= 3.14" }
+# Tracks click-extra main for the strip_ansi() and the built-in JSONC and XML
+# formats of its unreleased 10.0.0. The sync-dep-sources job swaps it for the
+# release once it ships.
+sources.click-extra = { git = "https://github.com/kdeldycke/click-extra", branch = "main" }
 # Cooldown period.
 exclude-newer = "1 week"
 # Package is at root level, not in "./src/".
@@ -1027,12 +1016,12 @@ test-matrix.full-include = [
 #   - sbom-online: httpx + platformdirs, for the opt-in
 #                  `mpm --network sbom` mode that queries OSV.dev for
 #                  vulnerability data and caches responses on disk.
-#   - toml/yaml/json5/jsonc/hjson/xml: click-extra config-file readers, for
+#   - toml/yaml/json5/hjson: click-extra config-file readers, for
 #           `mpm --config <path>` and `mpm --table-format <fmt>` output.
 # Nuitka follows these imports once the packages are installed. Do not add them
 # to [tool.nuitka] include-package: that bundles every submodule, test suites
 # included.
-nuitka.extras = [ "hjson", "json5", "jsonc", "sbom-offline", "sbom-online", "toml", "xml", "yaml" ]
+nuitka.extras = [ "hjson", "json5", "sbom-offline", "sbom-online", "toml", "yaml" ]
 # Render the mpm Click command tree as roff `.1` files and attach them as
 # `mpm-manpages.tar.gz` to every GitHub release (handled by the `manpages` job
 # in repomatic's `_release-engine.yaml`). The `module:function` form bypasses

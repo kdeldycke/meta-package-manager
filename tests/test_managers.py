@@ -26,10 +26,9 @@ from functools import cached_property
 from pathlib import Path, PurePath
 from string import ascii_letters, ascii_lowercase, digits
 from typing import ClassVar
+from urllib.parse import urlsplit
 
 import pytest
-from boltons.iterutils import unique
-from boltons.urlutils import URL
 from extra_platforms import ALL_PLATFORMS, Platform, is_windows
 
 from meta_package_manager import (
@@ -66,7 +65,7 @@ new package manager definitions.
 
 
 def test_xkcd_set():
-    assert len(unique(XKCD_MANAGER_ORDER)) == len(XKCD_MANAGER_ORDER)
+    assert len(set(XKCD_MANAGER_ORDER)) == len(XKCD_MANAGER_ORDER)
     assert set(pool.all_manager_ids).issuperset(XKCD_MANAGER_ORDER)
 
 
@@ -88,7 +87,7 @@ def test_unmaintained(manager):
         assert manager.unmaintained is True
         assert manager.unmaintained_message.strip()
         for url in re.findall(r"https?://[^\s)]+", manager.unmaintained_message):
-            location = URL(url)
+            location = urlsplit(url)
             assert location
             assert location.scheme.lower() in ("http", "https")
 
@@ -110,7 +109,7 @@ def test_maintenance_note(manager):
         "maintenance_note."
     )
     for url in re.findall(r"https?://[^\s)]+", manager.maintenance_note):
-        location = URL(url)
+        location = urlsplit(url)
         assert location
         assert location.scheme.lower() in ("http", "https")
 
@@ -250,7 +249,7 @@ def test_homepage_url(manager):
     assert manager.homepage_url or manager.repository_url
     if manager.homepage_url is None:
         return
-    location = URL(manager.homepage_url)
+    location = urlsplit(manager.homepage_url)
     assert location
     assert location.scheme.lower() in ("http", "https")
 
@@ -260,10 +259,10 @@ def test_repository_url(manager):
     """A repository is optional, since proprietary tools have none."""
     if manager.repository_url is None:
         return
-    location = URL(manager.repository_url)
+    location = urlsplit(manager.repository_url)
     assert location.scheme == "https"
-    assert location.host
-    assert "wikipedia.org" not in location.host
+    assert location.hostname
+    assert "wikipedia.org" not in location.hostname
 
 
 @all_managers
@@ -277,10 +276,10 @@ def test_documentation_url(manager):
     """
     if manager.documentation_url is None:
         return
-    location = URL(manager.documentation_url)
+    location = urlsplit(manager.documentation_url)
     assert location.scheme == "https"
-    assert location.host
-    assert "wikipedia.org" not in location.host
+    assert location.hostname
+    assert "wikipedia.org" not in location.hostname
 
 
 URL_ATTRIBUTES = tuple(
@@ -296,8 +295,8 @@ def _address(url: str) -> str:
     hosts these links point at, where `ivan-hc/AM` and `ivan-hc/am` are the same
     repository.
     """
-    location = URL(url)
-    host = location.host.casefold().removeprefix("www.")
+    location = urlsplit(url)
+    host = (location.hostname or "").casefold().removeprefix("www.")
     return f"{host}{location.path.rstrip('/').casefold()}"
 
 

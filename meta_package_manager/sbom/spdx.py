@@ -33,11 +33,12 @@ import hashlib
 import io
 import json
 import logging
+import platform
 import re
+import uuid
 from datetime import UTC, datetime
 from typing import cast
 
-from boltons.ecoutils import get_profile
 from extra_platforms import current_platform
 
 from .. import __version__
@@ -223,16 +224,10 @@ class SPDX(SBOM):
         """
         [SPDX document metadata specifications](https://spdx.github.io/spdx-spec/v2.3/document-creation-information/).
         """
-        profile = get_profile()
+        platform_name = current_platform().name
+        uname = platform.uname()
         system_id = self.normalize_spdx_id(
-            "-".join((
-                current_platform().name,
-                profile["linux_dist_name"],
-                profile["linux_dist_version"],
-                profile["uname"]["system"],
-                profile["uname"]["release"],
-                profile["uname"]["machine"],
-            ))
+            f"{platform_name}-{uname.system}-{uname.release}-{uname.machine}"
         )
 
         self.seen_ids = set()
@@ -271,7 +266,7 @@ class SPDX(SBOM):
                 # https://spdx.github.io/spdx-spec/v2.3/document-creation-information/#65-spdx-document-namespace-field
                 document_namespace=(
                     "https://github.com/kdeldycke/meta-package-manager/releases/tag/"
-                    f"v{__version__}/{profile['guid']}"
+                    f"v{__version__}/{uuid.uuid4().hex}"
                 ),
                 creators=[Actor(ActorType.TOOL, f"meta-package-manager-{__version__}")],
                 created=datetime.now(tz=UTC),

@@ -28,9 +28,9 @@ from __future__ import annotations
 
 import inspect
 from functools import cache
+from itertools import chain
 from pathlib import Path
 
-from boltons.iterutils import flatten
 from extra_platforms import extract_members
 
 from .platforms import MAIN_PLATFORMS
@@ -79,7 +79,7 @@ def generate_labels(
     can be called repeatedly without double-populating the registry.
     """
     # Check all labels to group are referenced in the full label set.
-    grouped_labels = set(flatten(groups.values()))
+    grouped_labels = set(chain.from_iterable(groups.values()))
     assert grouped_labels.issubset(all_labels)
 
     label_map = {}
@@ -274,7 +274,7 @@ for p_obj in MAIN_PLATFORMS:
     )
 """Similar platforms are grouped together under the same label."""
 
-all_platform_label_ids = frozenset(flatten(PLATFORM_LABEL_GROUPS.values()))
+all_platform_label_ids = frozenset(chain.from_iterable(PLATFORM_LABEL_GROUPS.values()))
 
 PLATFORM_LABELS, _platform_label_rows = generate_labels(
     all_platform_label_ids,

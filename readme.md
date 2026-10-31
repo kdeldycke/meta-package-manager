@@ -8,12 +8,7 @@
   </a>
 </p>
 
-[![Last release](https://img.shields.io/pypi/v/meta-package-manager.svg)](https://pypi.org/project/meta-package-manager)
-[![Python versions](https://img.shields.io/pypi/pyversions/meta-package-manager.svg)](https://pypi.org/project/meta-package-manager)
-[![Downloads](https://static.pepy.tech/badge/meta_package_manager/month)](https://pepy.tech/projects/meta_package_manager)
-[![Unittests status](https://img.shields.io/github/actions/workflow/status/kdeldycke/meta-package-manager/tests.yaml?branch=main&label=%F0%9F%94%AC%20Tests)](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests.yaml?query=branch%3Amain)
-[![Documentation status](https://img.shields.io/github/actions/workflow/status/kdeldycke/meta-package-manager/docs.yaml?branch=main&label=%F0%9F%93%9A%20Docs)](https://github.com/kdeldycke/meta-package-manager/actions/workflows/docs.yaml?query=branch%3Amain)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6809571.svg)](https://doi.org/10.5281/zenodo.6809571)
+[![Last release](https://img.shields.io/pypi/v/meta-package-manager.svg)](https://pypi.org/project/meta-package-manager) [![Python versions](https://img.shields.io/pypi/pyversions/meta-package-manager.svg)](https://pypi.org/project/meta-package-manager) [![Downloads](https://static.pepy.tech/badge/meta_package_manager/month)](https://pepy.tech/projects/meta_package_manager) [![Unittests status](https://img.shields.io/github/actions/workflow/status/kdeldycke/meta-package-manager/tests.yaml?branch=main&label=%F0%9F%94%AC%20Tests)](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests.yaml?query=branch%3Amain) [![Documentation status](https://img.shields.io/github/actions/workflow/status/kdeldycke/meta-package-manager/docs.yaml?branch=main&label=%F0%9F%93%9A%20Docs)](https://github.com/kdeldycke/meta-package-manager/actions/workflows/docs.yaml?query=branch%3Amain) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6809571.svg)](https://doi.org/10.5281/zenodo.6809571)
 
 **What is Meta Package Manager?**
 
@@ -24,28 +19,22 @@
 
 ## Features
 
-- [Snapshot installed packages](https://mpm.run/cli-parameters/#mpm-dump) to a TOML manifest or a Brewfile, across every manager at once, with `mpm dump packages.toml`:
-  ![Every installed package written to a single TOML manifest](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-dump-cli.svg)
+- [Snapshot installed packages](https://mpm.run/cli-parameters/#mpm-dump) to a TOML manifest or a Brewfile, across every manager at once, with `mpm dump packages.toml`: ![Every installed package written to a single TOML manifest](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-dump-cli.svg)
 - [Restore that manifest](https://mpm.run/cli-parameters/#mpm-restore) on the next machine with `mpm restore packages.toml`, and get the same set of packages back.
-- Inventory and list all [package managers](https://mpm.run/cli-parameters/#mpm-managers) available on the system:
-  ![Package managers detected on the system](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-managers-cli.svg)
+- Inventory and list all [package managers](https://mpm.run/cli-parameters/#mpm-managers) available on the system: ![Package managers detected on the system](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-managers-cli.svg)
 - Runs on macOS, Linux, Windows, FreeBSD, NetBSD, OpenBSD, illumos and Solaris, with [standalone executables](#executables) for the first three.
-- [List installed packages](https://mpm.run/cli-parameters/#mpm-installed):
-  ![Every package installed on the system](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-installed-cli.svg)
+- [List installed packages](https://mpm.run/cli-parameters/#mpm-installed): ![Every package installed on the system](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-installed-cli.svg)
 - [List duplicate installed packages](https://mpm.run/duplicates/).
 - [Search for packages](https://mpm.run/cli-parameters/#mpm-search).
 - [Install a package](https://mpm.run/cli-parameters/#mpm-install).
 - [Remove a package](https://mpm.run/cli-parameters/#mpm-remove).
-- [List outdated packages](https://mpm.run/cli-parameters/#mpm-outdated), with the differing part of each version picked out in color, so a patch bump reads apart from a major one at a glance:
-  ![Packages an upgrade is available for](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-outdated-cli.svg)
+- [List outdated packages](https://mpm.run/cli-parameters/#mpm-outdated), with the differing part of each version picked out in color, so a patch bump reads apart from a major one at a glance: ![Packages an upgrade is available for](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-outdated-cli.svg)
 - [List orphaned packages](https://mpm.run/cli-parameters/#mpm-orphans).
 - [Sync local package infos](https://mpm.run/cli-parameters/#mpm-sync).
 - [Diagnose the health of package managers](https://mpm.run/cli-parameters/#mpm-doctor).
-- [Upgrade all outdated packages](https://mpm.run/cli-parameters/#mpm-upgrade) from every manager at once, the primary use case of `mpm` and the main reason I built it, since [70% of vulnerabilities lie in outdated libraries](https://developers.slashdot.org/story/20/05/23/2330244/open-source-security-report-finds-library-induced-flaws-in-70-of-applications). A manager that fails is marked `✘` and named in a closing summary, while the others carry on:
-  ![Every manager upgraded, in one command](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-upgrade-cli.svg)
+- [Upgrade all outdated packages](https://mpm.run/cli-parameters/#mpm-upgrade) from every manager at once, the primary use case of `mpm` and the main reason I built it, since [70% of vulnerabilities lie in outdated libraries](https://developers.slashdot.org/story/20/05/23/2330244/open-source-security-report-finds-library-induced-flaws-in-70-of-applications). A manager that fails is marked `✘` and named in a closing summary, while the others carry on: ![Every manager upgraded, in one command](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-upgrade-cli.svg)
 - Get a [report of what each command changed](https://mpm.run/augmentations/#a-report-of-what-each-command-changed) at the end of `install`, `remove`, `upgrade`, `restore` and `cleanup --orphans`: every package upgraded, downgraded, installed, removed, held back by the cooldown or still outdated, with its versions.
-- [Mitigate supply-chain attacks](https://mpm.run/cooldown/) with a release-age cooldown that refuses any version published more recently than a threshold. A manager that cannot enforce the window is skipped, rather than run unguarded:
-  ![Upgrading under a release-age cooldown](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-upgrade-cooldown-cli.svg)
+- [Mitigate supply-chain attacks](https://mpm.run/cooldown/) with a release-age cooldown that refuses any version published more recently than a threshold. A manager that cannot enforce the window is skipped, rather than run unguarded: ![Upgrading under a release-age cooldown](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-upgrade-cooldown-cli.svg)
 - [Software Bill of Materials](https://mpm.run/cli-parameters/#mpm-sbom): export installed packages to [SPDX](https://spdx.dev) and [CycloneDX](https://cyclonedx.org) SBOM files.
 - Pin-point commands to a [subset of package managers](https://mpm.run/configuration/#selecting-managers) (include/exclude selectors).
 - Support plain, versioned and [purl](https://github.com/package-url/purl-spec) package specifiers.

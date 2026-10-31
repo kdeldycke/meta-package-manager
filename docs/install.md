@@ -628,8 +628,7 @@ eval (env _MPM_COMPLETE=fish_source mpm)
 
 ``````
 
-Alternatively, export the generated completion code as a static script to be
-executed:
+Alternatively, export the generated completion code as a static script to be executed:
 
 ``````{tab-set}
 

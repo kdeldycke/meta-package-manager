@@ -171,8 +171,7 @@ A missing `mpm` puts a bootstrap pair in place of the package list: an *Install 
 
 ## Screenshots
 
-Every layout, photographed from a real GNOME session driven by `docs/gnome_screenshots_update.py` and refreshed by [`docs-screenshots.yaml`](https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/docs-screenshots.yaml) whenever the extension changes.
-Each one is captured in both shell appearances, so the two are there to be compared rather than picked for you: the shell restyles its menu with the desktop's light or dark preference, and the version diff has to keep its colors legible on both. The tabs are synchronized, so switching one switches the other.
+Every layout, photographed from a real GNOME session driven by `docs/gnome_screenshots_update.py` and refreshed by [`docs-screenshots.yaml`](https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/docs-screenshots.yaml) whenever the extension changes. Each one is captured in both shell appearances, so the two are there to be compared rather than picked for you: the shell restyles its menu with the desktop's light or dark preference, and the version diff has to keep its colors legible on both. The tabs are synchronized, so switching one switches the other.
 
 The report scrolls past a set height instead of growing the menu to the screen, and the flat captures show that as it is: the list stops at its fold, under a scrollbar, and the sections below it are reached with the wheel.
 

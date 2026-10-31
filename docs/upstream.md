@@ -140,6 +140,10 @@ The SPDX documents [`brew`](managers/brew.md) generates point their `documentNam
 
 - [aboutcode-org/license-expression#99](https://github.com/aboutcode-org/license-expression/issues/99): the `data` subfolder is missing from the package manifest. Its bundling side was patched in the Nuitka pull request above.
 
+### [py-serializable](https://github.com/madpah/serializable)
+
+- [madpah/serializable#200](https://github.com/madpah/serializable/issues/200): on Python `3.16`, XML attributes get a second `ns1:` prefix, so the CycloneDX XML export of `mpm sbom` fails schema validation.
+
 ### [SwiftBar](https://github.com/swiftbar/SwiftBar)
 
 - [swiftbar/SwiftBar#578](https://github.com/swiftbar/SwiftBar/issues/578): a `terminal=true` action reaches the terminal cut to 1024 bytes, counting the `export` prefix SwiftBar adds, and waits at the prompt without running.

@@ -161,9 +161,8 @@ class MpmConfig:
     opaque: it carries no CLI flag of its own (the `--cooldown` option merges over it
     axis by axis at runtime instead) and its keys are validated by
     {func}`~meta_package_manager.config.validate_cooldown_section`, registered as a
-    {class}`~click_extra.config.schema.ConfigValidator`. The deprecated `[mpm] cooldown
-    =
-    "<duration>"` string spelling stays accepted as the period."""
+    {class}`~click_extra.config.schema.ConfigValidator`. The deprecated
+    `[mpm] cooldown = "<duration>"` string spelling stays accepted as the period."""
 
     description: bool = False
     """Show package description in results."""

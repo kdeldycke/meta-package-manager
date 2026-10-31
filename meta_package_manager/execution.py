@@ -1289,11 +1289,9 @@ class CLIExecutor:
                 # a regular file's type or size, so accept them without stat().
                 try:
                     if on_windows:
-                        file_stat = file.lstat()
-                        if (
-                            file_stat.st_file_attributes
-                            & stat.FILE_ATTRIBUTE_REPARSE_POINT
-                        ):
+                        # Only a native Windows Python fills `st_file_attributes`.
+                        attributes = getattr(file.lstat(), "st_file_attributes", 0)
+                        if attributes & stat.FILE_ATTRIBUTE_REPARSE_POINT:
                             logging.debug(
                                 "CLI found at "
                                 f"{highlight_cli_name(file, cli_names)} "

@@ -104,10 +104,11 @@ SHARED_LOCK_FAMILIES: Final[tuple[LockFamily, ...]] = (
         "they all install through `dpkg` and serialize on its `/var/lib/dpkg/lock`",
     ),
     LockFamily(
-        "Homebrew update lock",
-        frozenset({"brew", "cask"}),
-        "they are the same `brew` binary, and two concurrent `brew update` collide "
-        "on Homebrew's own update lock",
+        "Homebrew prefix",
+        frozenset({"brew", "cask", "vcpkg"}),
+        "`brew` and `cask` are the same `brew` binary, and two concurrent "
+        "`brew update` collide on Homebrew's own update lock, while `vcpkg` builds "
+        "its ports with Homebrew's `cmake`, which a `brew upgrade` deletes mid-build",
     ),
     LockFamily(
         "conda environment prefix",
@@ -164,6 +165,14 @@ serialize on its lock:
   Homebrew's own update lock: two concurrent `brew update` (which {command}`mpm sync`
   issues identically for both, as the formula/cask split does not apply to it) collide,
   one failing with *"Another active Homebrew update process is already running"*.
+  `vcpkg` joins them over the prefix rather than the lock: it builds its ports with
+  its own downloaded `cmake` if present, else with the first one on `PATH`
+  ([microsoft/vcpkg-tool `tools.cpp`](https://github.com/microsoft/vcpkg-tool/blob/3774ef9c290f0933824603e12fccf0cf079ba41e/src/vcpkg/tools.cpp#L1113-L1127)),
+  which is Homebrew's on a host carrying both. A `brew upgrade` that moves `cmake`
+  deletes the old keg, and a `cmake` still configuring a port then fails to load its
+  next module: *"Could not find cmake module file: CMakeCLinkerInformation.cmake"*.
+  It is the one family spanning two ecosystems, since the contention is a toolchain
+  rather than a package database.
 - `conda`, `mamba` and `micromamba` act on one environment prefix and one package
   cache. This is the family that does *not* get the guarantee below: mamba takes a
   real lock on the prefix and on every cache directory for the length of a
@@ -228,7 +237,8 @@ once per run.
 Concurrency is safe *across* families and unsafe *within* one, just as it is unsafe
 within a single manager (which is why a manager's own packages stay serial). For every
 family above *except* the conda one, two members running at once *block or fail*
-rather than corrupt: each backend holds a real lock and the loser is told so. That is
+rather than corrupt: each backend holds a real lock and the loser is told so, save
+`vcpkg`, whose port build fails on a `cmake` error that names no other manager. That is
 a property of those backends rather than of this mechanism, so a family added later
 earns the guarantee only by inspection, and conda is the standing proof that some do
 not.

@@ -121,10 +121,15 @@ def test_lock_families_nest_in_label_groups():
 
     Catches a manager wired into a lock family but forgotten in the label groups, which
     is what it caught for `nala`.
+
+    `vcpkg` is the one exemption: it shares Homebrew's `cmake`, a toolchain rather than
+    a package backend, so it joins that family from outside the `homebrew` group.
     """
+    toolchain_borrowers = {"vcpkg"}
     for family in SHARED_LOCK_FAMILIES:
         assert any(
-            family.members <= group for group in MANAGER_LABEL_GROUPS.values()
+            family.members - toolchain_borrowers <= group
+            for group in MANAGER_LABEL_GROUPS.values()
         ), (
             f"lock family {sorted(family.members)} is not contained in any ecosystem "
             "label group"

@@ -2,8 +2,7 @@
 
 Attempting to unify all package managers is a Sisyphean task.
 
-This did not prevent me or others to try to solve that problem. It is not easy to explain why
-but [there might be a greater need for such tools](augmentations.md) out there. Here is a list of some related projects I stumbled into and how they compares to `mpm`.
+This did not prevent me or others to try to solve that problem. It is not easy to explain why but [there might be a greater need for such tools](augmentations.md) out there. Here is a list of some related projects I stumbled into and how they compares to `mpm`.
 
 <!-- Editing rules of this page:
      - Only the "Package manager support" table is generated, from docs/benchmark.toml. Every other table is
@@ -476,11 +475,9 @@ print(benchmark_managers_table())
 
 <!-- mirror-end -->
 
-:::{note}
-[`brew`](managers/brew.md) is itself a meta-manager: `brew bundle` dispatches to other package managers ([`cask`](managers/cask.md), [`mas`](managers/mas.md), VSCode extensions, taps, and more) via the Brewfile DSL, which is why it earns a column alongside the dedicated wrappers in the tables above.
+\:::\{note} [`brew`](managers/brew.md) is itself a meta-manager: `brew bundle` dispatches to other package managers ([`cask`](managers/cask.md), [`mas`](managers/mas.md), VSCode extensions, taps, and more) via the Brewfile DSL, which is why it earns a column alongside the dedicated wrappers in the tables above.
 
-The table marks which managers each competing tool reaches natively, so the overlap with `mpm` is visible at a glance. It deliberately lists managers no tool here wraps yet: a row a competitor reaches and `mpm` does not is the point of the table, not an omission.
-:::
+The table marks which managers each competing tool reaches natively, so the overlap with `mpm` is visible at a glance. It deliberately lists managers no tool here wraps yet: a row a competitor reaches and `mpm` does not is the point of the table, not an omission. :::
 
 ## Operating system support
 
@@ -550,10 +547,7 @@ Both measure the vertical axis in powers of ten, so the series orders of magnitu
 
 ## Excluded projects
 
-:::{admonition} Coming from `pacapt`, `sysget`, `whohas` or `upt`?
-:class: tip
-[`pacapt`](unsupported.md#retired-cross-manager-tools), [`sysget`](unsupported.md#retired-cross-manager-tools) and [`whohas`](unsupported.md#retired-cross-manager-tools), `mpm`'s three closest peers, are all retired, and `mpm` ships every manager they reached. [`upt`](unsupported.md#cross-manager-aliases) left the comparison in September 2026, its upstream silent since late 2024.
-:::
+\:::\{admonition} Coming from `pacapt`, `sysget`, `whohas` or `upt`? :class: tip [`pacapt`](unsupported.md#retired-cross-manager-tools), [`sysget`](unsupported.md#retired-cross-manager-tools) and [`whohas`](unsupported.md#retired-cross-manager-tools), `mpm`'s three closest peers, are all retired, and `mpm` ships every manager they reached. [`upt`](unsupported.md#cross-manager-aliases) left the comparison in September 2026, its upstream silent since late 2024. :::
 
 ## Project's URL
 

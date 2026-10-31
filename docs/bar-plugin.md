@@ -102,8 +102,7 @@ The plugin has no icon files of its own: every state is an emoji, which SwiftBar
 
 ## Screenshots
 
-Each layout is captured in both system appearances, and the tabs are synchronized so switching one switches the others.
-The menu chrome is the host's, and only the version diff is the plugin's: its colors have to stay legible on either appearance, which is what the palette of {meth}`~meta_package_manager.bar_plugin_renderer.BarPluginRenderer.menu_diff_colors` is picked for.
+Each layout is captured in both system appearances, and the tabs are synchronized so switching one switches the others. The menu chrome is the host's, and only the version diff is the plugin's: its colors have to stay legible on either appearance, which is what the palette of {meth}`~meta_package_manager.bar_plugin_renderer.BarPluginRenderer.menu_diff_colors` is picked for.
 
 ### SwiftBar
 

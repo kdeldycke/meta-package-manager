@@ -54,7 +54,7 @@ jobs:
           # Pin what CI downloads: unpinned, setup-uv installs the newest uv
           # satisfying `required-version`. `sync-workflow-pins` bumps it once a
           # uv release clears the cooldown window.
-          version: "0.13.4"
+          version: "0.13.5"
 
       - name: Write the integration test
         run: |

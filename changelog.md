@@ -11,6 +11,9 @@
 
 ## [`8.2.0` (2026-10-25)](https://github.com/kdeldycke/meta-package-manager/compare/v8.1.2...v8.2.0)
 
+> [!NOTE]
+> `8.2.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/8.2.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v8.2.0).
+
 - **Breaking:** [cask,mpm] Remove the `--ignore-auto-updates/--include-auto-updates` option, the `[mpm] ignore_auto_updates` key and the per-manager `ignore_auto_updates` field. To include auto-updating casks, set `operations.outdated.extra_args` and `operations.upgrade_all.extra_args` to `["--greedy"]` in `[mpm.overrides.cask]`.
 - [mpm] Add an `operations` table to `[mpm.overrides.<id>]`, whose `extra_args` reach the commands of one operation alone. Closes [#2171](https://github.com/kdeldycke/meta-package-manager/issues/2171).
 - [mpm] List the operations each manager accepts in the `mpm config-template` output and on each manager page.

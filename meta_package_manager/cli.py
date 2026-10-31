@@ -213,9 +213,10 @@ theme slot.
 
 ```{todo}
 Declare the marker so it takes that slot back, once a click-extra release carries a
-`deprecated` field on {class}`~click_extra.highlight.HelpKeywords`:
+`deprecated` field on {class}`~click_extra.highlight.HelpKeywords`, in the
+`extra_keywords` the `mpm` group is built with:
 
-    mpm.extra_keywords = HelpKeywords(..., deprecated={UNMAINTAINED_MARKER})
+    extra_keywords=HelpKeywords(..., deprecated={UNMAINTAINED_MARKER})
 
 Naming it on a release without the field raises `TypeError` at import, so this waits
 on the floor rather than being guarded.
@@ -612,6 +613,12 @@ def _debug_rerun_command(ctx: Context, restrict_to: Iterable[str] | None = None)
     # Swaps --version for the brand-mark screen, which degrades to the plain
     # message below whenever colors, width or accessibility rule it out.
     params=partial(default_params, screen=VERSION_SCREEN),
+    # Highlight placeholder option names that appear in the help text prose.
+    extra_keywords=HelpKeywords(
+        long_options={"--<manager-id>", "--no-<manager-id>"},
+    ),
+    # "version" is a --sort-by choice but too common a word in help text.
+    excluded_keywords=HelpKeywords(choices={"version"}),
     examples=[
         ("List every package installed on the machine", "mpm installed"),
         ("Upgrade everything every manager reports as outdated", "mpm upgrade --all"),
@@ -1102,13 +1109,6 @@ if isinstance(version_option, VersionOption):
     version_option.message = "{prog_name}, version {version}\n" + (
         env_summary().replace("{", "{{").replace("}", "}}")
     )
-
-# Highlight placeholder option names that appear in the help text prose.
-mpm.extra_keywords = HelpKeywords(  # type: ignore[attr-defined]
-    long_options={"--<manager-id>", "--no-<manager-id>"},
-)
-# "version" is a --sort-by choice but too common a word in help text.
-mpm.excluded_keywords = HelpKeywords(choices={"version"})  # type: ignore[attr-defined]
 
 
 def serialized_errors(manager: PackageManager) -> list[str]:

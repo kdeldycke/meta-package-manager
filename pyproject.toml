@@ -330,11 +330,6 @@ dependencies = [
   # shell_env.py resolves the login shell's family with. Below it the import
   # fails and no mpm command runs.
   "extra-platforms>=13.10",
-  # packageurl-python 0.17.6 added the normalize_purl argument of
-  # PackageURL.from_string(), which specifier.py passes to keep a pURL lossless.
-  # Below it, parsing any pURL spec raises TypeError and tests/test_specifier.py
-  # fails to collect.
-  "packageurl-python>=0.17.6",
   # config.py and cli.py serialize config and installed-package TOML via
   # tomli_w.dumps(), an API stable since 1.0.
   "tomli-w>=1",
@@ -361,7 +356,10 @@ optional-dependencies.json5 = [ "click-extra[json5]" ]
 #   that meta_package_manager.sbom.spdx imports (model,
 #   validation.document_validator, common.spdx_licensing, and the
 #   json/rdf/tagvalue/xml/yaml writers); 0.8.2 is the floor we build
-#   against.
+#   against.  packageurl-python builds the pURL objects of both writers
+#   in meta_package_manager.sbom._purl, through `PackageURL`,
+#   `to_string()` and `from_string()`; 0.11 is the floor
+#   cyclonedx-python-lib itself requires.
 #
 # - [sbom-online]: adds httpx (the HTTP client used by
 #   meta_package_manager.sbom._network) and platformdirs (used to
@@ -372,7 +370,11 @@ optional-dependencies.json5 = [ "click-extra[json5]" ]
 #   `httpx.Timeout` constructor signature we rely on; platformdirs 4 is
 #   the current major and matches what click-extra already ships
 #   transitively.
-optional-dependencies.sbom-offline = [ "cyclonedx-python-lib>=11.9", "spdx-tools>=0.8.2" ]
+optional-dependencies.sbom-offline = [
+  "cyclonedx-python-lib>=11.9",
+  "packageurl-python>=0.11",
+  "spdx-tools>=0.8.2",
+]
 optional-dependencies.sbom-online = [ "httpx>=0.27", "platformdirs>=4" ]
 # Package referenced above and also featured in [project.optional-dependencies] or [dependency-groups]
 # will be set without version specifier as they are already constrained.
@@ -408,6 +410,9 @@ test = [
   "extra-platforms",
   # respx requires httpx as a peer; pin the same floor as [sbom-online].
   "httpx>=0.27",
+  # tests/test_specifier.py checks parse_purl() against
+  # PackageURL.from_string(normalize_purl=False), an argument 0.17.6 added.
+  "packageurl-python>=0.17.6",
   # Guards the pyproject-fmt fixpoint of the pyproject.toml sections
   # docs/docs_update.py rewrites, so update-docs and format-pyproject never rewrite
   # each other's output. Optional: the test skips when it is missing, keeping

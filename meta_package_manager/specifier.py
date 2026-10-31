@@ -24,9 +24,7 @@ from itertools import groupby
 from operator import attrgetter
 from urllib.parse import unquote
 
-from packageurl import PackageURL
-
-from .package import PURL_QUALIFYING_NAMESPACES, manager_purl
+from .package import PURL_QUALIFYING_NAMESPACES, manager_purl, parse_purl
 from .pool import pool
 from .version import is_version, parse_version
 
@@ -193,19 +191,14 @@ class Specifier:
         {data}`~meta_package_manager.package.PURL_QUALIFYING_NAMESPACES` keep the
         name alone, so `pkg:deb/debian/curl` resolves to `curl`.
 
-        packageurl-python parses the string without its normalization, which lowercases
-        the name of some types, npm among them: `pkg:npm/JSONStream` would come back as
-        `jsonstream`. That also skips percent-decoding, done here part by part.
-
-        ```{todo}
-        Parse with packageurl-python's normalization, and drop the decoding done here,
-        once it keeps the case of npm names
-        ([package-url/packageurl-python#230](https://github.com/package-url/packageurl-python/issues/230)).
-        ```
+        {func}`~meta_package_manager.package.parse_purl` splits the string without
+        normalizing it, which keeps the case of the name: `pkg:npm/JSONStream` must not
+        come back as `jsonstream`. The parts arrive percent-encoded, and are decoded
+        here part by part.
         """
         # Try to parse specifier as a pURL.
         try:
-            purl = PackageURL.from_string(spec_str, normalize_purl=False)
+            purl = parse_purl(spec_str)
         except ValueError as ex:
             logging.debug(f"{spec_str} is not a pURL: {ex}")
             return None

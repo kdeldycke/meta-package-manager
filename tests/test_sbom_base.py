@@ -19,9 +19,7 @@ from __future__ import annotations
 from collections import Counter
 
 import pytest
-from packageurl import PackageURL
 
-from meta_package_manager.package import PackageMetadata
 from meta_package_manager.sbom.base import SBOM, writer_unavailable_reason
 from meta_package_manager.summary import sbom_summary
 
@@ -129,9 +127,7 @@ def test_an_alias_equal_to_its_own_purl_is_not_indexed():
     """A coordinate cannot be an alias of itself."""
     sbom = SBOM()
     purl = "pkg:pypi/yt-dlp@2026.8.19"
-    sbom.register_purl_aliases(
-        purl, PackageMetadata(extra_purls=(PackageURL.from_string(purl),))
-    )
+    sbom.register_purl_aliases(purl, (purl,))
     assert sbom.primary_purls == {purl}
     assert sbom.purl_aliases == {}
 

@@ -18,8 +18,8 @@
 This subpackage is the home of every SBOM-flavored writer in `mpm`. Its
 existence mirrors the optional `[sbom-offline]` install extra defined in
 `pyproject.toml`: a default `pip install meta-package-manager` does not
-pull `cyclonedx-python-lib` or `spdx-tools`, so the format modules guard
-their heavy imports with `try/except` and expose
+pull `cyclonedx-python-lib`, `spdx-tools` or `packageurl-python`, so the
+format modules guard their heavy imports with `try/except` and expose
 `spdx_support` / `cyclonedx_support` flags that callers check before
 instantiating the rendering classes.
 

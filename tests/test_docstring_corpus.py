@@ -61,7 +61,7 @@ from meta_package_manager.docstring_corpus import (
     is_fixture,
     split_session,
 )
-from meta_package_manager.package import manager_purl
+from meta_package_manager.package import manager_purl, parse_purl
 from meta_package_manager.pool import pool
 from meta_package_manager.specifier import Specifier
 from meta_package_manager.version import VersionRange, parse_version
@@ -293,6 +293,29 @@ def test_documented_ids_read_back_from_their_purl(manager, member, output, monke
             (spec.manager_id, spec.package_id) for spec in Specifier.from_string(purl)
         }
         assert (manager.id, package.id) in resolved, purl
+
+
+@pytest.mark.parametrize(
+    "manager, member, output",
+    [param for param in _fixtures() if param.values[1] != "version_regexes"],
+)
+def test_documented_purls_split_like_packageurl(manager, member, output, monkeypatch):
+    """`parse_purl()` splits the pURL of every documented package like packageurl-python.
+
+    The reference is `PackageURL.from_string(purl, normalize_purl=False)`: the parser
+    `mpm` used before writing its own, and the one the SBOM writers still use.
+    """
+    packageurl = pytest.importorskip("packageurl")
+    _neutralize_binaries(manager, monkeypatch)
+    for package in _documented_packages(manager, member, output, monkeypatch):
+        purl = manager_purl(manager.id, package.id, "1.0-r1")
+        reference = packageurl.PackageURL.from_string(purl, normalize_purl=False)
+        assert parse_purl(purl) == (
+            reference.type,
+            reference.namespace or None,
+            reference.name,
+            reference.version or None,
+        ), purl
 
 
 def test_display_blocks_align_with_raw():

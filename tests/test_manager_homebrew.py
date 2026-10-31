@@ -222,8 +222,7 @@ def _write_formula_sbom(tmp_path, formula_name, external_refs, dep_refs=()):
 def test_upstream_purls_reads_the_source_package(tmp_path, external_refs, expected):
     """Only non-brew purls on the source package are lifted."""
     sbom_file = _write_formula_sbom(tmp_path, "pkg", external_refs)
-    purls = Brew._upstream_purls(sbom_file, "pkg")
-    assert tuple(p.to_string() for p in purls) == expected
+    assert Brew._upstream_purls(sbom_file, "pkg") == expected
 
 
 def test_upstream_purls_ignores_dependency_packages(tmp_path):
@@ -588,7 +587,7 @@ def test_formula_metadata_reads_the_sbom_of_the_installed_keg(
     [(_, metadata)] = manager.package_metadata_batch([manager.package(id="ty")])
 
     assert metadata.external_sbom_path == (sbom_file if found else None)
-    assert [purl.to_string() for purl in metadata.extra_purls] == upstream_purls
+    assert list(metadata.extra_purls) == upstream_purls
     assert metadata.dependencies == (Dependency("rust", DependencyScope.BUILD),)
 
 

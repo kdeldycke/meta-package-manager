@@ -94,7 +94,7 @@ class AliasedFakeManager(FakeManager):
                             type="pypi",
                             name=package.id,
                             version=str(package.installed_version),
-                        ),
+                        ).to_string(),
                     ),
                 ),
             )
@@ -318,7 +318,9 @@ def test_cli_import_defers_sbom_libraries():
     third-party import cost on every `mpm` invocation, for a dependency only
     `mpm sbom` ever uses. The imports therefore live inside the subcommand body,
     the one place in the codebase deliberately breaking the imports-at-module-level
-    rule, and this test is what keeps them from drifting back up.
+    rule, and this test is what keeps them from drifting back up. packageurl-python
+    is checked too: it comes with the `[sbom-offline]` extra, which the default
+    install does not carry.
 
     Runs in a fresh interpreter: the test session has long since imported
     everything, so `sys.modules` here proves nothing.
@@ -331,7 +333,7 @@ def test_cli_import_defers_sbom_libraries():
         heavy = sorted(
             name
             for name in sys.modules
-            if name.split(".", 1)[0] in {"spdx_tools", "cyclonedx"}
+            if name.split(".", 1)[0] in {"spdx_tools", "cyclonedx", "packageurl"}
         )
         print(",".join(heavy))
     """)

@@ -29,8 +29,6 @@ from __future__ import annotations
 
 import logging
 
-from packageurl import PackageURL
-
 from .. import __version__
 from ..package import (
     EMPTY_METADATA,
@@ -72,6 +70,9 @@ try:
     from cyclonedx.output import make_outputter
     from cyclonedx.output.json import JsonV1Dot7
     from cyclonedx.schema import OutputFormat, SchemaVersion
+    from packageurl import PackageURL
+
+    from ._purl import normalized_purls, package_purl
 except ImportError as import_error:
     cyclonedx_support = False
     cyclonedx_unavailable_reason = writer_unavailable_reason(
@@ -407,16 +408,17 @@ class CycloneDX(SBOM):
                     email=metadata.originator.email,
                 )
             ]
+        purl = package_purl(package)
         data = Component(
             name=package.id,
             type=ComponentType.APPLICATION,
             # pURL string, by its virtue of containing all important metadata of a
             # package, makes perfect unique IDs.
-            bom_ref=package.purl.to_string(),
+            bom_ref=purl.to_string(),
             group=package.manager_id,
             version=str(package.installed_version),
             description=metadata.description or package.description,
-            purl=package.purl,
+            purl=purl,
             supplier=self._supplier_for(manager, metadata),
             hashes=self._hashes_for(metadata),
             licenses=self._licenses_for(metadata),
@@ -428,7 +430,9 @@ class CycloneDX(SBOM):
         )
         self.document.components.add(data)
         self.component_index[(manager.id, package.id)] = data
-        self.register_purl_aliases(package.purl.to_string(), metadata)
+        self.register_purl_aliases(
+            purl.to_string(), normalized_purls(metadata.extra_purls)
+        )
         self._track_addition(manager.id, package.id, metadata)
         self.document.register_dependency(
             self.document.metadata.component,  # type:ignore[arg-type]

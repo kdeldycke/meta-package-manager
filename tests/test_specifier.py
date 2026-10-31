@@ -24,7 +24,7 @@ from string import ascii_lowercase, digits
 
 import pytest
 
-from meta_package_manager.package import Package, manager_purl, purl_quote
+from meta_package_manager.package import manager_purl, parse_purl, purl_quote
 from meta_package_manager.pool import pool
 from meta_package_manager.specifier import PURL_MAP, EmptyReduction, Solver, Specifier
 
@@ -226,14 +226,61 @@ def test_manager_purl_reads_back(case):
     assert str(spec) == purl
 
 
-def test_package_purl_carries_the_namespace():
-    """The pURL object of a scoped npm package holds its scope as namespace.
+@pytest.mark.parametrize(
+    "purl",
+    (
+        "pkg:npm/JSONStream@1.3.5",
+        "pkg:npm/%40babel/core@7.26.0",
+        "pkg:npm/@babel/core@7.26.0",
+        "pkg:npm/@babel/core",
+        "pkg:NPM/left-pad",
+        "pkg://npm/left-pad",
+        "pkg:npm/left-pad@",
+        "pkg:brew/homebrew%2Fcask/firefox@120.0",
+        "pkg:deb/debian/curl@7.50.3-1?arch=i386&distro=jessie",
+        "pkg:pypi/Django_Rest_Framework@3.15#src/rest_framework",
+        "pkg:apt/libc6:amd64@2.31",
+        "pkg:golang/google.golang.org/genproto#googleapis/api/annotations",
+        "pkg:generic/openssl@1.1.0g?download_url=https://openssl.org/openssl.tar.gz",
+        "pkg:cpan/Perl::Version@1.013",
+        "pkg:gem/rails@7.1.3?",
+        "pkg:npm/left-pad?arch=&platform=linux",
+        "",
+        "   ",
+        "left-pad",
+        "brew:firefox",
+        "npm/left-pad",
+        "PKG:npm/left-pad",
+        "pkg:",
+        "pkg:npm",
+        "pkg:npm/",
+        "pkg:1npm/left-pad",
+        "pkg:n%70m/left-pad",
+        "pkg:npm/left-pad?flag",
+        "pkg:npm/left-pad?1arch=x86",
+        "pkg:npm/left-pad?ar%20ch=x86",
+        "pkg:npm/@babel/core/extra",
+    ),
+)
+def test_parse_purl_splits_like_packageurl(purl):
+    """`parse_purl()` splits, and refuses, the strings packageurl-python does.
 
-    As the npm type definition expects.
+    The reference is `PackageURL.from_string(purl, normalize_purl=False)`, which
+    keeps every part but the type as written.
     """
-    purl = Package(id="@babel/core", manager_id="npm", installed_version="7.26.0").purl
-    assert (purl.namespace, purl.name) == ("@babel", "core")
-    assert purl.to_string() == "pkg:npm/%40babel/core@7.26.0"
+    packageurl = pytest.importorskip("packageurl")
+    try:
+        reference = packageurl.PackageURL.from_string(purl, normalize_purl=False)
+    except ValueError:
+        with pytest.raises(ValueError):
+            parse_purl(purl)
+        return
+    assert parse_purl(purl) == (
+        reference.type,
+        reference.namespace or None,
+        reference.name,
+        reference.version or None,
+    )
 
 
 def test_purl_quote_encodes_a_slash():

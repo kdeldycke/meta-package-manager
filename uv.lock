@@ -1024,7 +1024,6 @@ source = { editable = "." }
 dependencies = [
     { name = "click-extra" },
     { name = "extra-platforms" },
-    { name = "packageurl-python" },
     { name = "tomli-w" },
 ]
 
@@ -1037,6 +1036,7 @@ json5 = [
 ]
 sbom-offline = [
     { name = "cyclonedx-python-lib" },
+    { name = "packageurl-python" },
     { name = "spdx-tools" },
 ]
 sbom-online = [
@@ -1072,6 +1072,7 @@ test = [
     { name = "cyclonedx-python-lib", extra = ["validation"] },
     { name = "extra-platforms" },
     { name = "httpx" },
+    { name = "packageurl-python" },
     { name = "pyproject-fmt" },
     { name = "pytest" },
     { name = "pytest-cov" },
@@ -1101,7 +1102,7 @@ requires-dist = [
     { name = "cyclonedx-python-lib", marker = "extra == 'sbom-offline'", specifier = ">=11.9" },
     { name = "extra-platforms", specifier = ">=13.10" },
     { name = "httpx", marker = "extra == 'sbom-online'", specifier = ">=0.27" },
-    { name = "packageurl-python", specifier = ">=0.17.6" },
+    { name = "packageurl-python", marker = "extra == 'sbom-offline'", specifier = ">=0.11" },
     { name = "platformdirs", marker = "extra == 'sbom-online'", specifier = ">=4" },
     { name = "spdx-tools", marker = "extra == 'sbom-offline'", specifier = ">=0.8.2" },
     { name = "tomli-w", specifier = ">=1" },
@@ -1131,6 +1132,7 @@ test = [
     { name = "cyclonedx-python-lib", extras = ["validation"] },
     { name = "extra-platforms" },
     { name = "httpx", specifier = ">=0.27" },
+    { name = "packageurl-python", specifier = ">=0.17.6" },
     { name = "pyproject-fmt", specifier = ">=2.25.1" },
     { name = "pytest", specifier = ">=9" },
     { name = "pytest-cov", specifier = ">=7" },

@@ -56,7 +56,6 @@ if not cyclonedx_support:
 from cyclonedx.schema import OutputFormat, SchemaVersion
 from cyclonedx.validation import make_schemabased_validator
 from cyclonedx.validation.json import JsonStrictValidator
-from packageurl import PackageURL
 
 from meta_package_manager.package import (
     EMPTY_METADATA,
@@ -69,6 +68,7 @@ from meta_package_manager.package import (
     PackageMetadata,
     Supplier,
 )
+from meta_package_manager.sbom._purl import package_purl
 from meta_package_manager.sbom.base import SBOM, ExportFormat
 from meta_package_manager.sbom.cyclonedx import CycloneDX
 from meta_package_manager.sbom.spdx import SPDX
@@ -123,6 +123,17 @@ def assert_valid_cyclonedx(content: str, export_format: ExportFormat | str) -> N
         validator = make_schemabased_validator(OutputFormat.XML, SchemaVersion.V1_7)
     errors = validator.validate_str(content)
     assert not errors, f"Invalid CycloneDX {export_format} export: {errors}"
+
+
+def test_package_purl_carries_the_namespace():
+    """The pURL object of a scoped npm package holds its scope as namespace.
+
+    As the npm type definition expects.
+    """
+    package = Package(id="@babel/core", manager_id="npm", installed_version="7.26.0")
+    purl = package_purl(package)
+    assert (purl.namespace, purl.name) == ("@babel", "core")
+    assert purl.to_string() == "pkg:npm/%40babel/core@7.26.0"
 
 
 @pytest.mark.parametrize(
@@ -302,9 +313,11 @@ def test_bundled_mode_cyclonedx_populates_rich_fields():
     assert "website" in ref_types
     assert "vcs" in ref_types
     deps_for_curl = next(
-        dep for dep in doc["dependencies"] if dep["ref"] == curl.purl.to_string()
+        dep
+        for dep in doc["dependencies"]
+        if dep["ref"] == package_purl(curl).to_string()
     )
-    assert openssl.purl.to_string() in deps_for_curl["dependsOn"]
+    assert package_purl(openssl).to_string() in deps_for_curl["dependsOn"]
     assert_valid_cyclonedx(c.export(), ExportFormat.JSON)
 
 
@@ -569,7 +582,7 @@ def test_spdx_renders_attached_vulnerabilities():
     manager = _as_manager(_StubManager("pip", "Python pip"))
     package = _make_package("pip", "django", "1.0.0")
     s.add_package(manager, package, EMPTY_METADATA)
-    purl = package.purl.to_string()
+    purl = package_purl(package).to_string()
     s.attach_vulnerabilities({purl: (_sample_vulnerability(),)})
     s.finalize()
     doc = json.loads(s.export())  # exporting also validates the document.
@@ -592,7 +605,7 @@ def test_cyclonedx_renders_attached_vulnerabilities():
     manager = _as_manager(_StubManager("pip", "Python pip"))
     package = _make_package("pip", "django", "1.0.0")
     c.add_package(manager, package, EMPTY_METADATA)
-    purl = package.purl.to_string()
+    purl = package_purl(package).to_string()
     c.attach_vulnerabilities({purl: (_sample_vulnerability(),)})
     c.finalize()
     content = c.export()
@@ -619,7 +632,7 @@ def _aliased_brew_package():
     """A formula carrying its upstream registry coordinate."""
     package = _make_package("brew", "yt-dlp", "2026.8.19")
     metadata = PackageMetadata(
-        extra_purls=(PackageURL.from_string(UPSTREAM_ALIAS),),
+        extra_purls=(UPSTREAM_ALIAS,),
     )
     return package, metadata
 
@@ -634,7 +647,7 @@ def test_all_purls_yields_aliases(renderer_class):
         _as_manager(_StubManager("brew", "Homebrew Formulae")), package, metadata
     )
     purls = set(renderer.all_purls())
-    assert purls == {package.purl.to_string(), UPSTREAM_ALIAS}
+    assert purls == {package_purl(package).to_string(), UPSTREAM_ALIAS}
 
 
 @pytest.mark.parametrize("renderer_class", (SPDX, CycloneDX))
@@ -646,7 +659,7 @@ def test_resolve_purl_targets_names_every_owner(renderer_class):
     renderer.add_package(
         _as_manager(_StubManager("brew", "Homebrew Formulae")), package, metadata
     )
-    primary = package.purl.to_string()
+    primary = package_purl(package).to_string()
     assert renderer.resolve_purl_targets(UPSTREAM_ALIAS) == (UPSTREAM_ALIAS, primary)
     assert renderer.resolve_purl_targets(primary) == (primary,)
     assert renderer.resolve_purl_targets("pkg:pypi/django@1.0.0") == (
@@ -660,15 +673,15 @@ def test_one_coordinate_shared_by_two_packages_reaches_both(renderer_class):
     renderer = renderer_class()
     renderer.init_doc()
     manager = _as_manager(_StubManager("brew", "Homebrew Formulae"))
-    metadata = PackageMetadata(extra_purls=(PackageURL.from_string(UPSTREAM_ALIAS),))
+    metadata = PackageMetadata(extra_purls=(UPSTREAM_ALIAS,))
     first = _make_package("brew", "yt-dlp", "2026.8.19")
     second = _make_package("brew", "yt-dlp@stable", "2026.8.19")
     renderer.add_package(manager, first, metadata)
     renderer.add_package(manager, second, metadata)
     assert renderer.resolve_purl_targets(UPSTREAM_ALIAS) == (
         UPSTREAM_ALIAS,
-        first.purl.to_string(),
-        second.purl.to_string(),
+        package_purl(first).to_string(),
+        package_purl(second).to_string(),
     )
 
 
@@ -677,7 +690,7 @@ def test_cyclonedx_one_advisory_reaches_every_alias_owner():
     c = CycloneDX()
     c.init_doc()
     manager = _as_manager(_StubManager("brew", "Homebrew Formulae"))
-    metadata = PackageMetadata(extra_purls=(PackageURL.from_string(UPSTREAM_ALIAS),))
+    metadata = PackageMetadata(extra_purls=(UPSTREAM_ALIAS,))
     first = _make_package("brew", "yt-dlp", "2026.8.19")
     second = _make_package("brew", "yt-dlp@stable", "2026.8.19")
     c.add_package(manager, first, metadata)
@@ -689,7 +702,10 @@ def test_cyclonedx_one_advisory_reaches_every_alias_owner():
     vulns = json.loads(content).get("vulnerabilities", [])
     assert len(vulns) == 1
     affects = {target["ref"] for target in vulns[0]["affects"]}
-    assert affects == {first.purl.to_string(), second.purl.to_string()}
+    assert affects == {
+        package_purl(first).to_string(),
+        package_purl(second).to_string(),
+    }
 
 
 @pytest.mark.parametrize("renderer_class", (SPDX, CycloneDX))
@@ -698,7 +714,7 @@ def test_stats_count_the_packages_an_alias_reaches(renderer_class):
     renderer = renderer_class()
     renderer.init_doc()
     manager = _as_manager(_StubManager("brew", "Homebrew Formulae"))
-    metadata = PackageMetadata(extra_purls=(PackageURL.from_string(UPSTREAM_ALIAS),))
+    metadata = PackageMetadata(extra_purls=(UPSTREAM_ALIAS,))
     renderer.add_package(
         manager, _make_package("brew", "yt-dlp", "2026.8.19"), metadata
     )
@@ -742,7 +758,7 @@ def test_spdx_advisory_found_under_an_alias_lands_on_the_formula():
         # the SPDX 2.3 JSON schema spells it `PACKAGE-MANAGER`.
         if ref["referenceCategory"] == "PACKAGE_MANAGER"
     }
-    assert package_manager_refs == {package.purl.to_string(), UPSTREAM_ALIAS}
+    assert package_manager_refs == {package_purl(package).to_string(), UPSTREAM_ALIAS}
 
 
 def test_cyclonedx_advisory_found_under_an_alias_affects_the_formula():
@@ -761,7 +777,7 @@ def test_cyclonedx_advisory_found_under_an_alias_affects_the_formula():
     vulns = doc.get("vulnerabilities", [])
     assert len(vulns) == 1
     affects = {target["ref"] for target in vulns[0]["affects"]}
-    assert affects == {package.purl.to_string()}
+    assert affects == {package_purl(package).to_string()}
 
 
 def test_shared_advisory_deduplicated_in_cyclonedx():
@@ -778,12 +794,15 @@ def test_shared_advisory_deduplicated_in_cyclonedx():
     c.add_package(manager, flask, EMPTY_METADATA)
     vuln = _sample_vulnerability()
     c.attach_vulnerabilities({
-        django.purl.to_string(): (vuln,),
-        flask.purl.to_string(): (vuln,),
+        package_purl(django).to_string(): (vuln,),
+        package_purl(flask).to_string(): (vuln,),
     })
     c.finalize()
     doc = json.loads(c.export())
     vulns = doc.get("vulnerabilities", [])
     assert len(vulns) == 1
     affects = {target["ref"] for target in vulns[0]["affects"]}
-    assert affects == {django.purl.to_string(), flask.purl.to_string()}
+    assert affects == {
+        package_purl(django).to_string(),
+        package_purl(flask).to_string(),
+    }

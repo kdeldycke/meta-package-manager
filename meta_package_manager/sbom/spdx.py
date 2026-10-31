@@ -82,6 +82,8 @@ try:
     from spdx_tools.spdx.writer.write_utils import convert
     from spdx_tools.spdx.writer.xml import xml_writer
     from spdx_tools.spdx.writer.yaml import yaml_writer
+
+    from ._purl import normalized_purls, package_purl
 except ImportError as import_error:
     spdx_support = False
     spdx_unavailable_reason = writer_unavailable_reason("spdx-tools", import_error)
@@ -352,16 +354,16 @@ class SPDX(SBOM):
             ExternalPackageRef(
                 ExternalPackageRefCategory.PACKAGE_MANAGER,
                 "purl",
-                package.purl.to_string(),
+                package_purl(package).to_string(),
             )
         ]
         refs.extend(
             ExternalPackageRef(
                 ExternalPackageRefCategory.PACKAGE_MANAGER,
                 "purl",
-                extra.to_string(),
+                extra,
             )
-            for extra in metadata.extra_purls
+            for extra in normalized_purls(metadata.extra_purls)
         )
         if metadata.cpe:
             refs.append(
@@ -384,15 +386,16 @@ class SPDX(SBOM):
         """
         # pURL string, by its virtue of containing all important metadata of a package,
         # makes perfect unique IDs.
-        package_docid = self.normalize_spdx_id(f"SPDXRef-{package.purl}")
+        purl = package_purl(package).to_string()
+        package_docid = self.normalize_spdx_id(f"SPDXRef-{purl}")
         # Some managers (e.g. CPAN) list the same package multiple times.
         if package_docid in self.seen_ids:
             logging.debug(f"Skip duplicate package {package_docid}.")
             return
         self.seen_ids.add(package_docid)
         self.name_index[(manager.id, package.id)] = package_docid
-        self.purl_index[package.purl.to_string()] = package_docid
-        self.register_purl_aliases(package.purl.to_string(), metadata)
+        self.purl_index[purl] = package_docid
+        self.register_purl_aliases(purl, normalized_purls(metadata.extra_purls))
         self._track_addition(manager.id, package.id, metadata)
 
         download_location = metadata.download_url or SpdxNoAssertion()

@@ -25,7 +25,6 @@ from pathlib import Path
 from typing import ClassVar
 
 from extra_platforms import LINUX_LIKE, MACOS
-from packageurl import PackageURL
 
 from ..capabilities import version_not_implemented
 from ..manager import PackageManager
@@ -37,6 +36,7 @@ from ..package import (
     DependencyScope,
     PackageMetadata,
     Supplier,
+    parse_purl,
 )
 from ..version import parse_version
 
@@ -468,7 +468,7 @@ class Homebrew(PackageManager):
     @staticmethod
     def _upstream_purls(
         sbom_path: Path | None, formula_name: str | None
-    ) -> tuple[PackageURL, ...]:
+    ) -> tuple[str, ...]:
         """Lift the upstream registry coordinates out of a formula's SBOM.
 
         Homebrew derives a registry purl from the formula's source URL and
@@ -513,9 +513,11 @@ class Homebrew(PackageManager):
                 if not locator or locator.startswith("pkg:brew/"):
                     continue
                 try:
-                    purls.append(PackageURL.from_string(locator))
+                    parse_purl(locator)
                 except ValueError as exc:
                     logging.debug(f"Skip unparseable purl {locator!r}: {exc}")
+                    continue
+                purls.append(locator)
         return tuple(purls)
 
     @property

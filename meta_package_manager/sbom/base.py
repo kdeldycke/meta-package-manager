@@ -28,7 +28,7 @@ from importlib.metadata import PackageNotFoundError, version
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Iterable, Iterator
     from pathlib import Path
 
     from ..package import PackageMetadata
@@ -126,9 +126,9 @@ class SBOM:
     def register_purl_aliases(
         self,
         primary_purl: str,
-        metadata: PackageMetadata,
+        aliases: Iterable[str],
     ) -> None:
-        """Index a package's `extra_purls` as aliases of its primary purl.
+        """Index `aliases`, a package's normalized `extra_purls`, under its own purl.
 
         An alias is a second coordinate for the same installed package, so
         an advisory found under it belongs to the package the inventory
@@ -143,11 +143,10 @@ class SBOM:
         registers the primary purl itself.
         """
         self.primary_purls.add(primary_purl)
-        for extra in metadata.extra_purls:
-            extra_str = extra.to_string()
-            if extra_str == primary_purl:
+        for alias in aliases:
+            if alias == primary_purl:
                 continue
-            owners = self.purl_aliases.setdefault(extra_str, [])
+            owners = self.purl_aliases.setdefault(alias, [])
             if primary_purl not in owners:
                 owners.append(primary_purl)
 

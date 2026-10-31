@@ -43,12 +43,12 @@ manager engine ({mod}`meta_package_manager.manager`).
 from __future__ import annotations
 
 import re
+import string
 from dataclasses import dataclass, field
 from enum import StrEnum
-from functools import cached_property, lru_cache
-from urllib.parse import quote
-
-from packageurl import PackageURL
+from functools import lru_cache
+from typing import NamedTuple
+from urllib.parse import quote, urlsplit
 
 from .version import parse_version
 
@@ -83,6 +83,9 @@ Each type's `namespace_definition` in the
 settles which side it falls on.
 """
 
+_PURL_KEY_CHARS = frozenset(string.ascii_letters + string.digits + ".-_")
+"""Characters a pURL type and a qualifier key are made of."""
+
 
 def purl_parts(package_id: str) -> tuple[str | None, str]:
     """Split `package_id` into the namespace and the name of its pURL.
@@ -109,17 +112,13 @@ def manager_purl(manager_id: str, package_id: str, version: str | None = None) -
     same manager ID, package ID and version, so a command handed this pURL skips
     looking the package up.
 
-    Rendered here, not by packageurl-python's `PackageURL.to_string()`, which lowercases
-    the name of some types, npm among them. The npm type definition keeps names
-    case-sensitive, since packages published before 2015 may carry uppercase letters:
-    `JSONStream` would come back as `jsonstream`. `to_string()` also leaves a `/`
-    unencoded in a name ([package-url/packageurl-python#123](https://github.com/package-url/packageurl-python/pull/123)).
-
-    ```{todo}
-    Render with `PackageURL.to_string()` once packageurl-python keeps the case of
-    npm names ([package-url/packageurl-python#230](https://github.com/package-url/packageurl-python/issues/230))
-    and encodes a `/` in a name ([package-url/packageurl-python#123](https://github.com/package-url/packageurl-python/pull/123)).
-    ```
+    Rendered here, not by packageurl-python, which the default install does not carry.
+    Its `PackageURL.to_string()` would also lowercase the name of some types, npm among
+    them ([package-url/packageurl-python#230](https://github.com/package-url/packageurl-python/issues/230)),
+    where the npm type definition keeps names case-sensitive, since packages
+    published before 2015 may carry uppercase letters: `JSONStream` would come back as
+    `jsonstream`. And it leaves a `/` unencoded in a name
+    ([package-url/packageurl-python#123](https://github.com/package-url/packageurl-python/pull/123)).
     """
     namespace, name = purl_parts(package_id)
     segments = (*(namespace.split("/") if namespace else ()), name)
@@ -132,6 +131,106 @@ def manager_purl(manager_id: str, package_id: str, version: str | None = None) -
 def purl_quote(text: str) -> str:
     """Percent-encode one pURL segment, a `/` included, keeping `:` as is."""
     return quote(text, safe="").replace("%3A", ":")
+
+
+class PurlParts(NamedTuple):
+    """The parts of a pURL string that `mpm` reads, as {func}`parse_purl` splits them.
+
+    Every part but the type keeps its percent-encoding: the reader decodes what it
+    uses.
+    """
+
+    type: str
+    """The pURL type, lowercased."""
+
+    namespace: str | None
+    """The segments before the name, joined with `/`, or `None` without any."""
+
+    name: str
+    """The last segment of the path."""
+
+    version: str | None
+    """What follows the last `@`, or `None` without one."""
+
+
+def parse_purl(purl: str) -> PurlParts:
+    """Split `purl` into its parts, or raise {exc}`ValueError` if it is not a pURL.
+
+    Splits the string the way `PackageURL.from_string(purl, normalize_purl=False)`
+    of packageurl-python does, and refuses the strings it refuses: no `pkg:` scheme,
+    no type or a malformed one, no name, a qualifier without its `=` or with a
+    malformed key. Like it, takes the leading `@` of an `npm` path as the start of
+    its scope, and splits off the qualifiers and the subpath, which `mpm` does not
+    read, with {func}`urllib.parse.urlsplit`.
+
+    packageurl-python is still the library behind the SBOM writers, which need its
+    normalization. Parsing here keeps it out of the default install, and
+    `tests/test_specifier.py` checks the two parsers against each other.
+    """
+    if not purl.strip():
+        msg = "A pURL string is required."
+        raise ValueError(msg)
+    scheme, sep, remainder = purl.partition(":")
+    if not sep or scheme != "pkg":
+        msg = f'pURL is missing the required "pkg" scheme component: {purl!r}.'
+        raise ValueError(msg)
+    purl_type, sep, remainder = remainder.strip().lstrip("/").partition("/")
+    if not purl_type or not sep:
+        msg = f"pURL is missing the required type component: {purl!r}."
+        raise ValueError(msg)
+    if not set(purl_type) <= _PURL_KEY_CHARS or purl_type[0] in string.digits:
+        msg = f"pURL type is not valid: {purl_type!r}."
+        raise ValueError(msg)
+    purl_type = purl_type.lower()
+
+    url_scheme, authority, path, qualifiers, _ = urlsplit(remainder)
+    # `urlsplit()` reads a colon as the end of a scheme or an authority, where a
+    # pURL allows one in its namespace and name: put the colons back.
+    if authority:
+        path = f"{authority}:{path}"
+    if url_scheme:
+        # `urlsplit()` lowercases the scheme, so take it from the string.
+        path = f"{remainder.split(':', 1)[0]}:{path}"
+    path = path.lstrip("/")
+
+    namespace = ""
+    if purl_type == "npm" and path.startswith("@"):
+        namespace, _, path = path.partition("/")
+    rest, sep, version = path.rpartition("@")
+    if not sep:
+        rest, version = version, ""
+
+    segments = [seg for seg in rest.strip().strip("/").split("/") if seg.strip()]
+    name = ""
+    if not namespace and len(segments) > 1:
+        name = segments[-1]
+        namespace = "/".join(segments[:-1])
+    elif len(segments) == 1:
+        name = segments[0]
+    if not name:
+        msg = f"pURL is missing the required name component: {purl!r}."
+        raise ValueError(msg)
+
+    _check_purl_qualifiers(qualifiers)
+    return PurlParts(purl_type, namespace or None, name, version or None)
+
+
+def _check_purl_qualifiers(qualifiers: str) -> None:
+    """Raise {exc}`ValueError` for the qualifiers packageurl-python refuses."""
+    if not qualifiers:
+        return
+    pairs = [pair.partition("=") for pair in qualifiers.split("&")]
+    if any(not sep for _, sep, _ in pairs):
+        msg = f"pURL qualifiers must be key=value pairs: {qualifiers!r}."
+        raise ValueError(msg)
+    for raw_key, _, value in pairs:
+        key = raw_key.strip().lower()
+        if not key or not value.strip():
+            # An empty key or value is dropped, not refused.
+            continue
+        if not set(key) <= _PURL_KEY_CHARS or key[0] in string.digits:
+            msg = f"pURL qualifier key is not valid: {key!r}."
+            raise ValueError(msg)
 
 
 @dataclass
@@ -174,25 +273,6 @@ class Package:
         # Make sure version strings are parsed into proper objects.
         self.installed_version = parse_version(self.installed_version)  # type: ignore[arg-type]
         self.latest_version = parse_version(self.latest_version)  # type: ignore[arg-type]
-
-    @cached_property
-    def purl(self) -> PackageURL:
-        """Returns the package's pURL object.
-
-        {func}`purl_parts` splits the ID, so a scoped npm package or a tap-qualified
-        formula carries its namespace the way the pURL specification expects.
-        """
-        qualifiers = {}
-        if self.arch:
-            qualifiers["arch"] = self.arch
-        namespace, name = purl_parts(self.id)
-        return PackageURL(
-            type=self.manager_id,
-            namespace=namespace,
-            name=name,
-            version=str(self.installed_version),
-            qualifiers=qualifiers,
-        )
 
     @staticmethod
     @lru_cache(maxsize=64)
@@ -406,14 +486,16 @@ class PackageMetadata:
     the aggregate output (or attach it by reference).
     """
 
-    extra_purls: tuple[PackageURL, ...] = ()
+    extra_purls: tuple[str, ...] = ()
     """Additional purls when the manager identifies the same package
     through multiple coordinate systems (multi-arch, multi-origin, or the
     upstream registry a recipe builds from).
 
     SBOM renderers emit them as extra package-manager references and index
     them as aliases of the package's own purl, so a vulnerability scan can
-    query a coordinate an advisory database recognizes.
+    query a coordinate an advisory database recognizes. Each is a string
+    {func}`parse_purl` accepts, which the renderers normalize with
+    packageurl-python.
     """
 
     extras: dict[str, object] = field(default_factory=dict)

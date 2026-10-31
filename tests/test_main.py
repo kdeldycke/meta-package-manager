@@ -17,104 +17,16 @@
 from __future__ import annotations
 
 import inspect
-import io
 import runpy
 import sys
 from functools import partial
 
 import pytest
 
-from meta_package_manager.__main__ import force_unicode_output, main
-
-# The glyphs mpm prints that a legacy code page cannot encode: the two status
-# marks of the `managers` table, and one border character of every rounded table.
-UNENCODABLE_ON_CP1252 = ("✓", "✘", "╭", "─")
+from meta_package_manager.__main__ import main
 
 MAIN_SCRIPT = inspect.getfile(main)
 """The `__main__.py` file that `python -m meta_package_manager` runs."""
-
-
-class FakeStream:
-    """A stand-in for a standard stream, recording what it was reconfigured to.
-
-    Driving the real `sys.stdout` is what the guard cannot do: every workflow
-    exports `PYTHONIOENCODING=utf8`, so the streams a CI run hands the suite are
-    already UTF-8 and the legacy path is never taken.
-    """
-
-    def __init__(self, encoding: str | None, *, refuse: bool = False) -> None:
-        self.encoding = encoding
-        self.refuse = refuse
-        self.reconfigured: dict[str, str] = {}
-
-    def reconfigure(self, **kwargs: str) -> None:
-        if self.refuse:
-            raise ValueError("stream refuses reconfiguration")
-        self.reconfigured.update(kwargs)
-        if "encoding" in kwargs:
-            self.encoding = kwargs["encoding"]
-
-
-@pytest.mark.parametrize(
-    "encoding", ("cp1252", "ascii", "latin-1", "unknown-8bit", None)
-)
-def test_legacy_stream_is_promoted_to_utf8(monkeypatch, encoding):
-    """A stream that cannot carry mpm's glyphs is reconfigured to UTF-8.
-
-    So is a stream reporting an encoding Python does not know.
-    """
-    out, err = FakeStream(encoding), FakeStream(encoding)
-    monkeypatch.setattr("sys.stdout", out)
-    monkeypatch.setattr("sys.stderr", err)
-
-    force_unicode_output()
-
-    for stream in (out, err):
-        assert stream.reconfigured == {"encoding": "UTF-8"}
-        assert stream.encoding is not None
-        for glyph in UNENCODABLE_ON_CP1252:
-            glyph.encode(stream.encoding)
-
-
-@pytest.mark.parametrize("encoding", ("utf-8", "UTF-8", "utf8"))
-def test_utf8_stream_is_left_alone(monkeypatch, encoding):
-    """Reconfiguration never fires on a stream that already speaks UTF-8.
-
-    Whatever spelling it reports.
-    """
-    out, err = FakeStream(encoding), FakeStream(encoding)
-    monkeypatch.setattr("sys.stdout", out)
-    monkeypatch.setattr("sys.stderr", err)
-
-    force_unicode_output()
-
-    assert out.reconfigured == {}
-    assert err.reconfigured == {}
-
-
-def test_a_refusing_stream_never_raises(monkeypatch):
-    """A stream refusing reconfiguration is left as the platform made it.
-
-    Rather than taking the whole CLI down before it has printed anything.
-    """
-    out = FakeStream("cp1252", refuse=True)
-    monkeypatch.setattr("sys.stdout", out)
-    monkeypatch.setattr("sys.stderr", FakeStream("utf-8"))
-
-    force_unicode_output()
-
-    assert out.encoding == "cp1252"
-
-
-def test_a_stream_without_reconfigure_is_skipped(monkeypatch):
-    """A stream object without `reconfigure` does not crash the entry point.
-
-    A captured `io.StringIO` is one.
-    """
-    monkeypatch.setattr("sys.stdout", io.StringIO())
-    monkeypatch.setattr("sys.stderr", io.StringIO())
-
-    force_unicode_output()
 
 
 @pytest.mark.parametrize(

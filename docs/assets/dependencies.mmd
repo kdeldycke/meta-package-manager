@@ -3,16 +3,13 @@ flowchart LR
 
     subgraph primary-deps [Primary dependencies]
         click_extra{{"`click-extra`"}}
-        xmltodict{{"`xmltodict`"}}
-        boltons{{"`boltons`"}}
         extra_platforms{{"`extra-platforms`"}}
-        packageurl_python{{"`packageurl-python`"}}
         tomli_w{{"`tomli-w`"}}
     end
 
     jsonschema(["`jsonschema`"])
-    referencing(["`referencing`"])
     typing_extensions(["`typing-extensions`"])
+    referencing(["`referencing`"])
     pygments(["`pygments`"])
     requests(["`requests`"])
     idna(["`idna`"])
@@ -54,7 +51,6 @@ flowchart LR
     boolean_py(["`boolean-py`"])
     bracex(["`bracex`"])
     charset_normalizer(["`charset-normalizer`"])
-    deepmerge(["`deepmerge`"])
     defusedxml(["`defusedxml`"])
     execnet(["`execnet`"])
     fqdn(["`fqdn`"])
@@ -62,7 +58,6 @@ flowchart LR
     hjson(["`hjson`"])
     imagesize(["`imagesize`"])
     iniconfig(["`iniconfig`"])
-    json_with_comments(["`json-with-comments`"])
     json5(["`json5`"])
     jsonpointer(["`jsonpointer`"])
     lark(["`lark`"])
@@ -84,15 +79,16 @@ flowchart LR
     sphinxcontrib_jsmath(["`sphinxcontrib-jsmath`"])
     sphinxcontrib_qthelp(["`sphinxcontrib-qthelp`"])
     sphinxcontrib_serializinghtml(["`sphinxcontrib-serializinghtml`"])
-    tomli(["`tomli`"])
     uri_template(["`uri-template`"])
     uritools(["`uritools`"])
     urllib3(["`urllib3`"])
     webcolors(["`webcolors`"])
+    xmltodict(["`xmltodict`"])
 
     subgraph ext_sbom-offline [--extra sbom-offline]
         ext_sbom-offline_spdx_tools{{"`spdx-tools >=0.8.2`"}}
         ext_sbom-offline_cyclonedx_python_lib{{"`cyclonedx-python-lib >=11.9`"}}
+        ext_sbom-offline_packageurl_python{{"`packageurl-python >=0.11`"}}
     end
 
     subgraph ext_sbom-online [--extra sbom-online]
@@ -108,11 +104,11 @@ flowchart LR
         sphinxcontrib_mermaid{{"`sphinxcontrib-mermaid >=1.2.3`"}}
         sphinx_autodoc_typehints{{"`sphinx-autodoc-typehints >=2.4`"}}
         sphinxcontrib_jquery{{"`sphinxcontrib-jquery >=4`"}}
+        tomlrt{{"`tomlrt >=2`"}}
         sphinx_copybutton{{"`sphinx-copybutton >=0.5.2`"}}
         sphinx_design{{"`sphinx-design >=0.6`"}}
         sphinx_sitemap{{"`sphinx-sitemap >=2.6`"}}
         sphinxext_opengraph{{"`sphinxext-opengraph >=0.13`"}}
-        tomlkit{{"`tomlkit >=0.13`"}}
     end
 
     subgraph grp_test [--group test]
@@ -124,24 +120,21 @@ flowchart LR
         pytest_cov{{"`pytest-cov >=7`"}}
         pytest_xdist{{"`pytest-xdist >=3.7`"}}
         coverage{{"`coverage >=7.11`"}}
+        packageurl_python{{"`packageurl-python >=0.17.6`"}}
         pytest_github_actions_annotate_failures{{"`pytest-github-actions-annotate-failures >=0.3`"}}
         pytest_randomly{{"`pytest-randomly >=4.0.1`"}}
         respx{{"`respx >=0.22`"}}
         pyproject_fmt{{"`pyproject-fmt >=2.25.1`"}}
+        grp_test_tomlrt{{"`tomlrt >=2`"}}
     end
 
     subgraph grp_typing [--group typing]
-        types_boltons{{"`types-boltons >=25.0.0.20250919`"}}
         types_docutils{{"`types-docutils >=0.22.3.20260724`"}}
         types_pyyaml{{"`types-pyyaml >=6.0.12.9`"}}
-        types_xmltodict{{"`types-xmltodict >=1.0.1.20250920`"}}
     end
 
-    meta_package_manager ==>|" >=9.3 "| click_extra
-    meta_package_manager ==>|" >=0.12 "| xmltodict
-    meta_package_manager ==>|" >=25 "| boltons
+    meta_package_manager ==> click_extra
     meta_package_manager ==>|" >=13.10 "| extra_platforms
-    meta_package_manager ==>|" >=0.17.6 "| packageurl_python
     meta_package_manager ==>|" >=1 "| tomli_w
     sphinx --> pygments
     sphinx --> requests
@@ -162,21 +155,18 @@ flowchart LR
     sphinx --> sphinxcontrib_serializinghtml
     click_extra --> sphinx
     click_extra --> pytest
+    click_extra --> myst_parser
     click_extra --> pygments
     click_extra --> pyyaml
     click_extra --> click_0
     click_extra --> cloup
     click_extra --> docutils
-    click_extra --> xmltodict
-    click_extra --> boltons
+    click_extra --> tomlrt
     click_extra --> extra_platforms
     click_extra --> tabulate
-    click_extra --> tomlkit
     click_extra --> wcmatch
     click_extra --> wcwidth
-    click_extra --> deepmerge
     click_extra --> hjson
-    click_extra --> json_with_comments
     click_extra --> json5
     pytest --> pygments
     pytest --> packaging
@@ -186,15 +176,15 @@ flowchart LR
     spdx_tools --> pyyaml
     spdx_tools --> click_0
     spdx_tools --> license_expression
-    spdx_tools --> xmltodict
     spdx_tools --> rdflib
     spdx_tools --> beartype
     spdx_tools --> ply
     spdx_tools --> semantic_version
     spdx_tools --> uritools
+    spdx_tools --> xmltodict
     cyclonedx_python_lib --> jsonschema
-    cyclonedx_python_lib --> referencing
     cyclonedx_python_lib --> typing_extensions
+    cyclonedx_python_lib --> referencing
     cyclonedx_python_lib --> license_expression
     cyclonedx_python_lib --> packageurl_python
     cyclonedx_python_lib --> py_serializable
@@ -227,10 +217,10 @@ flowchart LR
     sphinxcontrib_mermaid --> sphinx
     sphinxcontrib_mermaid --> pyyaml
     sphinxcontrib_mermaid --> jinja2
-    coverage --> tomli
     sphinx_autodoc_typehints --> sphinx
     sphinx_autodoc_typehints --> typing_extensions
     sphinxcontrib_jquery --> sphinx
+    tomlrt --> typing_extensions
     pytest_github_actions_annotate_failures --> pytest
     pytest_randomly --> pytest
     respx --> httpx
@@ -292,7 +282,9 @@ flowchart LR
     meta_package_manager -.-> grp_typing
     ext_sbom-offline_spdx_tools -.- spdx_tools
     ext_sbom-offline_cyclonedx_python_lib -.- cyclonedx_python_lib
+    ext_sbom-offline_packageurl_python -.- packageurl_python
     ext_sbom-online_httpx -.- httpx
+    grp_test_tomlrt -.- tomlrt
 
     click accessible_pygments "https://pypi.org/project/accessible-pygments/" _blank
     click alabaster "https://pypi.org/project/alabaster/" _blank
@@ -302,7 +294,6 @@ flowchart LR
     click babel "https://pypi.org/project/babel/" _blank
     click beartype "https://pypi.org/project/beartype/" _blank
     click beautifulsoup4 "https://pypi.org/project/beautifulsoup4/" _blank
-    click boltons "https://pypi.org/project/boltons/" _blank
     click boolean_py "https://pypi.org/project/boolean-py/" _blank
     click bracex "https://pypi.org/project/bracex/" _blank
     click certifi "https://pypi.org/project/certifi/" _blank
@@ -313,7 +304,6 @@ flowchart LR
     click colorama "https://pypi.org/project/colorama/" _blank
     click coverage "https://pypi.org/project/coverage/" _blank
     click cyclonedx_python_lib "https://pypi.org/project/cyclonedx-python-lib/" _blank
-    click deepmerge "https://pypi.org/project/deepmerge/" _blank
     click defusedxml "https://pypi.org/project/defusedxml/" _blank
     click docutils "https://pypi.org/project/docutils/" _blank
     click execnet "https://pypi.org/project/execnet/" _blank
@@ -329,7 +319,6 @@ flowchart LR
     click iniconfig "https://pypi.org/project/iniconfig/" _blank
     click isoduration "https://pypi.org/project/isoduration/" _blank
     click jinja2 "https://pypi.org/project/jinja2/" _blank
-    click json_with_comments "https://pypi.org/project/json-with-comments/" _blank
     click json5 "https://pypi.org/project/json5/" _blank
     click jsonpointer "https://pypi.org/project/jsonpointer/" _blank
     click jsonschema "https://pypi.org/project/jsonschema/" _blank
@@ -393,13 +382,10 @@ flowchart LR
     click sphinxcontrib_serializinghtml "https://pypi.org/project/sphinxcontrib-serializinghtml/" _blank
     click sphinxext_opengraph "https://pypi.org/project/sphinxext-opengraph/" _blank
     click tabulate "https://pypi.org/project/tabulate/" _blank
-    click tomli "https://pypi.org/project/tomli/" _blank
     click tomli_w "https://pypi.org/project/tomli-w/" _blank
-    click tomlkit "https://pypi.org/project/tomlkit/" _blank
-    click types_boltons "https://pypi.org/project/types-boltons/" _blank
+    click tomlrt "https://pypi.org/project/tomlrt/" _blank
     click types_docutils "https://pypi.org/project/types-docutils/" _blank
     click types_pyyaml "https://pypi.org/project/types-pyyaml/" _blank
-    click types_xmltodict "https://pypi.org/project/types-xmltodict/" _blank
     click typing_extensions "https://pypi.org/project/typing-extensions/" _blank
     click tzdata "https://pypi.org/project/tzdata/" _blank
     click uri_template "https://pypi.org/project/uri-template/" _blank
@@ -411,10 +397,11 @@ flowchart LR
     click xmltodict "https://pypi.org/project/xmltodict/" _blank
     click ext_sbom-offline_spdx_tools "https://pypi.org/project/spdx-tools/" _blank
     click ext_sbom-offline_cyclonedx_python_lib "https://pypi.org/project/cyclonedx-python-lib/" _blank
+    click ext_sbom-offline_packageurl_python "https://pypi.org/project/packageurl-python/" _blank
     click ext_sbom-online_httpx "https://pypi.org/project/httpx/" _blank
+    click grp_test_tomlrt "https://pypi.org/project/tomlrt/" _blank
 
     style meta_package_manager stroke-width:3px
-    style boltons stroke-width:3px
     style click_extra stroke-width:3px
     style coverage stroke-width:3px
     style cyclonedx_python_lib stroke-width:3px
@@ -443,15 +430,14 @@ flowchart LR
     style sphinxcontrib_mermaid stroke-width:3px
     style sphinxext_opengraph stroke-width:3px
     style tomli_w stroke-width:3px
-    style tomlkit stroke-width:3px
-    style types_boltons stroke-width:3px
+    style tomlrt stroke-width:3px
     style types_docutils stroke-width:3px
     style types_pyyaml stroke-width:3px
-    style types_xmltodict stroke-width:3px
-    style xmltodict stroke-width:3px
     style ext_sbom-offline_spdx_tools stroke-width:3px,stroke-dasharray:5 5
     style ext_sbom-offline_cyclonedx_python_lib stroke-width:3px,stroke-dasharray:5 5
+    style ext_sbom-offline_packageurl_python stroke-width:3px,stroke-dasharray:5 5
     style ext_sbom-online_httpx stroke-width:3px,stroke-dasharray:5 5
+    style grp_test_tomlrt stroke-width:3px,stroke-dasharray:5 5
 
     style primary-deps fill:#1565C020,stroke:#42A5F5
     style ext_sbom-offline fill:#7B1FA220,stroke:#BA68C8

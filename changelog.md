@@ -1,9 +1,11 @@
 # Changelog
 
-## [`8.3.0.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v8.2.0...main)
+## [`8.3.1.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v8.3.0...main)
 
 > [!WARNING]
 > This version is **not released yet** and is under active development.
+
+## [`8.3.0` (2026-10-31)](https://github.com/kdeldycke/meta-package-manager/compare/v8.2.0...v8.3.0)
 
 - **Breaking:** [mpm] Drop Python `3.10`, past its end of life: `mpm` needs Python `3.11`. The PPA stops building for Ubuntu `22.04`, whose Python is `3.10`.
 - **Breaking:** [mpm] Remove the `jsonc` and `xml` extras: JSONC and XML configuration files and the `xml` table format need no extra dependency anymore.

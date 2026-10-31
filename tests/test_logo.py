@@ -17,11 +17,11 @@
 from __future__ import annotations
 
 import os
-import re
 import shutil
 
 import pytest
 from click_extra import strip_ansi
+from click_extra.version import env_summary
 
 from meta_package_manager import logo
 from meta_package_manager.logo import (
@@ -30,10 +30,9 @@ from meta_package_manager.logo import (
     LOGO_LINES,
     LOGO_WIDTH,
     TONES,
+    VERSION_SCREEN,
     build_rows,
-    env_summary,
     render_logo,
-    version_screen,
 )
 
 PROG, VERSION = "mpm", "1.2.3"
@@ -42,6 +41,11 @@ BLANK = " "
 
 MIRROR = str.maketrans({"+": ":", ":": "+"})
 """Reflecting the mark swaps its two vertical planes, left-facing for right."""
+
+
+def version_screen(prog_name: str, version: str) -> str | None:
+    """The screen `--version` draws, without the styles of the theme."""
+    return VERSION_SCREEN.render(prog_name, version, {})
 
 
 def screen_lines(*args, **kwargs) -> list[str]:
@@ -234,11 +238,6 @@ def test_version_screen_width_never_exceeds_the_terminal():
     width = shutil.get_terminal_size().columns
     for line in screen_lines(PROG, VERSION):
         assert len(line) <= width
-
-
-def test_env_summary_shape():
-    """The plain rendering's environment line, also split across two screen rows."""
-    assert re.fullmatch(r"Python [^,]+, .+", env_summary())
 
 
 def test_env_summary_facts_reach_the_screen():

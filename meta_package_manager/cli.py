@@ -111,6 +111,7 @@ from click_extra import (
     sort_by_option,
     zero_exit_option,
 )
+from click_extra.commands import default_params
 from click_extra.context import (
     PROGRESS,
     TABLE_FORMAT,
@@ -122,6 +123,7 @@ from click_extra.highlight import HelpKeywords
 from click_extra.logging import LogLevel
 from click_extra.table import SERIALIZATION_FORMATS
 from click_extra.theme import get_current_theme as theme
+from click_extra.version import env_summary
 
 from . import bar_plugin
 from .capabilities import Operations, implements_method
@@ -145,7 +147,7 @@ from .cooldown import (
 )
 from .dispatch import trail_label
 from .execution import PLAN_RECORDER, CLIError, operation_subject
-from .logo import env_summary, version_screen_params
+from .logo import VERSION_SCREEN
 from .manager import INVOCATION_CACHES, PackageManager
 from .pool import pool
 from .shell_env import import_shell_env
@@ -618,12 +620,12 @@ class SourcedParamsOption(ShowParamsOption):
 
 
 def group_params() -> list[Parameter]:
-    """click-extra's default parameters, with three of them swapped for ours.
+    """click-extra's default parameters, with two of them swapped for ours.
 
-    `--version` is swapped by {func}`~meta_package_manager.logo.version_screen_params`,
-    which this builds on. The other two are `--config`, which gains the cascade
-    described below, and `--params`, which gains the column that makes the cascade
-    readable.
+    `--version` draws {data}`~meta_package_manager.logo.VERSION_SCREEN`, handed to
+    click-extra's own option. The two swapped are `--config`, which gains the
+    cascade described below, and `--params`, which gains the column that makes the
+    cascade readable.
 
     Swapping instances in place keeps click-extra's carefully ordered parameter
     sequence, and keeps the `@group(config_schema=…, config_validators=…)` arguments
@@ -639,7 +641,7 @@ def group_params() -> list[Parameter]:
     ```
     """
     swapped: list[Parameter] = []
-    for param in version_screen_params():
+    for param in default_params(screen=VERSION_SCREEN):
         if isinstance(param, ConfigOption):
             swapped.append(ConfigOption(cascade=True))
         elif isinstance(param, ShowParamsOption):

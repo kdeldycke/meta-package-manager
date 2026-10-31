@@ -28,28 +28,22 @@ that figure is scale-invariant: no height fixes it. Stretching the projection to
 45° earns the diagonals but leaves the mark only ~12 columns wide, too few for
 the four flaps.
 
+click-extra's {class}`~click_extra.version.VersionScreen` lays the mark out beside
+the facts of {func}`facts`, and draws it only when the terminal allows it.
+
 ```{caution}
 The mark's structure is carried by *color* alone: strip the ANSI codes and it
-collapses into one solid silhouette. {class}`LogoVersionOption` therefore only draws
-it when color reaches the output, falling back to click-extra's plain rendering
-everywhere else. That plain form is also the one machine readers parse, the bar
-plugin probing `mpm --no-color --version`.
+collapses into one solid silhouette. click-extra therefore only draws the screen
+when color reaches the output, falling back to its plain rendering everywhere else.
+That plain form is also the one machine readers parse, the bar plugin probing
+`mpm --no-color --version`.
 ```
 """
 
 from __future__ import annotations
 
-import platform
-import shutil
-import sys
-
-import click
 from click_extra import style
-from click_extra.color import invocation_color, is_a_tty
-from click_extra.commands import default_params
-from click_extra.context import ACCESSIBLE, get
-from click_extra.version import VersionOption
-from extra_platforms import current_architecture, current_platform
+from click_extra.version import VersionScreen, default_facts
 
 from . import (
     __build_os__,
@@ -163,10 +157,8 @@ LOGO_LINES = len(LOGO) // 2
 """Terminal lines the mark renders to, two sub-pixel rows making one."""
 
 GUTTER = "   "
-"""Blank columns separating the mark from the metadata column beside it."""
-
-LABEL_WIDTH = 10
-"""Column width the metadata keys are padded to, aligning their values."""
+"""Blank columns separating the mark from the facts beside it, and each label from
+its value."""
 
 _UPPER = "▀"
 _LOWER = "▄"
@@ -179,21 +171,6 @@ Colors = tuple[int | None, int | None]
 """
 
 
-def env_summary() -> str:
-    """One-line interpreter and platform summary.
-
-    Feeds both the plain `--version` output, appended to its message, and the
-    version screen's own `Python` and `Platform` rows, so the two renderings can
-    never disagree on what they report.
-    """
-    return f"Python {platform.python_version()}, {platform_label()}"
-
-
-def platform_label() -> str:
-    """Current platform and CPU architecture, as displayed to the user."""
-    return f"{current_platform().name} {current_architecture().name}"
-
-
 def build_rows() -> tuple[tuple[str, str], ...]:
     """When and for what target this executable was compiled, or nothing at all.
 
@@ -203,14 +180,13 @@ def build_rows() -> tuple[tuple[str, str], ...]:
     build, so repeating them says nothing new.
 
     The target names the floor the binary was compiled for (`macosx-11.0-arm64`),
-    where {attr}`platform_label` names the machine running it now. Those answer
+    where the `Platform` row names the machine running it now. Those answer
     different questions in a bug report, which is what earns the second row.
 
-    Two rows rather than one sentence, because {func}`version_screen` sizes the
-    whole layout against its widest line and falls back to the plain message when
-    that overflows the terminal. Joined up, this metadata is wide enough to cost a
-    binary its version screen on an 80-column terminal; stacked, it costs no width
-    at all.
+    Two rows rather than one sentence, because the version screen sizes the whole
+    layout against its widest line and falls back to the plain message when that
+    overflows the terminal. Joined up, this metadata is wide enough to cost a binary
+    its version screen on an 80-column terminal; stacked, it costs no width at all.
     """
     if not __build_time__:
         return ()
@@ -265,131 +241,33 @@ def _paint(run: str, colors: Colors) -> str:
     return style(run, fg=colors[0], bg=colors[1])
 
 
-def _metadata(prog_name: str, version: str) -> tuple[tuple[str, str], ...]:
-    """The column of facts rendered beside the mark, as (plain, styled) pairs.
+def facts() -> dict[str, str]:
+    """The rows the version screen draws beside the mark, below the version line.
 
-    Both forms are built together because the styled one cannot be measured: its
-    escape sequences take columns that never reach the screen, and the plain twin is
-    what {func}`version_screen` sizes the layout against.
+    click-extra's own `Python` and `Platform` rows come first: the two facts its
+    `env_summary()` joins for the plain message. The build rows of a binary, the
+    manager count and the documentation host follow.
     """
     supported = len(pool.default_manager_ids)
     total = len(pool.all_manager_ids)
-    rows = (
-        ("Python", platform.python_version()),
-        ("Platform", platform_label()),
-        *build_rows(),
-        ("Managers", f"{supported} supported here, {total} total"),
-        ("Docs", DOCS_URL),
-    )
     return (
-        (
-            f"{prog_name}, version {version}",
-            style(prog_name, fg="bright_white", bold=True)
-            + ", version "
-            + style(version, fg="green"),
-        ),
-        (TAGLINE, style(TAGLINE, fg="bright_black")),
-        ("", ""),
-        *(
-            (
-                f"{label:<{LABEL_WIDTH}}{value}",
-                style(f"{label:<{LABEL_WIDTH}}", fg="bright_black") + value,
-            )
-            for label, value in rows
-        ),
+        default_facts()
+        | dict(build_rows())
+        | {
+            "Managers": f"{supported} supported here, {total} total",
+            "Docs": DOCS_URL,
+        }
     )
 
 
-def version_screen(prog_name: str, version: str) -> str | None:
-    """Compose the mark and the metadata column into the full version screen.
+VERSION_SCREEN = VersionScreen(
+    logo=render_logo,
+    tagline=TAGLINE,
+    facts=facts,
+    gutter=GUTTER,
+)
+"""The `--version` screen, which click-extra lays out and measures.
 
-    The metadata is centred against the mark's height, and either column may be the
-    taller of the two: a line missing from one side simply renders blank.
-
-    Returns `None` when the terminal is too narrow to seat the two columns side by
-    side, leaving the caller to fall back rather than emit a wrapped mess. The
-    threshold is measured off the metadata actually built, since its widest row grows
-    with the manager count and the platform name. A non-interactive stream reports
-    `shutil`'s 80-column default, wide enough that a redirected-but-forced-color run
-    still gets the screen it asked for.
-    """
-    metadata = _metadata(prog_name, version)
-    width = LOGO_WIDTH + len(GUTTER) + max(len(plain) for plain, _ in metadata)
-    if width > shutil.get_terminal_size().columns:
-        return None
-
-    logo = render_logo()
-    offset = max(0, (len(logo) - len(metadata)) // 2)
-    blank = " " * LOGO_WIDTH
-    lines = []
-    for index in range(max(len(logo), offset + len(metadata))):
-        left = logo[index] if index < len(logo) else blank
-        text_index = index - offset
-        right = metadata[text_index][1] if 0 <= text_index < len(metadata) else ""
-        lines.append(f"{left}{GUTTER}{right}".rstrip())
-    # Open on a blank line: `--version` is often the tail of a noisier command (a
-    # `uv run` resolving, a wrapper announcing itself), and the mark reads as part of
-    # that noise when it starts flush against it.
-    return "\n" + "\n".join(lines)
-
-
-def colors_reach_output() -> bool:
-    """Will ANSI codes survive all the way to the user's terminal?
-
-    Resolves click-extra's color tri-state, deferring to the output stream's TTY
-    status on its `auto` default, exactly as `click.echo` does when it decides
-    whether to strip the codes itself.
-    """
-    color = invocation_color()
-    if color is None:
-        # `sys.stdout` rather than `click.get_text_stream("stdout")`: Click 8.5
-        # deprecated that helper for removal in 9.0, and it resolves to the same
-        # stream for an `isatty` probe.
-        return is_a_tty(sys.stdout)
-    return color
-
-
-class LogoVersionOption(VersionOption):
-    """`--version`, upgraded to the full version screen when the terminal allows it.
-
-    Three conditions gate the screen, and failing any one of them falls back to
-    click-extra's plain `message` template unchanged. That is a deliberate
-    guarantee rather than a default: the plain form is the one every machine reader
-    parses.
-
-    - **Color reaches the output.** The mark keeps its structure in its colors alone,
-      so a stripped one is an unreadable blob.
-    - **The terminal is wide enough** to seat the metadata column beside the mark
-      without wrapping it.
-    - **Accessible mode is off.** A raster read out cell by cell is noise to a screen
-      reader, so `--accessible` keeps the plain two lines.
-    """
-
-    def render_message(self, template: str | None = None) -> str:
-        """Draw the version screen, or defer to the plain template."""
-        ctx = click.get_current_context(silent=True)
-        accessible = bool(ctx is not None and get(ctx, ACCESSIBLE, False))
-        # An explicit template is a caller asking for that exact string, never for a
-        # screen built around it.
-        if template is None and not accessible and colors_reach_output():
-            screen = version_screen(
-                str(self.prog_name or ""),
-                str(self.version or ""),
-            )
-            if screen is not None:
-                return screen
-        return super().render_message(template)
-
-
-def version_screen_params() -> list[click.Parameter]:
-    """click-extra's default parameters, with `--version` swapped for our own.
-
-    Passed to the CLI's `@group(params=…)`, the documented hook for tuning that list.
-    Swapping the instance in place keeps click-extra's carefully ordered parameter
-    sequence, and keeps `version_fields=` working: it targets whichever parameter is
-    a {class}`~click_extra.version.VersionOption`, which the subclass still is.
-    """
-    return [
-        LogoVersionOption() if isinstance(param, VersionOption) else param
-        for param in default_params()
-    ]
+The mark and the facts are both callables, so only a `--version` that draws the
+screen pays for them.
+"""

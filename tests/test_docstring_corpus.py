@@ -300,7 +300,7 @@ def test_documented_ids_read_back_from_their_purl(manager, member, output, monke
     [param for param in _fixtures() if param.values[1] != "version_regexes"],
 )
 def test_documented_purls_split_like_packageurl(manager, member, output, monkeypatch):
-    """`parse_purl()` splits the pURL of every documented package like packageurl-python.
+    """`parse_purl()` splits the pURL of each documented package like packageurl-python.
 
     The reference is `PackageURL.from_string(purl, normalize_purl=False)`: the parser
     `mpm` used before writing its own, and the one the SBOM writers still use.

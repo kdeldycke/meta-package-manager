@@ -30,7 +30,7 @@ Write one recipe for `mpm` and one per missing dependency, in the target's forma
 
 Keep the load-bearing comments that explain a non-obvious choice (why the tag tarball, why a test is ignored or deselected) and drop overlay-only chatter that means nothing upstream.
 
-Keep those comments tight. Their readers are the maintainers of the channel, who know their own build-sandbox conventions: the `/homeless-shelter` auto-skip, the standard `make_check` and test-phase behavior. Drop those explanations, drop pointers to documentation pages, and reduce a per-dependency breakdown to one line. When unsure, favor the tighter comment. The rule holds for the in-repo `packaging/*` specs and for their copies on a downstream branch.
+Keep those comments tight. Their readers are the maintainers of the channel, who know their own build-sandbox conventions: the `/homeless-shelter` auto-skip, the standard `make_check` and test-phase behavior. Drop those explanations, drop pointers to documentation pages, and reduce a per-dependency breakdown to one line. Drop historical notes too, like a dated run or how a line came to be. When unsure, favor the tighter comment. The rule holds for the in-repo `packaging/*` specs and for their copies on a downstream branch.
 
 Where a spec or an upstream submission must cite the packaging guidance, it cites `https://mpm.run/packaging/`, never a file of this repository.
 

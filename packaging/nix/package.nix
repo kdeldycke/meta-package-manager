@@ -72,7 +72,12 @@ python3Packages.buildPythonApplication (finalAttrs: {
     "CycloneDX"
     # Probe for a sudo binary and a policy the sandbox does not have.
     "test_prime_sudo"
-  ];
+  ]
+  # Compares the label list frozen in pyproject.toml at release time with the
+  # one computed from the installed extra-platforms, so it fails on any newer
+  # extra-platforms that adds a platform to a group, like 13.13.0. The markers
+  # above do not cover it.
+  ++ [ "test_extra_labels_in_pyproject" ];
 
   # Imports the environment of a login shell, which the build user has neither
   # a passwd entry nor a shell for.

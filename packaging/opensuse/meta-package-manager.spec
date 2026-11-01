@@ -23,7 +23,7 @@
 %define pythons %{primary_python}
 
 Name:           meta-package-manager
-Version:        8.1.2
+Version:        8.2.0
 Release:        0
 Summary:        Wraps all package managers with a unifying CLI
 License:        GPL-2.0-or-later
@@ -43,7 +43,7 @@ BuildRequires:  python-rpm-macros
 BuildRequires:  python3-boltons >= 25
 BuildRequires:  python3-click-extra >= 9.3
 BuildRequires:  python3-extra-platforms >= 13.10
-BuildRequires:  python3-packageurl-python >= 0.11
+BuildRequires:  python3-packageurl-python >= 0.17.6
 BuildRequires:  python3-tomli-w >= 1
 BuildRequires:  python3-xmltodict >= 0.12
 # /SECTION
@@ -61,7 +61,7 @@ BuildRequires:  python3-tomlkit >= 0.13
 Requires:       python3-boltons >= 25
 Requires:       python3-click-extra >= 9.3
 Requires:       python3-extra-platforms >= 13.10
-Requires:       python3-packageurl-python >= 0.11
+Requires:       python3-packageurl-python >= 0.17.6
 Requires:       python3-tomli-w >= 1
 Requires:       python3-xmltodict >= 0.12
 # Unlock `mpm sbom --vulnerabilities`, which queries the OSV database.
@@ -97,7 +97,11 @@ zypper is one of the ~150 managers it drives.
 %check
 # The integration layer drives the real package managers and the CLI
 # end-to-end, which no build root can satisfy. Everything else is hermetic.
-%pytest -m "not integration"
+# test_extra_labels_in_pyproject compares the label list frozen in
+# pyproject.toml at release time with the one computed from the installed
+# extra-platforms, so it fails on any newer extra-platforms that adds a
+# platform to a group.
+%pytest -m "not integration" --deselect tests/test_docs.py::test_extra_labels_in_pyproject
 
 %files
 %license license

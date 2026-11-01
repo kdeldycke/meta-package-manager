@@ -1,7 +1,18 @@
 -------------------------------------------------------------------
+Sat Oct 31 12:00:00 UTC 2026 - Kevin Deldycke <kevin@deldycke.com>
+
+- Update to 8.2.0.
+- Raise the packageurl-python floor to 0.17.6: below it, parsing a
+  pURL spec raises TypeError.
+- Skip test_extra_labels_in_pyproject in %check: it fails on any
+  newer extra-platforms that adds a platform to a group, like 13.13.
+
+-------------------------------------------------------------------
 Thu Oct 22 12:00:00 UTC 2026 - Kevin Deldycke <kevin@deldycke.com>
 
 - Update to 8.1.2.
+- Raise the click-extra floor to 9.3 and the extra-platforms floor
+  to 13.10.
 - Run the 8.1.2 test suite, which reads the documentation files it
   checks from the unpacked source rather than from the installed
   module, so %check passes under %pytest again.

@@ -105,12 +105,18 @@ myst_fence_as_directive = ["mermaid"]
 myst_heading_anchors = 6
 myst_heading_slug_func = "docutils.nodes.make_id"
 
-# Fail the build on a fragment link that lands nowhere. myst-parser logs a
-# `myst.xref_missing` warning for a `[text](#anchor)` or `[text](page.md#anchor)`
-# link it cannot place, and ships the link as written anyway. Sphinx exits 0 on
-# warnings, and this build carries unrelated ones, so `--fail-on-warning` is
-# out. Mirrors the upstream repomatic docs configuration.
-click_extra_fail_on_warnings = ["myst.xref_missing"]
+# Fail the build on two warnings, and only on those. click-extra logs a
+# `click_extra.config_docstring_heading` warning for a Markdown heading in a
+# docstring of `MpmConfig`, which the `click:config` reference renders as a section
+# of its own. myst-parser logs a `myst.xref_missing` warning for a `[text](#anchor)`
+# or `[text](page.md#anchor)` link it cannot place, and ships the link as written
+# anyway. Sphinx exits 0 on warnings, and this build carries unrelated ones, so
+# `--fail-on-warning` is out. The `myst.xref_missing` entry mirrors the upstream
+# repomatic docs configuration.
+click_extra_fail_on_warnings = [
+    "click_extra.config_docstring_heading",
+    "myst.xref_missing",
+]
 
 mermaid_d3_zoom = True
 

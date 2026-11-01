@@ -484,7 +484,7 @@ class YarnBerry(Yarn):
 
     @search_capabilities(extended_support=False, exact_support=False)
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
-        """Fetch matching packages.
+        r"""Fetch matching packages.
 
         ```{warning}
         Search is simulated by a direct call to `yarn npm info`, and as a

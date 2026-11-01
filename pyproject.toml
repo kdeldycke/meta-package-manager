@@ -671,7 +671,9 @@ files.ignore-hidden = false
 # repository internals. `sync-gitignore` regenerates `.gitignore`, which also
 # carries globs like `[Ii]nclude` that typos reads as a typo it cannot fix.
 # `.mailmap` lists contributor names, where a fix renames a person.
-files.extend-exclude = [ ".git", ".gitignore", ".mailmap" ]
+# `tests/purl-spec` copies the purl-spec data as published, so a fix there would
+# make the copy differ from its source.
+files.extend-exclude = [ ".git", ".gitignore", ".mailmap", "tests/purl-spec" ]
 # Skip the content of SVG files. A terminal capture renders each run of
 # same-styled characters as one <text> element, so a word cut at a run boundary
 # leaves a fragment the checker reads as a misspelling. Correcting it in place

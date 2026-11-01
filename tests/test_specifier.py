@@ -24,7 +24,12 @@ from string import ascii_lowercase, digits
 
 import pytest
 
-from meta_package_manager.package import manager_purl, parse_purl, purl_quote
+from meta_package_manager.package import (
+    PurlRuleError,
+    manager_purl,
+    parse_purl,
+    purl_quote,
+)
 from meta_package_manager.pool import pool
 from meta_package_manager.specifier import PURL_MAP, EmptyReduction, Solver, Specifier
 
@@ -227,60 +232,103 @@ def test_manager_purl_reads_back(case):
 
 
 @pytest.mark.parametrize(
-    "purl",
+    ("purl", "expected"),
     (
-        "pkg:npm/JSONStream@1.3.5",
-        "pkg:npm/%40babel/core@7.26.0",
-        "pkg:npm/@babel/core@7.26.0",
-        "pkg:npm/@babel/core",
-        "pkg:NPM/left-pad",
-        "pkg://npm/left-pad",
-        "pkg:npm/left-pad@",
-        "pkg:brew/homebrew%2Fcask/firefox@120.0",
-        "pkg:deb/debian/curl@7.50.3-1?arch=i386&distro=jessie",
-        "pkg:pypi/Django_Rest_Framework@3.15#src/rest_framework",
-        "pkg:apt/libc6:amd64@2.31",
-        "pkg:golang/google.golang.org/genproto#googleapis/api/annotations",
-        "pkg:generic/openssl@1.1.0g?download_url=https://openssl.org/openssl.tar.gz",
-        "pkg:cpan/Perl::Version@1.013",
-        "pkg:gem/rails@7.1.3?",
-        "pkg:npm/left-pad?arch=&platform=linux",
-        "",
-        "   ",
-        "left-pad",
-        "brew:firefox",
-        "npm/left-pad",
-        "PKG:npm/left-pad",
-        "pkg:",
-        "pkg:npm",
-        "pkg:npm/",
-        "pkg:1npm/left-pad",
-        "pkg:n%70m/left-pad",
-        "pkg:npm/left-pad?flag",
-        "pkg:npm/left-pad?1arch=x86",
-        "pkg:npm/left-pad?ar%20ch=x86",
-        "pkg:npm/@babel/core/extra",
+        ("pkg:npm/JSONStream@1.3.5", ("npm", None, "JSONStream", "1.3.5")),
+        ("pkg:npm/%40babel/core@7.26.0", ("npm", "@babel", "core", "7.26.0")),
+        ("pkg:npm/@babel/core@7.26.0", ("npm", "@babel", "core", "7.26.0")),
+        ("pkg:npm/@babel/core", ("npm", "@babel", "core", None)),
+        ("pkg:NPM/left-pad", ("npm", None, "left-pad", None)),
+        ("pkg://npm/left-pad", ("npm", None, "left-pad", None)),
+        ("pkg:npm/left-pad@", ("npm", None, "left-pad", None)),
+        (
+            "pkg:brew/Homebrew%2FCask/Firefox@120.0",
+            ("brew", "homebrew/cask", "firefox", "120.0"),
+        ),
+        (
+            "pkg:deb/debian/curl@7.50.3-1?arch=i386&distro=jessie",
+            ("deb", "debian", "curl", "7.50.3-1"),
+        ),
+        (
+            "pkg:pypi/Django_Rest_Framework@3.15#src/rest_framework",
+            ("pypi", None, "django-rest-framework", "3.15"),
+        ),
+        ("pkg:apt/libc6:amd64@2.31", ("apt", None, "libc6:amd64", "2.31")),
+        (
+            "pkg:golang/google.golang.org/genproto#googleapis/api/annotations",
+            ("golang", "google.golang.org", "genproto", None),
+        ),
+        (
+            "pkg:generic/openssl@1.1.0g?download_url=https://openssl.org/openssl.tar.gz",
+            ("generic", None, "openssl", "1.1.0g"),
+        ),
+        ("pkg:gem/rails@7.1.3?", ("gem", None, "rails", "7.1.3")),
+        ("pkg:npm/left-pad?arch=&platform=linux", ("npm", None, "left-pad", None)),
+        (
+            "pkg:bin/%2Fhome%2Fuser%2F.local%2Fbin%2Ffzf",
+            ("bin", None, "/home/user/.local/bin/fzf", None),
+        ),
+        (
+            "pkg:git/codeberg.org/forgejo/forgejo@a72d2c07",
+            ("git", "codeberg.org", "forgejo/forgejo", "a72d2c07"),
+        ),
+        ("", None),
+        ("   ", None),
+        ("left-pad", None),
+        ("brew:firefox", None),
+        ("npm/left-pad", None),
+        ("PKG:npm/left-pad", None),
+        ("pkg:", None),
+        ("pkg:npm", None),
+        ("pkg:npm/", None),
+        ("pkg:1npm/left-pad", None),
+        ("pkg:n%70m/left-pad", None),
+        ("pkg:npm/left-pad?flag", None),
+        ("pkg:npm/left-pad?1arch=x86", None),
+        ("pkg:npm/left-pad?ar%20ch=x86", None),
+        ("pkg:npm/@babel/core/extra", None),
     ),
 )
-def test_parse_purl_splits_like_packageurl(purl):
-    """`parse_purl()` splits, and refuses, the strings packageurl-python does.
+def test_parse_purl(purl, expected):
+    """`parse_purl()` decodes and normalizes the parts, or refuses a string.
 
-    The reference is `PackageURL.from_string(purl, normalize_purl=False)`, which
-    keeps every part but the type as written.
+    `None` marks a string that is not a pURL. `tests/test_purl_spec.py` runs the whole
+    purl-spec test suite.
     """
-    packageurl = pytest.importorskip("packageurl")
-    try:
-        reference = packageurl.PackageURL.from_string(purl, normalize_purl=False)
-    except ValueError:
+    if expected is None:
         with pytest.raises(ValueError):
             parse_purl(purl)
-        return
-    assert parse_purl(purl) == (
-        reference.type,
-        reference.namespace or None,
-        reference.name,
-        reference.version or None,
-    )
+    else:
+        assert parse_purl(purl) == expected
+
+
+@pytest.mark.parametrize(
+    ("purl", "lenient"),
+    (
+        ("pkg:cpan/Perl::Version@1.013", ("cpan", None, "Perl::Version", "1.013")),
+        ("pkg:deb/curl@8.14.1", ("deb", None, "curl", "8.14.1")),
+        ("pkg:julia/Example@0.5.3", ("julia", None, "Example", "0.5.3")),
+        ("pkg:pypi/pallets/flask", ("pypi", "pallets", "flask", None)),
+        ("pkg:gem/rails?Platform=java", ("gem", None, "rails", None)),
+    ),
+)
+def test_parse_purl_breaking_a_type_rule(purl, lenient):
+    """A pURL breaking a rule of its type is refused, and read outside strict mode."""
+    with pytest.raises(PurlRuleError):
+        parse_purl(purl)
+    assert parse_purl(purl, strict=False) == lenient
+
+
+def test_specifier_reads_a_purl_breaking_a_type_rule(caplog):
+    """A pURL breaking a rule of its type resolves, with a warning naming the rule."""
+    (spec,) = Specifier.from_string("pkg:rubygems/rails@7.1.3?Platform=java")
+    assert (spec.manager_id, spec.package_id) == ("gem", "rails")
+    assert "takes its qualifier keys in lowercase" in caplog.text
+    caplog.clear()
+    # `cpan` is also a manager ID: the pURL is one `mpm` writes, so no warning.
+    (spec,) = Specifier.from_string("pkg:cpan/Perl::Version@1.013")
+    assert (spec.manager_id, spec.package_id) == ("cpan", "Perl::Version")
+    assert not caplog.text
 
 
 def test_purl_quote_encodes_a_slash():

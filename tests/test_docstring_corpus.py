@@ -61,7 +61,7 @@ from meta_package_manager.docstring_corpus import (
     is_fixture,
     split_session,
 )
-from meta_package_manager.package import manager_purl, parse_purl
+from meta_package_manager.package import PURL_TYPES, manager_purl, parse_purl
 from meta_package_manager.pool import pool
 from meta_package_manager.specifier import Specifier
 from meta_package_manager.version import VersionRange, parse_version
@@ -295,27 +295,36 @@ def test_documented_ids_read_back_from_their_purl(manager, member, output, monke
         assert (manager.id, package.id) in resolved, purl
 
 
+MANAGERS_BREAKING_THEIR_PURL_TYPE = frozenset(("apk", "cpan", "julia"))
+"""The managers whose ID is a registered pURL type that their package IDs break.
+
+The `apk` manager names a package without its vendor, the `cpan` manager names a
+Perl module instead of its distribution, and the `julia` manager names a package
+without its UUID. `Specifier.parse_purl()` reads their pURLs anyway.
+"""
+
+
 @pytest.mark.parametrize(
     "manager, member, output",
-    [param for param in _fixtures() if param.values[1] != "version_regexes"],
+    [
+        param
+        for param in _fixtures()
+        if param.values[1] != "version_regexes"
+        and param.values[0].id in PURL_TYPES
+        and param.values[0].id not in MANAGERS_BREAKING_THEIR_PURL_TYPE
+    ],
 )
-def test_documented_purls_split_like_packageurl(manager, member, output, monkeypatch):
-    """`parse_purl()` splits the pURL of each documented package like packageurl-python.
+def test_documented_purls_follow_their_registered_type(
+    manager, member, output, monkeypatch
+):
+    """The pURL of each documented package follows the rules of its registered type.
 
-    The reference is `PackageURL.from_string(purl, normalize_purl=False)`: the parser
-    `mpm` used before writing its own, and the one the SBOM writers still use.
+    That pURL takes the manager ID as its type, so the rules apply when the ID is a
+    registered type.
     """
-    packageurl = pytest.importorskip("packageurl")
     _neutralize_binaries(manager, monkeypatch)
     for package in _documented_packages(manager, member, output, monkeypatch):
-        purl = manager_purl(manager.id, package.id, "1.0-r1")
-        reference = packageurl.PackageURL.from_string(purl, normalize_purl=False)
-        assert parse_purl(purl) == (
-            reference.type,
-            reference.namespace or None,
-            reference.name,
-            reference.version or None,
-        ), purl
+        parse_purl(manager_purl(manager.id, package.id, "1.0-r1"))
 
 
 def test_display_blocks_align_with_raw():

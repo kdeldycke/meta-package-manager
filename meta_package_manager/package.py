@@ -47,8 +47,8 @@ import string
 from dataclasses import dataclass, field
 from enum import StrEnum
 from functools import lru_cache
-from typing import NamedTuple
-from urllib.parse import quote, urlsplit
+from typing import Literal, NamedTuple
+from urllib.parse import quote, unquote, urlsplit
 
 from .version import parse_version
 
@@ -85,6 +85,92 @@ settles which side it falls on.
 
 _PURL_KEY_CHARS = frozenset(string.ascii_letters + string.digits + ".-_")
 """Characters a pURL type and a qualifier key are made of."""
+
+
+class PurlType(NamedTuple):
+    """The rules the definition of a registered pURL type sets on its components."""
+
+    namespace: Literal["optional", "prohibited", "required"]
+    """Whether a pURL of the type carries a namespace."""
+
+    lowercase: tuple[str, ...] = ()
+    """The components the type compares without case, which a parser lowercases."""
+
+    qualifiers: tuple[str, ...] = ()
+    """The keys of the qualifiers a pURL of the type requires."""
+
+
+PURL_TYPES: dict[str, PurlType] = {
+    "alpm": PurlType("required", lowercase=("namespace", "name")),
+    "apk": PurlType("required", lowercase=("namespace", "name")),
+    "bazel": PurlType("prohibited"),
+    "bitbucket": PurlType("required", lowercase=("namespace", "name")),
+    "bitnami": PurlType("prohibited", lowercase=("name",)),
+    "brew": PurlType("optional", lowercase=("namespace", "name")),
+    "cargo": PurlType("prohibited"),
+    "chrome-extension": PurlType("prohibited", lowercase=("name",)),
+    "cocoapods": PurlType("prohibited"),
+    "composer": PurlType("required", lowercase=("namespace", "name")),
+    "conan": PurlType("optional"),
+    "conda": PurlType("prohibited"),
+    "cpan": PurlType("optional"),
+    "cran": PurlType("prohibited"),
+    "deb": PurlType("required", lowercase=("namespace", "name")),
+    "docker": PurlType("optional"),
+    "gem": PurlType("prohibited"),
+    "generic": PurlType("optional"),
+    "git": PurlType("required"),
+    "github": PurlType("required", lowercase=("namespace", "name")),
+    "golang": PurlType("required"),
+    "hackage": PurlType("prohibited"),
+    "hex": PurlType("optional", lowercase=("namespace", "name")),
+    "huggingface": PurlType("required", lowercase=("version",)),
+    "julia": PurlType("prohibited", qualifiers=("uuid",)),
+    "luarocks": PurlType("optional", lowercase=("namespace", "name")),
+    "maven": PurlType("required"),
+    "mlflow": PurlType("prohibited"),
+    "npm": PurlType("optional"),
+    "nuget": PurlType("prohibited"),
+    "oci": PurlType("prohibited", lowercase=("name", "version")),
+    "opam": PurlType("prohibited"),
+    "otp": PurlType("prohibited", lowercase=("name",)),
+    "pub": PurlType("prohibited", lowercase=("name",)),
+    "pypi": PurlType("prohibited", lowercase=("name", "version")),
+    "qpkg": PurlType("required", lowercase=("namespace",)),
+    "rpm": PurlType("required", lowercase=("namespace",)),
+    "swid": PurlType("optional", qualifiers=("tag_id",)),
+    "swift": PurlType("required"),
+    "vcpkg": PurlType("prohibited"),
+    "vscode-extension": PurlType(
+        "required", lowercase=("namespace", "name", "version")
+    ),
+    "yocto": PurlType("optional", lowercase=("namespace",)),
+}
+"""The registered pURL types, with the rules their definitions state.
+
+Taken from the
+[type definitions of purl-spec `v1.1.0`](https://github.com/package-url/purl-spec/tree/v1.1.0/types).
+`tests/purl-spec/` holds a copy of them, and `tests/test_purl_spec.py` checks this
+table against it.
+
+Clause 5.7 of ECMA-427 2nd edition makes a pURL invalid when it breaks the rules
+of its registered type. A pURL of a type outside this table is valid when its
+syntax is.
+"""
+
+_CHROME_EXTENSION_NAME = re.compile(r"[a-p]{32}")
+"""A Chrome extension ID: 32 letters from `a` to `p`."""
+
+_CHROME_EXTENSION_VERSION = re.compile(r"\d+(\.\d+){0,3}")
+"""A Chrome extension version: one to four integers, joined with dots."""
+
+
+class PurlRuleError(ValueError):
+    """A pURL with a valid syntax, which breaks a rule of the specification.
+
+    {func}`parse_purl` raises it for a rule of a registered type, and for a
+    qualifier key not in lowercase.
+    """
 
 
 def purl_parts(package_id: str) -> tuple[str | None, str]:
@@ -136,8 +222,7 @@ def purl_quote(text: str) -> str:
 class PurlParts(NamedTuple):
     """The parts of a pURL string that `mpm` reads, as {func}`parse_purl` splits them.
 
-    Every part but the type keeps its percent-encoding: the reader decodes what it
-    uses.
+    Each part is percent-decoded, and normalized by the rules of its registered type.
     """
 
     type: str
@@ -153,19 +238,30 @@ class PurlParts(NamedTuple):
     """What follows the last `@`, or `None` without one."""
 
 
-def parse_purl(purl: str) -> PurlParts:
+def parse_purl(purl: str, *, strict: bool = True) -> PurlParts:
     """Split `purl` into its parts, or raise {exc}`ValueError` if it is not a pURL.
 
-    Splits the string the way `PackageURL.from_string(purl, normalize_purl=False)`
-    of packageurl-python does, and refuses the strings it refuses: no `pkg:` scheme,
-    no type or a malformed one, no name, a qualifier without its `=` or with a
-    malformed key. Like it, takes the leading `@` of an `npm` path as the start of
-    its scope, and splits off the qualifiers and the subpath, which `mpm` does not
-    read, with {func}`urllib.parse.urlsplit`.
+    Refuses a string without the `pkg:` scheme, without a type or with a malformed
+    one, without a name, or with a qualifier missing its `=` or carrying a malformed
+    key. Takes the leading `@` of an `npm` path as the start of its scope. Splits off
+    the qualifiers and the subpath with {func}`urllib.parse.urlsplit`: `mpm` reads
+    neither, but for the rules below.
 
-    packageurl-python is still the library behind the SBOM writers, which need its
-    normalization. Parsing here keeps it out of the default install, and
-    `tests/test_specifier.py` checks the two parsers against each other.
+    Each part comes back percent-decoded, and normalized by the rules of its type in
+    {data}`PURL_TYPES`: a part the type compares without case is lowercased. The type
+    definitions state some rules in prose only, which the purl-spec test suite checks.
+    A `pypi` name turns `_` into `-`. A `git` name is the whole repository path after
+    the host. An `mlflow` name is lowercased when its `repository_url` is on
+    Databricks.
+
+    In `strict` mode, raises {exc}`PurlRuleError` for a pURL breaking the rules of
+    its type: a namespace the type requires or prohibits, or a qualifier it requires.
+    So does a `cpan` name holding `::`, a `chrome-extension` name other than 32 letters
+    from `a` to `p` or a version of more than four numbers, a `swift` namespace
+    without both the host and the owner, and a qualifier key not in lowercase. Outside
+    `strict` mode, such a pURL comes back like a valid one.
+
+    `tests/test_purl_spec.py` runs the purl-spec test suite against it.
     """
     if not purl.strip():
         msg = "A pURL string is required."
@@ -183,7 +279,7 @@ def parse_purl(purl: str) -> PurlParts:
         raise ValueError(msg)
     purl_type = purl_type.lower()
 
-    url_scheme, authority, path, qualifiers, _ = urlsplit(remainder)
+    url_scheme, authority, path, query, _ = urlsplit(remainder)
     # `urlsplit()` reads a colon as the end of a scheme or an authority, where a
     # pURL allows one in its namespace and name: put the colons back.
     if authority:
@@ -203,34 +299,100 @@ def parse_purl(purl: str) -> PurlParts:
     segments = [seg for seg in rest.strip().strip("/").split("/") if seg.strip()]
     name = ""
     if not namespace and len(segments) > 1:
-        name = segments[-1]
-        namespace = "/".join(segments[:-1])
+        # The name of a `git` pURL is the repository path after the host.
+        split = 1 if purl_type == "git" else -1
+        namespace = "/".join(segments[:split])
+        name = "/".join(segments[split:])
     elif len(segments) == 1:
         name = segments[0]
     if not name:
         msg = f"pURL is missing the required name component: {purl!r}."
         raise ValueError(msg)
 
-    _check_purl_qualifiers(qualifiers)
+    qualifiers, keys = _purl_qualifiers(query)
+    namespace = "/".join(map(unquote, namespace.split("/"))) if namespace else ""
+    name = "/".join(map(unquote, name.split("/")))
+    version = unquote(version)
+
+    rules = PURL_TYPES.get(purl_type)
+    if rules:
+        if "namespace" in rules.lowercase:
+            namespace = namespace.lower()
+        if "name" in rules.lowercase:
+            name = name.lower()
+        if "version" in rules.lowercase:
+            version = version.lower()
+    if purl_type == "pypi":
+        name = name.replace("_", "-")
+    elif purl_type == "mlflow":
+        host = urlsplit(qualifiers.get("repository_url", "")).hostname or ""
+        if host.endswith("azuredatabricks.net"):
+            name = name.lower()
+
+    if strict:
+        problem = _purl_rule_problem(purl_type, namespace, name, version, qualifiers)
+        if any(key != key.lower() for key in keys):
+            problem = "takes its qualifier keys in lowercase"
+        if problem:
+            msg = f"A {purl_type} pURL {problem}: {purl!r}."
+            raise PurlRuleError(msg)
     return PurlParts(purl_type, namespace or None, name, version or None)
 
 
-def _check_purl_qualifiers(qualifiers: str) -> None:
-    """Raise {exc}`ValueError` for the qualifiers packageurl-python refuses."""
-    if not qualifiers:
-        return
-    pairs = [pair.partition("=") for pair in qualifiers.split("&")]
+def _purl_qualifiers(query: str) -> tuple[dict[str, str], tuple[str, ...]]:
+    """Read the qualifiers of a pURL, or raise {exc}`ValueError` for a malformed one.
+
+    Returns the qualifiers by lowercased key, their values percent-decoded, and the
+    keys as written. A pair with an empty key or value is dropped, not refused.
+    """
+    qualifiers: dict[str, str] = {}
+    keys: list[str] = []
+    if not query:
+        return qualifiers, ()
+    pairs = [pair.partition("=") for pair in query.split("&")]
     if any(not sep for _, sep, _ in pairs):
-        msg = f"pURL qualifiers must be key=value pairs: {qualifiers!r}."
+        msg = f"pURL qualifiers must be key=value pairs: {query!r}."
         raise ValueError(msg)
     for raw_key, _, value in pairs:
-        key = raw_key.strip().lower()
+        key = raw_key.strip()
         if not key or not value.strip():
-            # An empty key or value is dropped, not refused.
             continue
         if not set(key) <= _PURL_KEY_CHARS or key[0] in string.digits:
-            msg = f"pURL qualifier key is not valid: {key!r}."
+            msg = f"pURL qualifier key is not valid: {key.lower()!r}."
             raise ValueError(msg)
+        keys.append(key)
+        qualifiers[key.lower()] = unquote(value)
+    return qualifiers, tuple(keys)
+
+
+def _purl_rule_problem(
+    purl_type: str,
+    namespace: str,
+    name: str,
+    version: str,
+    qualifiers: dict[str, str],
+) -> str | None:
+    """Say which rule of its registered type a pURL breaks, or `None` for none."""
+    rules = PURL_TYPES.get(purl_type)
+    if not rules:
+        return None
+    if rules.namespace == "required" and not namespace:
+        return "requires a namespace"
+    if rules.namespace == "prohibited" and namespace:
+        return "prohibits a namespace"
+    for key in rules.qualifiers:
+        if key not in qualifiers:
+            return f"requires the {key} qualifier"
+    if purl_type == "cpan" and "::" in name:
+        return "names a distribution, which holds no '::'"
+    if purl_type == "chrome-extension":
+        if not _CHROME_EXTENSION_NAME.fullmatch(name):
+            return "names an extension ID of 32 letters from a to p"
+        if version and not _CHROME_EXTENSION_VERSION.fullmatch(version):
+            return "takes a version of one to four numbers"
+    if purl_type == "swift" and "/" not in namespace:
+        return "takes the host and the owner as its namespace"
+    return None
 
 
 @dataclass

@@ -1,0 +1,205 @@
+{
+	"$schema": "https://packageurl.org/schemas/purl-test.schema-0.2.json",
+	"tests": [
+		{
+			"description": "valid swift purl. Roundtrip an input purl to canonical.",
+			"test_group": "recommended",
+			"test_type": "validate",
+			"input": "pkg:swift/github.com/Alamofire/Alamofire@5.4.3",
+			"expected_output": "pkg:swift/github.com/Alamofire/Alamofire@5.4.3",
+			"expected_failure": false,
+			"expected_message": null
+		},
+		{
+			"description": "valid swift purl",
+			"test_group": "required",
+			"test_type": "parse",
+			"input": "pkg:swift/github.com/Alamofire/Alamofire@5.4.3",
+			"expected_output": {
+				"type": "swift",
+				"namespace": "github.com/Alamofire",
+				"name": "Alamofire",
+				"version": "5.4.3",
+				"qualifiers": null,
+				"subpath": null
+			},
+			"expected_failure": false,
+			"expected_message": null
+		},
+		{
+			"description": "valid swift purl. Roundtrip a canonical input to canonical output.",
+			"test_group": "required",
+			"test_type": "validate",
+			"input": "pkg:swift/github.com/Alamofire/Alamofire@5.4.3",
+			"expected_output": "pkg:swift/github.com/Alamofire/Alamofire@5.4.3",
+			"expected_failure": false,
+			"expected_message": null
+		},
+		{
+			"description": "valid swift purl",
+			"test_group": "required",
+			"test_type": "build",
+			"input": {
+				"type": "swift",
+				"namespace": "github.com/Alamofire",
+				"name": "Alamofire",
+				"version": "5.4.3",
+				"qualifiers": null,
+				"subpath": null
+			},
+			"expected_output": "pkg:swift/github.com/Alamofire/Alamofire@5.4.3",
+			"expected_failure": false,
+			"expected_message": null
+		},
+		{
+			"description": "invalid swift purl without namespace",
+			"test_group": "required",
+			"test_type": "parse",
+			"input": "pkg:swift/Alamofire@5.4.3",
+			"expected_output": null,
+			"expected_failure": true,
+			"expected_message": "Should fail to parse a PURL from invalid purl input"
+		},
+		{
+			"description": "invalid swift purl without namespace",
+			"test_group": "required",
+			"test_type": "parse",
+			"input": "pkg:swift/Alamofire@5.4.3",
+			"expected_output": null,
+			"expected_failure": true,
+			"expected_message": "Should fail to parse a PURL from invalid canonical purl input"
+		},
+		{
+			"description": "invalid swift purl without namespace",
+			"test_group": "required",
+			"test_type": "build",
+			"input": {
+				"type": "swift",
+				"namespace": null,
+				"name": "Alamofire",
+				"version": "5.4.3",
+				"qualifiers": null,
+				"subpath": null
+			},
+			"expected_output": null,
+			"expected_failure": true,
+			"expected_message": "Should fail to build a PURL from invalid input components"
+		},
+		{
+			"description": "invalid swift purl without name",
+			"test_group": "required",
+			"test_type": "parse",
+			"input": "pkg:swift/github.com/Alamofire/@5.4.3",
+			"expected_output": null,
+			"expected_failure": true,
+			"expected_message": "Should fail to parse a PURL from invalid purl input"
+		},
+		{
+			"description": "invalid swift purl without name",
+			"test_group": "required",
+			"test_type": "parse",
+			"input": "pkg:swift/github.com/Alamofire/@5.4.3",
+			"expected_output": null,
+			"expected_failure": true,
+			"expected_message": "Should fail to parse a PURL from invalid canonical purl input"
+		},
+		{
+			"description": "invalid swift purl without name",
+			"test_group": "required",
+			"test_type": "build",
+			"input": {
+				"type": "swift",
+				"namespace": "github.com/Alamofire",
+				"name": null,
+				"version": "5.4.3",
+				"qualifiers": null,
+				"subpath": null
+			},
+			"expected_output": null,
+			"expected_failure": true,
+			"expected_message": "Should fail to build a PURL from invalid input components"
+		},
+		{
+			"description": "Parse test for PURL type: swift",
+			"test_group": "required",
+			"test_type": "parse",
+			"input": "pkg:swift/github.com/Alamofire/Alamofire@5.4.3",
+			"expected_output": {
+				"type": "swift",
+				"namespace": "github.com/Alamofire",
+				"name": "Alamofire",
+				"version": "5.4.3",
+				"qualifiers": null,
+				"subpath": null
+			},
+			"expected_failure": false,
+			"expected_message": null
+		},
+		{
+			"description": "Roundtrip test for PURL type: swift",
+			"test_group": "required",
+			"test_type": "validate",
+			"input": "pkg:swift/github.com/Alamofire/Alamofire@5.4.3",
+			"expected_output": "pkg:swift/github.com/Alamofire/Alamofire@5.4.3",
+			"expected_failure": false,
+			"expected_message": null
+		},
+		{
+			"description": "Build test  for PURL type: swift",
+			"test_group": "required",
+			"test_type": "build",
+			"input": {
+				"type": "swift",
+				"namespace": "github.com/Alamofire",
+				"name": "Alamofire",
+				"version": "5.4.3",
+				"qualifiers": null,
+				"subpath": null
+			},
+			"expected_output": "pkg:swift/github.com/Alamofire/Alamofire@5.4.3",
+			"expected_failure": false,
+			"expected_message": null
+		},
+		{
+			"description": "Parse test for PURL type: swift",
+			"test_group": "required",
+			"test_type": "parse",
+			"input": "pkg:swift/github.com/RxSwiftCommunity/RxFlow@2.12.4",
+			"expected_output": {
+				"type": "swift",
+				"namespace": "github.com/RxSwiftCommunity",
+				"name": "RxFlow",
+				"version": "2.12.4",
+				"qualifiers": null,
+				"subpath": null
+			},
+			"expected_failure": false,
+			"expected_message": null
+		},
+		{
+			"description": "Roundtrip test for PURL type: swift",
+			"test_group": "required",
+			"test_type": "validate",
+			"input": "pkg:swift/github.com/RxSwiftCommunity/RxFlow@2.12.4",
+			"expected_output": "pkg:swift/github.com/RxSwiftCommunity/RxFlow@2.12.4",
+			"expected_failure": false,
+			"expected_message": null
+		},
+		{
+			"description": "Build test  for PURL type: swift",
+			"test_group": "required",
+			"test_type": "build",
+			"input": {
+				"type": "swift",
+				"namespace": "github.com/RxSwiftCommunity",
+				"name": "RxFlow",
+				"version": "2.12.4",
+				"qualifiers": null,
+				"subpath": null
+			},
+			"expected_output": "pkg:swift/github.com/RxSwiftCommunity/RxFlow@2.12.4",
+			"expected_failure": false,
+			"expected_message": null
+		}
+	]
+}

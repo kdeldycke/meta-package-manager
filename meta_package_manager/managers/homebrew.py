@@ -513,7 +513,7 @@ class Homebrew(PackageManager):
                 if not locator or locator.startswith("pkg:brew/"):
                     continue
                 try:
-                    parse_purl(locator)
+                    parse_purl(locator, strict=False)
                 except ValueError as exc:
                     logging.debug(f"Skip unparseable purl {locator!r}: {exc}")
                     continue

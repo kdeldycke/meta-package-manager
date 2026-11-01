@@ -33,7 +33,6 @@ from __future__ import annotations
 
 import json
 from typing import ClassVar
-from urllib.parse import unquote
 
 from extra_platforms import ALL_PLATFORMS
 
@@ -478,11 +477,11 @@ class Mason(PackageManager):
             version = None
             if purl.strip():
                 try:
-                    raw_version = parse_purl(purl.strip()).version
+                    raw_version = parse_purl(purl.strip(), strict=False).version
                 except ValueError:
                     raw_version = None
                 if raw_version:
-                    version = unquote(raw_version.strip()) or None
+                    version = raw_version.strip() or None
             yield self.package(id=package_id.strip(), installed_version=version)
 
     @version_not_implemented

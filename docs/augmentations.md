@@ -227,6 +227,8 @@ Package managers report versions in mutually incompatible schemes: semver, PEP 4
 
 Every package `mpm` reports carries a [purl](https://github.com/package-url/purl-spec) identifier that the native tools do not emit. It is the same identifier that powers `mpm sbom`, giving every manager a portable, tool-agnostic package name.
 
+`mpm` also reads a purl as a package specifier, by the rules of [purl-spec `v1.1.0`](https://github.com/package-url/purl-spec/releases/tag/v1.1.0). It normalizes each part that a registered type compares without case, like the name of a `pkg:brew/` formula. It passes each case of the purl-spec test suite, except 7 cases that contradict the standard or another case. A purl that breaks a rule of its type still resolves, with a warning naming the rule.
+
 ### One sudo prompt, uniform policy
 
 Managers disagree on whether an operation needs root. `mpm` applies a consistent policy: system managers ([`apt`](managers/apt.md), [`dnf`](managers/dnf.md), [`pacman`](managers/pacman.md), …) escalate, user-level managers do not. Before a state-changing command it probes the `sudo` credential cache and silently keeps a warm one alive; only a cold cache on an interactive terminal draws a single up-front password prompt, naming the escalating managers and branded `[mpm]`, instead of letting each manager prompt mid-run. Off a terminal, managers that need root fail fast rather than hanging on a hidden prompt.

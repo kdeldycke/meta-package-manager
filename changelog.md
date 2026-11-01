@@ -14,6 +14,7 @@
 - [mpm] Move `packageurl-python` from the default install to the `sbom-offline` extra: `mpm` parses pURL specifiers itself.
 - [mpm] Raise the `click-extra` floor to `10.0.0`: below it, `mpm` cannot import the `strip_ansi()` it applies to manager output.
 - [mpm] Color the program name and version on the `--version` screen with the active theme, like the plain message.
+- [mpm] Read purl specifiers by the rules of purl-spec `v1.1.0`, normalizing the case each registered type ignores, and warn about a purl breaking its type.
 - [brew,cask,vcpkg] Run `vcpkg` one at a time with `brew` and `cask`, so a `brew upgrade` no longer deletes the `cmake` a `vcpkg` port build is using.
 - [mpm] Take a list that both layered configuration files set from the project file alone, as documented, instead of joining the two.
 - [mpm] Stop the SPDX export of `mpm sbom` from looking up the DNS name of the machine, which the document never used.

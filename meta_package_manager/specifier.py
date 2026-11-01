@@ -22,9 +22,13 @@ from dataclasses import dataclass
 from functools import cached_property
 from itertools import groupby
 from operator import attrgetter
-from urllib.parse import unquote
 
-from .package import PURL_QUALIFYING_NAMESPACES, manager_purl, parse_purl
+from .package import (
+    PURL_QUALIFYING_NAMESPACES,
+    PurlRuleError,
+    manager_purl,
+    parse_purl,
+)
 from .pool import pool
 from .version import is_version, parse_version
 
@@ -137,26 +141,13 @@ PURL_MAP: dict[str, set[str] | None] = {
     "wordpress": None,
     "yocto": None,
 }
-"""Map pURL's types to MPM's manager IDs.
+"""Map pURL types to the IDs of the managers handling them.
 
-Keys are recognized pURL's types, and values are the set of MPM's manager IDs that can
-handle the package type.
-
-```{warning}
-
-There is no official list of `pkg:<type>/...` prefixes defined in the pURL
-specification.
-
-The only source we found lying around in the pURL literature is this [list of diverse
-aliases, examples and
-libraries](https://github.com/package-url/purl-spec/blob/master/PURL-TYPES.rst). We use
-this document to compile the keys of this `PURL_MAP` mapping.
-```
-
-```{todo}
-
-Reuse the mapping that is proposed upstream to the [package-url Python project](https://github.com/package-url/packageurl-python/pull/188).
-```
+The keys hold most registered types of {data}`~meta_package_manager.package.PURL_TYPES`,
+and the candidate types of the
+[older list](https://github.com/package-url/purl-spec/blob/master/PURL-TYPES.rst) of the
+purl-spec repository, like `alpine` or `nix`, which a pURL can still carry. A key
+mapping to `None` names a type no manager handles.
 """
 
 
@@ -191,19 +182,26 @@ class Specifier:
         {data}`~meta_package_manager.package.PURL_QUALIFYING_NAMESPACES` keep the
         name alone, so `pkg:deb/debian/curl` resolves to `curl`.
 
-        {func}`~meta_package_manager.package.parse_purl` splits the string without
-        normalizing it, which keeps the case of the name: `pkg:npm/JSONStream` must not
-        come back as `jsonstream`. The parts arrive percent-encoded, and are decoded
-        here part by part.
+        {func}`~meta_package_manager.package.parse_purl` decodes the parts, and
+        normalizes them by the rules of a registered type alone: `pkg:npm/JSONStream`
+        keeps its case. A pURL breaking the rules of its type is read anyway, with a
+        warning. A type that is also a manager ID gets no warning: the pURLs `mpm`
+        writes take the manager ID as the type, and some managers name a package in a
+        way the registered type forbids, like a Perl module in a `pkg:cpan/` pURL.
         """
         # Try to parse specifier as a pURL.
         try:
-            purl = parse_purl(spec_str)
+            purl = parse_purl(spec_str, strict=False)
         except ValueError as ex:
             logging.debug(f"{spec_str} is not a pURL: {ex}")
             return None
+        if purl.type not in pool.all_manager_ids:
+            try:
+                parse_purl(spec_str)
+            except PurlRuleError as ex:
+                logging.warning(f"{ex} Reading it anyway.")
 
-        purl_type = purl.type.lower()
+        purl_type = purl.type
         # A recognized pURL type points to the managers handling it, and a manager ID
         # to that manager, even when the map claims the type for no manager.
         manager_ids = PURL_MAP.get(purl_type)
@@ -213,10 +211,9 @@ class Specifier:
             msg = f"Unrecognized {purl_type} pURL type."
             raise ValueError(msg)
 
-        package_id = unquote(purl.name)
+        package_id = purl.name
         if purl.namespace and purl_type not in PURL_QUALIFYING_NAMESPACES:
-            namespace = "/".join(map(unquote, purl.namespace.split("/")))
-            package_id = f"{namespace}/{package_id}"
+            package_id = f"{purl.namespace}/{package_id}"
 
         # The pURL can be handled by one manager or more.
         return tuple(
@@ -224,7 +221,7 @@ class Specifier:
                 raw_spec=spec_str,
                 package_id=package_id,
                 manager_id=manager_id,
-                version=unquote(purl.version) if purl.version else None,
+                version=purl.version,
             )
             for manager_id in manager_ids
         )

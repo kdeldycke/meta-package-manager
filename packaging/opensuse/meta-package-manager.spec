@@ -35,11 +35,7 @@ BuildRequires:  python3-uv-build >= 0.8
 BuildRequires:  fdupes
 BuildRequires:  python-rpm-macros
 # SECTION runtime requirements, also imported by the test suite
-# Each floor mirrors [project.dependencies] of pyproject.toml, so the built
-# package can only pair mpm with a dependency set it runs on. A floor Tumbleweed
-# has not reached yet fails the build rather than shipping a broken package:
-# the 2026-09-07 run stopped on `python3-extra-platforms >= 13.8 is needed`,
-# and the channel waits on the distribution, not on this file.
+# Each floor mirrors [project.dependencies] of pyproject.toml.
 BuildRequires:  python3-boltons >= 25
 BuildRequires:  python3-click-extra >= 9.3
 BuildRequires:  python3-extra-platforms >= 13.10

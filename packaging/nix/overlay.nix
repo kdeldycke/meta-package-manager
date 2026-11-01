@@ -2,9 +2,7 @@
 #
 # Kept in one file because those entry points are built by different commands:
 # `nix-build` reads default.nix, while `nix build ./packaging/nix` reads the
-# flake. They used to carry their own copy of this set, and a fix applied to
-# one silently left the other broken — which is how the click override below
-# came to build locally and still fail in CI.
+# flake, and both must build the same set.
 { pkgs }:
 self: super: {
   click-extra = self.callPackage ./click-extra.nix { };

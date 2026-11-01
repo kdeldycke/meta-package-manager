@@ -522,6 +522,10 @@ dependency-groups.docs = { requires-python = ">= 3.14" }
 sources.click-extra = { git = "https://github.com/kdeldycke/click-extra", branch = "main" }
 # Cooldown period.
 exclude-newer = "1 week"
+# extra-platforms is published by this repository's own maintainer: the cooldown
+# guards against a compromised upstream, which does not apply here, and it
+# otherwise holds each release back a week from the projects that consume it.
+exclude-newer-package = { extra-platforms = "0 days" }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
 # source-include does not honor .gitignore, so prune the build output and caches
@@ -2067,7 +2071,7 @@ description = "DragonFly BSD, FreeBSD, MidnightBSD, NetBSD, OpenBSD, SunOS"
 [[tool.repomatic.labels.extra]]
 name = "🖥 platform: Linux"
 color = "bfd4f2"
-description = "AlmaLinux, Alpine Linux, ALT Linux, Amazon Linux, Android, Arch Linux, Buildroot, CachyOS, CentOS, …"
+description = "AlmaLinux, Alpine Linux, ALT Linux, Amazon Linux, Android, Arch Linux, Artix Linux, Buildroot, …"
 
 [[tool.repomatic.labels.extra]]
 name = "🖥 platform: macOS"

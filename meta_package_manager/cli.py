@@ -100,6 +100,7 @@ from click_extra import (
     UsageError,
     VersionOption,
     echo,
+    env_summary,
     group,
     jobs_option,
     option,
@@ -121,7 +122,6 @@ from click_extra.highlight import HelpKeywords
 from click_extra.logging import LogLevel
 from click_extra.table import SERIALIZATION_FORMATS
 from click_extra.theme import get_current_theme as theme
-from click_extra.version import env_summary
 
 from . import bar_plugin
 from .capabilities import Operations, implements_method

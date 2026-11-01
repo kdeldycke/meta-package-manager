@@ -353,7 +353,7 @@ def test_spinner_clock_dims_the_parentheses_too(color_enabled, expected):
 def test_spinner_clock_is_plain_before_start():
     """A spinner that never started reports color off, so it never dims."""
     spinner = FakeManager()._make_spinner()
-    assert spinner._color_enabled is False
+    assert spinner._color is False
 
 
 # Tiny cross-platform CLIs that exit non-zero, differing only in which stream

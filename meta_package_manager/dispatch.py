@@ -44,10 +44,13 @@ from dataclasses import dataclass
 from typing import Final
 
 from click.core import ParameterSource
-from click_extra import get_current_context
+from click_extra import (
+    OperationTrail as _OperationTrail,
+    get_current_context,
+    resolve_jobs,
+    run_lanes,
+)
 from click_extra.context import JOBS
-from click_extra.execution import resolve_jobs, run_lanes
-from click_extra.spinner import OperationTrail as _OperationTrail
 from click_extra.theme import get_current_theme as theme
 
 from .execution import SPINNER_DELAY, _styling_enabled, elapsed_clock

@@ -10,6 +10,9 @@ resolution-markers = [
 exclude-newer = "0001-01-01T00:00:00Z" # This has no effect and is included for backwards compatibility when using relative exclude-newer values.
 exclude-newer-span = "P1W"
 
+[options.exclude-newer-package]
+extra-platforms = { timestamp = "0001-01-01T00:00:00Z", span = "PT0S" }
+
 [[package]]
 name = "accessible-pygments"
 version = "0.0.5"
@@ -283,7 +286,7 @@ wheels = [
 [[package]]
 name = "click-extra"
 version = "10.0.0.dev0"
-source = { git = "https://github.com/kdeldycke/click-extra?branch=main#0035ae786fd247d6f7fc6bf425bee3343ec13f40" }
+source = { git = "https://github.com/kdeldycke/click-extra?branch=main#85ee7e4e032e82a39df5ea5abd53326f231498cf" }
 dependencies = [
     { name = "click" },
     { name = "cloup" },
@@ -306,6 +309,7 @@ pytest = [
 sphinx = [
     { name = "docutils" },
     { name = "myst-parser" },
+    { name = "packaging" },
     { name = "pygments" },
     { name = "sphinx" },
 ]
@@ -516,11 +520,11 @@ wheels = [
 
 [[package]]
 name = "extra-platforms"
-version = "13.12.0"
+version = "14.0.1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/2b/7e/b92eb5fe6c14b00c1469357622ee32e8b96ba8247b90b9da4cba3743ab32/extra_platforms-13.12.0.tar.gz", hash = "sha256:883feefe546402e1ccfe6f53b3f248dbaee3cd72d82e137549769db452c4712c", size = 494651, upload-time = "2026-10-12T18:13:30.702Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/99/37/5c2fde6d7c6036fd53144e63b37d8632314f791f3d681d3fcf0456d06292/extra_platforms-14.0.1.tar.gz", hash = "sha256:c58c5cb5dab87ee907b977be403ed2fa2e923bdc27bd39c76c6b60c99ea0700c", size = 506679, upload-time = "2026-10-31T14:39:37.474Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/36/26/7f61812ba2cc540edd3889802e90deeee03cd9569fafe41c64f1e35e03f7/extra_platforms-13.12.0-py3-none-any.whl", hash = "sha256:68a0cc9a16be81e6a9795bf413da7e14b1e8707dee260a47bedff7b6a5db58b3", size = 107721, upload-time = "2026-10-12T18:13:28.764Z" },
+    { url = "https://files.pythonhosted.org/packages/90/b8/4679e946fbb68bc3889595c612fa79e0d95f30b9c2f815b64e5a03769425/extra_platforms-14.0.1-py3-none-any.whl", hash = "sha256:39be8b76a407d5f2506484fa164bafb0c2ecd7578cc9b0b1bc3507477d2f296a", size = 106791, upload-time = "2026-10-31T14:39:35.994Z" },
 ]
 
 [[package]]

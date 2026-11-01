@@ -20,8 +20,7 @@ import os
 import shutil
 
 import pytest
-from click_extra import strip_ansi
-from click_extra.version import env_summary
+from click_extra import env_summary, strip_ansi
 
 from meta_package_manager import logo
 from meta_package_manager.logo import (

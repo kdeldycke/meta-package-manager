@@ -215,7 +215,7 @@ Running `--network` transmits the ecosystem coordinates of your installed packag
 SBOM export requires optional extras, split by usage:
 
 - `[sbom-offline]` pulls the CycloneDX and SPDX writer libraries needed to render documents from local data. This is what `mpm sbom` needs for its default offline operation.
-- `[sbom-online]` adds the HTTP client and cache used by `mpm --network sbom` for the OSV.dev vulnerability lookups described above.
+- `[sbom-online]` adds the HTTP client used by `mpm --network sbom` for the OSV.dev vulnerability lookups described above.
 
 ```shell-session
 $ uv tool install 'meta-package-manager[sbom-offline]'

@@ -13,6 +13,7 @@
 - [mpm] Split a version string at its non-ASCII characters, instead of first spelling its accented letters in ASCII.
 - [mpm,zypper] Drop the `xmltodict` dependency: `mpm` reads the XML output of `zypper` with the standard library.
 - [mpm] Move `packageurl-python` from the default install to the `sbom-offline` extra: `mpm` parses pURL specifiers itself.
+- [mpm] Drop `platformdirs` from the `sbom-online` extra: `click-extra` locates the cache of `mpm --network sbom`, which moves to `%LOCALAPPDATA%\meta-package-manager\Cache\sbom` on Windows.
 - [mpm] Raise the `click-extra` floor to `10.0.0`: below it, `mpm` cannot import the `strip_ansi()` it applies to manager output.
 - [mpm] Color the program name and version on the `--version` screen with the active theme, like the plain message.
 - [mpm] Read purl specifiers by the rules of purl-spec `v1.1.0`, normalizing the case each registered type ignores, and warn about a purl breaking its type.

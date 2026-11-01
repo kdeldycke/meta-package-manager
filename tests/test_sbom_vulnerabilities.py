@@ -133,7 +133,7 @@ def test_network_client_raises_on_invalid_json(client):
 
 
 def test_network_client_needs_the_online_extra(monkeypatch, tmp_path):
-    """Without `httpx` and `platformdirs`, the client refuses to start."""
+    """Without `httpx`, the client refuses to start."""
     monkeypatch.setattr(_network, "network_support", False)
     with pytest.raises(NetworkError, match=r"requires the \[sbom-online\] extra"):
         NetworkClient(cache_dir=tmp_path)
@@ -141,9 +141,7 @@ def test_network_client_needs_the_online_extra(monkeypatch, tmp_path):
 
 def test_network_client_defaults_to_the_user_cache(monkeypatch, tmp_path):
     """With no folder given, the cache goes to the user cache folder of mpm."""
-    monkeypatch.setattr(
-        _network, "user_cache_dir", lambda appname: str(tmp_path / appname)
-    )
+    monkeypatch.setattr(_network, "get_cache_dir", lambda app_name: tmp_path / app_name)
     cache_dir = tmp_path / "meta-package-manager" / "sbom"
     with NetworkClient(trust_env=False) as client:
         assert client.cache_dir == cache_dir

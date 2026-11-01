@@ -21,17 +21,17 @@ bounded retry/backoff policy, so the higher-level adapters (currently
 just {mod}`meta_package_manager.sbom.vulnerabilities`, which queries
 OSV.dev) stay free of transport concerns.
 
-Heavy imports (`httpx`, `platformdirs`) are guarded behind a
-`try/except` exactly like the SPDX and CycloneDX writers: a default
-install does not pull them, so this module is importable but
-{data}`network_support` reports `False` until the user installs the
-`[sbom-online]` extra.
+The heavy `httpx` import is guarded behind a `try/except` exactly like
+the SPDX and CycloneDX writers: a default install does not pull it, so
+this module is importable but {data}`network_support` reports `False`
+until the user installs the `[sbom-online]` extra.
 
 Caching is central to the design. The online mode is only
 worth using with a warm cache: vulnerability records are immutable once
 published, batch queries are large, and remote services rate-limit. The
-cache lives under the OS-appropriate user cache directory (resolved via
-`platformdirs`) so repeat runs hit disk instead of the network.
+cache lives under the OS-appropriate user cache directory (resolved by
+{func}`click_extra.get_cache_dir`) so repeat runs hit disk instead of the
+network.
 """
 
 from __future__ import annotations
@@ -42,12 +42,12 @@ import logging
 import time
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from pathlib import Path
+
+from click_extra import get_cache_dir
 
 network_support = True
 try:
     import httpx
-    from platformdirs import user_cache_dir
 except ImportError:
     network_support = False
     logging.getLogger("meta_package_manager").debug(
@@ -58,6 +58,7 @@ except ImportError:
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Mapping
+    from pathlib import Path
     from typing import Self
 
 
@@ -131,8 +132,9 @@ class NetworkClient:
     ) -> None:
         """Set up the cache directory and the underlying HTTP client.
 
-        `cache_dir` defaults to `<user-cache>/meta-package-manager/sbom`
-        when not supplied. The directory is created if missing.
+        `cache_dir` defaults to the `sbom` folder of the user cache directory
+        of `meta-package-manager` when not supplied. The directory is created
+        if missing.
 
         `trust_env` is forwarded to `httpx.Client`: left `True` so a
         user's `HTTP(S)_PROXY` / `ALL_PROXY` environment is honored.
@@ -144,7 +146,7 @@ class NetworkClient:
                 "Install with: pip install meta-package-manager[sbom-online]",
             )
         if cache_dir is None:
-            cache_dir = Path(user_cache_dir("meta-package-manager")) / "sbom"
+            cache_dir = get_cache_dir("meta-package-manager") / "sbom"
         # The cache is an optimization, not a requirement: if the directory
         # cannot be created (read-only home, sandbox, locked-down CI), the
         # client still works, just without persistence. `cache_dir` is set

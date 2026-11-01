@@ -361,21 +361,18 @@ optional-dependencies.json5 = [ "click-extra[json5]" ]
 #   `to_string()` and `from_string()`; 0.11 is the floor
 #   cyclonedx-python-lib itself requires.
 #
-# - [sbom-online]: adds httpx (the HTTP client used by
-#   meta_package_manager.sbom._network) and platformdirs (used to
-#   locate the on-disk response cache at the OS-appropriate location).
-#   These power the opt-in `mpm --network sbom` mode that queries
-#   OSV.dev for vulnerability data and attaches it to the rendered
-#   document.  httpx 0.27 is the first release with the stable
-#   `httpx.Timeout` constructor signature we rely on; platformdirs 4 is
-#   the current major and matches what click-extra already ships
-#   transitively.
+# - [sbom-online]: adds httpx, the HTTP client used by
+#   meta_package_manager.sbom._network. It powers the opt-in
+#   `mpm --network sbom` mode that queries OSV.dev for vulnerability data
+#   and attaches it to the rendered document.  httpx 0.27 is the first
+#   release with the stable `httpx.Timeout` constructor signature we rely
+#   on.
 optional-dependencies.sbom-offline = [
   "cyclonedx-python-lib>=11.9",
   "packageurl-python>=0.11",
   "spdx-tools>=0.8.2",
 ]
-optional-dependencies.sbom-online = [ "httpx>=0.27", "platformdirs>=4" ]
+optional-dependencies.sbom-online = [ "httpx>=0.27" ]
 # Package referenced above and also featured in [project.optional-dependencies] or [dependency-groups]
 # will be set without version specifier as they are already constrained.
 optional-dependencies.toml = [ "click-extra[toml]" ]
@@ -1019,9 +1016,9 @@ test-matrix.full-include = [
 # every feature gated behind try/except imports in click-extra and mpm:
 #   - sbom-offline: cyclonedx-python-lib + spdx-tools, for `mpm sbom --spdx`
 #                   and `mpm sbom --cyclonedx` rendering from local data.
-#   - sbom-online: httpx + platformdirs, for the opt-in
-#                  `mpm --network sbom` mode that queries OSV.dev for
-#                  vulnerability data and caches responses on disk.
+#   - sbom-online: httpx, for the opt-in `mpm --network sbom` mode that
+#                  queries OSV.dev for vulnerability data and caches
+#                  responses on disk.
 #   - toml/yaml/json5/hjson: click-extra config-file readers, for
 #           `mpm --config <path>` and `mpm --table-format <fmt>` output.
 # Nuitka follows these imports once the packages are installed. Do not add them

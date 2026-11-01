@@ -113,9 +113,7 @@ def osv(monkeypatch, tmp_path):
     respx = pytest.importorskip("respx")
     for var in PROXY_VARS:
         monkeypatch.delenv(var, raising=False)
-    monkeypatch.setattr(
-        _network, "user_cache_dir", lambda appname: str(tmp_path / appname)
-    )
+    monkeypatch.setattr(_network, "get_cache_dir", lambda app_name: tmp_path / app_name)
     with respx.mock(base_url="https://api.osv.dev") as mock:
         yield mock
 

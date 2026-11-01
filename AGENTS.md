@@ -44,7 +44,7 @@ Each rule sits beside the code or the page it governs: a docstring, a comment, a
 Three installs deliberately bypass the window:
 
 - **The upstream toolkit's own pin.** Every `uvx` call carrying the `repomatic` pin passes `--exclude-newer-package repomatic=P0D` beside it: the pin moves in lockstep with the `uses:` refs, so a release must install the minute it is published.
-- **A fresh click-extra or extra-platforms, on the day it ships.** Both share a maintainer with `mpm`, and most `mpm` releases raise one of their floors. `[tool.uv] exclude-newer-package` names the package with the midnight following its upload, an absolute timestamp that covers that release and nothing after it. The entry is transient: repomatic's `sync-uv-lock` prunes it once the release ages past the window.
+- **A fresh click-extra or extra-platforms, on the day it ships.** Both share a maintainer with `mpm`, and most `mpm` releases raise one of their floors. `[tool.uv] exclude-newer-package` names the package with a `"0 days"` span. The entry is transient: repomatic's `sync-uv-lock` freezes it to a fixed date that holds the locked release, then prunes it once that release ages past the window.
 - **The `tests-install.yaml` workflow.** Its subject is the freshly published artifact. Its header comment holds the rationale.
 
 ## Documentation conventions

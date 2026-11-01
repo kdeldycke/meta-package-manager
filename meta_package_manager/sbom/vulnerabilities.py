@@ -253,6 +253,20 @@ def _coordinate_key(ecosystem: str, name: str, version: str) -> str:
     return f"{ecosystem}\n{name}\n{version}"
 
 
+def _osv_name(ecosystem: str, purl: PackageURL) -> str:
+    """The name OSV gives to the package `purl` designates in `ecosystem`.
+
+    OSV names a package by its full coordinate, namespace included. Maven joins
+    the group and the artifact with `:`. The other ecosystems join the namespace
+    with `/`: the npm scope, the Packagist vendor, the Go module path. A bare name
+    would match another package, or none.
+    """
+    if not purl.namespace:
+        return purl.name
+    separator = ":" if ecosystem == "Maven" else "/"
+    return f"{purl.namespace}{separator}{purl.name}"
+
+
 def _parse_purls(purls: Iterable[str]) -> dict[str, _OSVQuery]:
     """Turn purl strings into deduplicated OSV queries.
 
@@ -280,7 +294,7 @@ def _parse_purls(purls: Iterable[str]) -> dict[str, _OSVQuery]:
             continue
         # OSV keys names case-sensitively per ecosystem; the purl name is
         # already normalized by the manager that produced it.
-        name = purl.name
+        name = _osv_name(ecosystem, purl)
         key = _coordinate_key(ecosystem, name, purl.version)
         query = queries.get(key)
         if query is None:

@@ -313,7 +313,25 @@ def test_normalize_osv_record_full():
         # An alias lifted from an upstream document spells its type per
         # the purl spec, not as an mpm manager id: `pypi`, never `pip`.
         (["pkg:pypi/yt-dlp@2026.8.19"], [("PyPI", "yt-dlp", "2026.8.19")]),
-        (["pkg:maven/org.example/widget@1.0.0"], [("Maven", "widget", "1.0.0")]),
+        # The namespace is part of the OSV name: Maven joins the group with a
+        # colon, the other ecosystems with a slash.
+        (
+            ["pkg:maven/org.example/widget@1.0.0"],
+            [("Maven", "org.example:widget", "1.0.0")],
+        ),
+        # Two scoped npm packages of the same name and version stay two queries.
+        (
+            ["pkg:npm/%40angular/core@7.0.0", "pkg:yarn/%40babel/core@7.0.0"],
+            [("npm", "@angular/core", "7.0.0"), ("npm", "@babel/core", "7.0.0")],
+        ),
+        (
+            ["pkg:composer/laravel/framework@8.0.0"],
+            [("Packagist", "laravel/framework", "8.0.0")],
+        ),
+        (
+            ["pkg:golang/github.com/gin-gonic/gin@1.6.0"],
+            [("Go", "github.com/gin-gonic/gin", "1.6.0")],
+        ),
         (
             ["pkg:nuget/Newtonsoft.Json@13.0.3"],
             [("NuGet", "Newtonsoft.Json", "13.0.3")],

@@ -25,6 +25,7 @@
 - [brew,composer,mpm,npm,yarn] Query OSV with the full name of a namespaced package, so `mpm --network sbom` finds its advisories.
 - [bun,dotnet,go,mpm,pipxu,pnpm,uv,uvx,volta] Scan the packages of `bun`, `dotnet`, `go`, `pipxu`, `pnpm`, `uv`, `uvx` and `volta` for vulnerabilities: `mpm --network sbom` skipped them.
 - [mpm] Skip `test_extra_labels_in_pyproject` outside a git checkout, where a newer `extra-platforms` failed it for a packager.
+- [mpm] Test the sdist in CI the way a distribution builds it: a new job runs the hermetic layer from the unpacked sdist on the newest dependencies.
 
 ## [`8.2.0` (2026-10-25)](https://github.com/kdeldycke/meta-package-manager/compare/v8.1.2...v8.2.0)
 

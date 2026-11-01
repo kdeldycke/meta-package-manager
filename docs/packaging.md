@@ -29,6 +29,8 @@ Pick the skip path that fits the builder. Either way no per-module ignore list i
 
 Repo-maintenance sync guards (which regenerate a committed artifact from the installed tooling and compare) skip automatically outside a git checkout, so a tarball or sdist build never trips on a tooling-version mismatch. A builder that packages the SBOM extras can install `[sbom-offline]` / `[sbom-online]` to exercise the SBOM tests instead of skipping them.
 
+CI holds the suite to this on every push: the `sdist-tests` job of [`tests.yaml`](https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/tests.yaml) builds the sdist, unpacks it outside the checkout, installs the newest release of each dependency, and runs `pytest -m "not integration"` there.
+
 Running only the `sanity-check` phase (or its equivalent) stays a valid minimal option: it confirms the package imports cleanly and its declared dependencies resolve. Full functional verification of the integration layer is covered by [the project's own GitHub Actions CI](https://github.com/kdeldycke/meta-package-manager/actions), where the package managers are pre-installed.
 
 The `--skip-destructive` and `pytest -m "not destructive"` selectors exist for *developer* environments where some package managers are present but mutating them would be undesirable. They do not make the suite hermetic.

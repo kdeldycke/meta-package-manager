@@ -125,7 +125,7 @@ jobs:
         run: >
           uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==8.0.0' show-metadata
           --output-format github-json --output "$GITHUB_OUTPUT"
-          test_matrix test_matrix_pr
+          latest_stable_python test_matrix test_matrix_pr
 
   tests:
     needs: metadata
@@ -776,6 +776,42 @@ jobs:
         # package code beyond `__version__`, so measuring them is pointless
         # and would only invite a spurious floor check.
         run: uv --no-progress run --frozen -- pytest -m once
+
+  # A distribution builds mpm from the sdist, outside any git checkout, with the newest release of each dependency it
+  # ships instead of the versions of `uv.lock`. This job does the same and runs the hermetic layer packagers run, so a
+  # test that passes in a checkout only, or a dependency release the lockfile has not reached, fails here first. It
+  # stays out of the `tests` matrix, whose cells install every package manager this layer never drives.
+  sdist-tests:
+    name: 📦 Tests from the sdist
+    needs:
+      - metadata
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          # Pin what CI downloads: unpinned, setup-uv installs the newest uv
+          # satisfying `required-version`. `sync-workflow-pins` bumps it once a
+          # uv release clears the cooldown window.
+          version: "0.13.4"
+      - name: Unpack the source distribution
+        run: |
+          uv --no-progress build --sdist --out-dir "${RUNNER_TEMP}/dist"
+          mkdir "${RUNNER_TEMP}/sdist"
+          tar --extract --file "${RUNNER_TEMP}"/dist/*.tar.gz --directory "${RUNNER_TEMP}/sdist" --strip-components 1
+      - name: Install the source distribution
+        # `--upgrade` resolves each dependency to its newest release past the cooldown, whatever lockfile the sdist
+        # holds.
+        working-directory: ${{ runner.temp }}/sdist
+        env:
+          PYTHON_VERSION: ${{ fromJSON(needs.metadata.outputs.metadata).latest_stable_python }}
+        run: uv --no-progress sync --upgrade --python "${PYTHON_VERSION}" --all-extras --group test
+      - name: Run the hermetic layer
+        # The selection docs/packaging.md gives packagers, with no coverage measured: the guards of a git checkout
+        # skip here, so the slice covers less than the `tests` matrix.
+        working-directory: ${{ runner.temp }}/sdist
+        run: uv --no-progress run --frozen -- pytest -m "not integration"
 
   # release.yaml drives the CLI test plan of `[tool.click-extra]` against the Nuitka binaries, on pushes to `main`
   # alone. This job drives it against the checkout, pull requests included, through both entry points. One runner

@@ -325,7 +325,7 @@ dependencies = [
   # click-extra 10.0 added strip_ansi(), which execution.py applies to every
   # manager output, and reads JSONC and XML configuration files with no extra.
   # Below it the import fails and no mpm command runs.
-  "click-extra>=10.0.0.dev0",
+  "click-extra>=10",
   # extra-platforms 13.10 added shell_from_path(), which shell_argv() in
   # shell_env.py resolves the login shell's family with. Below it the import
   # fails and no mpm command runs.
@@ -516,16 +516,13 @@ required-version = ">=0.12.22"
 # marker split holding a second, older resolution alive for an interpreter that
 # never renders a page.
 dependency-groups.docs = { requires-python = ">= 3.14" }
-# Tracks click-extra main for the strip_ansi() and the built-in JSONC and XML
-# formats of its unreleased 10.0.0. The sync-dep-sources job swaps it for the
-# release once it ships.
-sources.click-extra = { git = "https://github.com/kdeldycke/click-extra", branch = "main" }
 # Cooldown period.
 exclude-newer = "1 week"
-# extra-platforms is published by this repository's own maintainer: the cooldown
-# guards against a compromised upstream, which does not apply here, and it
-# otherwise holds each release back a week from the projects that consume it.
-exclude-newer-package = { extra-platforms = "2026-11-02T00:00:00Z" }
+# click-extra and extra-platforms are published by this repository's own
+# maintainer: the cooldown guards against a compromised upstream, which does not
+# apply here, and it otherwise holds each release back a week from the projects
+# that consume it.
+exclude-newer-package = { click-extra = "2026-11-02T00:00:00Z", extra-platforms = "2026-11-02T00:00:00Z" }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
 # source-include does not honor .gitignore, so prune the build output and caches
@@ -579,7 +576,7 @@ windows-icon-from-ico = "docs/assets/icon.ico"
 # via importlib.resources for the yay --cooldown overlay (see
 # meta_package_manager.managers.pacman); without it the compiled binary would crash
 # on import. The wheel (uv_build) includes the file with no extra config.
-include-package-data = [ "click_extra", "meta_package_manager.managers:*.lua", "meta_package_manager.managers:*.toml" ]
+include-package-data = [ "meta_package_manager.managers:*.lua", "meta_package_manager.managers:*.toml" ]
 
 [tool.typos]
 # Correct capitalization for proper nouns, plus "PATCHed"

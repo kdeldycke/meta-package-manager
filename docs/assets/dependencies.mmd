@@ -133,7 +133,7 @@ flowchart LR
         types_pyyaml{{"`types-pyyaml >=6.0.12.9`"}}
     end
 
-    meta_package_manager ==> click_extra
+    meta_package_manager ==>|" >=10 "| click_extra
     meta_package_manager ==>|" >=13.10 "| extra_platforms
     meta_package_manager ==>|" >=1 "| tomli_w
     sphinx --> pygments

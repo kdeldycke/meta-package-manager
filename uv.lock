@@ -11,6 +11,7 @@ exclude-newer = "0001-01-01T00:00:00Z" # This has no effect and is included for 
 exclude-newer-span = "P1W"
 
 [options.exclude-newer-package]
+click-extra = "2026-11-02T00:00:00Z"
 extra-platforms = "2026-11-02T00:00:00Z"
 
 [[package]]
@@ -285,8 +286,8 @@ wheels = [
 
 [[package]]
 name = "click-extra"
-version = "10.0.0.dev0"
-source = { git = "https://github.com/kdeldycke/click-extra?branch=main#672621fdd347bfa0acb0aa0a88287e1aa16a8196" }
+version = "10.0.0"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
     { name = "cloup" },
@@ -294,6 +295,10 @@ dependencies = [
     { name = "tabulate", extra = ["widechars"] },
     { name = "wcmatch" },
     { name = "wcwidth" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/93/fd/268d16abb637c2d61a138cdfa2785e7a3dfde72e0b9546f5b9605b965edb/click_extra-10.0.0.tar.gz", hash = "sha256:90d9d91a8f8861385e7bdeca2197747e975b6f53acd855cce1d535cd176bc274", size = 1903611, upload-time = "2026-11-01T16:34:30.199Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d6/53/a079f138b07fa6073cee68beb4410762457c28139428450279c47fcebbc1/click_extra-10.0.0-py3-none-any.whl", hash = "sha256:34f5f9eb5f166e69f2f8c1e1339e88658ce81e24ee6361d1e183a5909f69b4ff", size = 723972, upload-time = "2026-11-01T16:34:28.231Z" },
 ]
 
 [package.optional-dependencies]
@@ -1098,11 +1103,11 @@ docs = ">=3.14"
 
 [package.metadata]
 requires-dist = [
-    { name = "click-extra", git = "https://github.com/kdeldycke/click-extra?branch=main" },
-    { name = "click-extra", extras = ["hjson"], marker = "extra == 'hjson'", git = "https://github.com/kdeldycke/click-extra?branch=main" },
-    { name = "click-extra", extras = ["json5"], marker = "extra == 'json5'", git = "https://github.com/kdeldycke/click-extra?branch=main" },
-    { name = "click-extra", extras = ["toml"], marker = "extra == 'toml'", git = "https://github.com/kdeldycke/click-extra?branch=main" },
-    { name = "click-extra", extras = ["yaml"], marker = "extra == 'yaml'", git = "https://github.com/kdeldycke/click-extra?branch=main" },
+    { name = "click-extra", specifier = ">=10" },
+    { name = "click-extra", extras = ["hjson"], marker = "extra == 'hjson'" },
+    { name = "click-extra", extras = ["json5"], marker = "extra == 'json5'" },
+    { name = "click-extra", extras = ["toml"], marker = "extra == 'toml'" },
+    { name = "click-extra", extras = ["yaml"], marker = "extra == 'yaml'" },
     { name = "cyclonedx-python-lib", marker = "extra == 'sbom-offline'", specifier = ">=11.9" },
     { name = "extra-platforms", specifier = ">=13.10" },
     { name = "httpx", marker = "extra == 'sbom-online'", specifier = ">=0.27" },
@@ -1115,7 +1120,7 @@ provides-extras = ["hjson", "json5", "sbom-offline", "sbom-online", "toml", "yam
 
 [package.metadata.requires-dev]
 docs = [
-    { name = "click-extra", extras = ["sphinx"], marker = "python_full_version >= '3.14'", git = "https://github.com/kdeldycke/click-extra?branch=main" },
+    { name = "click-extra", extras = ["sphinx"], marker = "python_full_version >= '3.14'" },
     { name = "furo", marker = "python_full_version >= '3.14'", specifier = ">=2025.9.25" },
     { name = "myst-parser", marker = "python_full_version >= '3.14'", specifier = ">=5.1" },
     { name = "sphinx", marker = "python_full_version >= '3.14'", specifier = ">=8" },
@@ -1130,8 +1135,8 @@ docs = [
     { name = "tomlrt", marker = "python_full_version >= '3.14'", specifier = ">=2" },
 ]
 test = [
-    { name = "click-extra", extras = ["pytest"], git = "https://github.com/kdeldycke/click-extra?branch=main" },
-    { name = "click-extra", extras = ["toml"], git = "https://github.com/kdeldycke/click-extra?branch=main" },
+    { name = "click-extra", extras = ["pytest"] },
+    { name = "click-extra", extras = ["toml"] },
     { name = "coverage", extras = ["toml"], specifier = ">=7.11" },
     { name = "cyclonedx-python-lib", extras = ["validation"] },
     { name = "extra-platforms" },

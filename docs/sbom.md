@@ -131,19 +131,19 @@ $ mpm --brew sbom > deep.spdx.json
 
 ## Coverage matrix
 
-| Capability       | [`brew`](managers/brew.md) | [`pip`](managers/pip.md) | [`npm`](managers/npm.md) | [`cargo`](managers/cargo.md) | [`gem`](managers/gem.md) | [`composer`](managers/composer.md) | Others |
-| :--------------- | :------------------------: | :----------------------: | :----------------------: | :--------------------------: | :----------------------: | :--------------------------------: | :----: |
-| License          |             ✅             |            ✅            |                          |                              |                          |                                    |        |
-| Homepage         |             ✅             |            ✅            |                          |                              |                          |                                    |        |
-| Download URL     |             ✅             |                          |                          |                              |                          |                                    |        |
-| Checksums        |             ✅             |                          |                          |                              |                          |                                    |        |
-| Dependency graph |             ✅             |            ✅            |                          |                              |                          |                                    |        |
-| Per-package SBOM |             ✅             |                          |                          |                              |                          |                                    |        |
-| Vulnerabilities  |        ✅ (partial)        |     ✅ (`--network`)     |     ✅ (`--network`)     |       ✅ (`--network`)       |     ✅ (`--network`)     |          ✅ (`--network`)          |        |
+| Capability       | [`brew`](managers/brew.md) | [`pip`](managers/pip.md) | [`npm`](managers/npm.md) | [`cargo`](managers/cargo.md) | [`gem`](managers/gem.md) | [`composer`](managers/composer.md) |  Others   |
+| :--------------- | :------------------------: | :----------------------: | :----------------------: | :--------------------------: | :----------------------: | :--------------------------------: | :-------: |
+| License          |             ✅             |            ✅            |                          |                              |                          |                                    |           |
+| Homepage         |             ✅             |            ✅            |                          |                              |                          |                                    |           |
+| Download URL     |             ✅             |                          |                          |                              |                          |                                    |           |
+| Checksums        |             ✅             |                          |                          |                              |                          |                                    |           |
+| Dependency graph |             ✅             |            ✅            |                          |                              |                          |                                    |           |
+| Per-package SBOM |             ✅             |                          |                          |                              |                          |                                    |           |
+| Vulnerabilities  |        ✅ (partial)        |     ✅ (`--network`)     |     ✅ (`--network`)     |       ✅ (`--network`)       |     ✅ (`--network`)     |          ✅ (`--network`)          | ✅ (some) |
 
 Coverage will expand. Every manager exposes its metadata differently, and more extractors are added per manager over time.
 
-The `Vulnerabilities` row tracks [OSV.dev's indexed ecosystems](https://ossf.github.io/osv-schema/#defined-ecosystems). A manager OSV does not index returns no advisories, and reports no error. That covers [`mas`](managers/mas.md), and the distro managers OSV needs a release qualifier for.
+The `Vulnerabilities` row tracks [OSV.dev's indexed ecosystems](https://ossf.github.io/osv-schema/#defined-ecosystems). Under `Others`, it covers the managers that install from the same registries: [`bun`](managers/bun.md), [`dotnet`](managers/dotnet.md), [`go`](managers/go.md), [`pipx`](managers/pipx.md), [`pipxu`](managers/pipxu.md), [`pnpm`](managers/pnpm.md), [`uv`](managers/uv.md), [`uvx`](managers/uvx.md), [`volta`](managers/volta.md) and [`yarn`](managers/yarn.md). A `go` command installed from a subdirectory of its module matches no advisory, because OSV indexes the module path. A manager OSV does not index returns no advisories, and reports no error. That covers [`mas`](managers/mas.md), and the distro managers OSV needs a release qualifier for.
 
 [`brew`](managers/brew.md) is the exception. OSV indexes no formula, but it does index the upstream package a formula builds from. Under `--network`, `mpm` queries that coordinate like the rest. Its cell is marked partial because only a formula built from a registry archive carries one.
 

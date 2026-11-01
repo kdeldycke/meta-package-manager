@@ -56,6 +56,7 @@ from meta_package_manager.sbom.vulnerabilities import (
     _parse_timestamp,
     scan_vulnerabilities,
 )
+from meta_package_manager.specifier import PURL_MAP
 
 # A realistic OSV advisory detail record, trimmed to the fields the
 # normalizer reads.
@@ -299,8 +300,14 @@ def test_normalize_osv_record_full():
 @pytest.mark.parametrize(
     ("purls", "expected_coordinates"),
     (
-        # pip maps to PyPI.
+        # pip maps to PyPI, and so does every other manager installing from it.
         (["pkg:pip/django@1.0.0"], [("PyPI", "django", "1.0.0")]),
+        (["pkg:uv/yt-dlp@2026.8.19"], [("PyPI", "yt-dlp", "2026.8.19")]),
+        # A Go command is named by its import path, version prefix included.
+        (
+            ["pkg:go/github.com/nao1215/gup@v1.8.1"],
+            [("Go", "github.com/nao1215/gup", "v1.8.1")],
+        ),
         # npm passes through; yarn also maps to npm.
         (
             ["pkg:npm/lodash@4.17.0", "pkg:yarn/left-pad@1.0.0"],
@@ -366,6 +373,24 @@ def test_osv_ecosystems_cover_every_canonical_alias_type():
         "pypi",
     }
     assert "cpan" not in OSV_ECOSYSTEMS
+
+
+@pytest.mark.parametrize(
+    ("manager_id", "purl_type"),
+    sorted(
+        (manager_id, purl_type)
+        for purl_type, manager_ids in PURL_MAP.items()
+        if purl_type in OSV_ECOSYSTEMS
+        for manager_id in manager_ids or ()
+    ),
+)
+def test_osv_ecosystems_cover_every_manager_of_an_indexed_type(manager_id, purl_type):
+    """A package's own purl takes its manager ID as the type.
+
+    So each manager `PURL_MAP` ties to a type OSV indexes must map to the ecosystem
+    of that type, or the scan skips every package of that manager.
+    """
+    assert OSV_ECOSYSTEMS.get(manager_id) == OSV_ECOSYSTEMS[purl_type]
 
 
 def test_parse_purls_skips_an_unparsable_purl():

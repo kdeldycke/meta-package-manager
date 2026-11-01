@@ -19,6 +19,7 @@
 - [mpm] Stop the SPDX export of `mpm sbom` from looking up the DNS name of the machine, which the document never used.
 - [bar-plugin,mpm] Strip a terminal hyperlink from manager output together with its URI, which stayed in the text.
 - [brew,composer,mpm,npm,yarn] Query OSV with the full name of a namespaced package, so `mpm --network sbom` finds its advisories.
+- [bun,dotnet,go,mpm,pipxu,pnpm,uv,uvx,volta] Scan the packages of `bun`, `dotnet`, `go`, `pipxu`, `pnpm`, `uv`, `uvx` and `volta` for vulnerabilities: `mpm --network sbom` skipped them.
 
 ## [`8.2.0` (2026-10-25)](https://github.com/kdeldycke/meta-package-manager/compare/v8.1.2...v8.2.0)
 

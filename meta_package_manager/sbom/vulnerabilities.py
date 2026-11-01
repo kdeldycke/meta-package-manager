@@ -103,6 +103,7 @@ from datetime import datetime
 
 from packageurl import PackageURL
 
+from ..specifier import PURL_MAP
 from ._network import NetworkError
 
 TYPE_CHECKING = False
@@ -137,38 +138,45 @@ same record on every scan while still picking up the occasional
 correction within a month.
 """
 
-OSV_ECOSYSTEMS: dict[str, str] = {
-    # mpm manager id (used as the purl type) -> OSV ecosystem name.
-    # Only the managers OSV actually indexes are listed; a purl whose
-    # type is absent here is skipped (its package gets no advisories
-    # rather than a bogus query). System package managers (brew, cask,
-    # macports, mas, ...) are intentionally absent: OSV does not index
-    # them, and the distro ecosystems it does index (Debian, Alpine)
-    # need a release qualifier mpm does not track.
+_INDEXED_PURL_TYPES = {
+    # The purl types OSV indexes, spelled per the purl specification. A purl
+    # whose type is absent here is skipped: its package gets no advisories
+    # rather than a bogus query. System types are intentionally absent: OSV
+    # indexes no Homebrew or Mac App Store package, and the distro ecosystems it
+    # does index (Debian, Alpine) need a release qualifier mpm does not track.
     "cargo": "crates.io",
     "composer": "Packagist",
-    "gem": "RubyGems",
-    "npm": "npm",
-    "pip": "PyPI",
-    "pipx": "PyPI",
-    "yarn": "npm",
-    # Canonical purl types, a second key space this map has to cover.
-    # A package's own purl takes its manager's id as the type, which is
-    # what every key above is. An alias does not: it is copied from an
-    # upstream document that spells the type per the purl specification,
-    # and `pkg:pypi/…` would be skipped by a map holding only `pip`.
-    # Types already spelled the same in both spaces are not repeated.
     "cran": "CRAN",
+    "gem": "RubyGems",
+    # The `go` manager names a command by its import path, which is the module
+    # path OSV indexes only for a command at the root of its module.
     "golang": "Go",
     "hackage": "Hackage",
     "hex": "Hex",
     "maven": "Maven",
+    "npm": "npm",
     "nuget": "NuGet",
     "pypi": "PyPI",
     # `cpan` is deliberately absent: OSV indexes no CPAN ecosystem, and
     # Perl advisories live in CPANSA, a separate database.
 }
-"""Maps purl types to [OSV ecosystem names](https://ossf.github.io/osv-schema/#defined-ecosystems)."""
+
+OSV_ECOSYSTEMS: dict[str, str] = {
+    **{
+        manager_id: ecosystem
+        for purl_type, ecosystem in _INDEXED_PURL_TYPES.items()
+        for manager_id in PURL_MAP.get(purl_type) or ()
+    },
+    **_INDEXED_PURL_TYPES,
+}
+"""Maps purl types to [OSV ecosystem names](https://ossf.github.io/osv-schema/#defined-ecosystems).
+
+Two key spaces share this map. An alias copied from an upstream document spells its
+type per the purl specification, like `pkg:pypi/yt-dlp`. A package's own purl takes
+its manager's ID as the type, like `pkg:uv/yt-dlp`. So each manager
+{data}`~meta_package_manager.specifier.PURL_MAP` ties to an indexed type maps to the
+ecosystem of that type.
+"""
 
 _SEVERITY_ALIASES = {
     "LOW": "low",

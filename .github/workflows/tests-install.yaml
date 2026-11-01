@@ -657,7 +657,7 @@ jobs:
           # Pin what CI downloads: unpinned, setup-uv installs the newest uv
           # satisfying `required-version`. `sync-workflow-pins` bumps it once a
           # uv release clears the cooldown window.
-          version: "0.13.4"
+          version: "0.13.5"
       - name: Install Python
         run: uv --no-progress venv --python 3.14
       - name: Run CLI via pip
@@ -687,7 +687,7 @@ jobs:
           # Pin what CI downloads: unpinned, setup-uv installs the newest uv
           # satisfying `required-version`. `sync-workflow-pins` bumps it once a
           # uv release clears the cooldown window.
-          version: "0.13.4"
+          version: "0.13.5"
       - name: Install Python
         run: uv --no-progress venv --python 3.14
       - name: Run stable CLI via pipx
@@ -746,7 +746,7 @@ jobs:
         run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
-          version: "0.13.4"
+          version: "0.13.5"
       - name: Assemble the source tree
         run: uv run --script ./packaging/ppa/build-source.py --series ${{ matrix.series }} --output ./dist
       # build-essential compiles nothing here, but dpkg-checkbuilddeps requires
@@ -848,7 +848,7 @@ jobs:
           # Pin what CI downloads: unpinned, setup-uv installs the newest uv
           # satisfying `required-version`. `sync-workflow-pins` bumps it once a
           # uv release clears the cooldown window.
-          version: "0.13.4"
+          version: "0.13.5"
       - name: Install Python
         run: uv --no-progress venv --python 3.14
       - name: Run stable CLI

@@ -249,7 +249,12 @@ class _OSVQuery:
     purls: list[str] = field(default_factory=list)
 
     def as_osv_payload(self) -> dict:
-        """Render the OSV `query` object for this coordinate."""
+        """Render the OSV `query` object for this coordinate.
+
+        OSV also takes a purl in place of the ecosystem and the name. But it rejects
+        the whole batch with HTTP 400 when one purl breaks the rules of its type, like
+        a `cpan` module name holding `::`.
+        """
         return {
             "package": {"ecosystem": self.ecosystem, "name": self.name},
             "version": self.version,

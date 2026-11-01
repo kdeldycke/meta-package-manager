@@ -525,7 +525,7 @@ exclude-newer = "1 week"
 # extra-platforms is published by this repository's own maintainer: the cooldown
 # guards against a compromised upstream, which does not apply here, and it
 # otherwise holds each release back a week from the projects that consume it.
-exclude-newer-package = { extra-platforms = "0 days" }
+exclude-newer-package = { extra-platforms = "2026-11-02T00:00:00Z" }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
 # source-include does not honor .gitignore, so prune the build output and caches

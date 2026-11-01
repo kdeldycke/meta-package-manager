@@ -328,10 +328,15 @@ def test_new_package_manager_issue_template():
     assert template_platforms == reference_labels
 
 
+@pytest.mark.repo_maintenance
 def test_extra_labels_in_pyproject():
     """Check the generated label block is consistent with `LABELS`.
 
     The `[tool.repomatic.labels.extra]` block of `pyproject.toml`.
+
+    Repo-maintenance guard: the platform labels are regenerated from the installed
+    `extra_platforms` release, whose platform groups a downstream packager cannot be
+    expected to match, so `conftest` skips it outside a git checkout.
     """
     pyproject = PROJECT_ROOT / "pyproject.toml"
     data = tomllib.loads(pyproject.read_text(encoding="utf-8"))

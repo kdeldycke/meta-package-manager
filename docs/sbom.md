@@ -100,6 +100,15 @@ To export only a subset of the installed packages, filter with `--query`. The ma
 $ mpm --brew sbom --query openssl > openssl.spdx.json
 ```
 
+## Package URLs
+
+Each package carries two [purls](https://github.com/package-url/purl-spec):
+
+- The purl of its registered type, which other tools read: `pkg:pypi/django@5.2` for a [`pip`](managers/pip.md) package, `pkg:brew/homebrew/cask/firefox@120.0` for a [`cask`](managers/cask.md), or `pkg:deb/ubuntu/curl@8.5.0-2ubuntu10?arch=amd64` for an [`apt`](managers/apt.md) package on Ubuntu. Both formats give it as the purl of the package.
+- The purl tying the package to its manager, which takes the manager ID as its type, like `pkg:pip/django@5.2`. It is the CycloneDX `bom-ref` of the package, the source of its SPDX ID, and its second SPDX reference.
+
+A package keeps the second purl alone when no registered type fits it. Its manager can install from a source no type covers, like [`mas`](managers/mas.md) or the devkitPro packages of [`dkp-pacman`](managers/dkp-pacman.md). Or `mpm` lacks a part the type requires: the UUID of a [`julia`](managers/julia.md) package, the distribution of a Perl module of [`cpan`](managers/cpan.md), or the vendor of a system package outside a Linux distribution.
+
 ## Scan mode: `--bundled` vs `--minimal`
 
 `mpm sbom` defaults to bundled mode. Every manager that can is queried for per-package metadata: license, supplier, homepage, declared dependencies, source URL, checksums. Per-package upstream SBOM documents are merged into the aggregate, and the result is written into the rendered SPDX or CycloneDX document. Bundled mode is the default because `mpm sbom` collapses N different manager APIs into one self-contained file.

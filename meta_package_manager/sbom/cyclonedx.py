@@ -72,7 +72,12 @@ try:
     from cyclonedx.schema import OutputFormat, SchemaVersion
     from packageurl import PackageURL
 
-    from ._purl import normalized_purls, package_purl
+    from ._purl import (
+        cyclonedx_purl,
+        normalized_purls,
+        package_purl,
+        registered_purl,
+    )
 except ImportError as import_error:
     cyclonedx_support = False
     cyclonedx_unavailable_reason = writer_unavailable_reason(
@@ -408,17 +413,19 @@ class CycloneDX(SBOM):
                     email=metadata.originator.email,
                 )
             ]
+        # The pURL tying the package to its manager makes a unique ID, which the
+        # pURL of its registered type does not: `pip` and `uv` can both install
+        # the same `pkg:pypi/` package.
         purl = package_purl(package)
+        registered = registered_purl(package)
         data = Component(
             name=package.id,
             type=ComponentType.APPLICATION,
-            # pURL string, by its virtue of containing all important metadata of a
-            # package, makes perfect unique IDs.
-            bom_ref=purl.to_string(),
+            bom_ref=purl,
             group=package.manager_id,
             version=str(package.installed_version),
             description=metadata.description or package.description,
-            purl=purl,
+            purl=cyclonedx_purl(registered or purl),
             supplier=self._supplier_for(manager, metadata),
             hashes=self._hashes_for(metadata),
             licenses=self._licenses_for(metadata),
@@ -431,7 +438,11 @@ class CycloneDX(SBOM):
         self.document.components.add(data)
         self.component_index[(manager.id, package.id)] = data
         self.register_purl_aliases(
-            purl.to_string(), normalized_purls(metadata.extra_purls)
+            purl,
+            (
+                *([registered] if registered else []),
+                *normalized_purls(metadata.extra_purls),
+            ),
         )
         self._track_addition(manager.id, package.id, metadata)
         self.document.register_dependency(
@@ -444,18 +455,18 @@ class CycloneDX(SBOM):
     def all_purls(self) -> Iterator[str]:
         """Yield every component purl in insertion order.
 
-        Each component's `bom_ref` is its purl string, so the same
-        values double as the vulnerability `affects` targets in
+        Each component's `bom_ref` is the purl tying it to its manager, so the
+        same values double as the vulnerability `affects` targets in
         {meth}`~meta_package_manager.sbom.base.SBOM.finalize`.
 
-        Their aliases follow: a second coordinate for a component the
-        inventory did add, which
+        Their aliases follow: another coordinate for a component the inventory
+        did add, like the purl of its registered type, which
         {meth}`~meta_package_manager.sbom.base.SBOM.resolve_purl_targets`
         maps back to that component's `bom_ref`.
         """
         for component in self.component_index.values():
-            if component.purl is not None:
-                yield component.purl.to_string()
+            if component.bom_ref.value is not None:
+                yield component.bom_ref.value
         yield from self.purl_aliases
 
     def finalize(self) -> None:
@@ -470,7 +481,7 @@ class CycloneDX(SBOM):
         is projected into the CycloneDX `vulnerabilities` array. Each
         advisory is described once at the document level with an
         `affects` list pointing at every component (by `bom_ref`,
-        which equals the purl) it impacts.
+        the purl tying it to its manager) it impacts.
         """
         for source, manager_id, target_id in self.pending_dependencies:
             target = self.component_index.get((manager_id, target_id))
@@ -492,7 +503,7 @@ class CycloneDX(SBOM):
         if not self.vulnerabilities_by_purl:
             return
         purls_with_component = {
-            c.purl.to_string() for c in self.component_index.values() if c.purl
+            c.bom_ref.value for c in self.component_index.values() if c.bom_ref.value
         }
         by_id: dict[str, Any] = {}
         for advisory_purl, vulns in self.vulnerabilities_by_purl.items():

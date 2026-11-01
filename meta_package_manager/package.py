@@ -207,11 +207,7 @@ def manager_purl(manager_id: str, package_id: str, version: str | None = None) -
     ([package-url/packageurl-python#123](https://github.com/package-url/packageurl-python/pull/123)).
     """
     namespace, name = purl_parts(package_id)
-    segments = (*(namespace.split("/") if namespace else ()), name)
-    purl = f"pkg:{manager_id}/{'/'.join(map(purl_quote, segments))}"
-    if version:
-        purl += f"@{purl_quote(version)}"
-    return purl
+    return _encode_purl(manager_id, namespace, name, version)
 
 
 def purl_quote(text: str) -> str:
@@ -314,6 +310,104 @@ def parse_purl(purl: str, *, strict: bool = True) -> PurlParts:
     name = "/".join(map(unquote, name.split("/")))
     version = unquote(version)
 
+    namespace, name, version = _normalize_purl_parts(
+        purl_type, namespace, name, version, qualifiers
+    )
+
+    if strict:
+        problem = _purl_rule_problem(purl_type, namespace, name, version, qualifiers)
+        if any(key != key.lower() for key in keys):
+            problem = "takes its qualifier keys in lowercase"
+        if problem:
+            msg = f"A {purl_type} pURL {problem}: {purl!r}."
+            raise PurlRuleError(msg)
+    return PurlParts(purl_type, namespace or None, name, version or None)
+
+
+def render_purl(
+    purl_type: str,
+    namespace: str | None,
+    name: str,
+    version: str | None = None,
+    qualifiers: dict[str, str] | None = None,
+    subpath: str | None = None,
+) -> str:
+    """Render the canonical pURL string of its parts, or raise {exc}`ValueError`.
+
+    The reverse of {func}`parse_purl` in strict mode: normalizes the parts by the rules
+    of their type, and refuses those breaking a rule with {exc}`PurlRuleError`.
+    Percent-encodes each segment of the namespace and the subpath, the name, the
+    version and each qualifier value, keeping `:`. Sorts the qualifiers by key and
+    drops those without a value, and drops the `.` and `..` segments of the subpath.
+
+    `tests/test_purl_spec.py` runs the build cases of the purl-spec test suite against
+    it.
+    """
+    if (
+        not purl_type
+        or not set(purl_type) <= _PURL_KEY_CHARS
+        or purl_type[0] in string.digits
+    ):
+        msg = f"pURL type is not valid: {purl_type!r}."
+        raise ValueError(msg)
+    purl_type = purl_type.lower()
+    if not name:
+        msg = "pURL is missing the required name component."
+        raise ValueError(msg)
+    qualifiers = {key: value for key, value in (qualifiers or {}).items() if value}
+    for key in qualifiers:
+        if not key or not set(key) <= _PURL_KEY_CHARS or key[0] in string.digits:
+            msg = f"pURL qualifier key is not valid: {key!r}."
+            raise ValueError(msg)
+    namespace, name, version = _normalize_purl_parts(
+        purl_type, namespace or "", name, version or "", qualifiers
+    )
+    problem = _purl_rule_problem(purl_type, namespace, name, version, qualifiers)
+    if any(key != key.lower() for key in qualifiers):
+        problem = "takes its qualifier keys in lowercase"
+    if problem:
+        msg = f"A {purl_type} pURL {problem}."
+        raise PurlRuleError(msg)
+    return _encode_purl(purl_type, namespace, name, version, qualifiers, subpath)
+
+
+def _encode_purl(
+    purl_type: str,
+    namespace: str | None,
+    name: str,
+    version: str | None = None,
+    qualifiers: dict[str, str] | None = None,
+    subpath: str | None = None,
+) -> str:
+    """Join the parts of a pURL into its string, percent-encoding each of them."""
+    segments = namespace.split("/") if namespace else []
+    # The name of a `git` pURL is a repository path, which keeps its slashes.
+    segments += name.split("/") if purl_type == "git" else [name]
+    purl = f"pkg:{purl_type}/{'/'.join(map(purl_quote, segments))}"
+    if version:
+        purl += f"@{purl_quote(version)}"
+    if qualifiers:
+        purl += "?" + "&".join(
+            f"{key}={purl_quote(value)}" for key, value in sorted(qualifiers.items())
+        )
+    subpath_segments = [
+        segment
+        for segment in (subpath or "").split("/")
+        if segment not in ("", ".", "..")
+    ]
+    if subpath_segments:
+        purl += "#" + "/".join(map(purl_quote, subpath_segments))
+    return purl
+
+
+def _normalize_purl_parts(
+    purl_type: str,
+    namespace: str,
+    name: str,
+    version: str,
+    qualifiers: dict[str, str],
+) -> tuple[str, str, str]:
+    """Normalize the decoded namespace, name and version of a pURL by its type."""
     rules = PURL_TYPES.get(purl_type)
     if rules:
         if "namespace" in rules.lowercase:
@@ -328,15 +422,7 @@ def parse_purl(purl: str, *, strict: bool = True) -> PurlParts:
         host = urlsplit(qualifiers.get("repository_url", "")).hostname or ""
         if host.endswith("azuredatabricks.net"):
             name = name.lower()
-
-    if strict:
-        problem = _purl_rule_problem(purl_type, namespace, name, version, qualifiers)
-        if any(key != key.lower() for key in keys):
-            problem = "takes its qualifier keys in lowercase"
-        if problem:
-            msg = f"A {purl_type} pURL {problem}: {purl!r}."
-            raise PurlRuleError(msg)
-    return PurlParts(purl_type, namespace or None, name, version or None)
+    return namespace, name, version
 
 
 def _purl_qualifiers(query: str) -> tuple[dict[str, str], tuple[str, ...]]:

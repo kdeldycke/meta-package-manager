@@ -7,6 +7,7 @@
 
 - **Breaking:** [mpm] Drop Python `3.10`, past its end of life: `mpm` needs Python `3.11`. The PPA stops building for Ubuntu `22.04`, whose Python is `3.10`.
 - **Breaking:** [mpm] Remove the `jsonc` and `xml` extras: JSONC and XML configuration files and the `xml` table format need no extra dependency anymore.
+- **Breaking:** [mpm] Give each package of `mpm sbom` the purl of its registered type, like `pkg:pypi/` for a `pip` package. The purl naming its manager moves to the CycloneDX `bom-ref` and to the second SPDX reference.
 - [mpm] Replace `tomlkit` with `tomlrt` in `docs/docs_update.py`. Packagers can drop `tomlkit` from the test dependencies: the tests that need `tomlrt` skip without it.
 - [mpm] Drop the `boltons` dependency: version parsing, manager detection and the SPDX export use the standard library, and ANSI stripping comes from `click-extra`.
 - [mpm] Split a version string at its non-ASCII characters, instead of first spelling its accented letters in ASCII.

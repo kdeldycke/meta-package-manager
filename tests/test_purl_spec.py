@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-"""Run the test suite of purl-spec against the pURL parser of `mpm`.
+"""Run the test suite of purl-spec against the pURL parser and renderer of `mpm`.
 
 `tests/purl-spec/` copies the `LICENSE`, the type definitions of `types/` and the
 test suite of `tests/` from the
@@ -34,7 +34,7 @@ from pathlib import Path
 
 import pytest
 
-from meta_package_manager.package import PURL_TYPES, PurlType, parse_purl
+from meta_package_manager.package import PURL_TYPES, PurlType, parse_purl, render_purl
 
 PURL_SPEC = Path(__file__).parent / "purl-spec"
 
@@ -130,3 +130,25 @@ def test_validate_case(case):
             parse_purl(case["input"])
     else:
         assert parse_purl(case["input"]) == parse_purl(case["expected_output"])
+
+
+@pytest.mark.parametrize("case", _cases("build"))
+def test_build_case(case):
+    """`render_purl()` renders each valid set of parts, and refuses the others."""
+    parts = case["input"]
+
+    def build() -> str:
+        return render_purl(
+            parts.get("type") or "",
+            parts.get("namespace"),
+            parts.get("name") or "",
+            parts.get("version"),
+            parts.get("qualifiers"),
+            parts.get("subpath"),
+        )
+
+    if case["expected_failure"]:
+        with pytest.raises(ValueError):
+            build()
+    else:
+        assert build() == case["expected_output"]

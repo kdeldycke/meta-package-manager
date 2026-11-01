@@ -83,7 +83,7 @@ try:
     from spdx_tools.spdx.writer.xml import xml_writer
     from spdx_tools.spdx.writer.yaml import yaml_writer
 
-    from ._purl import normalized_purls, package_purl
+    from ._purl import normalized_purls, package_purl, registered_purl
 except ImportError as import_error:
     spdx_support = False
     spdx_unavailable_reason = writer_unavailable_reason("spdx-tools", import_error)
@@ -345,26 +345,25 @@ class SPDX(SBOM):
     ) -> list:
         """Assemble the SPDX `externalRefs` block.
 
-        Always includes the package's primary purl. CPE strings (when
+        Leads with the purl of the package's registered type when it has
+        one, followed by the purl tying it to its manager. CPE strings (when
         provided) land as a security-category `cpe23Type` ref. Extra
         purls (multi-arch or multi-origin variants) become additional
         package-manager refs.
         """
+        registered = registered_purl(package)
         refs = [
             ExternalPackageRef(
                 ExternalPackageRefCategory.PACKAGE_MANAGER,
                 "purl",
-                package_purl(package).to_string(),
+                purl,
+            )
+            for purl in (
+                *([registered] if registered else []),
+                package_purl(package),
+                *normalized_purls(metadata.extra_purls),
             )
         ]
-        refs.extend(
-            ExternalPackageRef(
-                ExternalPackageRefCategory.PACKAGE_MANAGER,
-                "purl",
-                extra,
-            )
-            for extra in normalized_purls(metadata.extra_purls)
-        )
         if metadata.cpe:
             refs.append(
                 ExternalPackageRef(
@@ -384,9 +383,10 @@ class SPDX(SBOM):
         """
         [SPDX package metadata specifications](https://spdx.github.io/spdx-spec/v2.3/package-information/).
         """
-        # pURL string, by its virtue of containing all important metadata of a package,
-        # makes perfect unique IDs.
-        purl = package_purl(package).to_string()
+        # The pURL tying the package to its manager makes a unique ID, which the
+        # pURL of its registered type does not: `pip` and `uv` can both install
+        # the same `pkg:pypi/` package.
+        purl = package_purl(package)
         package_docid = self.normalize_spdx_id(f"SPDXRef-{purl}")
         # Some managers (e.g. CPAN) list the same package multiple times.
         if package_docid in self.seen_ids:
@@ -395,7 +395,14 @@ class SPDX(SBOM):
         self.seen_ids.add(package_docid)
         self.name_index[(manager.id, package.id)] = package_docid
         self.purl_index[purl] = package_docid
-        self.register_purl_aliases(purl, normalized_purls(metadata.extra_purls))
+        registered = registered_purl(package)
+        self.register_purl_aliases(
+            purl,
+            (
+                *([registered] if registered else []),
+                *normalized_purls(metadata.extra_purls),
+            ),
+        )
         self._track_addition(manager.id, package.id, metadata)
 
         download_location = metadata.download_url or SpdxNoAssertion()

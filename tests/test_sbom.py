@@ -68,7 +68,7 @@ from meta_package_manager.package import (
     PackageMetadata,
     Supplier,
 )
-from meta_package_manager.sbom._purl import package_purl
+from meta_package_manager.sbom._purl import package_purl, registered_purl
 from meta_package_manager.sbom.base import SBOM, ExportFormat
 from meta_package_manager.sbom.cyclonedx import CycloneDX
 from meta_package_manager.sbom.spdx import SPDX
@@ -126,14 +126,165 @@ def assert_valid_cyclonedx(content: str, export_format: ExportFormat | str) -> N
 
 
 def test_package_purl_carries_the_namespace():
-    """The pURL object of a scoped npm package holds its scope as namespace.
+    """The pURL of a scoped npm package holds its scope as namespace.
 
     As the npm type definition expects.
     """
     package = Package(id="@babel/core", manager_id="npm", installed_version="7.26.0")
-    purl = package_purl(package)
-    assert (purl.namespace, purl.name) == ("@babel", "core")
-    assert purl.to_string() == "pkg:npm/%40babel/core@7.26.0"
+    assert package_purl(package) == "pkg:npm/%40babel/core@7.26.0"
+
+
+@pytest.mark.parametrize(
+    ("manager_id", "package_id", "version", "arch", "vendor", "expected"),
+    (
+        ("pip", "Django_Rest", "3.15", None, None, "pkg:pypi/django-rest@3.15"),
+        ("uv", "yt-dlp", "2026.8.19", None, None, "pkg:pypi/yt-dlp@2026.8.19"),
+        # npm names are case-sensitive.
+        ("npm", "JSONStream", "1.3.5", None, None, "pkg:npm/JSONStream@1.3.5"),
+        ("yarn", "@babel/core", "7.26.0", None, None, "pkg:npm/%40babel/core@7.26.0"),
+        ("brew", "python@3.12", "3.12.7", None, None, "pkg:brew/python%403.12@3.12.7"),
+        (
+            "brew",
+            "hashicorp/tap/terraform",
+            "1.9.8",
+            None,
+            None,
+            "pkg:brew/hashicorp/tap/terraform@1.9.8",
+        ),
+        (
+            "cask",
+            "firefox",
+            "120.0",
+            None,
+            None,
+            "pkg:brew/homebrew/cask/firefox@120.0",
+        ),
+        (
+            "vscode",
+            "ms-python.python",
+            "2024.0.1",
+            None,
+            None,
+            "pkg:vscode-extension/ms-python/python@2024.0.1",
+        ),
+        (
+            "apt",
+            "curl",
+            "8.5.0-2ubuntu10",
+            "amd64",
+            "ubuntu",
+            "pkg:deb/ubuntu/curl@8.5.0-2ubuntu10?arch=amd64",
+        ),
+        (
+            "pacman",
+            "pacman",
+            "6.0.1-1",
+            "x86_64",
+            "arch",
+            "pkg:alpm/arch/pacman@6.0.1-1?arch=x86_64",
+        ),
+        (
+            "vcpkg",
+            "zlib:x64-linux",
+            "1.3.1#2",
+            None,
+            None,
+            "pkg:vcpkg/zlib@1.3.1?port_version=2&triplet=x64-linux",
+        ),
+        (
+            "go",
+            "github.com/nao1215/gup",
+            "v1.8.1",
+            None,
+            None,
+            "pkg:golang/github.com/nao1215/gup@v1.8.1",
+        ),
+        # Outside a distribution, a system package has no vendor.
+        ("apt", "curl", "8.5.0-2ubuntu10", "amd64", None, None),
+        # The type requires a part `mpm` does not know.
+        ("julia", "Example", "0.5.3", None, None, None),
+        ("cpan", "Text::CharWidth", "0.04", None, None, None),
+        ("dkp-pacman", "devkitarm-rules", "1.5.1-1", None, "arch", None),
+        # No registered type covers the manager.
+        ("mas", "497799835", "16.0", None, None, None),
+    ),
+)
+def test_registered_purl(
+    monkeypatch, manager_id, package_id, version, arch, vendor, expected
+):
+    """A package gets the pURL of its registered type, when `mpm` can build one."""
+    monkeypatch.setattr("meta_package_manager.sbom._purl.distro_vendor", lambda: vendor)
+    package = Package(
+        id=package_id, manager_id=manager_id, installed_version=version, arch=arch
+    )
+    assert registered_purl(package) == expected
+
+
+def test_cyclonedx_publishes_the_registered_purl():
+    """A component carries the pURL of its type, and its manager pURL as `bom-ref`.
+
+    packageurl-python would lowercase the npm name, which the npm type keeps.
+    """
+    c = CycloneDX()
+    c.init_doc()
+    c.add_package(
+        _as_manager(_StubManager("pip", "Python pip")),
+        _make_package("pip", "django", "1.0.0"),
+        EMPTY_METADATA,
+    )
+    c.add_package(
+        _as_manager(_StubManager("npm", "npm")),
+        _make_package("npm", "JSONStream", "1.3.5"),
+        EMPTY_METADATA,
+    )
+    c.finalize()
+    content = c.export()
+    assert_valid_cyclonedx(content, ExportFormat.JSON)
+    components = {
+        component["name"]: (component["purl"], component["bom-ref"])
+        for component in json.loads(content)["components"]
+    }
+    assert components["django"] == ("pkg:pypi/django@1.0.0", "pkg:pip/django@1.0.0")
+    assert components["JSONStream"] == (
+        "pkg:npm/JSONStream@1.3.5",
+        "pkg:npm/JSONStream@1.3.5",
+    )
+
+
+def test_spdx_leads_with_the_registered_purl():
+    """The pURL of the registered type comes first, the manager pURL second."""
+    s = SPDX()
+    s.init_doc()
+    s.add_package(
+        _as_manager(_StubManager("pip", "Python pip")),
+        _make_package("pip", "django", "1.0.0"),
+        EMPTY_METADATA,
+    )
+    s.finalize()
+    doc = json.loads(s.export())
+    django = next(p for p in doc["packages"] if p["name"] == "django")
+    purls = [
+        ref["referenceLocator"]
+        for ref in django["externalRefs"]
+        if ref["referenceType"] == "purl"
+    ]
+    assert purls == ["pkg:pypi/django@1.0.0", "pkg:pip/django@1.0.0"]
+
+
+@pytest.mark.parametrize("renderer_class", (SPDX, CycloneDX))
+def test_advisory_of_the_registered_purl_reaches_the_package(renderer_class):
+    """An advisory found under the pURL of the registered type lands on the package."""
+    renderer = renderer_class()
+    renderer.init_doc()
+    package = _make_package("pip", "django", "1.0.0")
+    renderer.add_package(
+        _as_manager(_StubManager("pip", "Python pip")), package, EMPTY_METADATA
+    )
+    assert "pkg:pypi/django@1.0.0" in set(renderer.all_purls())
+    assert renderer.resolve_purl_targets("pkg:pypi/django@1.0.0") == (
+        "pkg:pypi/django@1.0.0",
+        package_purl(package),
+    )
 
 
 @pytest.mark.parametrize(
@@ -313,11 +464,9 @@ def test_bundled_mode_cyclonedx_populates_rich_fields():
     assert "website" in ref_types
     assert "vcs" in ref_types
     deps_for_curl = next(
-        dep
-        for dep in doc["dependencies"]
-        if dep["ref"] == package_purl(curl).to_string()
+        dep for dep in doc["dependencies"] if dep["ref"] == package_purl(curl)
     )
-    assert package_purl(openssl).to_string() in deps_for_curl["dependsOn"]
+    assert package_purl(openssl) in deps_for_curl["dependsOn"]
     assert_valid_cyclonedx(c.export(), ExportFormat.JSON)
 
 
@@ -582,7 +731,7 @@ def test_spdx_renders_attached_vulnerabilities():
     manager = _as_manager(_StubManager("pip", "Python pip"))
     package = _make_package("pip", "django", "1.0.0")
     s.add_package(manager, package, EMPTY_METADATA)
-    purl = package_purl(package).to_string()
+    purl = package_purl(package)
     s.attach_vulnerabilities({purl: (_sample_vulnerability(),)})
     s.finalize()
     doc = json.loads(s.export())  # exporting also validates the document.
@@ -605,7 +754,7 @@ def test_cyclonedx_renders_attached_vulnerabilities():
     manager = _as_manager(_StubManager("pip", "Python pip"))
     package = _make_package("pip", "django", "1.0.0")
     c.add_package(manager, package, EMPTY_METADATA)
-    purl = package_purl(package).to_string()
+    purl = package_purl(package)
     c.attach_vulnerabilities({purl: (_sample_vulnerability(),)})
     c.finalize()
     content = c.export()
@@ -647,7 +796,7 @@ def test_all_purls_yields_aliases(renderer_class):
         _as_manager(_StubManager("brew", "Homebrew Formulae")), package, metadata
     )
     purls = set(renderer.all_purls())
-    assert purls == {package_purl(package).to_string(), UPSTREAM_ALIAS}
+    assert purls == {package_purl(package), UPSTREAM_ALIAS}
 
 
 @pytest.mark.parametrize("renderer_class", (SPDX, CycloneDX))
@@ -659,7 +808,7 @@ def test_resolve_purl_targets_names_every_owner(renderer_class):
     renderer.add_package(
         _as_manager(_StubManager("brew", "Homebrew Formulae")), package, metadata
     )
-    primary = package_purl(package).to_string()
+    primary = package_purl(package)
     assert renderer.resolve_purl_targets(UPSTREAM_ALIAS) == (UPSTREAM_ALIAS, primary)
     assert renderer.resolve_purl_targets(primary) == (primary,)
     assert renderer.resolve_purl_targets("pkg:pypi/django@1.0.0") == (
@@ -680,8 +829,8 @@ def test_one_coordinate_shared_by_two_packages_reaches_both(renderer_class):
     renderer.add_package(manager, second, metadata)
     assert renderer.resolve_purl_targets(UPSTREAM_ALIAS) == (
         UPSTREAM_ALIAS,
-        package_purl(first).to_string(),
-        package_purl(second).to_string(),
+        package_purl(first),
+        package_purl(second),
     )
 
 
@@ -703,8 +852,8 @@ def test_cyclonedx_one_advisory_reaches_every_alias_owner():
     assert len(vulns) == 1
     affects = {target["ref"] for target in vulns[0]["affects"]}
     assert affects == {
-        package_purl(first).to_string(),
-        package_purl(second).to_string(),
+        package_purl(first),
+        package_purl(second),
     }
 
 
@@ -758,7 +907,7 @@ def test_spdx_advisory_found_under_an_alias_lands_on_the_formula():
         # the SPDX 2.3 JSON schema spells it `PACKAGE-MANAGER`.
         if ref["referenceCategory"] == "PACKAGE_MANAGER"
     }
-    assert package_manager_refs == {package_purl(package).to_string(), UPSTREAM_ALIAS}
+    assert package_manager_refs == {package_purl(package), UPSTREAM_ALIAS}
 
 
 def test_cyclonedx_advisory_found_under_an_alias_affects_the_formula():
@@ -777,7 +926,7 @@ def test_cyclonedx_advisory_found_under_an_alias_affects_the_formula():
     vulns = doc.get("vulnerabilities", [])
     assert len(vulns) == 1
     affects = {target["ref"] for target in vulns[0]["affects"]}
-    assert affects == {package_purl(package).to_string()}
+    assert affects == {package_purl(package)}
 
 
 def test_shared_advisory_deduplicated_in_cyclonedx():
@@ -794,8 +943,8 @@ def test_shared_advisory_deduplicated_in_cyclonedx():
     c.add_package(manager, flask, EMPTY_METADATA)
     vuln = _sample_vulnerability()
     c.attach_vulnerabilities({
-        package_purl(django).to_string(): (vuln,),
-        package_purl(flask).to_string(): (vuln,),
+        package_purl(django): (vuln,),
+        package_purl(flask): (vuln,),
     })
     c.finalize()
     doc = json.loads(c.export())
@@ -803,6 +952,6 @@ def test_shared_advisory_deduplicated_in_cyclonedx():
     assert len(vulns) == 1
     affects = {target["ref"] for target in vulns[0]["affects"]}
     assert affects == {
-        package_purl(django).to_string(),
-        package_purl(flask).to_string(),
+        package_purl(django),
+        package_purl(flask),
     }

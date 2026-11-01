@@ -278,7 +278,7 @@ Every dependency comes from Tumbleweed itself.
 
 ````{admonition} Help land it in openSUSE Factory
 :class: important
-The repository above is a personal project on the Open Build Service. The package is being prepared for submission to `system:packagemanager`, the development project through which it would reach Tumbleweed and then Leap. Once accepted, it installs from the distribution's own repositories:
+The repository above is a personal project on the Open Build Service. The package awaits review in [request 1394245](https://build.opensuse.org/request/show/1394245) to `system:packagemanager`, the development project through which it would reach Tumbleweed and then Leap. Once accepted, it installs from the distribution's own repositories:
 
 ```{code-block} shell-session
 $ sudo zypper install meta-package-manager

@@ -75,7 +75,7 @@ def _cases(test_type: str) -> list:
             if case["test_type"] != test_type:
                 continue
             case_id = f"{path.stem}-{index}"
-            marks = ()
+            marks: tuple[pytest.MarkDecorator, ...] = ()
             if case_id in SPEC_CONTRADICTIONS:
                 reason = SPEC_CONTRADICTIONS[case_id]
                 marks = (pytest.mark.xfail(reason=reason, strict=True),)

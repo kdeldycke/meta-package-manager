@@ -473,17 +473,19 @@ def test_single_manager_install_and_remove(invoke, manager_id, package_id):
             continue
 
         # These installs read a live registry (crates.io, Packagist, the Anaconda
-        # channels, CPAN, npm, the snap store, the winget community source) and
-        # need a healthy toolchain behind it, so they regularly surface transient
-        # failures on the CI runners. A stalled Packagist holds the `composer
-        # search` an install starts with past its 120s timeout on every runner at
-        # once, and the install then reports its package as not found. conda's
-        # solver times out or fails to resolve on the Windows runner. Part of the
-        # Windows fleet ships a Strawberry Perl whose CPAN is configured for its
+        # channels, CPAN, npm, the PEAR channel, the snap store, the winget
+        # community source) and need a healthy toolchain behind it, so they
+        # regularly surface transient failures on the CI runners. A stalled Packagist
+        # holds the `composer search` an install starts with past its 120s timeout on
+        # every runner at once, and the install then reports its package as not found.
+        # conda's solver times out or fails to resolve on the Windows runner. Part of
+        # the Windows fleet ships a Strawberry Perl whose CPAN is configured for its
         # SQLite index without DBD::SQLite installed, so every install dies on
         # "install_driver(SQLite) failed". One slow or reset answer from the npm
         # registry fails `npm`, `yarn` and `yarn-berry` alike, since all three
-        # read it. And the snap store truncates a download mid-flight as
+        # read it. The PEAR channel drops REST requests under load, and `pear
+        # install` then fails on a missing info, release or dependency file of the
+        # package. And the snap store truncates a download mid-flight as
         # `unexpected EOF`, which the same store does to this workflow's own
         # `snap install` setup steps. Accept exit 1 like
         # test_single_manager_upgrade_all does for the same reason; the
@@ -495,6 +497,7 @@ def test_single_manager_install_and_remove(invoke, manager_id, package_id):
             "conda",
             "cpan",
             "npm",
+            "pear",
             "snap",
             "winget",
             "yarn",

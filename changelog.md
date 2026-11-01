@@ -15,6 +15,8 @@
 - [mpm] Raise the `click-extra` floor to `10.0.0`: below it, `mpm` cannot import the `strip_ansi()` it applies to manager output.
 - [mpm] Color the program name and version on the `--version` screen with the active theme, like the plain message.
 - [mpm] Read purl specifiers by the rules of purl-spec `v1.1.0`, normalizing the case each registered type ignores, and warn about a purl breaking its type.
+- [brew,cask] Resolve a `pkg:brew/` purl of the `homebrew/cask` tap to `cask`, and one of the `homebrew/core` tap to `brew`, by the bare name.
+- [vscode,vscodium] Resolve a `pkg:vscode-extension/` purl to the `vscode` and `vscodium` extension it names.
 - [brew,cask,vcpkg] Run `vcpkg` one at a time with `brew` and `cask`, so a `brew upgrade` no longer deletes the `cmake` a `vcpkg` port build is using.
 - [mpm] Take a list that both layered configuration files set from the project file alone, as documented, instead of joining the two.
 - [mpm] Stop the SPDX export of `mpm sbom` from looking up the DNS name of the machine, which the document never used.

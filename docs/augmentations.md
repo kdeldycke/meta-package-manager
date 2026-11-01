@@ -227,7 +227,7 @@ Package managers report versions in mutually incompatible schemes: semver, PEP 4
 
 Every package `mpm` reports carries a [purl](https://github.com/package-url/purl-spec) identifier that the native tools do not emit. It is the same identifier that powers `mpm sbom`, giving every manager a portable, tool-agnostic package name.
 
-`mpm` also reads a purl as a package specifier, by the rules of [purl-spec `v1.1.0`](https://github.com/package-url/purl-spec/releases/tag/v1.1.0). It normalizes each part that a registered type compares without case, like the name of a `pkg:brew/` formula. It passes each case of the purl-spec test suite, except 7 cases that contradict the standard or another case. A purl that breaks a rule of its type still resolves, with a warning naming the rule.
+`mpm` also reads a purl as a package specifier, by the rules of [purl-spec `v1.1.0`](https://github.com/package-url/purl-spec/releases/tag/v1.1.0). It normalizes each part that a registered type compares without case, like the name of a `pkg:brew/` formula. It passes each case of the purl-spec test suite, except 7 cases that contradict the standard or another case. A purl that breaks a rule of its type still resolves, with a warning naming the rule. A registered type reaches each manager serving it, under the package ID that manager uses: `pkg:brew/homebrew/cask/firefox` names the `firefox` cask of [`cask`](managers/cask.md), and `pkg:vscode-extension/ms-python/python` the `ms-python.python` extension of [`vscode`](managers/vscode.md) and [`vscodium`](managers/vscodium.md).
 
 ### One sudo prompt, uniform policy
 

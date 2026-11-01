@@ -192,6 +192,43 @@ def props(spec: Specifier):
             ),
             id="purl_multiple_aliases",
         ),
+        pytest.param(
+            "pkg:brew/homebrew/cask/firefox@120.0",
+            ({"package_id": "firefox", "manager_id": "cask", "version": "120.0"},),
+            id="purl_brew_cask_tap",
+        ),
+        pytest.param(
+            "pkg:brew/Homebrew/Core/SQLite@3.43.2",
+            ({"package_id": "sqlite", "manager_id": "brew", "version": "3.43.2"},),
+            id="purl_brew_core_tap",
+        ),
+        pytest.param(
+            "pkg:brew/hashicorp/tap/terraform",
+            (
+                {
+                    "package_id": "hashicorp/tap/terraform",
+                    "manager_id": "brew",
+                    "version": None,
+                },
+            ),
+            id="purl_brew_third_party_tap",
+        ),
+        pytest.param(
+            "pkg:vscode-extension/ms-python/python@2023.25.10292213",
+            (
+                {
+                    "package_id": "ms-python.python",
+                    "manager_id": "vscode",
+                    "version": "2023.25.10292213",
+                },
+                {
+                    "package_id": "ms-python.python",
+                    "manager_id": "vscodium",
+                    "version": "2023.25.10292213",
+                },
+            ),
+            id="purl_vscode_extension",
+        ),
     ),
 )
 def test_parse_specs(spec_string, expected):

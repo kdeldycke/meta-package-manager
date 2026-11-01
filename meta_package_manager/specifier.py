@@ -71,6 +71,7 @@ PURL_MAP: dict[str, set[str] | None] = {
     "bitbucket": None,
     "bitnami": None,
     "bower": None,
+    "brew": {"brew", "cask"},
     "buildroot": None,
     "cargo": {"cargo"},
     "carthage": None,
@@ -138,6 +139,7 @@ PURL_MAP: dict[str, set[str] | None] = {
     "terraform": None,
     "vagrant": None,
     "vim": None,
+    "vscode-extension": {"vscode", "vscodium"},
     "wordpress": None,
     "yocto": None,
 }
@@ -148,6 +150,14 @@ and the candidate types of the
 [older list](https://github.com/package-url/purl-spec/blob/master/PURL-TYPES.rst) of the
 purl-spec repository, like `alpine` or `nix`, which a pURL can still carry. A key
 mapping to `None` names a type no manager handles.
+"""
+
+BREW_DEFAULT_TAPS: dict[str, str] = {"homebrew/cask": "cask", "homebrew/core": "brew"}
+"""The default taps of Homebrew, by the ID of the manager installing from each.
+
+Their formulae and casks go by a bare name: `pkg:brew/homebrew/cask/firefox` names
+the `firefox` cask. The `brew` type of purl-spec covers both, and reads a pURL
+without a namespace as a formula of `homebrew/core`.
 """
 
 
@@ -211,9 +221,18 @@ class Specifier:
             msg = f"Unrecognized {purl_type} pURL type."
             raise ValueError(msg)
 
-        package_id = purl.name
-        if purl.namespace and purl_type not in PURL_QUALIFYING_NAMESPACES:
-            package_id = f"{purl.namespace}/{package_id}"
+        namespace, package_id = purl.namespace, purl.name
+        if purl_type == "brew":
+            # A `pkg:brew/` pURL names a cask under the `homebrew/cask` tap alone, and
+            # a formula otherwise.
+            manager_ids = {BREW_DEFAULT_TAPS.get(namespace or "", "brew")}
+            if namespace in BREW_DEFAULT_TAPS:
+                namespace = None
+        if purl_type == "vscode-extension" and namespace:
+            # An extension ID joins its publisher and its name with a dot.
+            package_id = f"{namespace}.{package_id}"
+        elif namespace and purl_type not in PURL_QUALIFYING_NAMESPACES:
+            package_id = f"{namespace}/{package_id}"
 
         # The pURL can be handled by one manager or more.
         return tuple(

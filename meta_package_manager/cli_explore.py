@@ -50,19 +50,21 @@ from typing import Final
 
 import tomli_w
 from click_extra import (
+    KO_GLYPH,
+    OK_GLYPH,
+    SERIALIZATION_FORMATS,
     STRING,
     Choice,
     Spinner,
     argument,
     columns_option,
     echo,
+    get_current_theme as theme,
     option,
     pass_context,
 )
 from click_extra.context import SORT_BY, TABLE_FORMAT
 from click_extra.highlight import highlight
-from click_extra.table import SERIALIZATION_FORMATS
-from click_extra.theme import KO_GLYPH, OK_GLYPH, get_current_theme as theme
 from extra_platforms import reduce
 
 from .bar_plugin_renderer import BarPluginRenderer

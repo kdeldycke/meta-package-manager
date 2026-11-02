@@ -29,7 +29,7 @@ from textwrap import indent
 from urllib.parse import quote, urlparse
 
 import pytest
-from click_extra.theme import KO_GLYPH
+from click_extra import KO_GLYPH
 from extra_platforms import Group, extract_members
 from wcwidth import wcswidth
 from yaml import Loader, load, safe_load

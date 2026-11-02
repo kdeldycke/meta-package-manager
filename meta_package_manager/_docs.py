@@ -76,7 +76,7 @@ from urllib.parse import quote, urlparse
 
 import tomli_w
 import yaml
-from click_extra.table import TableFormat, render_table
+from click_extra import TableFormat, render_table
 from extra_platforms import extract_members
 
 from meta_package_manager.capabilities import (

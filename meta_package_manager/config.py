@@ -45,15 +45,15 @@ from typing import Any
 
 import tomli_w
 from click import get_app_dir
-from click_extra import echo
-from click_extra.config import (
+from click_extra import (
     CONFIG_PATH_METADATA_KEY,
     ConfigValidator,
     ValidationError,
+    echo,
+    get_current_theme as theme,
     read_file,
 )
 from click_extra.context import CONF_FULL, CONF_SOURCE
-from click_extra.theme import get_current_theme as theme
 
 from .cooldown import parse_cooldown_section
 from .definitions import (

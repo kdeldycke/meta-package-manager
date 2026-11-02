@@ -18,7 +18,7 @@
 from __future__ import annotations
 
 import pytest
-from click_extra.color import COLOR_ENVVARS
+from click_extra import COLOR_ENVVARS
 
 from meta_package_manager.tables import OUTDATED_COLUMNS
 

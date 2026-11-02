@@ -47,11 +47,11 @@ from click.core import ParameterSource
 from click_extra import (
     OperationTrail as _OperationTrail,
     get_current_context,
+    get_current_theme as theme,
     resolve_jobs,
     run_lanes,
 )
 from click_extra.context import JOBS
-from click_extra.theme import get_current_theme as theme
 
 from .execution import SPINNER_DELAY, _styling_enabled, elapsed_clock
 from .sudo import _hidden_prompt_risk

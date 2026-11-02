@@ -47,8 +47,7 @@ from textwrap import dedent
 from types import SimpleNamespace
 
 import pytest
-from click_extra import strip_ansi
-from click_extra.table import SERIALIZATION_FORMATS, TableFormat
+from click_extra import SERIALIZATION_FORMATS, TableFormat, strip_ansi
 from extra_platforms import is_any_windows
 
 from meta_package_manager import __version__, bar_plugin

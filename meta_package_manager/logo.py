@@ -42,8 +42,7 @@ That plain form is also the one machine readers parse, the bar plugin probing
 
 from __future__ import annotations
 
-from click_extra import style
-from click_extra.version import VersionScreen, default_facts
+from click_extra import VersionScreen, default_facts, style
 
 from . import (
     __build_os__,

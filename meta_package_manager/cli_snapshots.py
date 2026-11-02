@@ -39,12 +39,12 @@ from click_extra import (
     columns_option,
     echo,
     file_path,
+    get_current_theme as theme,
     is_stdout,
     option,
     pass_context,
     prep_path,
 )
-from click_extra.theme import get_current_theme as theme
 from extra_platforms import current_platform
 
 from . import __version__

@@ -64,18 +64,23 @@ from textwrap import dedent, indent, shorten
 from types import MappingProxyType
 from typing import ClassVar, Final
 
-from click_extra import Style, echo, strip_ansi, style
-from click_extra.color import invocation_color, is_a_tty, resolve_color_env
-from click_extra.execution import (
+from click_extra import (
     INDENT,
+    Spinner,
+    Style,
     args_cleanup,
+    echo,
     format_cli_prompt,
+    format_duration,
+    get_current_theme as theme,
     highlight_bin_name,
+    invocation_color,
+    is_a_tty,
+    resolve_color_env,
     run_cli,
+    strip_ansi,
+    style,
 )
-from click_extra.humanize import format_duration
-from click_extra.spinner import Spinner
-from click_extra.theme import get_current_theme as theme
 from extra_platforms import UNIX, current_platform, is_any_windows
 
 from .cooldown import CooldownPolicy

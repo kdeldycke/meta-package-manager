@@ -30,9 +30,12 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
-from click_extra.color import COLOR_ENVVARS
-from click_extra.execution import _LIVE_PROCESSES, terminate_live_processes
-from click_extra.theme import get_current_theme as theme
+from click_extra import (
+    COLOR_ENVVARS,
+    get_current_theme as theme,
+    terminate_live_processes,
+)
+from click_extra.execution import _LIVE_PROCESSES
 from extra_platforms import ALL_PLATFORMS, UNIX, is_any_windows
 from extra_platforms.pytest import write_fake_executable
 

@@ -44,9 +44,15 @@ import shutil
 from contextlib import contextmanager
 from enum import StrEnum
 
-from click_extra import ColumnSpec, print_data, select_columns, select_row
+from click_extra import (
+    AUTO_WIDTH,
+    SERIALIZATION_FORMATS,
+    ColumnSpec,
+    print_data,
+    select_columns,
+    select_row,
+)
 from click_extra.context import COLUMNS, TABLE_FORMAT
-from click_extra.table import AUTO_WIDTH, SERIALIZATION_FORMATS
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:

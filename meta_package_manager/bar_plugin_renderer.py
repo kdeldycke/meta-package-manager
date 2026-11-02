@@ -33,9 +33,14 @@ import sys
 from functools import cached_property
 from io import StringIO
 
-from click_extra import echo, get_current_context, strip_ansi
-from click_extra.color import invocation_color
-from click_extra.table import TableFormat, render_table
+from click_extra import (
+    TableFormat,
+    echo,
+    get_current_context,
+    invocation_color,
+    render_table,
+    strip_ansi,
+)
 
 from .bar_plugin import MPMPlugin
 from .capabilities import Operations, implements

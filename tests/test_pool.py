@@ -25,8 +25,8 @@ from pathlib import Path
 
 import click
 import pytest
+from click_extra import LogLevel
 from click_extra.context import JOBS, VERBOSITY_LEVEL
-from click_extra.logging import LogLevel
 
 import meta_package_manager
 from meta_package_manager.capabilities import Delegate

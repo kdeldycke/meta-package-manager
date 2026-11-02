@@ -40,10 +40,10 @@ from click_extra import (
     argument,
     columns_option,
     echo,
+    get_current_theme as theme,
     option,
     pass_context,
 )
-from click_extra.theme import get_current_theme as theme
 
 from .capabilities import (
     Operations,

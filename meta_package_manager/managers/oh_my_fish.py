@@ -21,7 +21,7 @@ import shlex
 from pathlib import Path
 from typing import ClassVar
 
-from click_extra.execution import args_cleanup
+from click_extra import args_cleanup
 from extra_platforms import LINUX_LIKE, MACOS
 
 from ..capabilities import version_not_implemented

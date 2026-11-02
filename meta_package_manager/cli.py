@@ -92,16 +92,22 @@ from textwrap import dedent
 from typing import cast
 
 from click_extra import (
+    SERIALIZATION_FORMATS,
     STRING,
     Choice,
+    HelpKeywords,
     IntRange,
+    LogLevel,
     Option,
     Section,
     UsageError,
     VersionOption,
+    default_params,
     echo,
     env_summary,
+    get_current_theme as theme,
     group,
+    install_interrupt_handler,
     jobs_option,
     option,
     option_group,
@@ -110,18 +116,12 @@ from click_extra import (
     sort_by_option,
     zero_exit_option,
 )
-from click_extra.commands import default_params
 from click_extra.context import (
     PROGRESS,
     TABLE_FORMAT,
     VERBOSITY_LEVEL,
     ZERO_EXIT,
 )
-from click_extra.execution import install_interrupt_handler
-from click_extra.highlight import HelpKeywords
-from click_extra.logging import LogLevel
-from click_extra.table import SERIALIZATION_FORMATS
-from click_extra.theme import get_current_theme as theme
 
 from . import bar_plugin
 from .capabilities import Operations, implements_method

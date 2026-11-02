@@ -27,9 +27,7 @@ from itertools import product
 from typing import ClassVar, cast
 
 import pytest
-from click_extra import strip_ansi
-from click_extra.color import COLOR_ENVVARS
-from click_extra.execution import args_cleanup
+from click_extra import COLOR_ENVVARS, args_cleanup, strip_ansi
 from extra_platforms import is_any_windows
 from extra_platforms.pytest import unless_macos
 

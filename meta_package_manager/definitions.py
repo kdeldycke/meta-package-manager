@@ -53,7 +53,7 @@ from dataclasses import dataclass
 from functools import cache
 from typing import cast
 
-from click_extra.config import ValidationError
+from click_extra import ValidationError
 from extra_platforms import ALL_GROUP_IDS, ALL_PLATFORMS, traits_from_ids
 
 from .capabilities import METHOD_OPERATIONS, Operations, implements_method

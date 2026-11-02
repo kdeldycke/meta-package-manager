@@ -42,8 +42,7 @@ from unittest.mock import patch
 
 import click
 import pytest
-from click_extra.color import COLOR_ENVVARS
-from click_extra.spinner import Spinner
+from click_extra import COLOR_ENVVARS, Spinner
 from extra_platforms import is_any_windows
 
 from meta_package_manager.capabilities import Operations

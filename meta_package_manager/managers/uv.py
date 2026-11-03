@@ -80,20 +80,10 @@ class UVBase(PackageManager):
     """
 
     pre_args = ("--color", "never", "--no-progress")
-    """
-    - `--color color-choice`
-        Control colors in output [default: `auto`]
+    """`--color never` keeps ANSI escapes out of the output mpm parses, and
+    `--no-progress` hides the spinners and progress bars uv draws.
 
-        Possible values:
-        - `auto`: Enables colored output only when the output is going to a terminal or
-          TTY with support
-        - `always`: Enables colored output regardless of the detected environment
-        - `never`: Disables colored output
-
-    - `--no-progress`
-        Hide all progress outputs.
-
-        For example, spinners or progress bars.
+    Source: the global options of `uv help`.
     """
 
     version_regexes = (r"uv\s+(?P<version>\S+)",)

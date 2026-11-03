@@ -41,6 +41,13 @@ in-flight children registered by `run_cli`). This module keeps what is
 package-manager policy: per-operation timeouts, sudo escalation, cooldown
 enforcement and dry-run.
 ```
+
+```{todo}
+Narrow the color gate of `_styling_enabled` to the still-call line of
+`CLIExecutor._spawn`, and paint the spinner label and the trail lines
+unconditionally. {data}`~meta_package_manager.execution.ITALIC_CAPABLE_TERMS`
+stays: that gate is about the terminal, not about color.
+```
 """
 
 from __future__ import annotations
@@ -485,14 +492,9 @@ def _styling_enabled() -> bool:
     worker thread it cannot read the invocation's color. A spinner frame and a
     trail line no longer depend on it, since
     {class}`click_extra.spinner.Spinner` and
-    {class}`click_extra.spinner.OperationTrail` drop every escape when color is
-    off, the ones embedded in a label or a trail message included.
-
-    ```{todo}
-    Gate the still-call line alone, and paint the spinner label and the trail
-    lines unconditionally. {data}`ITALIC_CAPABLE_TERMS` stays: that gate is about
-    the terminal, not about color.
-    ```
+    {class}`click_extra.trail.OperationTrail` drop every escape when color is
+    off, the ones embedded in a label or a trail message included. The module
+    docstring holds the plan to narrow this gate.
     """
     color = invocation_color()
     if color is not None:
@@ -1112,7 +1114,7 @@ class CLIExecutor:
 
     ```{caution}
     Not thread-safe, and it does not need to be: both callers bind a cache to a lane,
-    and {func}`click_extra.execution.run_lanes` runs a lane's items serially on a
+    and {func}`click_extra.jobs.run_lanes` runs a lane's items serially on a
     single worker. Handing one dict to managers that run *concurrently* would race
     two peers into spawning the same command anyway, losing the de-duplication rather
     than corrupting anything, so the lane is what makes the cache work at all.

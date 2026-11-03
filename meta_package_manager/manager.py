@@ -1052,7 +1052,8 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         """Publication timestamp of the latest release of a package.
 
         The probe behind the synthesized per-package cooldown gate (see
-        {meth}`cooldown_hold`): a manager without a native
+        {meth}`~meta_package_manager.manager.PackageManager.cooldown_hold`): a
+        manager without a native
         {attr}`~meta_package_manager.execution.CLIExecutor.cooldown_env_var`
         that implements this method becomes gateable, package by package.
 
@@ -1105,12 +1106,14 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         """Decide whether the release-age cooldown holds back one package.
 
         The per-package half of the gate, for managers that implement the
-        {meth}`release_date` probe instead of carrying a native
+        {meth}`~meta_package_manager.manager.PackageManager.release_date` probe
+        instead of carrying a native
         {attr}`~meta_package_manager.execution.CLIExecutor.cooldown_env_var`.
         Returns `None` when the package may proceed: no active probe-backed
         cooldown, or a publication old enough to clear the window. Returns a
-        {class}`CooldownHold` otherwise: the caller logs its
-        {attr}`~CooldownHold.reason`, and the change report reads its two
+        {class}`~meta_package_manager.manager.CooldownHold` otherwise: the caller
+        logs its {attr}`~meta_package_manager.manager.CooldownHold.reason`, and
+        the change report reads its two
         timestamps.
 
         The probe is fail-closed: a publication date that cannot be read

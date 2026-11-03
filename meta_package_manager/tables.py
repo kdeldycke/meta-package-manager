@@ -20,7 +20,7 @@ command) but share the same output machinery. This module owns all of it:
 
 - {class}`SortableField`, the vocabulary of the global `mpm --sort-by`
   selector. The selector itself is click-extra's field-vocabulary
-  {class}`~click_extra.table.SortByOption`, and the per-table resolution (sort
+  {class}`~click_extra.table_options.SortByOption`, and the per-table resolution (sort
   by the selected fields the table carries, keep the original row order when it
   carries none) happens inside {func}`click_extra.table.print_table`, from the
   field each header pairs with its column in the registries below.
@@ -489,7 +489,7 @@ def print_projected_table(
 
     The `--columns` selection restricts and reorders the rendering,
     SQL-`SELECT`-style; click-extra's
-    {class}`~click_extra.table.ColumnsOption` already validated it against the
+    {class}`~click_extra.table_options.ColumnsOption` already validated it against the
     same `columns` registry, so unknown IDs never reach this point.
     `default_ids` is the selection applied when the user passed none
     (`search` uses it to hide the description column unless
@@ -497,7 +497,7 @@ def print_projected_table(
 
     Sorting stays on mpm's global `--sort-by`: each header pairs its label
     with the sortable field the column carries, and click-extra's
-    {meth}`~click_extra.context.Context.print_table` reads the selection
+    {meth}`~click_extra.commands.Context.print_table` reads the selection
     (with the `--table-format` one) from the shared context `meta` and
     resolves it per table. A sort field whose column is projected out is simply
     skipped, and a table carrying none of the selected fields keeps its

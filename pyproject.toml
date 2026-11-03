@@ -473,6 +473,10 @@ docs = [
   # comments and layout. 2.0.0 is the first release whose dumps() takes a plain
   # mapping.
   "tomlrt>=2",
+  # autodoc imports every module it documents, and docs/tests.md documents the
+  # test suite, whose modules import pytest. Without the test group the whole
+  # tests package fails to import and each of its pages renders empty.
+  { include-group = "test" },
 ]
 # Stubs for the untyped libraries the tests import: docutils and PyYAML in
 # tests/test_docs.py. mypy needs the docutils stub even though the library
@@ -913,6 +917,7 @@ site.deploy = "cloudflare-pages"
 # generator. `docs/conf.py` keeps the former paths alive as redirect stubs, and
 # `docs/infrastructure.md` carries the edge side of the move.
 sphinx.builder = "dirhtml"
+sphinx.fail-on-warning = true
 # `check-void-deps.yaml` stays on `ubuntu-22.04` on purpose, for the reason its
 # job comment gives: later images restrict unprivileged user namespaces, which
 # blocks the chroot helper of `xbps-src`. Without this entry the scheduled

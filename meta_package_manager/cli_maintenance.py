@@ -26,6 +26,17 @@ drives, live in {mod}`meta_package_manager.cli`.
 ```{todo}
 Add a `--force`/`--reinstall` flag to `install`.
 ```
+
+```{todo}
+Drop every per-manager announcement once mpm requires a click-extra release
+labeling the prompt line `run_cli` logs. `_announce_level` sets the level of
+four of them (`sync`, `cleanup`, `upgrade --all` and `doctor`), and `backup`,
+`restore` and `sbom` log their own. That `info:brew.sync: $ …` line then names
+the manager, the operation and the command, which is all an announcement says.
+Two things move in the same change: the selection tests read an announcement
+as proof a manager acted, and a `restore` section with no package runs no
+command, so the announcement is the only trace it leaves.
+```
 """
 
 from __future__ import annotations
@@ -160,17 +171,7 @@ def _announce_level(ctx: Context) -> int:
     "run everything" stays at `DEBUG` so the default view shows only the trail
     (matching the explicit/implicit levels `select_managers` already uses for
     its skip messages). Shared by `sync`, `cleanup`, `upgrade --all` and
-    `doctor`.
-
-    ```{todo}
-    Drop every per-manager announcement (these four, plus `backup`, `restore`
-    and `sbom`) once mpm requires a click-extra release labeling the prompt line
-    `run_cli` logs. That `info:brew.sync: $ …` line then names the manager, the
-    operation and the command, which is all an announcement says. Two things
-    move in the same change: the selection tests read an announcement as proof
-    a manager acted, and a `restore` section with no package runs no command,
-    so the announcement is the only trace it leaves.
-    ```
+    `doctor`. The module docstring holds the plan to drop these announcements.
     """
     return logging.INFO if ctx.obj.user_selection else logging.DEBUG
 

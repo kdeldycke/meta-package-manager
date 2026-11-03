@@ -30,7 +30,7 @@ through.
 The generic layers live upstream in click-extra: the concurrency primitives in
 {mod}`click_extra.execution` (`run_lanes` driven by
 `mpm --jobs`) and the batch-reporting trail in {mod}`click_extra.spinner`
-({class}`~click_extra.spinner.OperationTrail` with its
+({class}`~click_extra.trail.OperationTrail` with its
 `trail_glyph`/`trail_line` atoms). This module keeps what is package-manager
 policy: which managers must never overlap, how the trail binds to the pool's
 `--progress` state, and when a batch collapses to a sequential pass.
@@ -355,7 +355,7 @@ Lets {func}`merge_into_lock_lanes` resolve a manager's mutual-exclusion group in
 def effective_jobs(ctx: Context | None, count: int) -> int:
     """Resolve how many worker threads to use for a batch of `count` items.
 
-    Thin wrapper over {func}`click_extra.execution.resolve_jobs` pinning mpm's
+    Thin wrapper over {func}`click_extra.jobs.resolve_jobs` pinning mpm's
     policy: always collapse to a single (sequential) worker at `DEBUG` verbosity,
     where coherent per-manager log narration matters more than the speed-up
     (interleaved threads would scramble it). The base helper also collapses to
@@ -474,7 +474,7 @@ def _state_failed(data: dict) -> bool:
 
 
 class OperationTrail(_OperationTrail):
-    """{class}`click_extra.spinner.OperationTrail` bound to the manager pool.
+    """{class}`click_extra.trail.OperationTrail` bound to the manager pool.
 
     The upstream class owns the two renderings (sequential echoed lines, or one
     aggregate indicator with buffered-then-streamed lines) and the interactive
@@ -536,6 +536,11 @@ class OperationTrail(_OperationTrail):
         jobs: int = 1,
         coverage: bool = False,
     ) -> None:
+        """Derive the upstream trail options from the batch's *managers*.
+
+        The trail shows when any manager has `progress` on, and a concurrent
+        batch with a known *total* draws a determinate bar.
+        """
         self._managers = tuple(managers)
         progress = any(manager.progress for manager in self._managers)
         super().__init__(

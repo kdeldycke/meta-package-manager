@@ -25,6 +25,6 @@ name: 🆙 Changelog & versions
 jobs:
 
   changelog:
-    uses: kdeldycke/repomatic/.github/workflows/changelog.yaml@8ddfc918229f98cf10ca9cf809c4b53ec84274cd # v8.0.0
+    uses: kdeldycke/repomatic/.github/workflows/changelog.yaml@a86e2f8a11ac500c56951e04d2b4bde002bff8f1 # v8.1.0
     secrets:
       REPOMATIC_PAT: ${{ secrets.REPOMATIC_PAT }}

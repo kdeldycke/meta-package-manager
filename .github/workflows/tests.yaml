@@ -123,7 +123,7 @@ jobs:
       - name: Run repomatic show-metadata
         id: metadata
         run: >
-          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==8.0.0' show-metadata
+          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==8.1.0' show-metadata
           --output-format github-json --output "$GITHUB_OUTPUT"
           latest_stable_python test_matrix test_matrix_pr
 
@@ -665,7 +665,7 @@ jobs:
         # sound.
         if: ${{ !cancelled() }}
         run: >
-          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==8.0.0' lint-coverage
+          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==8.1.0' lint-coverage
           --report "${{ runner.temp }}/coverage.json" --no-fatal
 
       # The end-to-end bar plugin tests call way too many external commands to be run in parallel, and need macOS.

@@ -65,7 +65,6 @@ You can also try the library itself in an interactive Python shell without insta
 
 ```{code-block} shell-session
 $ uvx --with meta-package-manager python
-Installed 14 packages in 29ms
 Python 3.13.2 (main, Feb  4 2025, 14:51:09) [Clang 16.0.0 (clang-1600.0.26.6)] on darwin
 Type "help", "copyright", "credits" or "license" for more information.
 >>> from meta_package_manager.pool import pool

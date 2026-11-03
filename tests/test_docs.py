@@ -2763,7 +2763,7 @@ def test_benchmark_operations_rows_have_support():
     for line in rows[2:]:
         cells = [cell.strip() for cell in line.strip("|").split("|")]
         label, tools = cells[0], cells[1:]
-        assert any("✅" in cell or "🟡" in cell for cell in tools), (
+        assert any("✅" in cell or "🪫" in cell for cell in tools), (
             f"Operations row {label!r} shows no support from any tool; "
             "drop the row or fill in the tool that provides it"
         )

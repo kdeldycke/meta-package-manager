@@ -274,7 +274,7 @@ cell means that nobody assessed the tool, and only the benchmark shows one.
 
 ```{note}
 ✅ and ❌ are shared by every comparison and capability table of `docs/`. Some
-glyphs stay local to one table. The benchmark adds 🟡 for coarse support. The
+glyphs stay local to one table. The benchmark adds 🪫 for coarse support. The
 cooldown support table adds 🔜 and ➖, and gives 🚧 a meaning of its own:
 proposed upstream. The ⚠️ of the bar plugin counts runtime errors and says
 nothing about upstream health. A glyph is never written in backticks, in a
@@ -1010,10 +1010,10 @@ def benchmark_managers_table() -> str:
     hand-edited tables follows. The page's card links the source file, so the
     checked-in mirror holds no line anchor that shifts when a class moves.
 
-    Support cells are normally `✅`, but render as `[🟡](url)` when the
+    Support cells are normally `✅`, but render as `[🪫](url)` when the
     `(manager_id, competitor)` pair is listed in the TOML's
     `coarse_support` map, with the URL pointing to the maintainer's own
-    acknowledgement of the bundling. `🟡` means the competitor can only
+    acknowledgement of the bundling. `🪫` means the competitor can only
     reach this manager through a coarser umbrella step (topgrade's
     `--only shell` or `--only vim`), never in isolation. Refused
     managers (from the `refused` map) render as `[❌](url)` where the
@@ -1065,7 +1065,7 @@ def benchmark_managers_table() -> str:
         for name in BENCHMARK_COMPETITORS:
             if name in flags:
                 if name in coarse_map:
-                    cells.append(f"[🟡]({coarse_map[name]})")
+                    cells.append(f"[🪫]({coarse_map[name]})")
                 else:
                     cells.append("✅")
             elif name in refused_map:

@@ -583,7 +583,7 @@ zr = "https://github.com/jedahan/zr"
 # well-formedness test stays simple. Each maps competitor to url, linking to
 # the maintainer's own confirmation of the coarse bundling (like the
 # `Step::Shell` / `Step::Vim` acknowledgement in topgrade discussion #961).
-# Cells render as `[🟡](url)`.
+# Cells render as `[🪫](url)`.
 [coarse_support.antibody]
 topgrade = "https://github.com/topgrade-rs/topgrade/issues/961#issuecomment-2420924279"
 

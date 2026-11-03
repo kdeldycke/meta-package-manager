@@ -1,0 +1,106 @@
+# TEMPORARY probe workflow, to be deleted once the linkcheck status of each host in the bot-blocked group of
+# `linkcheck_ignore` (docs/conf.py) is measured from a GitHub-hosted runner.
+---
+name: 🔍 Linkcheck probe
+"on":
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/linkcheck-probe.yaml
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NPM_CONFIG_MIN_RELEASE_AGE: 7
+  UV_EXCLUDE_NEWER: "1 week"
+
+jobs:
+
+  linkcheck:
+    name: 🔗 Bot-blocked hosts
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          version: "0.13.5"
+      - name: Write the probe project
+        # The linkcheck settings of docs/conf.py minus `linkcheck_ignore`, over every URL the built site links to on
+        # each host of the group.
+        run: |
+          mkdir probe
+          cat > probe/conf.py <<'EOF'
+          linkcheck_retries = 3
+          linkcheck_anchors_ignore = [r"issuecomment-\d+", r"readme", r"L\d+", r"diff-[0-9a-f]+"]
+          linkcheck_anchors_ignore_for_url = [r"https://github\.com/.+"]
+          EOF
+          cat > probe/index.rst <<'EOF'
+          Probe
+          =====
+
+          - https://devkitpro.org/wiki/Getting_Started
+          - https://docs.chocolatey.org/en-us/choco/
+          - https://docs.chocolatey.org/en-us/community-repository/maintainers/list-unlist-a-chocolatey-package/
+          - https://docs.chocolatey.org/en-us/community-repository/moderation/
+          - https://en.opensuse.org/Portal:Zypper
+          - https://git.yoctoproject.org/cgit/cgit.cgi/opkg/
+          - https://gitlab.alpinelinux.org/alpine/apk-tools
+          - https://gitlab.alpinelinux.org/alpine/aports/-/merge_requests/105566
+          - https://guix.gnu.org
+          - https://guix.gnu.org/manual/en/html_node/Invoking-guix-package.html
+          - https://medium.com/@sdboyer/so-you-want-to-write-a-package-manager-4ae9c17d9527
+          - https://ohmybash.nntoan.com
+          - https://openclipart.org/detail/190311/packaging-icons
+          - https://openclipart.org/detail/300407/paper-box-head
+          - https://openclipart.org/detail/300435/paper-box-head-3
+          - https://web.archive.org/web/20071230212545/http://apt-rpm.org/
+          - https://web.archive.org/web/20090215003815/http://autopackage.org/
+          - https://web.archive.org/web/20100121142959/http://www.openpkg.org/
+          - https://web.archive.org/web/20191121154506/https://github.com/svnpenn/sage
+          - https://www.gnu.org/software/emacs/
+          - https://www.gnu.org/software/emacs/manual/html_node/emacs/Packages.html
+          - https://www.npmjs.com
+          - https://www.tug.org/texlive/
+          - https://www.tug.org/texlive/doc/tlmgr.html
+          EOF
+      - name: Run the linkcheck builder
+        # A broken link is the measurement, not a failure of the probe.
+        run: >
+          uvx --no-progress --from 'sphinx==9.2.0' sphinx-build --builder linkcheck probe probe/_linkcheck || true
+      - name: Report each URL
+        shell: python
+        run: |
+          import json
+          import os
+          from pathlib import Path
+
+          output = Path("probe/_linkcheck/output.json").read_text(encoding="UTF-8")
+          rows = [json.loads(line) for line in output.splitlines() if line]
+          lines = ["| Status | Code | URL | Info |", "| :-- | :-- | :-- | :-- |"]
+          for row in sorted(rows, key=lambda row: row["uri"]):
+              info = str(row.get("info", "")).replace("|", "/")[:200]
+              lines.append(f"| {row['status']} | {row['code']} | {row['uri']} | {info} |")
+          table = "\n".join(lines)
+          print(table)
+          Path(os.environ["GITHUB_STEP_SUMMARY"]).write_text(table + "\n", encoding="UTF-8")
+      - name: Gate on every URL measured
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+
+          output = Path("probe/_linkcheck/output.json").read_text(encoding="UTF-8")
+          rows = [json.loads(line) for line in output.splitlines() if line]
+          probed = Path("probe/index.rst").read_text(encoding="UTF-8").count("\n- https://")
+          assert probed == 24, f"the probe page lists {probed} URLs, expected 24"
+          assert len(rows) == probed, f"{len(rows)} results for {probed} URLs"
+          # Nothing here may be skipped: an ignore leaking into the probe would hide the very hosts it measures.
+          ignored = [row["uri"] for row in rows if row["status"] == "ignored"]
+          assert not ignored, f"ignored instead of checked: {ignored}"

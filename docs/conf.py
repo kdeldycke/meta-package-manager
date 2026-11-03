@@ -105,17 +105,20 @@ myst_fence_as_directive = ["mermaid"]
 myst_heading_anchors = 6
 myst_heading_slug_func = "docutils.nodes.make_id"
 
-# Fail the build on two warnings even when `sphinx-build` runs without
+# Fail the build on three warnings even when `sphinx-build` runs without
 # `--fail-on-warning`, as a local build does. The Docs workflow passes that flag
 # (`[tool.repomatic] sphinx.fail-on-warning`), so CI fails on every warning.
 # click-extra logs a `click_extra.config_docstring_heading` warning for a Markdown
 # heading in a docstring of `MpmConfig`, which the `click:config` reference
-# renders as a section of its own. myst-parser logs a `myst.xref_missing` warning
-# for a `[text](#anchor)` or `[text](page.md#anchor)` link it cannot place, and
-# ships the link as written anyway. The `myst.xref_missing` entry mirrors the
-# upstream repomatic docs configuration.
+# renders as a section of its own, and a `click_extra.todo_unrendered` warning
+# for a docstring `{todo}` that no page renders, which the todolist page then
+# cannot list. myst-parser logs a `myst.xref_missing` warning for a
+# `[text](#anchor)` or `[text](page.md#anchor)` link it cannot place, and ships
+# the link as written anyway. The last two entries mirror the upstream repomatic
+# docs configuration.
 click_extra_fail_on_warnings = [
     "click_extra.config_docstring_heading",
+    "click_extra.todo_unrendered",
     "myst.xref_missing",
 ]
 
@@ -190,7 +193,7 @@ exclude_patterns = ["_build", "_linkcheck", "html", "Thumbs.db", ".DS_Store"]
 # the whole corpus for that defect class, not for a spot fix.
 nitpicky = True
 
-# Two categories with no fix on this side of the build. Every other warning the
+# One category with no fix on this side of the build. Every other warning the
 # build emits is this project's to act on, which is the point of keeping the list
 # this short.
 suppress_warnings = [
@@ -198,13 +201,6 @@ suppress_warnings = [
     # which opens at `## ` because GitHub supplies the H1 from the repository
     # name. Starting it at H1 would put a second title on the landing page.
     "myst.header",
-    # "Cannot resolve forward reference in type annotations of
-    # meta_package_manager.package.PackageURL (module packageurl): name
-    # 'ClassVar' is not defined". The annotation lives in `packageurl` and
-    # `click`, neither of which imports the name at runtime, so autodoc cannot
-    # resolve it whatever this project writes. Cosmetic: the signature still
-    # renders, with the unresolved name as plain text.
-    "sphinx_autodoc_typehints.forward_reference",
 ]
 
 # `sphinx_autodoc_typehints` renders every annotation as a cross-reference, using
@@ -366,10 +362,6 @@ linkcheck_ignore = [
     r"https://www\.npmjs\.com",
     r"https://(www\.)?patreon\.com",
     r"https://www\.tug\.org/",
-    # GitHub fragment anchors are rendered client-side and not visible to linkcheck.
-    r"https://github\.com/kdeldycke/click-extra#",
-    # GitHub README tab fragments are rendered client-side.
-    r"https://github\.com/.+\?tab=readme-ov-file#",
     # The unversioned `releases/latest/download/<file>` aliases of the readme's
     # Executables table. The release engine uploads one beside every versioned
     # artifact, so each resolves for as long as the newest release carried that
@@ -478,8 +470,17 @@ html_extra_path = ["404.html", "_redirects", "robots.txt"]
 # publishing several translations or versions side by side. This one publishes a
 # single tree, so anything but the bare link yields sitemap entries that 404.
 sitemap_url_scheme = "{link}"
+# The generated navigation pages hold no content a crawler should index. The
+# patterns match the links sphinx-sitemap records, which the `dirhtml` builder
+# ends with a slash instead of `.html`.
+sitemap_excludes = ["genindex/", "py-modindex/", "search/"]
 html_css_files = ["custom.css", "manager-index.css", "table-crosshair.css"]
 html_js_files = ["manager-index.js", "table-crosshair.js"]
+
+# Copy the commands of a shell-session block alone: `.gp` is the Pygments class
+# of the prompt, `.go` the one of the output lines. The default only skips line
+# numbers, so every `$ ` and every output line landed in the clipboard.
+copybutton_exclude = ".linenos, .gp, .go"
 
 # Opt into click_extra.sphinx's executable directives: the `click:tree` block of
 # docs/cli-parameters.md, the `click:config` and `click:run` blocks of
@@ -569,6 +570,43 @@ def prune_build_artifacts(app, exception):
         sources.rmdir()
 
 
+def rehome_moved_nodes(app: object, doctree: nodes.document) -> None:
+    """Point every node of a page at the page's own document.
+
+    myst-parser parses an `{eval-rst}` block into a throwaway document that
+    shares the page's settings, then moves the parsed nodes into the page. The
+    moved nodes keep the throwaway document as theirs. Before it pickles a page,
+    Sphinx removes the build environment from a copy of the page's settings, not
+    from the settings object the throwaway document still holds. So without this
+    hook, every API page, each one an `automodule` inside an `{eval-rst}` block,
+    pickles the whole build environment: about 7 MB per page, and 1.3 GB of
+    doctrees for a full build (Sphinx `9.2.0`, myst-parser `5.1.0`).
+    """
+    for node in doctree.findall():
+        if node.document is not doctree:
+            node.document = doctree
+
+
+def drop_unused_viewcode_modules(app: object, env: object) -> None:
+    """Forget each module `sphinx.ext.viewcode` read but no document links.
+
+    `viewcode` reads the source of every module a documented object may come
+    from, and keeps an entry for that module even when none of its objects gets
+    a `[source]` link. A serial read drops such an entry when it purges the next
+    document. A parallel read, which the Docs workflow runs, merges the entries
+    of its workers after every purge has run, so each unused module becomes a
+    published page that nothing links to, like `_modules/pathlib/`
+    (sphinx-doc/sphinx#14675). Dropping the entries with no recorded use gives
+    both reads the same output.
+    """
+    modules = getattr(env, "_viewcode_modules", {})
+    for modname, entry in list(modules.items()):
+        # A module viewcode could not read is `False`. A read one is a tuple of
+        # its code, its tags, the objects documented from it, and its refname.
+        if entry and not entry[2]:
+            del modules[modname]
+
+
 RELEASE_HEADING = re.compile(r"(?P<version>\d+\.\d+\.\d+)(?:\.\w+)? \([^)]+\)")
 """Rendered title of a changelog release: `8.1.0 (2026-10-04)`.
 
@@ -628,4 +666,6 @@ class ReleaseAnchors(Transform):
 def setup(app):
     app.add_role("mpm-release", mpm_release_role)
     app.add_transform(ReleaseAnchors)
+    app.connect("doctree-read", rehome_moved_nodes)
+    app.connect("env-updated", drop_unused_viewcode_modules)
     app.connect("build-finished", prune_build_artifacts)

@@ -18,17 +18,21 @@
 
 Build the docs once and assert against the real HTML that the generated summary
 tables deep-link to the sections they describe, that each changelog release is
-anchored on its version, and that intersphinx references to Click resolve to
-the upstream site. This catches drift the moment a `{click:config}` or
-`{click:tree}` directive stops wiring its anchors, or an `intersphinx_mapping`
-URL goes stale, neither of which a mock-based test would notice.
+anchored on its version, that intersphinx references to Click resolve to the
+upstream site, and that each sidebar icon of the stylesheet lands on its
+entry. This catches drift the moment a `{click:config}` or `{click:tree}`
+directive stops wiring its anchors, an `intersphinx_mapping` URL goes stale,
+or a stylesheet selector names a link the build never writes, none of which a
+mock-based test would notice.
 """
 
 from __future__ import annotations
 
+import re
 import shutil
 import subprocess
 import sys
+import tomllib
 from pathlib import Path
 
 import pytest
@@ -36,6 +40,13 @@ import pytest
 from meta_package_manager import _docs
 
 PROJECT_ROOT = Path(__file__).parent.parent
+
+# The builder the Docs workflow deploys with. Building with it here is what
+# lets a defect only its output shows fail a test, like a stylesheet keyed to
+# the shape of its links.
+SPHINX_BUILDER = tomllib.loads(
+    (PROJECT_ROOT / "pyproject.toml").read_text(encoding="UTF-8"),
+)["tool"]["repomatic"]["sphinx"]["builder"]
 
 # The `docs` group declares `requires-python = ">= 3.14"` (see [tool.uv]), so it
 # resolves nowhere else: below that, `uv run --group docs` installs nothing and
@@ -70,7 +81,7 @@ pytestmark = [
 
 @pytest.fixture(scope="module")
 def built_docs(tmp_path_factory: pytest.TempPathFactory) -> Path:
-    """Build the HTML documentation once and return its output directory.
+    """Build the documentation once and return its output directory.
 
     Builds into a throwaway directory (rather than `docs/_build`) so the run is
     hermetic and never clobbers a developer's local build.
@@ -86,7 +97,7 @@ def built_docs(tmp_path_factory: pytest.TempPathFactory) -> Path:
             "docs",
             "sphinx-build",
             "--builder",
-            "html",
+            SPHINX_BUILDER,
             str(PROJECT_ROOT / "docs"),
             str(out_dir),
         ],
@@ -96,9 +107,16 @@ def built_docs(tmp_path_factory: pytest.TempPathFactory) -> Path:
     return out_dir
 
 
-def read_html(built_docs: Path, filename: str) -> str:
-    """Read a built HTML page."""
-    html_path = built_docs / filename
+def page_file(name: str) -> str:
+    """Name the file the builder writes for the document *name*."""
+    if SPHINX_BUILDER == "dirhtml" and name != "index":
+        return f"{name}/index.html"
+    return f"{name}.html"
+
+
+def read_html(built_docs: Path, name: str) -> str:
+    """Read the built HTML page of the document *name*."""
+    html_path = built_docs / page_file(name)
     assert html_path.exists(), f"HTML file not found: {html_path}"
     return html_path.read_text(encoding="utf-8")
 
@@ -111,7 +129,7 @@ def test_changelog_releases_are_anchored_on_their_version(built_docs):
     `ReleaseAnchors` of `docs/conf.py` gives that section `#v3-6-0` instead,
     and the release in preparation the anchor it ships with.
     """
-    html = read_html(built_docs, "changelog.html")
+    html = read_html(built_docs, "changelog")
     missing = [
         version
         for version in _docs.changelog_releases()
@@ -125,12 +143,12 @@ def test_changelog_releases_are_anchored_on_their_version(built_docs):
     (
         # The `{click:config} mpm` summary table, one row per option.
         *(
-            ("configuration.html", option)
+            ("configuration", option)
             for option in ("dry-run", "jobs", "stop-on-error", "timeout")
         ),
         # The `{click:tree} mpm` summary table, one row per command.
         *(
-            ("cli-parameters.html", command)
+            ("cli-parameters", command)
             for command in ("mpm-install", "mpm-remove", "mpm-sync", "mpm-upgrade")
         ),
     ),
@@ -150,10 +168,47 @@ def test_intersphinx_click_resolves(built_docs):
     """
     hits = [
         page.name
-        for page in sorted(built_docs.glob("*.html"))
+        for page in sorted(built_docs.rglob("*.html"))
         if "https://click.palletsprojects.com" in page.read_text(encoding="utf-8")
     ]
     assert hits, (
         "no intersphinx link to Click found in the built docs; "
         "the mapping may be broken"
     )
+
+
+@pytest.mark.parametrize("page", ("index", "install", "managers/apk"))
+def test_sidebar_icons_match_their_entries(built_docs, page):
+    """Each sidebar icon of `custom.css` lands on its entry, at every depth.
+
+    The stylesheet keys an icon to the href of a toctree entry. That href is
+    relative to the page, so it gains a `../` per level of nesting, and the
+    builder decides its suffix: `tests.html` under `html`, `tests/` under
+    `dirhtml`. A selector naming a shape the build never writes draws no icon,
+    and nothing else reports it.
+    """
+    css = (PROJECT_ROOT / "docs" / "_static" / "custom.css").read_text(
+        encoding="UTF-8",
+    )
+    selectors = re.findall(
+        r"^(\.sidebar-tree a\.reference\.internal.*)::before \{$",
+        css,
+        re.MULTILINE,
+    )
+    assert selectors, "no sidebar icon rule in custom.css"
+    sidebar = read_html(built_docs, page).partition('class="sidebar-tree"')[2]
+    hrefs = re.findall(
+        r'<a class="reference internal" href="([^"]*)"',
+        sidebar.partition("</div>")[0],
+    )
+    for selector in selectors:
+        tests = re.findall(r'\[href(\$?=)"([^"]*)"\]', selector)
+        matches = [
+            href
+            for href in hrefs
+            if any(
+                href.endswith(value) if operator == "$=" else href == value
+                for operator, value in tests
+            )
+        ]
+        assert len(matches) == 1, f"{selector} matches {matches} on {page}"

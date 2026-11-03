@@ -28,6 +28,8 @@
 - [mpm] Skip `test_extra_labels_in_pyproject` outside a git checkout, where a newer `extra-platforms` failed it for a packager.
 - [mpm] Test the sdist in CI the way a distribution builds it: a new job runs the hermetic layer from the unpacked sdist on the newest dependencies.
 - [mpm] Replace the benchmark's 🟡 mark with 🪫, for coarse support that only runs inside a wider operation.
+- [mpm] Copy only the commands of a shell example on the documentation site, without its prompt and output lines.
+- [mpm] Restore the sidebar icons of the API reference, test suite and index pages on the documentation site.
 - [mpm] Fix the API reference of the test suite, whose pages published empty, and the links to the `click-extra` symbols that `10.0.0` moved.
 
 ## [`8.2.0` (2026-10-25)](https://github.com/kdeldycke/meta-package-manager/compare/v8.1.2...v8.2.0)

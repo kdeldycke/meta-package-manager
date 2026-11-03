@@ -914,7 +914,7 @@ site.deploy = "cloudflare-pages"
 # Publish every page as `<name>/index.html`, so the site serves `/managers/apk/`
 # instead of `/managers/apk.html`. Extension-less URLs are what search engines
 # and readers expect of a documentation site, and they outlive a change of
-# generator. `docs/conf.py` keeps the former paths alive as redirect stubs, and
+# generator. `docs/_redirects` keeps the former paths alive, and
 # `docs/infrastructure.md` carries the edge side of the move.
 sphinx.builder = "dirhtml"
 sphinx.fail-on-warning = true

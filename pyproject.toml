@@ -851,7 +851,6 @@ exclude = [
   "^https://gitlab\\.manjaro\\.org/.*$",
   "^https://liberapay\\.com/?$",
   "^https://medium\\.com/.*$",
-  "^https://ohmybash\\.nntoan\\.com/?$",
   "^http://www\\.slackware\\.com/.*$",
   "^https://www\\.bitdefender\\.com/.*$",
   "^https://www\\.gnu\\.org/software/.*$",

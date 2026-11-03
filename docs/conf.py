@@ -339,29 +339,22 @@ linkcheck_anchors_ignore_for_url = [
 ]
 
 linkcheck_ignore = [
-    # These sites return 403/418/429/timeout to bots but are valid.
-    r"https://claude\.ai/",
-    r"https://devkitpro\.org",
-    r"https://docs\.chocolatey\.org/",
-    r"https://en\.opensuse\.org/",
+    # The status codes below are what the linkcheck builder of Sphinx `9.2.0`
+    # gets from a GitHub-hosted runner.
+    # git.yoctoproject.org returns 403 to bots but is valid.
     r"https://git\.yoctoproject\.org/",
+    # gitlab.alpinelinux.org returns 418 to bots but is valid.
     r"https://gitlab\.alpinelinux\.org/",
-    r"https://gitlab\.manjaro\.org/",
+    # guix.gnu.org returns 403 to bots but is valid.
     r"https://guix\.gnu\.org",
-    r"https://liberapay\.com",
+    # medium.com returns 403 to bots but is valid.
     r"https://medium\.com/",
-    r"https://ohmybash\.nntoan\.com",
-    r"https://openclipart\.org/",
     # archive.org throttles crawlers with a 429. The `sage` section links a
     # capture because the project it cites was deleted along with its owner,
     # so the snapshot is the only thing left to point at.
     r"https://web\.archive\.org/",
-    r"http://www\.slackware\.com/",
-    r"https://www\.bitdefender\.com/",
-    r"https://www\.gnu\.org/software/",
+    # npmjs.com returns 403 to bots but is valid.
     r"https://www\.npmjs\.com",
-    r"https://(www\.)?patreon\.com",
-    r"https://www\.tug\.org/",
     # The unversioned `releases/latest/download/<file>` aliases of the readme's
     # Executables table. The release engine uploads one beside every versioned
     # artifact, so each resolves for as long as the newest release carried that

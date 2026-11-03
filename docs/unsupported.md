@@ -557,7 +557,7 @@ Declined in {mpm-release}`8.0.0`.
 
 ## Shell configuration frameworks ❌ 🛟
 
-[`bash-it`](https://bash-it.readthedocs.io), [`oh-my-bash`](https://ohmybash.nntoan.com) and [`oh-my-zsh`](https://ohmyz.sh).
+[`bash-it`](https://bash-it.readthedocs.io), [`oh-my-bash`](https://ohmybash.github.io) and [`oh-my-zsh`](https://ohmyz.sh).
 
 A shell configuration framework ships no registry of its own. Its plugins, themes, aliases and completions are files inside the single git checkout the install clones, so enabling one points at a path already on disk, and nothing is fetched or versioned independently. A third-party plugin arrives as a pull request against the framework itself ([ohmybash/oh-my-bash#771](https://github.com/ohmybash/oh-my-bash/pull/771)), or as a directory the user creates by hand ([oh-my-zsh Customization](https://github.com/ohmyzsh/ohmyzsh/wiki/Customization#adding-a-new-plugin)). The upgrade `topgrade` drives is a `git pull` of that one checkout, which is the whole of it. Nor is there an inventory to report: the plugin set is whatever the user's own configuration array lists.
 

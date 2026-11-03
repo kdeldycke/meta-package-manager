@@ -353,6 +353,8 @@ linkcheck_ignore = [
     # capture because the project it cites was deleted along with its owner,
     # so the snapshot is the only thing left to point at.
     r"https://web\.archive\.org/",
+    # www.gnu.org is intermittently unreachable from CI.
+    r"https://www\.gnu\.org/software/",
     # npmjs.com returns 403 to bots but is valid.
     r"https://www\.npmjs\.com",
     # The unversioned `releases/latest/download/<file>` aliases of the readme's

@@ -27,31 +27,32 @@ The **real package is named `meta-package-manager`**. Only the latter provides t
 You can try Meta Package Manager right now in your terminal, without installing any dependency or virtual env [thanks to `uvx`](https://docs.astral.sh/uv/guides/tools/):
 
 ``````{tab-set}
-`````{tab-item} Latest version
+`````{tab-item} Latest release
 ```shell-session
-$ uvx meta-package-manager
-Installed 14 packages in 29ms
-Usage: mpm [OPTIONS] COMMAND [ARGS]...
+$ uvx meta-package-manager --help
+```
+
+```{click:run}
+from meta_package_manager.cli import mpm
+invoke(mpm, args=["--help"])
 ```
 `````
 
 `````{tab-item} Specific version
 ```shell-session
-$ uvx meta-package-manager@8.2.0
-Installed 14 packages in 29ms
-Usage: mpm [OPTIONS] COMMAND [ARGS]...
+$ uvx meta-package-manager@8.2.0 --help
 ```
 `````
 
 `````{tab-item} Development version
 ```shell-session
-$ uvx --from git+https://github.com/kdeldycke/meta-package-manager -- mpm
+$ uvx --from git+https://github.com/kdeldycke/meta-package-manager -- mpm --help
 ```
 `````
 
 `````{tab-item} Local version
 ```shell-session
-$ uvx --from file:///Users/me/code/meta-package-manager -- mpm
+$ uvx --from file:///Users/me/code/meta-package-manager -- mpm --help
 ```
 `````
 ``````

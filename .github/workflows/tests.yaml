@@ -138,7 +138,7 @@ jobs:
         || fromJSON(needs.metadata.outputs.metadata).test_matrix_pr }}
     # `python-label` is set by repomatic show-metadata only where the plain
     # version would hide why a cell is continue-on-error: a prerelease reads
-    # `3.15-dev`, and every other cell falls back to the version itself. A cell
+    # `3.16-dev`, and every other cell falls back to the version itself. A cell
     # carrying a `resolution` key appends it, which tells that cell from the
     # twin sharing its runner and Python.
     name: >-
@@ -596,14 +596,12 @@ jobs:
 
       - name: Install Python ${{ matrix.python-version }}
         # If UV cannot find the requested Python version, it exits with code 2, which let the job pass unnoticed on
-        # Windows. So we force the shell to bash, even on Windows, and "set -e" to ensure any error in the install
-        # process is caught and fails the job. It works because Windows runners too Git Bash available).
+        # Windows. So we force the shell to bash, even on Windows, whose runners ship Git Bash: GitHub runs a bash
+        # step with `-e`, so the failed install fails the job.
         shell: bash
-        run: |
-          set -e
-          uv --no-progress venv --python "${PYTHON_VERSION}"
         env:
           PYTHON_VERSION: ${{ matrix.python-version }}
+        run: uv --no-progress venv --python "${PYTHON_VERSION}"
       - name: Install project
         run: uv --no-progress sync --frozen --all-extras --group test
       - name: Resolve again (${{ matrix.resolution || 'not requested' }})

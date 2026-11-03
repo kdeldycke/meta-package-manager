@@ -399,7 +399,7 @@ test = [
   "click-extra[pytest]",
   "click-extra[toml]",
   # coverage 7.11.0 dropped Python 3.9, below our requires-python floor.
-  "coverage[toml]>=7.11",
+  "coverage>=7.11",
   # The [validation] extra provides the jsonschema-based validators used to assert
   # generated CycloneDX SBOMs are schema-valid. Kept test-only (not a runtime dep) so
   # the heavy validation stack stays out of the install. See tests/test_cli_sbom.py.

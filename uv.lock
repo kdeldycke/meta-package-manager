@@ -1135,7 +1135,7 @@ docs = [
 test = [
     { name = "click-extra", extras = ["pytest"] },
     { name = "click-extra", extras = ["toml"] },
-    { name = "coverage", extras = ["toml"], specifier = ">=7.11" },
+    { name = "coverage", specifier = ">=7.11" },
     { name = "cyclonedx-python-lib", extras = ["validation"] },
     { name = "extra-platforms" },
     { name = "httpx", specifier = ">=0.27" },

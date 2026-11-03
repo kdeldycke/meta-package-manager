@@ -1438,7 +1438,7 @@ class CLIExecutor:
         """
         for regex in self.version_regexes:
             logging.debug(f"Use {regex!r} to extracting version.")
-            parts = re.compile(regex, re.MULTILINE).search(output)
+            parts = re.search(regex, output, re.MULTILINE)
             if parts:
                 version_string = parts.groupdict().get("version")
                 logging.debug(f"Extracted version: {version_string!r}")

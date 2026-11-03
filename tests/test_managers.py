@@ -474,7 +474,7 @@ def test_version_regex_matches_sample(manager_id, sample_output, expected_versio
     manager = pool[manager_id]
     matched = None
     for regex in manager.version_regexes:
-        match = re.compile(regex, re.MULTILINE).search(sample_output)
+        match = re.search(regex, sample_output, re.MULTILINE)
         if match and match.group("version"):
             matched = match.group("version")
             break

@@ -443,23 +443,29 @@ test = [
 ]
 docs = [
   "click-extra[sphinx]",
-  # furo 2025.9.25 is a recent CalVer release supporting Sphinx 8.
-  "furo>=2025.9.25",
+  # furo 2025.12.19 is the first release that accepts Sphinx 9 (`sphinx<10`):
+  # 2025.9.25 caps it below 9.
+  "furo>=2025.12.19",
   # attrs_block, attrs_inline and colon_fence (enabled in docs/conf.py) ship in
   # myst-parser 4.0+; the `alert` extension needs 5.1.
   "myst-parser>=5.1",
-  # Sphinx 8.0.0 is the first version to drop Python 3.9, below our requires-python floor.
-  "sphinx>=8",
-  # sphinx-autodoc-typehints 2.4.0 is the first release aligned to Python >= 3.10.
-  "sphinx-autodoc-typehints>=2.4",
+  # Sphinx 9.1.0 is the oldest release that sphinx-autodoc-typehints 3.14, below,
+  # accepts.
+  "sphinx>=9.1",
+  # sphinx-autodoc-typehints 3.14.0 resolves the forward references of the click and
+  # packageurl classes the API pages document, like `UsageError` and `PackageURL`:
+  # below it each one logs a `forward_reference` warning, which fails the docs build.
+  "sphinx-autodoc-typehints>=3.14",
   # sphinx-copybutton 0.5.2 stabilized the code-block copy button.
   "sphinx-copybutton>=0.5.2",
   # sphinx-datatables 1.0.0 is the first stable release; makes the binaries
   # catalog table searchable and sortable client-side (pulls sphinxcontrib-jquery).
   "sphinx-datatables>=1",
-  # sphinx-design 0.6 introduced the card/grid/tab directive syntax used in docs.
-  "sphinx-design>=0.6",
-  # sphinx-sitemap 2.6.0 is the first release supporting Sphinx 8.
+  # sphinx-design 0.7.0 is the first release that accepts Sphinx 9 (`sphinx<10`):
+  # 0.6.1 caps it below 9.
+  "sphinx-design>=0.7",
+  # sphinx-sitemap 2.6.0 added `sitemap_excludes`, which docs/conf.py sets to keep
+  # the index and search pages out of the sitemap.
   "sphinx-sitemap>=2.6",
   # sphinxcontrib-jquery is loaded explicitly in docs/conf.py (sphinx-datatables
   # activates it too late to register jquery.js on its own); declare it so the

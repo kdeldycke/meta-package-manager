@@ -31,6 +31,7 @@
 - [mpm] Copy only the commands of a shell example on the documentation site, without its prompt and output lines.
 - [mpm] Restore the sidebar icons of the API reference, test suite and index pages on the documentation site.
 - [mpm] Render the live `mpm --help` screen in the installation page, in place of a typed excerpt.
+- [mpm] Raise the docs floor of `sphinx-autodoc-typehints` to `3.14`, below which the docs build fails, and those of Sphinx, `furo` and `sphinx-design` with it.
 - [mpm] Point the `oh-my-bash` links of the documentation at its current site, in place of the dead `ohmybash.nntoan.com`.
 - [mpm] Fix the API reference of the test suite, whose pages published empty, and the links to the `click-extra` symbols that `10.0.0` moved.
 

@@ -289,7 +289,6 @@ ogp_site_url = docs_site_url
 # absolute URL whatever its depth. The card is the site's own copy rather than a
 # GitHub raw hotlink, which keeps one origin and refreshes it on every deploy.
 ogp_image = "_static/banner-social-dark.png"
-ogp_image_alt = project
 html_theme_options = {
     # Sidebar logo. Furo renders this pair as .only-light/.only-dark images
     # driven by its own theme state, so the logo follows the toggle. A single
@@ -322,20 +321,16 @@ html_theme_options = {
     ),
 }
 
-# GitHub renders issue comments, README tab anchors, blob line anchors and
-# commit-diff anchors with JavaScript, so the linkcheck builder cannot find
-# them in the static HTML.
-linkcheck_anchors_ignore = [
-    r"issuecomment-\d+",
-    r"readme",
-    r"L\d+",
-    r"diff-[0-9a-f]+",
-]
-
-# GitHub markdown READMEs and CONTRIBUTING files render their heading anchors
-# client-side, so linkcheck can't validate any fragment on github.com pages.
+# GitHub renders issue comments, README tab and heading anchors, blob line
+# anchors and commit-diff anchors with JavaScript, and GitLab renders its blob
+# line anchors the same way, so the linkcheck builder cannot find them in the
+# static HTML: skip anchor checks for each host instead of stacking per-anchor
+# patterns. The manager docstrings link source lines on gitlab.com and
+# salsa.debian.org.
 linkcheck_anchors_ignore_for_url = [
     r"https://github\.com/.+",
+    r"https://gitlab\.com/",
+    r"https://salsa\.debian\.org/",
 ]
 
 linkcheck_ignore = [

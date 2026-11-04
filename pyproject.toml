@@ -847,24 +847,12 @@ exclude = [
   "^https://doi.org/.+/zenodo.*$",
   # Allow redirects to the official pip documentation.
   "^https://pip.pypa.io/.*$",
-  # Sites that respond 403/418/timeout to lychee but are valid in a browser.
-  "^https://claude\\.ai/.*$",
-  "^https://devkitpro\\.org/?$",
-  "^https://docs\\.chocolatey\\.org/.*$",
-  "^https://en\\.opensuse\\.org/.*$",
-  "^https://git\\.yoctoproject\\.org/.*$",
+  # The status codes below are what lychee 0.24.2 gets from the runner of the
+  # broken-links job.
+  # gitlab.alpinelinux.org returns 418 to bots but is valid.
   "^https://gitlab\\.alpinelinux\\.org/.*$",
-  "^https://gitlab\\.manjaro\\.org/.*$",
-  "^https://liberapay\\.com/?$",
+  # medium.com returns 403 to bots but is valid.
   "^https://medium\\.com/.*$",
-  "^http://www\\.slackware\\.com/.*$",
-  "^https://www\\.bitdefender\\.com/.*$",
-  "^https://www\\.gnu\\.org/software/.*$",
-  "^https://www\\.npmjs\\.com/?$",
-  "^https://(www\\.)?patreon\\.com/?$",
-  "^https://www\\.tug\\.org/.*$",
-  # openclipart.org intermittently returns 500 for valid asset detail pages.
-  "^https://openclipart\\.org/.*$",
 ]
 
 [tool.repomatic]

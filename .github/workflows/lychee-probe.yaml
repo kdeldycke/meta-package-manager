@@ -1,0 +1,100 @@
+# TEMPORARY probe workflow, to be deleted once the lychee status of each host still linked from a doc file, among the
+# bot-blocked `[tool.lychee]` excludes of pyproject.toml, is measured from the runner the broken-links job uses.
+---
+name: 🔍 Lychee probe
+"on":
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/lychee-probe.yaml
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NPM_CONFIG_MIN_RELEASE_AGE: 7
+  UV_EXCLUDE_NEWER: "1 week"
+
+jobs:
+
+  lychee:
+    name: 🔗 Bot-blocked hosts
+    # The runner of the `check-broken-links` job, whose network the measurement must share.
+    runs-on: ubuntu-26.04-arm
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          version: "0.13.5"
+      - name: Write the probe page
+        # Every URL of the doc files that a bot-blocked exclude still matches. The directory holds no pyproject.toml,
+        # so no `[tool.lychee]` exclude applies.
+        run: |
+          mkdir probe
+          cat > probe/urls.md <<'EOF'
+          - <https://docs.chocolatey.org/en-us/community-repository/maintainers/list-unlist-a-chocolatey-package/>
+          - <https://docs.chocolatey.org/en-us/community-repository/moderation/>
+          - <https://gitlab.alpinelinux.org/alpine/aports/-/merge_requests/105566>
+          - <https://medium.com/@sdboyer/so-you-want-to-write-a-package-manager-4ae9c17d9527>
+          - <https://openclipart.org/detail/190311/packaging-icons>
+          - <https://openclipart.org/detail/300407/paper-box-head>
+          - <https://openclipart.org/detail/300435/paper-box-head-3>
+          EOF
+      - name: Run lychee three times, a minute apart
+        # The flags of the broken-links crawl, with the lychee that repomatic pins. A failed link is the measurement,
+        # not a failure of the probe. Three runs, since one passing run proves nothing for a flaky host.
+        working-directory: probe
+        run: |
+          for run in 1 2 3; do
+            uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==8.1.0' run lychee -- \
+              --no-progress --include-fragments --exclude-all-private --format json --output "run-$run.json" urls.md \
+              || true
+            if [ "$run" != 3 ]; then sleep 60; fi
+          done
+      - name: Report each URL
+        shell: python
+        run: |
+          import json
+          import os
+          import re
+          from pathlib import Path
+
+          urls = re.findall(r"<(https://[^>]+)>", Path("probe/urls.md").read_text(encoding="UTF-8"))
+          runs = [json.loads(Path(f"probe/run-{run}.json").read_text(encoding="UTF-8")) for run in (1, 2, 3)]
+          lines = ["| URL | Run 1 | Run 2 | Run 3 |", "| :-- | :-- | :-- | :-- |"]
+          for url in urls:
+              cells = []
+              for report in runs:
+                  # A passing URL lands in no map: lychee fills `success_map` only under `--verbose`.
+                  cell = "ok"
+                  for key in ("error_map", "timeout_map", "redirect_map", "excluded_map"):
+                      for entries in report.get(key, {}).values():
+                          for entry in entries:
+                              if entry.get("url") == url:
+                                  status = entry.get("status")
+                                  text = status.get("text") if isinstance(status, dict) else status
+                                  cell = f"{key.removesuffix('_map')}: {text}"[:90].replace("|", "/")
+                  cells.append(cell)
+              lines.append(f"| {url} | " + " | ".join(cells) + " |")
+          table = "\n".join(lines)
+          print(table)
+          keys = ("total", "successful", "errors", "excludes")
+          print(json.dumps([{key: report.get(key) for key in keys} for report in runs]))
+          Path(os.environ["GITHUB_STEP_SUMMARY"]).write_text(table + "\n", encoding="UTF-8")
+      - name: Gate on every URL measured
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+
+          for run in (1, 2, 3):
+              report = json.loads(Path(f"probe/run-{run}.json").read_text(encoding="UTF-8"))
+              assert report["total"] == 7, f"run {run} checked {report['total']} URLs, expected 7"
+              # An exclude leaking into the probe would hide the very hosts it measures.
+              assert report.get("excludes", 0) == 0, f"run {run} excluded {report['excludes']} URLs"

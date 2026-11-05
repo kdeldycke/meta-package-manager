@@ -571,9 +571,27 @@ If the command is not found, you can directly execute the module from Python:
 $ python -m meta_package_manager --version
 ```
 
+## Support envelope
+
+The [Python](#python-compatibility) and [click-extra](packaging.md#click-extra-compatibility) compatibility tables keep the [support envelope](https://kdeldycke.github.io/click-extra/python-directives.html#the-support-envelope) of `mpm`. Outside of it, these are obsolete:
+
+<!-- envelope python click-extra package=mpm -->
+
+- `mpm` releases before `7.6.0` (2026-08-10)
+- Python versions before `3.10` (2021-10-04)
+- `click-extra` versions before `8.8.1` (2026-08-02)
+
+<!-- envelope-end -->
+
 ## Python compatibility
 
-The table below shows which Python versions each `mpm` release range supports. For `5.17.0` and later, support comes from the `Programming Language :: Python :: 3.X` classifiers in `pyproject.toml`. For earlier releases, the floor comes from the `requires-python` (or Poetry `python = "..."` for older tags) or `python_requires` (`setup.py`) declaration, capped at the latest Python released within the range. Releases before `1.8.0` did not declare Python version support and are not represented. Cells carry three states: ✅ for a version the release declares, ❌ for one its `requires-python` rules out, and – for one it neither claimed nor forbade, which is mostly a Python that did not exist yet when the release was cut. The table is regenerated from the release tags by repomatic's `update-docs` job, through click-extra's [`matrix` mechanism](https://kdeldycke.github.io/click-extra/python-directives.html#the-matrix-directive):
+Each cell holds one of three states:
+
+- ✅: the release declares support for that Python.
+- ❌: the `requires-python` of the release rules that Python out.
+- `–`: the release neither claimed nor forbade that Python, usually because that Python was not out yet when the release declared its requirements.
+
+See [three states, two sources](https://kdeldycke.github.io/click-extra/python-directives.html#three-states-two-sources). The table keeps the [support envelope](https://kdeldycke.github.io/click-extra/python-directives.html#the-support-envelope) of `mpm`, so the oldest releases drop off as the oldest supported Python moves up.
 
 <!-- matrix python package=mpm -->
 

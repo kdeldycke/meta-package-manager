@@ -1,4 +1,4 @@
-# {octicon}`checklist` Todo-list
+# {octicon}`tasklist` Todo-list
 
 ```{todolist}
 ```

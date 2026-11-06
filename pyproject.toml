@@ -445,7 +445,7 @@ docs = [
   # 10.2.0 lays out the `tabs-vertical` tab-set of docs/install.md, which
   # docs/_static/custom.css styled itself before. Until it ships, [tool.uv]
   # sources track the click-extra main branch.
-  "click-extra[sphinx]>=10.2.0.dev0",
+  "click-extra[sphinx]>=10.2.0",
   # furo 2025.12.19 is the first release that accepts Sphinx 9 (`sphinx<10`):
   # 2025.9.25 caps it below 9.
   "furo>=2025.12.19",
@@ -526,16 +526,13 @@ required-version = ">=0.12.22"
 # marker split holding a second, older resolution alive for an interpreter that
 # never renders a page.
 dependency-groups.docs = { requires-python = ">= 3.14" }
-# The click-extra main branch, until the release the `.dev` floor of the docs
-# group awaits: `sync-dep-sources` drops the entry once it ships.
-sources.click-extra = { git = "https://github.com/kdeldycke/click-extra", branch = "main" }
 # Cooldown period.
 exclude-newer = "1 week"
 # click-extra and extra-platforms are published by this repository's own
 # maintainer: the cooldown guards against a compromised upstream, which does not
 # apply here, and it otherwise holds each release back a week from the projects
 # that consume it.
-exclude-newer-package = { click-extra = "2026-11-02T00:00:00Z", extra-platforms = "2026-11-02T00:00:00Z" }
+exclude-newer-package = { click-extra = "2026-11-08T00:00:00Z", extra-platforms = "2026-11-02T00:00:00Z" }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
 # source-include does not honor .gitignore, so prune the build output and caches

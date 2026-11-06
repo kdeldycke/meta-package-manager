@@ -91,8 +91,6 @@ class Tazpkg(PackageManager):
     """What TazPkg prints, with exit code `0`, when it refuses an install until it
     has upgraded itself. `LC_ALL=C` keeps it in English."""
 
-    _ANSI_REGEXP = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
-
     _PACKAGE_LINE_REGEXP = re.compile(
         r"^(?P<package_id>\S+)\s+(?P<version>\d\S*)\s+\S+\s*$",
     )
@@ -102,7 +100,7 @@ class Tazpkg(PackageManager):
 
     def _parse_listing(self, output: str) -> Iterator[tuple[str, str]]:
         """Yield `(package_id, version)` from a decorated tazpkg listing."""
-        for line in self._ANSI_REGEXP.sub("", output).splitlines():
+        for line in output.splitlines():
             match = self._PACKAGE_LINE_REGEXP.match(line)
             if match:
                 yield match.group("package_id"), match.group("version")

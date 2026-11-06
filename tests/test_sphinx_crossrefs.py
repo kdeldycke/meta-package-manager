@@ -126,8 +126,9 @@ def test_changelog_releases_are_anchored_on_their_version(built_docs):
 
     docutils reduces a release heading to nothing and numbers its section from
     a per-page counter, so `#id94` names another release after each new one.
-    `ReleaseAnchors` of `docs/conf.py` gives that section `#v3-6-0` instead,
-    and the release in preparation the anchor it ships with.
+    The `click_extra_release_anchors` setting of `docs/conf.py` gives that
+    section `#v3-6-0` instead, and the release in preparation the anchor it ships
+    with.
     """
     html = read_html(built_docs, "changelog")
     missing = [

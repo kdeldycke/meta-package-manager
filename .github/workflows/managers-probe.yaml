@@ -1,7 +1,7 @@
 ---
 # TEMPORARY probe workflow, to be deleted once the output of Octave's `pkg`, R's
-# `Rscript` and pkgcore's `pmerge` is captured for the `octave`, `r` and `pmerge`
-# managers.
+# `Rscript` and pkgcore's `pmerge` is captured for the `octave`, `cran` and
+# `pmerge` managers.
 # yamllint disable rule:line-length
 name: 🧪 Managers probe
 "on":
@@ -24,12 +24,93 @@ env:
 
 jobs:
 
-  pmerge:
-    name: pkgcore pmerge in a Gentoo container
+  octave-cran:
+    name: mpm driving Octave and R on Ubuntu
     runs-on: ubuntu-26.04
-    timeout-minutes: 90
+    timeout-minutes: 30
+    permissions:
+      contents: read
     steps:
-      - name: Drive pmerge
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: "0.13.5"
+      - name: Install Octave and R
+        run: |
+          sudo apt-get --quiet update
+          sudo apt-get --quiet --yes install --no-install-recommends octave r-base-core
+          # A dated Posit Package Manager snapshot of CRAN, seven days old: the
+          # cooldown for the installs below, which CRAN itself cannot express.
+          printf 'options(repos = c(CRAN = "https://packagemanager.posit.co/cran/2026-10-31"))\n' | sudo tee --append /etc/R/Rprofile.site
+      - name: Install mpm
+        run: uv --no-progress sync --frozen
+      - name: Drive mpm
+        shell: bash {0}
+        run: |
+          run() {
+            printf '\n=== %s\n' "$*"
+            "$@" > /tmp/out 2> /tmp/err
+            printf -- '--- exit=%s\n--- stdout\n' "$?"
+            cat /tmp/out
+            printf -- '--- stderr\n'
+            cat /tmp/err
+          }
+          MPM=(uv --no-progress run --frozen -- mpm --verbosity INFO)
+          OLD_DOCTEST='https://downloads.sourceforge.net/project/octave/Octave%20Forge%20Packages/Individual%20Package%20Releases/doctest-0.8.1.tar.gz'
+          OLD_R6='https://cran.r-project.org/src/contrib/Archive/R6/R6_2.5.1.tar.gz'
+
+          run "${MPM[@]}" --octave --cran managers
+          run "${MPM[@]}" --octave installed
+          run "${MPM[@]}" --octave search doc
+          run "${MPM[@]}" --octave search --exact doctest
+          run "${MPM[@]}" --octave install doctest
+          run "${MPM[@]}" --octave installed
+          run "${MPM[@]}" --octave remove doctest
+          run octave-cli --no-init-file --quiet --no-window-system --eval "pkg install \"$OLD_DOCTEST\""
+          run "${MPM[@]}" --octave outdated
+          run "${MPM[@]}" --octave upgrade doctest
+          run "${MPM[@]}" --octave outdated
+          run octave-cli --no-init-file --quiet --no-window-system --eval "pkg uninstall doctest; pkg install \"$OLD_DOCTEST\""
+          run "${MPM[@]}" --octave upgrade --all
+          run "${MPM[@]}" --octave installed
+          run "${MPM[@]}" --octave remove doctest
+          run "${MPM[@]}" --octave remove doctest
+
+          run "${MPM[@]}" --cran installed
+          run "${MPM[@]}" --cran outdated
+          run "${MPM[@]}" --cran search praise
+          run "${MPM[@]}" --cran search --exact praise
+          run "${MPM[@]}" --cran install praise
+          run "${MPM[@]}" --cran installed
+          run Rscript --no-init-file -e "install.packages('$OLD_R6', repos = NULL, type = 'source', lib = .libPaths()[1L])"
+          run "${MPM[@]}" --cran outdated
+          run "${MPM[@]}" --cran upgrade R6
+          run "${MPM[@]}" --cran outdated
+          run Rscript --no-init-file -e "install.packages('$OLD_R6', repos = NULL, type = 'source', lib = .libPaths()[1L])"
+          run "${MPM[@]}" --cran upgrade --all
+          run "${MPM[@]}" --cran installed
+          run "${MPM[@]}" --cran remove praise
+          run "${MPM[@]}" --cran remove praise
+          run "${MPM[@]}" --cran install nosuchpackage
+
+          run uv --no-progress run --frozen -- pytest tests/test_cli_install_remove.py tests/test_cli_upgrade.py --run-destructive --numprocesses=0 --no-cov -p no:randomly -k 'octave or cran'
+
+  pmerge:
+    name: mpm driving pmerge in a Gentoo container
+    runs-on: ubuntu-26.04
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: "0.13.5"
+      - name: Drive mpm
         shell: bash {0}
         run: |
           cat > /tmp/probe.sh <<'EOF'
@@ -39,61 +120,55 @@ jobs:
             printf -- '--- exit=%s\n--- stdout\n' "$?"
             head -n 80 /tmp/out
             printf -- '--- stderr\n'
-            head -n 40 /tmp/err
+            head -n 60 /tmp/err
           }
           printf 'FEATURES="${FEATURES} -ipc-sandbox -network-sandbox -pid-sandbox -sandbox -usersandbox"\n' >> /etc/portage/make.conf
           printf 'MAKEOPTS="-j4"\n' >> /etc/portage/make.conf
           emerge-webrsync --quiet > /tmp/webrsync.log 2>&1
           printf 'emerge-webrsync exit=%s\n' "$?"
-          tail -n 5 /tmp/webrsync.log
           emerge --quiet --getbinpkg --oneshot sys-apps/pkgcore > /tmp/emerge.log 2>&1 \
             || emerge --quiet --oneshot sys-apps/pkgcore > /tmp/emerge.log 2>&1
           printf 'emerge pkgcore exit=%s\n' "$?"
-          tail -n 5 /tmp/emerge.log
-          INSTALLED='{category}/{package}={fullver}'
-          SLOTTED='{category}/{package}:{slot}={fullver}'
-          SEARCH='{category}/{package}={fullver}={description}'
-
-          run cat /usr/share/portage/config/repos.conf
-          run pmerge --version
-          run pmerge --color no --version
-          run pquery --color no --installed --format "$INSTALLED"
-          run pquery --color no --installed --format "$SLOTTED"
-          run pmerge --color no --list-sets
-          run pmerge --color no --pretend --upgrade --deep --newuse @world @system
-          run pmerge --color no games-misc/nyancat
-          run pmerge --color no --oneshot dev-libs/libevent
           printf 'sys-apps/pkgcore\n' >> /var/lib/portage/world
-          run cat /var/lib/portage/world
-          run pmerge --color no --pretend --clean
-          run pquery --color no --installed --format "$INSTALLED" nyancat libevent pkgcore
+          run ls -ld /var/cache/distfiles
+          run ls -l /var/cache/distfiles
+          chown -R portage:portage /var/cache/distfiles
+          run ls -ld /var/cache/distfiles
 
-          run pquery --color no --max --format "$SEARCH" '*nyan*'
-          run pquery --color no --max --format "$SEARCH" nyancat
-          run pquery --color no --max --format "$SEARCH" --description 'ANSI escape'
-          run pquery --color no --max --format "$SEARCH" '*cowsay*'
-          run bash -c "time pquery --color no --max --format '$SEARCH' '*py*' | wc -l"
-          run bash -c "time pquery --color no --max --format '$SEARCH' --description 'terminal' | wc -l"
+          cp -a /src /tmp/src
+          cd /tmp/src || exit 1
+          uv --no-progress sync --frozen --python /usr/bin/python3 > /tmp/sync.log 2>&1
+          printf 'uv sync exit=%s\n' "$?"
+          tail -n 5 /tmp/sync.log
+          MPM=(uv --no-progress run --frozen -- mpm --verbosity INFO)
+
+          run "${MPM[@]}" --pmerge managers
+          run "${MPM[@]}" --pmerge installed
+          run "${MPM[@]}" --pmerge search nyancat
+          run "${MPM[@]}" --pmerge search --exact nyancat
+          run "${MPM[@]}" --pmerge search --extended 'ANSI escape'
+          run "${MPM[@]}" --pmerge install games-misc/nyancat
+          run "${MPM[@]}" --pmerge installed nyancat
+          run cat /var/lib/portage/world
+          run "${MPM[@]}" --pmerge orphans
+          run "${MPM[@]}" --pmerge remove games-misc/nyancat
+          run "${MPM[@]}" --pmerge remove games-misc/nyancat
+          run cat /var/lib/portage/world
 
           printf 'ACCEPT_KEYWORDS="~amd64"\n' >> /etc/portage/make.conf
-          run pquery --color no --upgrade --format "$SLOTTED"
-          run pquery --color no --installed --format "$SLOTTED"
-          run bash -c "time pquery --color no --upgrade --format '$SLOTTED' | wc -l"
-          run pmerge --color no --pretend --upgrade --deep --newuse @world @system
-          run pmerge --color no --pretend --upgrade app-crypt/libmd
-          run pmerge --color no --upgrade app-crypt/libmd
-          run pquery --color no --installed --format "$SLOTTED" libmd
-          run cat /var/lib/portage/world
-
-          run pmerge --color no --clean
-          run pquery --color no --installed --format "$INSTALLED" libevent
-          run pmerge --color no --unmerge games-misc/nyancat
-          run pclean --color no dist --installed --pretend
-          run pclean --color no dist --installed
-          run ls /var/cache/distfiles
-          run timeout 900 pmaint --color no sync
-          run timeout 900 pmaint --color no sync gentoo
+          run "${MPM[@]}" --pmerge outdated
+          run "${MPM[@]}" --pmerge upgrade app-crypt/libmd
+          run "${MPM[@]}" --pmerge installed libmd
+          run "${MPM[@]}" --pmerge --plan upgrade --all
+          run "${MPM[@]}" --pmerge sync
+          run "${MPM[@]}" --pmerge cleanup
+          run "${MPM[@]}" --pmerge cleanup --orphans
+          run "${MPM[@]}" --pmerge orphans
           EOF
-          docker run --rm --privileged --volume /tmp/probe.sh:/probe.sh:ro \
+          docker run --rm --privileged \
+            --env UV_EXCLUDE_NEWER --env NO_COLOR=1 \
+            --volume /tmp/probe.sh:/probe.sh:ro \
+            --volume "$GITHUB_WORKSPACE:/src:ro" \
+            --volume "$(command -v uv):/usr/local/bin/uv:ro" \
             'gentoo/stage3:amd64-openrc-20261102@sha256:dcf796a992c7b1a507c9c564bd11faf9b3a39bea0b4474ef64240cd6554dc691' \
             bash /probe.sh

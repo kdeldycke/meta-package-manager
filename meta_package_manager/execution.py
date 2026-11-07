@@ -1377,7 +1377,7 @@ class CLIExecutor:
 
         Returns a parsed and normalized version in the form of a
         {class}`meta_package_manager.version.TokenizedString` instance, read from
-        {attr}`version_output`.
+        {attr}`~meta_package_manager.execution.CLIExecutor.version_output`.
         """
         output = self.version_output
         if output is None:

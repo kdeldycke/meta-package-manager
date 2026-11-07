@@ -617,6 +617,9 @@ default.extend-ignore-re = [
   # unprompted rather than reporting it, `merged` being an unambiguous
   # suggestion where `mis` above merely errors out.
   "meged to share the same code",
+  # `conecpt` is the Octave Packages index's own typo, in the description of its
+  # `pkg` entry, which the search sample of octave.toml quotes verbatim.
+  "proof of conecpt and NOT REQUIRED",
   # Brand color hex triplets in the generated docs/assets/managers/logos.yaml:
   # typos reads embedded letter runs as misspellings (`BA` to `BY`), which would
   # corrupt both the color and the contrast figure derived from it. Anchored on

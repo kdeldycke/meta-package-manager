@@ -37,6 +37,7 @@
 - [mpm] Run the probes of `sudo` and the other privilege escalators in the same locale, so `mpm` recognizes their answers on a non-English host.
 - [mpm] Print the path of a skipped manager's binary as text, instead of as a `PosixPath(...)` object.
 - [emerge] Match an exact search or an exact `installed` or `outdated` filter against the bare package name, like `tmux` for `app-misc/tmux`.
+- [emerge] List only upgrades in `outdated`, leaving out the packages an upgrade would newly pull in, add in a new slot or downgrade.
 - [mpm] Skip `test_extra_labels_in_pyproject` outside a git checkout, where a newer `extra-platforms` failed it for a packager.
 - [mpm] Test the sdist in CI the way a distribution builds it: a new job runs the hermetic layer from the unpacked sdist on the newest dependencies.
 - [mpm] Replace the benchmark's 🟡 mark with 🪫, for coarse support that only runs inside a wider operation.

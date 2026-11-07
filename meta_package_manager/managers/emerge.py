@@ -117,7 +117,9 @@ class Emerge(PackageManager):
     )
     _OUTDATED_REGEXP = re.compile(
         r"""
-        \[.+\]                               # Update state.
+        ^\[(?:ebuild|binary)\                # The package type, then the state:
+        [^\]UD]*U                            #   the U flag of a version change...
+        [^\]D]*\]                            #   ...without the D of a downgrade.
         \                                    # A space.
         (?P<package_id>                      # Named group must not split
                                              #   (?P< across lines.
@@ -213,11 +215,29 @@ class Emerge(PackageManager):
         Runs without `--quiet`, which would drop the `[ebuild   U  ]` state
         prefix and unbracket the latest version. See `_PARSED_PRE_ARGS`.
 
+        The plan lists every package the upgrade would merge. Only a row whose
+        state carries the `U` flag of a new version is outdated, and not with the
+        `D` flag of a downgrade. A package the upgrade newly pulls in (`N`) has no
+        installed version, and one it adds in a new slot (`NS`) leaves the
+        installed slot in place: its second bracket is that other slot's version.
+
         ```{code-block} shell-session
 
         $ emerge --color n --nospinner --update --deep --pretend --columns @world
         [ebuild     U  ] sys-process/htop                                      [3.5.3]                      [3.5.1]
         [binary    gU  ] app-editors/nano                                      [9.2-1]                      [9.1]
+        ```
+
+        ```{code-block} shell-session
+
+        $ emerge --color n --nospinner --update --deep --pretend --columns @world
+        These are the packages that would be merged, in order:
+
+        Calculating dependencies  ... done!
+        Dependency resolution took 5.36 s (backtrack: 2/20).
+
+        [binary  NSg   ] dev-build/autoconf                                    [2.73-r2-1]                  [2.72-r7]
+        [ebuild     U *] sys-process/htop                                      [9999]                       [3.5.3]
         ```
         """  # noqa: E501
         output = self.run_cli(

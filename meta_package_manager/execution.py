@@ -1691,11 +1691,13 @@ class CLIExecutor:
         `10.2.0`, `sudo` `1.9.17p2`).
 
         ```{todo}
-        Re-scope the paragraph above once the timeout of `run_cli` sends
-        `SIGTERM`, then waits, before its `SIGKILL` to a child sharing the
-        caller's process group. `sudo` forwards a `SIGTERM` to its command,
-        which then exits. A command that ignores `SIGTERM` still survives, so
-        the paragraph stays true for that case.
+        Re-scope the paragraph above once the click-extra floor reaches the
+        release carrying
+        [kdeldycke/click-extra@30455e6](https://github.com/kdeldycke/click-extra/commit/30455e69dd3348c54910450313d78da343f7cc97),
+        whose `run_cli` timeout sends `SIGTERM`, then waits, before its
+        `SIGKILL`. `sudo` forwards a `SIGTERM` to its command, which then
+        exits. A command that ignores `SIGTERM` still survives, so the
+        paragraph stays true for that case.
         ```
 
         :param must_succeed: if `True`, raise

@@ -445,7 +445,7 @@ docs = [
   # 10.2.0 ships `click_extra.sphinx.announcement`, which docs/conf.py imports,
   # the build hooks conf.py no longer copies, and the `tabs-vertical` layout of
   # docs/install.md. Below it, the build stops at that import.
-  "click-extra[sphinx]>=10.2.0",
+  "click-extra[sphinx]>=10.2",
   # furo 2025.12.19 is the first release that accepts Sphinx 9 (`sphinx<10`):
   # 2025.9.25 caps it below 9.
   "furo>=2025.12.19",

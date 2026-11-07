@@ -114,8 +114,10 @@ from functools import cache
 from typing import Final
 
 from click_extra import echo
+from click_extra.envvar import env_copy
 from extra_platforms import is_any_windows
 
+from .shell_env import FORCED_LOCALE_ENV
 from .version import parse_version
 
 # Windows has no `termios`: `_terminal_echo` answers `None` there.
@@ -213,6 +215,8 @@ def _run_probe(args: tuple[str, ...]) -> subprocess.CompletedProcess[str] | None
             check=False,
             text=True,
             encoding="UTF-8",
+            # The answers are matched against English wording.
+            env=env_copy(FORCED_LOCALE_ENV),
             stdin=subprocess.DEVNULL,
             start_new_session=True,
         )
@@ -429,10 +433,10 @@ class Escalator:
     from the service manager, which inherits nothing from the caller, so the
     environment {meth}`CLIExecutor.run
     <meta_package_manager.execution.CLIExecutor.run>` forces on a call would
-    reach `run0` and stop there. That silently costs the managers relying on
-    one: `dnf`, `dnf5`, `nala`, `tazpkg`, `urpmi` and `yum` pin their parsers
-    against a translated locale with `LC_ALL`, and `ports` keeps out of an
-    interactive dialog with `BATCH=yes`.
+    reach `run0` and stop there. That silently costs every escalated call the
+    `LC_ALL` of {data}`~meta_package_manager.shell_env.FORCED_LOCALE_ENV`,
+    which pins the parsers against a translated locale, and costs `ports` the
+    `BATCH=yes` that keeps it out of an interactive dialog.
 
     `sudo` and `doas` need no template: both reset the environment too, but
     through a `sudoers` policy whose `env_keep` the host owns, which is where
@@ -1222,6 +1226,8 @@ def _probe_credentials(
             escalator.resolved_probe_args(),
             capture_output=True,
             check=False,
+            # The answers are matched against English wording.
+            env=env_copy(FORCED_LOCALE_ENV),
             stdin=subprocess.DEVNULL,
         )
     except OSError:
@@ -1362,6 +1368,8 @@ def _escalation_is_passwordless(
                 probe_cli,
                 capture_output=True,
                 check=False,
+                # The answers are matched against English wording.
+                env=env_copy(FORCED_LOCALE_ENV),
                 stdin=subprocess.DEVNULL,
             )
         except OSError:

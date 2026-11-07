@@ -54,6 +54,7 @@ from meta_package_manager.execution import (
     CLIExecutor,
 )
 from meta_package_manager.pool import pool
+from meta_package_manager.shell_env import FORCED_LOCALE_ENV
 from meta_package_manager.specifier import Specifier
 from meta_package_manager.sudo import (
     _SUDO_CACHE_WARM,
@@ -69,6 +70,7 @@ from meta_package_manager.sudo import (
     _is_sudo_denied,
     _probe_credentials,
     _restore_terminal_modes,
+    _run_probe,
     _StallWatchdog,
     _terminal_echo,
     _terminal_modes,
@@ -580,6 +582,29 @@ def test_passwordless_probe_asks_about_escalated_binaries_alone(tmp_path):
     assert [call.args[0] for call in run.call_args_list] == [
         (*sudo.passwordless_probe_args, str(escalated.cli_path)),
     ]
+
+
+@pytest.mark.skipif(is_any_windows(), reason="Windows forces no locale.")
+@pytest.mark.parametrize("probe", ("release", "credentials", "policy"))
+def test_escalation_probes_run_in_the_forced_locale(monkeypatch, probe):
+    """Each probe whose answer mpm matches runs in the forced locale.
+
+    `sudo` translates `a password is required`, which its failure markers match.
+    The user's `LANGUAGE` is removed, as gettext reads it before `LC_ALL`.
+    """
+    monkeypatch.setenv("LANGUAGE", "de")
+    sudo = next(e for e in ESCALATORS if e.id == "sudo")
+    with patch("meta_package_manager.sudo.subprocess.run") as run:
+        run.return_value = subprocess.CompletedProcess((), 0, "", "")
+        if probe == "release":
+            _run_probe(("sudo", "--version"))
+        elif probe == "credentials":
+            _probe_credentials(sudo)
+        else:
+            _escalation_is_passwordless(sudo, [_escalating_manager()])
+    env = run.call_args.kwargs["env"]
+    assert env["LC_ALL"] == FORCED_LOCALE_ENV["LC_ALL"]
+    assert "LANGUAGE" not in env
 
 
 @pytest.mark.parametrize(

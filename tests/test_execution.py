@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import errno
+import locale
 import logging
 import os
 import re
@@ -62,6 +63,7 @@ from meta_package_manager.execution import (
 )
 from meta_package_manager.managers.npm import NPM
 from meta_package_manager.pool import pool
+from meta_package_manager.shell_env import FORCED_LOCALE_ENV, _c_locale
 from meta_package_manager.sudo import (
     _SUDO_CACHE_WARM,
     ESCALATORS,
@@ -1364,6 +1366,67 @@ def test_run_forwards_a_forced_environment_across_run0():
     assert "--setenv=LC_ALL=C" in argv
     # Ahead of the separator, so the payload's own flags stay shielded.
     assert argv.index("--setenv=LC_ALL=C") < argv.index("--")
+
+
+@pytest.mark.skipif(is_any_windows(), reason="Windows forces no locale.")
+def test_run_forwards_the_forced_locale_across_run0():
+    """The forced locale reaches the payload `run0` escalates, `LANGUAGE` unset.
+
+    An unset variable needs no carrying: the fresh environment run0 builds never
+    had it, and a bare `--setenv=LANGUAGE` would import the caller's value.
+    """
+    manager = FakeManager()
+    manager.sudo = True
+    with (
+        only_escalator("run0"),
+        patch("meta_package_manager.execution.run_cli") as spawn,
+    ):
+        spawn.return_value = SimpleNamespace(returncode=0, stdout="", stderr="")
+        manager.run(manager.build_cli("-c", "true", sudo=True))
+    argv = spawn.call_args.args[0]
+    assert f"--setenv=LC_ALL={FORCED_LOCALE_ENV['LC_ALL']}" in argv
+    assert not any(arg.startswith("--setenv=LANGUAGE") for arg in argv)
+
+
+@pytest.mark.skipif(is_any_windows(), reason="Windows forces no locale.")
+@pytest.mark.parametrize(
+    ("manager_env", "expected"),
+    (
+        pytest.param(None, FORCED_LOCALE_ENV.get("LC_ALL"), id="forced"),
+        # `nala` sets `LC_ALL=C` to select its ASCII glyphs.
+        pytest.param({"LC_ALL": "C"}, "C", id="manager-pin-wins"),
+    ),
+)
+def test_run_spawns_in_the_forced_locale(manager_env, expected):
+    """Every spawned command gets the forced locale, under the manager's own.
+
+    The disclosed `$` line keeps the manager's variables alone: the locale is
+    disclosed once per process instead of on every line.
+    """
+    manager = FakeManager()
+    with patch("meta_package_manager.execution.run_cli") as spawn:
+        spawn.return_value = SimpleNamespace(returncode=0, stdout="", stderr="")
+        manager.run(manager.build_cli("-c", "true"), extra_env=manager_env)
+    env = spawn.call_args.kwargs["extra_env"]
+    assert env["LC_ALL"] == expected
+    assert "LANGUAGE" in env
+    assert env["LANGUAGE"] is None
+
+
+def test_c_locale_falls_back_to_c_without_c_utf8(monkeypatch):
+    """A C library without `C.UTF-8` gets `C`, and the probe leaves mpm's locale."""
+    before = locale.setlocale(locale.LC_CTYPE)
+    real_setlocale = locale.setlocale
+
+    def without_c_utf8(category, value=None):
+        if value == "C.UTF-8":
+            raise locale.Error("unsupported locale setting")
+        return real_setlocale(category, value)
+
+    monkeypatch.setattr(locale, "setlocale", without_c_utf8)
+    assert _c_locale() == "C"
+    monkeypatch.undo()
+    assert locale.setlocale(locale.LC_CTYPE) == before
 
 
 def test_run_forwards_nothing_across_an_escalator_that_needs_no_help():

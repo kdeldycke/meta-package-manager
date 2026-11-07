@@ -65,7 +65,7 @@ import sys
 import threading
 from contextlib import contextmanager
 from datetime import UTC, datetime
-from functools import cached_property
+from functools import cache, cached_property
 from pathlib import Path
 from textwrap import dedent, indent, shorten
 from types import MappingProxyType
@@ -91,6 +91,7 @@ from click_extra import (
 from extra_platforms import UNIX, current_platform, is_any_windows
 
 from .cooldown import CooldownPolicy
+from .shell_env import FORCED_LOCALE_ENV
 from .sudo import (
     ESCALATION,
     ESCALATORS,
@@ -310,6 +311,19 @@ def format_plan_command(
     )
     command = " ".join(shlex.quote(str(arg)) for arg in cmd_args)
     return f"{env_prefix}{command}"
+
+
+@cache
+def _disclose_forced_locale() -> None:
+    """Log at `DEBUG`, once per process, the locale every command runs in.
+
+    See {data}`~meta_package_manager.shell_env.FORCED_LOCALE_ENV`.
+    """
+    if FORCED_LOCALE_ENV:
+        logging.debug(
+            f"Run every command with LC_ALL={FORCED_LOCALE_ENV['LC_ALL']} and "
+            "LANGUAGE unset, unless a manager sets its own."
+        )
 
 
 class _PlanRecorder:
@@ -679,6 +693,10 @@ class CLIExecutor:
     {meth}`meta_package_manager.execution.CLIExecutor.run_cli` calls. An
     `extra_env` override in `[mpm.overrides.<id>]` adds its variables to these,
     and its value wins for a name both set.
+
+    They sit over {data}`~meta_package_manager.shell_env.FORCED_LOCALE_ENV`,
+    which every spawned command gets: a manager setting `LC_ALL` here replaces
+    the forced locale.
     """
 
     pre_cmds: tuple[str, ...] = ()
@@ -1744,7 +1762,9 @@ class CLIExecutor:
         # ever seeing an environment, and after the cooldown merge so the gate
         # travels too.
         if escalator is not None:
-            clean_args = escalator.forward_env(clean_args, extra_env)
+            clean_args = escalator.forward_env(
+                clean_args, {**FORCED_LOCALE_ENV, **(extra_env or {})}
+            )
         cli_msg = format_cli_prompt(clean_args, extra_env)
 
         code = 0
@@ -1945,11 +1965,15 @@ class CLIExecutor:
             # https://github.com/kdeldycke/meta-package-manager/issues/1968
             # Should live output be wanted with concurrency, run_cli() takes a
             # per-call `output_level` to pass here, keyed on `_active_operation`.
+            # The forced locale reaches the child alone: the disclosed
+            # command line and the plan keep the manager's own variables, so
+            # the locale is disclosed once per process instead.
+            _disclose_forced_locale()
             try:
                 with spinner:
                     result = run_cli(
                         clean_args,
-                        extra_env=extra_env,
+                        extra_env={**FORCED_LOCALE_ENV, **(extra_env or {})},
                         timeout=effective_timeout,
                         label=subject,
                         command_level=command_level,

@@ -123,9 +123,10 @@ def test_version_probe_reads_dnf5_in_a_german_locale(
 ):
     """The probe gets the English banner on a German host.
 
-    The fake binary picks its banner like gettext does, `LC_ALL` before `LANG`.
-    In the German one, the `version` word that `dnf5` and `yum` look for is
-    `Version`, so without a forced locale `dnf5` reads no version and `yum`
+    The fake binary picks its banner like gettext in glibc before `2.39`:
+    `LANGUAGE` first unless the locale is `C`, then `LC_ALL` before `LANG`. In
+    the German banner, the `version` word that `dnf5` and `yum` look for is
+    `Version`, so without the forced locale `dnf5` reads no version and `yum`
     reads the word `dnf5` as its version.
     """
     for name, banner in (("de", DNF5_VERSION_DE), ("en", DNF5_VERSION)):
@@ -133,14 +134,17 @@ def test_version_probe_reads_dnf5_in_a_german_locale(
     fake = tmp_path / "dnf5"
     fake.write_text(
         "#!/bin/sh\n"
-        'case "${LC_ALL:-$LANG}" in\n'
-        f"  de_*) cat {shlex.quote(str(tmp_path / 'de'))} ;;\n"
+        'locale="${LC_ALL:-$LANG}"\n'
+        'if [ "$locale" != C ] && [ -n "$LANGUAGE" ]; then locale="$LANGUAGE"; fi\n'
+        'case "$locale" in\n'
+        f"  de*) cat {shlex.quote(str(tmp_path / 'de'))} ;;\n"
         f"  *) cat {shlex.quote(str(tmp_path / 'en'))} ;;\n"
         "esac\n",
         encoding="UTF-8",
     )
     fake.chmod(0o755)
     monkeypatch.setenv("LANG", "de_DE.UTF-8")
+    monkeypatch.setenv("LANGUAGE", "de")
     monkeypatch.delenv("LC_ALL", raising=False)
 
     manager = manager_class()

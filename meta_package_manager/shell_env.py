@@ -46,12 +46,14 @@ the variables that changed are narrated, at `DEBUG`.
 
 from __future__ import annotations
 
+import locale
 import logging
 import os
 import secrets
 import signal
 import subprocess
 import sys
+from types import MappingProxyType
 from typing import Final
 
 from extra_platforms import C_SHELLS, WINDOWS_SHELLS, is_any_windows, shell_from_path
@@ -63,6 +65,54 @@ if sys.platform != "win32":
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Mapping, MutableMapping
+
+
+def _c_locale() -> str:
+    """Name of the C locale for the commands mpm runs: `C.UTF-8`, else `C`.
+
+    The C library answers, the same one the spawned commands load: it switches
+    the character type of this process to `C.UTF-8` and back. A host without that
+    locale gets `C`, which every C library carries.
+    """
+    current = locale.setlocale(locale.LC_CTYPE)
+    try:
+        locale.setlocale(locale.LC_CTYPE, "C.UTF-8")
+    except locale.Error:
+        return "C"
+    finally:
+        locale.setlocale(locale.LC_CTYPE, current)
+    return "C.UTF-8"
+
+
+FORCED_LOCALE_ENV: Final[Mapping[str, str | None]] = MappingProxyType(
+    {} if is_any_windows() else {"LC_ALL": _c_locale(), "LANGUAGE": None}
+)
+"""Locale forced on every command mpm runs outside Windows.
+
+mpm parses the output of each manager, and every parser is written against
+English output. A tool that translates its messages breaks the parser on a host
+with another locale, and no pattern can read every translation. dnf5 `5.4.3.0`
+prints `dnf5 Version 5.4.3.0` in German, `dnf5versão 5.4.3.0` in Brazilian
+Portuguese and `dnf5 verzió: 5.4.3.0` in Hungarian. apt translates the
+`[upgradable from: %s]` marker its `outdated` parser reads, and `sudo` the
+`a password is required` its failure detection reads.
+
+- `LC_ALL` overrides every other locale variable. `C.UTF-8` and not `C`, so a
+  tool keeps UTF-8 output: dnf4 escapes each character its stream cannot encode,
+  and on RHEL 8 it runs on Python `3.6`, which opens an ASCII stream in the `C`
+  locale. dnf5 writes the same bytes in the two locales.
+- `LANGUAGE` is unset, because gettext reads it before `LC_ALL`. Only glibc
+  `2.39` and later ignore it in `C.UTF-8`, as all releases do in `C`. A `None`
+  value removes the variable: see {func}`click_extra.envvar.env_copy`.
+
+{meth}`~meta_package_manager.execution.CLIExecutor.run` hands it to each
+command under the variables of the manager's
+{attr}`~meta_package_manager.execution.CLIExecutor.extra_env`, which win: `nala`
+keeps the `LC_ALL=C` that selects its ASCII glyphs. A user restores the host's
+locale for one manager with an `extra_env` override.
+
+Windows tools read no `LC_ALL`, so the mapping is empty there.
+"""
 
 
 SHELL_ENV_GUARD: Final = "MPM_RESOLVING_SHELL_ENV"

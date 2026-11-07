@@ -201,7 +201,6 @@ def sbom(ctx, spdx, export_format, overwrite, bundled, query, exact, export_path
     by_id = {manager.id: manager for manager in managers}
 
     def fetch(manager: PackageManager) -> tuple[str, dict]:
-        logging.info("Export installed packages.", extra={"label": manager.subject})
         installed_packages = snapshot_installed(manager, query, exact=exact)
         # In --bundled mode, enrich each package with its metadata here too, so the
         # slow per-manager metadata fetch parallelizes alongside the listing.

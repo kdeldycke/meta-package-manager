@@ -133,10 +133,11 @@ def evaluate_signals(mid, stdout, stderr):
         # The glued `:<mid>:` label form matches whatever level the
         # message lands at: demoted to DEBUG for implicit selection,
         # WARNING/INFO for explicit ones (`mpm --<mid> sbom`).
-        f":{mid}.installed: Export installed packages." in stderr,
         f":{mid}: Does not implement {Operations.installed}" in stderr,
         f":{mid}: Skipped:" in stderr,
-        f":{mid}.installed: Could not list installed packages." in stderr,
+        # Any line labeled with the operation: the `$` line of the listing, the
+        # reuse of a peer's result, or the warning of a listing that failed.
+        f":{mid}.installed: " in stderr,
     )
 
 
@@ -168,7 +169,7 @@ def test_unrecognized_extension_without_format(invoke, subcmd):
     assert "Cannot guess export format from 'help'" in result.stderr
     assert "Use --format to pick one of: json, xml, yaml, tag, rdf." in result.stderr
     # The collection loop must not have run.
-    assert "Export installed packages." not in result.stderr
+    assert ".installed: " not in result.stderr
 
 
 def test_unrecognized_extension_with_explicit_format(

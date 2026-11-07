@@ -26,17 +26,6 @@ drives, live in {mod}`meta_package_manager.cli`.
 ```{todo}
 Add a `--force`/`--reinstall` flag to `install`.
 ```
-
-```{todo}
-Drop every per-manager announcement once mpm requires a click-extra release
-labeling the prompt line `run_cli` logs. `_announce_level` sets the level of
-four of them (`sync`, `cleanup`, `upgrade --all` and `doctor`), and `backup`,
-`restore` and `sbom` log their own. That `info:brew.sync: $ …` line then names
-the manager, the operation and the command, which is all an announcement says.
-Two things move in the same change: the selection tests read an announcement
-as proof a manager acted, and a `restore` section with no package runs no
-command, so the announcement is the only trace it leaves.
-```
 """
 
 from __future__ import annotations
@@ -164,35 +153,22 @@ def cooldown_permits(manager: PackageManager) -> bool:
     return False
 
 
-def _announce_level(ctx: Context) -> int:
-    """Log level for a maintenance command's per-manager announcement.
-
-    An explicit `--<id>` selection announces loudly at `INFO`; an implicit
-    "run everything" stays at `DEBUG` so the default view shows only the trail
-    (matching the explicit/implicit levels `select_managers` already uses for
-    its skip messages). Shared by `sync`, `cleanup`, `upgrade --all` and
-    `doctor`. The module docstring holds the plan to drop these announcements.
-    """
-    return logging.INFO if ctx.obj.user_selection else logging.DEBUG
-
-
 def _maintenance_work(
-    announce: int,
-    message: str,
     operation: Callable[[PackageManager], object],
 ) -> Callable[[PackageManager], tuple[str, dict]]:
     """Build a `work` callable for a maintenance command's fan-out.
 
-    Logs `message` at the `announce` level, labeled with the manager's subject
-    (rendered into the level prefix, `info:brew.sync:`), runs `operation(manager)`,
-    and returns the manager ID with the `_trail_data` of the CLI errors raised
-    during the run, so a manager that grows its error list is marked `✘`
-    in the trail. `sync` uses it as is, and `cleanup` and `upgrade --all` each
-    build a variant with the details of their own.
+    Runs `operation(manager)` and returns the manager ID with the `_trail_data`
+    of the CLI errors raised during the run, so a manager that grows its error
+    list is marked `✘` in the trail. `sync` uses it as is, and `cleanup` and
+    `upgrade --all` each build a variant with the details of their own.
+
+    The work announces nothing: each command it runs logs its `$` line at `INFO`,
+    labeled with the manager and the operation, like `info:brew.sync: $ brew
+    update`.
     """
 
     def work(manager: PackageManager) -> tuple[str, dict]:
-        logging.log(announce, message, extra={"label": manager.subject})
         with manager.new_errors() as errors:
             operation(manager)
         return manager.id, _trail_data(errors)
@@ -759,7 +735,6 @@ def upgrade(ctx, all, packages_specs):
                 Operations.outdated,
             ),
         )
-        announce = _announce_level(ctx)
         report = ChangeReport(managers)
 
         def upgrade_all_work(manager: PackageManager) -> tuple[str, dict]:
@@ -770,11 +745,6 @@ def upgrade(ctx, all, packages_specs):
                     "failed": True,
                     "detail": "cooldown",
                 }
-            logging.log(
-                announce,
-                "Upgrade all outdated packages.",
-                extra={"label": manager.subject},
-            )
             # Two inventory readings frame the native upgrade (see ChangeReport).
             # The outdated listing rides along to name what did not move, and is
             # handed to the upgrade so the paths enumerating it do not list twice.
@@ -899,7 +869,6 @@ def sync(ctx):
     """Sync local package metadata and info from external sources."""
     managers = list(ctx.obj.selected_managers(implements_operation=Operations.sync))
     prime_sudo(ctx, managers, operations=(Operations.sync,))
-    announce = _announce_level(ctx)
 
     # Sync is independent per manager, so fan out concurrently with a ✓/✘ trail and
     # a success-count finisher (see collect_from_managers).
@@ -907,7 +876,7 @@ def sync(ctx):
         "Syncing",
         "Synced",
         managers,
-        _maintenance_work(announce, "Sync package info.", lambda m: m.sync()),
+        _maintenance_work(lambda m: m.sync()),
         report_state=True,
     )
 
@@ -1056,20 +1025,14 @@ def cleanup(ctx, orphans, cache, repair):
         managers,
         operations=(Operations.cleanup, *(sweep if "orphans" in selected else ())),
     )
-    announce = _announce_level(ctx)
     report = ChangeReport(managers)
 
     def cleanup_work(manager: PackageManager) -> tuple[str, dict]:
         # A bespoke variant of _maintenance_work: managers run different category
-        # subsets, so both the narration and the trail label disclose each
-        # manager's own dispatch (`✓ brew.cleanup (cache)`).
+        # subsets, so the trail label discloses each manager's own dispatch
+        # (`✓ brew.cleanup (cache)`).
         steps = _cleanup_steps(manager, selected, explicit_orphans)
         categories = [category for category, _step in steps]
-        logging.log(
-            announce,
-            f"Clean up {', '.join(categories)}.",
-            extra={"label": manager.subject},
-        )
         # The orphan sweep is the one category removing packages, so two
         # inventory readings frame the run to report what it removed (see
         # ChangeReport). Its count joins the category on the trail line.
@@ -1151,10 +1114,8 @@ def doctor(ctx):
         logging.warning("None of the selected managers has a diagnostic verb.")
         return
     prime_sudo(ctx, managers, operations=(Operations.doctor,))
-    announce = _announce_level(ctx)
 
     def doctor_work(manager: PackageManager) -> tuple[str, dict]:
-        logging.log(announce, "Check health.", extra={"label": manager.subject})
         healthy, report = manager.doctor()
         # Resolved here so the probes overlap with the diagnoses in the same
         # concurrent fan-out. Informational only: ownership never flips health.

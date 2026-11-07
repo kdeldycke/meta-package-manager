@@ -17,6 +17,7 @@
 - [mpm] Raise the `click-extra` floor to `10.0.0`: below it, `mpm` cannot import the `strip_ansi()` it applies to manager output.
 - [mpm] Color the program name and version on the `--version` screen with the active theme, like the plain message.
 - [mpm] Color the `(unmaintained)` marker of a manager option in `--help` with the `deprecated` theme style, like Click's `(DEPRECATED)`.
+- [mpm] Stop announcing each manager in `sync`, `cleanup`, `upgrade --all`, `doctor`, `dump`, `restore` and `sbom`, whose labeled `$` command lines already name it.
 - [mpm] Read purl specifiers by the rules of purl-spec `v1.1.0`, normalizing the case each registered type ignores, and warn about a purl breaking its type.
 - [brew,cask] Resolve a `pkg:brew/` purl of the `homebrew/cask` tap to `cask`, and one of the `homebrew/core` tap to `brew`, by the bare name.
 - [vscode,vscodium] Resolve a `pkg:vscode-extension/` purl to the `vscode` and `vscodium` extension it names.

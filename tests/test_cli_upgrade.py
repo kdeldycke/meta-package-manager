@@ -30,7 +30,7 @@ from datetime import UTC, datetime, timedelta, timezone
 from functools import partial
 
 import pytest
-from click_extra import strip_ansi
+from click_extra import KO_GLYPH, OK_GLYPH, strip_ansi
 
 from meta_package_manager.capabilities import Operations
 from meta_package_manager.cli import outcome_detail, package_outcomes
@@ -79,7 +79,13 @@ def evaluate_signals(mid, stdout, stderr):
         # WARNING/INFO for explicit ones (`mpm --<mid> upgrade`).
         f":{mid}: Does not implement upgrade_all_cli." in stderr,
         f":{mid}: Does not implement {Operations.upgrade_all}." in stderr,
-        f":{mid}.upgrade_all: Upgrade all outdated packages." in stderr,
+        # Any line labeled with the operation: the `$` line of the upgrade, its
+        # dry-run, or the cooldown hold.
+        f":{mid}.upgrade_all: " in stderr,
+        # The trail line, the one trace of a manager with nothing to upgrade, which
+        # runs no command. The trail prints at INFO, the level these tests use.
+        f"{OK_GLYPH} {mid}.upgrade_all" in stderr,
+        f"{KO_GLYPH} {mid}.upgrade_all" in stderr,
         bool(re.search(rf"Upgrade \S+ with\b.*\b{mid}\b", stderr)),
         f":{mid}: Skipped:" in stderr,
     )
@@ -113,7 +119,7 @@ def test_all_managers_upgrade_all(invoke, monkeypatch):
     #
     # Every default manager is selected explicitly because both halves of
     # this test hang on the verbosity mechanics: select_managers demotes
-    # the per-manager skip/announce signals to DEBUG on an implicit run,
+    # the per-manager skip signals to DEBUG on an implicit run,
     # and DEBUG collapses the fan-out to a single worker (serial_at_debug
     # in effective_jobs), which no --jobs value can override. Explicit
     # selection keeps every signal visible at INFO, where the grouped
@@ -150,7 +156,8 @@ def test_all_managers_upgrade_all(invoke, monkeypatch):
     check_selection(result, selected)
     timed_out = f"Timed out after {SHORT_FAILURE_TIMEOUT}s."
     for mid in capped:
-        if f":{mid}.upgrade_all: Upgrade all outdated packages." in result.stderr:
+        # The `$` line shows the upgrade started, past the cooldown gate.
+        if f":{mid}.upgrade_all: $ " in result.stderr:
             assert f":{mid}.upgrade_all: {timed_out}" in result.stderr
 
 

@@ -40,7 +40,9 @@ def subcmd():
 
 def evaluate_signals(mid, stdout, stderr):
     yield from (
-        f":{mid}.installed: Dump installed packages." in stderr,
+        # Any line labeled with the operation: the `$` line of the listing, the
+        # reuse of a peer's result, or the warning of a listing that failed.
+        f":{mid}.installed: " in stderr,
         # The glued `:<mid>:` label form matches whatever level the
         # message lands at: demoted to DEBUG for implicit selection
         # (`mpm backup`), INFO for explicit ones (`mpm --<mid> backup`).

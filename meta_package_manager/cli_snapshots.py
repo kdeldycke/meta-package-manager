@@ -284,7 +284,6 @@ def _dump_toml(
     )
 
     def fetch(manager: PackageManager) -> tuple[str, dict]:
-        logging.info("Dump installed packages.", extra={"label": manager.subject})
         packages = tuple(
             packages_asdict(snapshot_installed(manager, query, exact=exact), fields)
         )
@@ -456,7 +455,13 @@ def restore(ctx, toml_files):
                     f"No [{theme().invoked_command(manager.id)}] section found.",
                 )
                 continue
-            logging.info("Restore packages.", extra={"label": manager.subject})
+            # The install of each package logs its own `$` line. A section with no
+            # package runs no command, so this line is the only trace it leaves.
+            if not doc[manager.id]:
+                logging.info(
+                    f"No package in [{theme().invoked_command(manager.id)}] section.",
+                )
+                continue
             for package_id, version in doc[manager.id].items():
                 spec = Specifier(
                     raw_spec=f"pkg:{manager.id}/{package_id}{VERSION_SEP}{version}",

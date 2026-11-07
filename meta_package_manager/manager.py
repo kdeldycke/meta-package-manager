@@ -1371,6 +1371,7 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
                 logging.debug(
                     "upgrade_all_cli operation not implemented. "
                     "Call single upgrade operation on each package, one-by-one.",
+                    extra={"label": self.subject},
                 )
                 return self._upgrade_all_one_by_one(outdated_ids)
 

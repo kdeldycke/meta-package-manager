@@ -836,15 +836,13 @@ def test_cleanup_category_selection(
     assert fake.calls == expected_calls
 
 
-def test_cleanup_narration_names_categories(invoke, patch_pool_with):
-    """The per-manager narration names the categories dispatched to it.
-
-    Matching the `✓`/`✘` trail labels.
-    """
+def test_cleanup_trail_names_categories(invoke, patch_pool_with):
+    """The trail line of a manager names the categories dispatched to it."""
     fake = patch_pool_with(DecomposedCleanupFakeManager())
-    result = invoke("--verbosity", "DEBUG", "cleanup", "--orphans", "--cache")
+    result = invoke("cleanup", "--orphans", "--cache")
     assert result.exit_code == 0
-    assert "Clean up orphans, cache." in result.stderr
+    trail = f"✓ {fake.id}.cleanup (orphans: nothing removed, cache)"
+    assert trail in strip_ansi(result.stderr)
     assert fake.calls == ["cleanup_orphan", "cleanup_cache"]
 
 

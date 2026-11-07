@@ -42,8 +42,8 @@ gated by `--verbosity`, and each call belongs to one tier:
   may hide a `sudo` prompt), the end-of-run error summary and timeouts.
   `critical` is for fatal conditions. Keep this tier sparse.
 - `INFO` holds the narration: the selection summary, the install priority,
-  per-manager announcements, discovery, capability skips, options with no
-  effect, and each CLI invocation run on the system.
+  discovery, capability skips, options with no effect, and each CLI invocation
+  run on the system, labeled with its manager and operation.
 - `DEBUG` holds the mechanics: raw CLI output, version probes, refiltering,
   selection parsing and data dumps.
 
@@ -583,8 +583,8 @@ def _debug_rerun_command(ctx: Context, restrict_to: Iterable[str] | None = None)
 @group(
     # Verbosity stays at click-extra's WARNING default: the ✓/✘ trail and finisher
     # print via echo (not logging) and survive it, so a default run shows just those
-    # plus real warnings and critical. Per-operation narration (priority,
-    # announcements, skip reasons) sits at INFO, one --verbosity INFO away.
+    # plus real warnings and critical. Per-operation narration (priority, skip
+    # reasons, the `$` line of each command) sits at INFO, one --verbosity INFO away.
     config_schema=MpmConfig,
     sections=SECTIONS,
     config_validators=(

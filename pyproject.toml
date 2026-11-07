@@ -57,6 +57,7 @@ keywords = [
   "conda",
   "conda-forge",
   "cpan",
+  "cran",
   "crate",
   "crux",
   "ctan",
@@ -142,6 +143,7 @@ keywords = [
   "nodejs",
   "npm",
   "nuget",
+  "octave",
   "oh-my-fish",
   "ollama",
   "opam",
@@ -174,12 +176,14 @@ keywords = [
   "pkg",
   "pkg-tools",
   "pkg5",
+  "pkgcore",
   "pkgin",
   "pkgit",
   "pkgm",
   "pkgsrc",
   "platformio-core",
   "plugin",
+  "pmerge",
   "pnpm",
   "portage",
   "ports",
@@ -1099,6 +1103,7 @@ metrics.subjects.clib = "https://github.com/clibs/clib"
 metrics.subjects.composer = "https://github.com/composer/composer"
 metrics.subjects.conda = "https://github.com/conda/conda"
 metrics.subjects.cpan = "https://github.com/andk/cpanpm"
+metrics.subjects.cran = "https://github.com/wch/r-source"
 metrics.subjects.deb-get = "https://github.com/wimpysworld/deb-get"
 metrics.subjects.dkp-pacman = "https://github.com/devkitPro/pacman"
 metrics.subjects.dnf = "https://github.com/rpm-software-management/dnf"
@@ -1145,6 +1150,7 @@ metrics.subjects.nala = "https://gitlab.com/volian/nala"
 metrics.subjects.nimble = "https://github.com/nim-lang/nimble"
 metrics.subjects.nix = "https://github.com/NixOS/nix"
 metrics.subjects.npm = "https://github.com/npm/cli"
+metrics.subjects.octave = "https://github.com/gnu-octave/octave"
 metrics.subjects.oh-my-fish = "https://github.com/oh-my-fish/oh-my-fish"
 metrics.subjects.ollama = "https://github.com/ollama/ollama"
 metrics.subjects.opam = "https://github.com/ocaml/opam"
@@ -1168,6 +1174,7 @@ metrics.subjects.pkg-tools = "https://github.com/openbsd/src"
 metrics.subjects.pkgin = "https://github.com/NetBSDfr/pkgin"
 metrics.subjects.pkgm = "https://github.com/pkgxdev/pkgm"
 metrics.subjects.platformio-core = "https://github.com/platformio/platformio-core"
+metrics.subjects.pmerge = "https://github.com/pkgcore/pkgcore"
 metrics.subjects.pnpm = "https://github.com/pnpm/pnpm"
 metrics.subjects.ports = "https://github.com/freebsd/freebsd-ports"
 metrics.subjects.protonplus = "https://github.com/Vysp3r/ProtonPlus"
@@ -1229,7 +1236,7 @@ labels.content-rules."📦 manager: conda-based" = [ "anaconda", "conda-forge", 
 labels.content-rules."📦 manager: cpan" = [ "perl" ]
 labels.content-rules."📦 manager: dotnet" = [ "nuget" ]
 labels.content-rules."📦 manager: dpkg-based" = [ "debian", "dpkg", "ubuntu" ]
-labels.content-rules."📦 manager: emerge" = [ "gentoo", "portage" ]
+labels.content-rules."📦 manager: ebuild-based" = [ "gentoo", "pkgcore", "portage" ]
 labels.content-rules."📦 manager: eopkg" = [ "solus" ]
 labels.content-rules."📦 manager: flatpak" = [ "flathub" ]
 labels.content-rules."📦 manager: fwupd" = [ "lvfs" ]
@@ -1313,6 +1320,7 @@ labels.file-rules."📦 manager: conda-based" = [
   "tests/*pixi*",
 ]
 labels.file-rules."📦 manager: cpan" = [ "meta_package_manager/managers/cpan.*", "tests/*cpan*" ]
+labels.file-rules."📦 manager: cran" = [ "meta_package_manager/managers/cran.*", "tests/*cran*" ]
 labels.file-rules."📦 manager: dotnet" = [ "meta_package_manager/managers/dotnet.*", "tests/*dotnet*" ]
 labels.file-rules."📦 manager: dpkg-based" = [
   "meta_package_manager/managers/apt.*",
@@ -1331,9 +1339,14 @@ labels.file-rules."📦 manager: dpkg-based" = [
   "tests/*opkg*",
   "tests/*pacstall*",
 ]
+labels.file-rules."📦 manager: ebuild-based" = [
+  "meta_package_manager/managers/emerge.*",
+  "meta_package_manager/managers/pmerge.*",
+  "tests/*emerge*",
+  "tests/*pmerge*",
+]
 labels.file-rules."📦 manager: elan" = [ "meta_package_manager/managers/elan.*", "tests/*elan*" ]
 labels.file-rules."📦 manager: emacs" = [ "meta_package_manager/managers/emacs.*", "tests/*emacs*" ]
-labels.file-rules."📦 manager: emerge" = [ "meta_package_manager/managers/emerge.*", "tests/*emerge*" ]
 labels.file-rules."📦 manager: eopkg" = [ "meta_package_manager/managers/eopkg.*", "tests/*eopkg*" ]
 labels.file-rules."📦 manager: fish-based" = [
   "meta_package_manager/managers/fisher.*",
@@ -1411,6 +1424,7 @@ labels.file-rules."📦 manager: npm-based" = [
   "tests/*yarn*",
   "tests/*yarn_berry*",
 ]
+labels.file-rules."📦 manager: octave" = [ "meta_package_manager/managers/octave.*", "tests/*octave*" ]
 labels.file-rules."📦 manager: ollama" = [ "meta_package_manager/managers/ollama.*", "tests/*ollama*" ]
 labels.file-rules."📦 manager: opam" = [ "meta_package_manager/managers/opam.*", "tests/*opam*" ]
 labels.file-rules."📦 manager: pacman-based" = [
@@ -1627,6 +1641,11 @@ color = "bfdadc"
 description = "cpan"
 
 [[tool.repomatic.labels.extra]]
+name = "📦 manager: cran"
+color = "bfdadc"
+description = "cran"
+
+[[tool.repomatic.labels.extra]]
 name = "📦 manager: dotnet"
 color = "bfdadc"
 description = "dotnet"
@@ -1637,6 +1656,11 @@ color = "bfdadc"
 description = "apt, apt-mint, aptitude, deb-get, fink, nala, opkg, pacstall"
 
 [[tool.repomatic.labels.extra]]
+name = "📦 manager: ebuild-based"
+color = "bfdadc"
+description = "emerge, pmerge"
+
+[[tool.repomatic.labels.extra]]
 name = "📦 manager: elan"
 color = "bfdadc"
 description = "elan"
@@ -1645,11 +1669,6 @@ description = "elan"
 name = "📦 manager: emacs"
 color = "bfdadc"
 description = "emacs"
-
-[[tool.repomatic.labels.extra]]
-name = "📦 manager: emerge"
-color = "bfdadc"
-description = "emerge"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: eopkg"
@@ -1800,6 +1819,11 @@ description = "nix"
 name = "📦 manager: npm-based"
 color = "bfdadc"
 description = "bun, npm, pnpm, volta, yarn, yarn-berry"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: octave"
+color = "bfdadc"
+description = "octave"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: ollama"

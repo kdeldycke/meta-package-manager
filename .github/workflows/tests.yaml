@@ -282,6 +282,21 @@ jobs:
         if: runner.os == 'Linux'
         run: sudo apt-get --quiet --yes install --no-install-recommends packagekit
 
+      # GNU Octave
+      - name: Octave - Linux install
+        if: runner.os == 'Linux'
+        # Without its recommends, `pkg` still installs and removes a pure m-file
+        # package like the `doctest` of the destructive round-trip.
+        run: sudo apt-get --quiet --yes install --no-install-recommends octave
+
+      # R
+      - name: R - Linux install
+        if: runner.os == 'Linux'
+        # The base system alone: `r-recommended` and the compilers of `r-base-dev`
+        # are recommends, and the pure-R `praise` of the destructive round-trip
+        # needs neither.
+        run: sudo apt-get --quiet --yes install --no-install-recommends r-base-core
+
       # Chocolatey
       - name: Chocolatey - Windows self-upgrade
         if: runner.os == 'Windows'

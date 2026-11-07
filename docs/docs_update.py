@@ -111,12 +111,13 @@ for free from the pool: {func}`update_keywords` merges both sets into
 
 METRICS_MIRRORS = {
     "emacs": "https://github.com/emacs-mirror/emacs",
+    "cran": "https://github.com/wch/r-source",
 }
 """Repositories the metrics sample reads in place of a manager's own.
 
 For a manager whose `repository_url` sits on a host no forge API answers, but whose
-history is mirrored on one that does: Savannah serves Emacs through cgit, and the
-GitHub mirror carries the same commits.
+history is mirrored on one that does: Savannah serves Emacs through cgit, R keeps its
+sources in Subversion, and each GitHub mirror carries the same commits.
 """
 
 SAMPLED_FORGES = ("codeberg.org", "github.com", "gitlab.com")

@@ -1,0 +1,129 @@
+# GNU Octave's own package manager, the `pkg` command, driven headlessly
+# (https://octave.org). See docs/overrides.md ("Define a new manager") for the
+# schema and meta_package_manager/definitions.py (build_bundled_managers) for
+# the loader.
+#
+# A package is a name from the Octave Packages index (https://packages.octave.org),
+# and every verb takes that name. Each operation is one `octave-cli --eval` call,
+# so the listings print a format chosen here instead of the table of `pkg list`.
+#
+# The inventory holds the packages of the user and the packages installed for all
+# users, the user's copy winning when both hold one name, as in `pkg list`. A
+# regular user cannot remove a package installed for all users, like one from a
+# Debian `octave-*` package: `pkg` refuses it as "a global package".
+#
+# Parsing notes, verified against GNU Octave 11.1.0 on Ubuntu 26.04:
+#   - `--no-init-file` skips `~/.octaverc` and the `.octaverc` of the working
+#     directory, which Octave reads otherwise and which can print into the output
+#     being parsed. Octave 10 renamed the option `--no-init-user` and still
+#     accepts the old name, which is the one older releases know.
+#   - `pkg` has no read-only update check: `pkg update` installs what it finds.
+#     `outdated` reads the index itself and applies the rule of `pkg update`,
+#     `compare_versions` against the first, most recent, version of the entry.
+#   - `--eval` refuses trailing arguments ("--eval "CODE" and script file are
+#     mutually exclusive options"), so the package name goes into the code.
+#   - Removing or updating a package that is not installed only warns, and exits
+#     `0`.
+
+[mpm.overrides.octave]
+name = "GNU Octave pkg"
+homepage_url = "https://octave.org"
+documentation_url = "https://docs.octave.org/latest/Packages.html"
+# The canonical Mercurial repository resets every scripted connection; the GNU
+# Octave organization mirrors it on GitHub.
+repository_url = "https://github.com/gnu-octave/octave"
+wikipedia_url = "https://en.wikipedia.org/wiki/GNU_Octave"
+logo = "octave"
+platforms = ["all_platforms"]
+# `jsondecode`, which `outdated` and `search` read the index with, joined Octave
+# core in `7.1.0`.
+requirement = ">=7.1.0"
+cli_names = ["octave-cli", "octave"]
+pre_args = ["--no-init-file", "--quiet", "--no-window-system"]
+version_cli_options = ["--version"]
+# `octave-cli --version` opens with "GNU Octave (x86_64-pc-linux-gnu) version
+# 11.1.0", and older releases with "GNU Octave, version 9.2.0". The license line
+# below it also carries a "version", so the pattern anchors on the program name.
+version_regexes = ['GNU Octave.*?version\s+(?P<version>\S+)']
+
+[mpm.overrides.octave.operation_notes]
+search = "Lists the whole Octave Packages index, which mpm narrows to the query."
+sync = "Each operation reads the Octave Packages index online, so nothing needs a refresh."
+
+# Each loop index is the uppercase `K`: the definition DSL reads a lowercase word
+# in braces, like the `l{k}` of Octave's cell indexing, as a placeholder.
+[mpm.overrides.octave.operations.installed]
+args = [
+  "--eval",
+  'l = pkg ("list"); for K = 1:numel (l) printf ("%s %s\n", l{K}.name, l{K}.version); endfor',
+]
+regex = '^(?P<package_id>\S+) (?P<installed_version>\S+)$'
+
+# The index entry lists its versions newest first, as `pkg update` assumes. An
+# entry whose newest version is not numeric, like `dev`, makes `compare_versions`
+# raise, and is skipped.
+[mpm.overrides.octave.operations.outdated]
+args = [
+  "--eval",
+  '[s, ok] = urlread ("https://packages.octave.org/packages.json"); if (! ok) s = urlread ("https://gnu-octave.github.io/packages/packages.json"); endif; x = jsondecode (s, "makeValidName", false); l = pkg ("list"); for K = 1:numel (l) n = l{K}.name; if (isfield (x, n)) v = x.(n).versions(1); if (iscell (v)) v = v{1}; endif; try if (compare_versions (v.id, l{K}.version, ">")) printf ("%s %s %s\n", n, l{K}.version, v.id); endif; catch; end_try_catch; endif; endfor',
+]
+regex = '^(?P<package_id>\S+) (?P<installed_version>\S+) (?P<latest_version>\S+)$'
+
+# The whole index, one `name version description` row per package. The
+# description is printed but not captured: the definition DSL reads only IDs and
+# versions.
+[mpm.overrides.octave.operations.search]
+args = [
+  "--eval",
+  '[s, ok] = urlread ("https://packages.octave.org/packages.json"); if (! ok) s = urlread ("https://gnu-octave.github.io/packages/packages.json"); endif; x = jsondecode (s, "makeValidName", false); n = fieldnames (x); for K = 1:numel (n) e = x.(n{K}); v = e.versions(1); if (iscell (v)) v = v{1}; endif; printf ("%s %s %s\n", n{K}, v.id, strtrim (regexprep (e.description, "\\s+", " "))); endfor',
+]
+regex = '^(?P<package_id>\S+) (?P<latest_version>\S+)'
+
+[mpm.overrides.octave.operations.install]
+args = ["--eval", 'pkg ("install", "-forge", "{package_id}")']
+
+[mpm.overrides.octave.operations.remove]
+args = ["--eval", 'pkg ("uninstall", "{package_id}")']
+
+[mpm.overrides.octave.operations.upgrade_one]
+args = ["--eval", 'pkg ("update", "{package_id}")']
+
+[mpm.overrides.octave.operations.upgrade_all]
+args = ["--eval", 'pkg ("update")']
+
+# Output samples locking the version probe and the declared parsers, captured
+# from GNU Octave 11.1.0 on Ubuntu 26.04. Consumed by
+# tests/test_manager_definition.py; ignored by mpm's loader.
+[samples.version]
+output = """
+GNU Octave (x86_64-pc-linux-gnu) version 11.1.0
+Copyright (C) 1993-2026 The Octave Project Developers.
+License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>"""
+expected = "11.1.0"
+
+# Captured with `doctest` held one release back, installed from the URL of its
+# `0.8.1` tarball.
+[[samples.installed]]
+output = """
+doctest 0.8.1"""
+packages = [{ id = "doctest", version = "0.8.1" }]
+
+[[samples.outdated]]
+output = """
+doctest 0.8.1 0.8.2"""
+packages = [{ id = "doctest", version = "0.8.2" }]
+
+# Four consecutive rows of the 145 the index held, including the `pkg` entry,
+# whose only version is `dev`.
+[[samples.search]]
+output = """
+pkg-example 1.1.0 Example package to demonstrate the creation process of an Octave package. Keep this description brief. Describe the major features in the first two lines (160 characters). Multiple lines are allowed. Each line may have maximal 80 characters. Exceptions are URLs. Paragraphs, blank lines, and line breaks are ignored and replaced by spaces.
+pkg-octave-doc 0.8.6 Octave Package Documentation
+pkg dev The GNU Octave package management tool `pkg` is already installed with GNU Octave itself. This package is a proof of conecpt and NOT REQUIRED to work with Octave packages.
+ponchon-savarit 1.0.0 A toolbox for the Ponchón-Savarit method for GNU Octave."""
+packages = [
+  { id = "pkg-example", version = "1.1.0" },
+  { id = "pkg-octave-doc", version = "0.8.6" },
+  { id = "pkg", version = "dev" },
+  { id = "ponchon-savarit", version = "1.0.0" },
+]

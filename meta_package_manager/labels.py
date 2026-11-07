@@ -142,6 +142,7 @@ MANAGER_LABEL_GROUPS: TLabelGroup = {
         "opkg",
         "pacstall",
     }),
+    "ebuild-based": frozenset({"emerge", "pmerge"}),
     "fish-based": frozenset({"fisher", "oh-my-fish"}),
     "go-based": frozenset({"go", "gup"}),
     "homebrew": frozenset({"brew", "cask", "zerobrew"}),
@@ -220,6 +221,12 @@ tracker searches, which is the split this group exists to prevent.
 that test: it manages plugins for any shell rather than for one, and it is a compiled
 binary rather than a sourced function, so it shares neither a host program nor the
 interpreter wrapper with the groups above.
+
+`ebuild-based` is the plain reading as well: Portage's `emerge` and pkgcore's
+`pmerge` share no code, but they resolve the same ebuild repositories and record
+into the same database of installed packages, so a report about either is a
+report about one Gentoo host. `cave` stays out: `mpm` keys Paludis to Exherbo
+alone.
 
 `asdf-based` is the plain reading again: `mise` resolves asdf's plugins directly through
 its `asdf:` backend, so the two share one plugin ecosystem and one class of report.

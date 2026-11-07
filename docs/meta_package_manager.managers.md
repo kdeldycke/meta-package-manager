@@ -63,6 +63,7 @@
    meta_package_manager.managers.pkcon
    meta_package_manager.managers.pkg
    meta_package_manager.managers.pkgit
+   meta_package_manager.managers.pmerge
    meta_package_manager.managers.pnpm
    meta_package_manager.managers.protonplus
    meta_package_manager.managers.prt_get

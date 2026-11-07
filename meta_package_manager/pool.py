@@ -85,6 +85,7 @@ from .managers.pixi import Pixi
 from .managers.pkcon import Pkcon
 from .managers.pkg import PKG, Ports
 from .managers.pkgit import Pkgit
+from .managers.pmerge import Pmerge
 from .managers.pnpm import PNPM
 from .managers.protonplus import ProtonPlus
 from .managers.prt_get import PrtGet
@@ -185,6 +186,7 @@ manager_classes = (
     Pkcon,
     PKG,
     Pkgit,
+    Pmerge,
     PNPM,
     Ports,
     ProtonPlus,

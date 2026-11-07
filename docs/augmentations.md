@@ -32,6 +32,7 @@ print(augmentations_table())
 | [`clib`](managers/clib.md)                 |                      |              |                  |      ✅      |       ✅        |               |
 | [`composer`](managers/composer.md)         |                      |              |                  |      ✅      |                 |               |
 | [`conda`](managers/conda.md)               |                      |              |                  |      ✅      |       ✅        |               |
+| [`cran`](managers/cran.md)                 |                      |              |                  |      ✅      |       ✅        |               |
 | [`deb-get`](managers/deb-get.md)           |                      |              |                  |      ✅      |       ✅        |               |
 | [`dkp-pacman`](managers/dkp-pacman.md)     |                      |      ✅      |        ✅        |              |       ✅        |               |
 | [`dnf`](managers/dnf.md)                   |                      |              |        ✅        |      ✅      |       ✅        |               |
@@ -62,6 +63,7 @@ print(augmentations_table())
 | [`nimble`](managers/nimble.md)             |                      |              |                  |      ✅      |       ✅        |               |
 | [`nix`](managers/nix.md)                   |                      |              |                  |      ✅      |       ✅        |               |
 | [`npm`](managers/npm.md)                   |                      |              |                  |      ✅      |                 |               |
+| [`octave`](managers/octave.md)             |                      |              |                  |      ✅      |       ✅        |               |
 | [`opam`](managers/opam.md)                 |                      |              |                  |      ✅      |       ✅        |               |
 | [`opkg`](managers/opkg.md)                 |                      |              |                  |      ✅      |       ✅        |               |
 | [`pacaur`](managers/pacaur.md)             |                      |      ✅      |        ✅        |              |       ✅        |               |

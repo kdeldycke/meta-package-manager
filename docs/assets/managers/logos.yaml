@@ -137,6 +137,7 @@ icons:
     license: CC-BY-SA-2.5
     managers:
     - emerge
+    - pmerge
     source: https://wiki.gentoo.org/wiki/Project:Artwork/Artwork#Variations_of_the_.22g.22_logo
     title: Gentoo
   github:
@@ -320,6 +321,14 @@ icons:
     - opam
     source: https://ocaml.org/logo
     title: OCaml
+  octave:
+    contrast_on_light: 3.65
+    hex: 0790C0
+    license: CC0-1.0
+    managers:
+    - octave
+    source: https://www.gnu.org/software/octave/
+    title: Octave
   ollama:
     contrast_on_light: 21.0
     hex: '000000'
@@ -401,6 +410,14 @@ icons:
     - pyenv
     source: https://www.python.org/community/logos/
     title: Python
+  r:
+    contrast_on_light: 5.17
+    hex: 276DC3
+    license: CC-BY-SA-4.0
+    managers:
+    - cran
+    source: https://www.r-project.org/logo/
+    title: R
   rubygems:
     contrast_on_light: 3.56
     hex: E9573F

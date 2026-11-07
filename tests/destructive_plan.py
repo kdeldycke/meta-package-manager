@@ -102,6 +102,8 @@ PACKAGE_IDS = {
     "composer": "ralouphie/getallheaders",
     "conda": "pytz",  # Pure-Python, zero-dependency leaf on the default channel.
     "cpan": "Try::Tiny",
+    # A pure-R package with no dependency and no compiled code.
+    "cran": "praise",
     "deb-get": "deb-get",
     # devkitPro's repositories carry console toolchains and their libraries, not
     # the usual distro fare: no nyancat. The GBA example sources are the lightest
@@ -199,6 +201,8 @@ PACKAGE_IDS = {
     "nimble": "parsetoml",
     "nix": "hello",
     "npm": "ms",
+    # Pure m-file documentation tests, with no compiled code and no dependency.
+    "octave": "doctest",
     # Tiny single-function plugin of Oh My Fish's own package index.
     "oh-my-fish": "bak",
     # The smallest model in ollama's library, at a few hundred megabytes;
@@ -238,6 +242,7 @@ PACKAGE_IDS = {
     # Declares no install operation: the round-trip auto-skips. Every mutating
     # verb needs the package kind as a flag, which an id alone does not carry.
     "platformio-core": "ArduinoJson",
+    "pmerge": "games-misc/nyancat",
     "pnpm": "ms",
     "ports": "net/nyancat",
     # A 3 MB DXVK build, on the Lutris launcher the wrapper was driven against.

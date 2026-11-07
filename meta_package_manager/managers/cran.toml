@@ -1,0 +1,159 @@
+# R's own package management, the `install.packages()` family of its `utils`
+# package, driven headlessly through `Rscript` (https://www.r-project.org). See
+# docs/overrides.md ("Define a new manager") for the schema and
+# meta_package_manager/definitions.py (build_bundled_managers) for the loader.
+#
+# A package is a name from the repositories R is configured with, CRAN by
+# default, and every verb takes that name. Each operation is one `Rscript -e`
+# call, so the listings print a format chosen here. The package name reaches
+# the code as a trailing argument, which R reads with `commandArgs()`.
+#
+# The inventory holds the packages of the libraries the user can write to. A
+# fresh account has none, so the first install creates the personal library
+# that `R_LIBS_USER` names, as an interactive R session offers to. A library the
+# user cannot write to is left out, like `/usr/lib/R/site-library` where the
+# `r-cran-*` packages of Debian go, and so are the base packages of R itself.
+#
+# Parsing notes, verified against R 4.5.2 on Ubuntu 26.04:
+#   - `--no-init-file` skips `~/.Rprofile` and the `.Rprofile` of the working
+#     directory, which R reads first. The profile of an `renv` project would
+#     otherwise swap the library, and anything a profile prints would land in the
+#     output being parsed. The site profile still applies, and with it the CRAN
+#     mirror a distribution sets. Without one, `https://cloud.r-project.org` is
+#     used.
+#   - `install.packages()` only warns, and exits `0`, for a package it cannot
+#     find ("package ‘x’ is not available for this version of R"), and so does
+#     `available.packages()` for a repository it cannot reach. Every call runs
+#     with `options(warn = 2)`, which turns such a warning into an error.
+
+[mpm.overrides.cran]
+name = "R packages"
+homepage_url = "https://www.r-project.org"
+documentation_url = "https://cran.r-project.org/doc/manuals/r-release/R-admin.html#Installing-packages"
+repository_url = "https://svn.r-project.org/R/"
+wikipedia_url = "https://en.wikipedia.org/wiki/R_(programming_language)"
+logo = "r"
+platforms = ["all_platforms"]
+# No version floor is declared: every function driven here, the character form
+# of `update.packages(oldPkgs = )` included, already exists in R `3.6.3`. Driven
+# against `4.5.2`.
+cli_names = ["Rscript"]
+pre_args = ["--no-init-file"]
+version_cli_options = ["--version"]
+# Rscript printed its version on `<stderr>`, as "R scripting front-end version
+# 4.1.2 (2021-11-01)", until R `4.2.0` moved it to `<stdout>` as "Rscript (R)
+# version 4.5.2 (2025-10-31)". Ubuntu 22.04 still ships R `4.1.2`.
+version_from_stderr = true
+version_regexes = ['version\s+(?P<version>\d+\.\d+\.\d+)']
+
+# Every operation opens on the same first `-e` expression: it turns warnings
+# into errors, falls back to the CRAN cloud mirror where no profile set one,
+# and collects the writable libraries as `w`. It cannot live in `pre_args`,
+# which holds plain options only.
+[mpm.overrides.cran.operation_notes]
+search = "Matches package names only: the repository index carries no description."
+sync = "Each operation reads the repository index online, so nothing needs a refresh."
+
+# A package installed in two writable libraries is listed once, from the first,
+# which is the copy R loads.
+[mpm.overrides.cran.operations.installed]
+args = [
+  "-e",
+  'options(warn = 2L); r <- getOption("repos"); if (is.na(r["CRAN"]) || r["CRAN"] == "@CRAN@") { r["CRAN"] <- "https://cloud.r-project.org"; options(repos = r) }; w <- Filter(function(l) file.access(l, 2L) == 0L, .libPaths())',
+  "-e",
+  'p <- installed.packages(lib.loc = w); p <- p[!duplicated(p[, "Package"]) & (is.na(p[, "Priority"]) | p[, "Priority"] != "base"), , drop = FALSE]; cat(sprintf("%s %s\n", p[, "Package"], p[, "Version"]), sep = "")',
+]
+regex = '^(?P<package_id>\S+) (?P<installed_version>\S+)$'
+
+# `old.packages()` returns `NULL`, not an empty matrix, when nothing is behind.
+[mpm.overrides.cran.operations.outdated]
+args = [
+  "-e",
+  'options(warn = 2L); r <- getOption("repos"); if (is.na(r["CRAN"]) || r["CRAN"] == "@CRAN@") { r["CRAN"] <- "https://cloud.r-project.org"; options(repos = r) }; w <- Filter(function(l) file.access(l, 2L) == 0L, .libPaths())',
+  "-e",
+  'o <- old.packages(lib.loc = w); if (!is.null(o)) { o <- o[!duplicated(o[, "Package"]), , drop = FALSE]; cat(sprintf("%s %s %s\n", o[, "Package"], o[, "Installed"], o[, "ReposVer"]), sep = "") }',
+]
+regex = '^(?P<package_id>\S+) (?P<installed_version>\S+) (?P<latest_version>\S+)$'
+
+[mpm.overrides.cran.operations.search]
+args = [
+  "-e",
+  'options(warn = 2L); r <- getOption("repos"); if (is.na(r["CRAN"]) || r["CRAN"] == "@CRAN@") { r["CRAN"] <- "https://cloud.r-project.org"; options(repos = r) }; w <- Filter(function(l) file.access(l, 2L) == 0L, .libPaths())',
+  "-e",
+  'a <- available.packages(); q <- tolower(commandArgs(TRUE)[1L]); a <- a[grepl(q, tolower(a[, "Package"]), fixed = TRUE), , drop = FALSE]; cat(sprintf("%s %s\n", a[, "Package"], a[, "Version"]), sep = "")',
+  "{query}",
+]
+regex = '^(?P<package_id>\S+) (?P<latest_version>\S+)$'
+
+[mpm.overrides.cran.operations.install]
+args = [
+  "-e",
+  'options(warn = 2L); r <- getOption("repos"); if (is.na(r["CRAN"]) || r["CRAN"] == "@CRAN@") { r["CRAN"] <- "https://cloud.r-project.org"; options(repos = r) }; w <- Filter(function(l) file.access(l, 2L) == 0L, .libPaths())',
+  "-e",
+  'if (!length(w)) { w <- path.expand(strsplit(Sys.getenv("R_LIBS_USER"), .Platform$path.sep)[[1L]][1L]); dir.create(w, recursive = TRUE, showWarnings = FALSE); .libPaths(c(w, .libPaths())) }; install.packages(commandArgs(TRUE), lib = w[1L])',
+  "{package_id}",
+]
+
+# The package leaves the writable library holding it, the first one R finds.
+[mpm.overrides.cran.operations.remove]
+args = [
+  "-e",
+  'options(warn = 2L); r <- getOption("repos"); if (is.na(r["CRAN"]) || r["CRAN"] == "@CRAN@") { r["CRAN"] <- "https://cloud.r-project.org"; options(repos = r) }; w <- Filter(function(l) file.access(l, 2L) == 0L, .libPaths())',
+  "-e",
+  'p <- commandArgs(TRUE); remove.packages(p, lib = dirname(find.package(p, lib.loc = w)))',
+  "{package_id}",
+]
+
+# `oldPkgs` narrows the update to the named package, which is left alone when
+# it is not behind.
+[mpm.overrides.cran.operations.upgrade_one]
+args = [
+  "-e",
+  'options(warn = 2L); r <- getOption("repos"); if (is.na(r["CRAN"]) || r["CRAN"] == "@CRAN@") { r["CRAN"] <- "https://cloud.r-project.org"; options(repos = r) }; w <- Filter(function(l) file.access(l, 2L) == 0L, .libPaths())',
+  "-e",
+  'update.packages(lib.loc = w, oldPkgs = commandArgs(TRUE), ask = FALSE)',
+  "{package_id}",
+]
+
+[mpm.overrides.cran.operations.upgrade_all]
+args = [
+  "-e",
+  'options(warn = 2L); r <- getOption("repos"); if (is.na(r["CRAN"]) || r["CRAN"] == "@CRAN@") { r["CRAN"] <- "https://cloud.r-project.org"; options(repos = r) }; w <- Filter(function(l) file.access(l, 2L) == 0L, .libPaths())',
+  "-e",
+  'update.packages(lib.loc = w, ask = FALSE)',
+]
+
+# Output samples locking the version probe and the declared parsers, captured
+# from R 4.5.2 on Ubuntu 26.04. Consumed by tests/test_manager_definition.py;
+# ignored by mpm's loader.
+[samples.version]
+output = "Rscript (R) version 4.5.2 (2025-10-31)"
+expected = "4.5.2"
+
+# Captured with `R6` held one release back, installed from the CRAN archive
+# tarball of `2.5.1`.
+[[samples.installed]]
+output = """
+praise 1.0.0
+R6 2.5.1"""
+packages = [
+  { id = "praise", version = "1.0.0" },
+  { id = "R6", version = "2.5.1" },
+]
+
+[[samples.outdated]]
+output = """
+R6 2.5.1 2.6.1"""
+packages = [{ id = "R6", version = "2.6.1" }]
+
+# The query was `praise`, which also matches inside two other names.
+[[samples.search]]
+output = """
+appraise 0.1.1
+praise 1.0.0
+reappraised 0.2"""
+packages = [
+  { id = "appraise", version = "0.1.1" },
+  { id = "praise", version = "1.0.0" },
+  { id = "reappraised", version = "0.2" },
+]

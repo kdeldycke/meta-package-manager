@@ -110,6 +110,23 @@ class DNF(PackageManager):
     already covers.
     """
 
+    extra_env: ClassVar = {"LC_ALL": "C.UTF-8"}
+    """Keep every message in English, the version banner first.
+
+    dnf5 translates its `--version` banner, and no one pattern reads the
+    translations of dnf5 `5.4.3.0`: German prints `dnf5 Version 5.4.3.0`,
+    Brazilian Portuguese `dnf5versão 5.4.3.0` and Hungarian
+    `dnf5 verzió: 5.4.3.0`. In a non-English locale, `dnf5` then reads no
+    version and `yum` reads the word `dnf5` as one, and both leave the pool.
+    glibc `2.43` ignores `LANGUAGE` in `C.UTF-8`, as it does in `C`.
+
+    `C.UTF-8` and not `C` protects the summaries dnf4 prints. dnf4 replaces each
+    character its output stream cannot encode with an escape sequence, and on
+    RHEL 8 it runs on Python `3.6`, which opens an ASCII stream in the `C`
+    locale: the UTF-8 mode came in Python `3.7`. dnf5 writes the same UTF-8
+    bytes in the two locales.
+    """
+
     pre_args: tuple[str, ...] = ("--color=never", "--quiet")
 
     version_regexes: tuple[str, ...] = (

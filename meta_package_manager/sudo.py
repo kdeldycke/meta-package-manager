@@ -430,14 +430,14 @@ class Escalator:
     environment {meth}`CLIExecutor.run
     <meta_package_manager.execution.CLIExecutor.run>` forces on a call would
     reach `run0` and stop there. That silently costs the managers relying on
-    one: `nala`, `tazpkg` and `urpmi` pin their parsers against a translated
-    locale with `LC_ALL=C`, and `ports` keeps out of an interactive dialog with
-    `BATCH=yes`.
+    one: `dnf`, `dnf5`, `nala`, `tazpkg`, `urpmi` and `yum` pin their parsers
+    against a translated locale with `LC_ALL`, and `ports` keeps out of an
+    interactive dialog with `BATCH=yes`.
 
     `sudo` and `doas` need no template: both reset the environment too, but
     through a `sudoers` policy whose `env_keep` the host owns, which is where
     such a decision belongs. `pkexec` clears it down to a fixed list, which
-    holds `LANG` and every `LC_*` variable, so the `LC_ALL=C` above survives
+    holds `LANG` and every `LC_*` variable, so the `LC_ALL` above survives
     it and only `BATCH=yes` is lost. Carrying that one would need the
     `pkexec env NAME=VALUE ...` idiom rather than a per-variable flag, so it
     keeps `None` until a manager on a polkit-only host asks for one.

@@ -24,10 +24,14 @@ Fedora since 41 presents and which no CI runner reproduces.
 
 from __future__ import annotations
 
+import shlex
+
 import pytest
 
 from meta_package_manager.managers.dnf import DNF, DNF5, YUM
 from meta_package_manager.version import VersionRange, parse_version
+
+from .test_manager_definition import skip_windows
 
 DNF5_VERSION = """dnf5 version 5.4.3.0
 dnf5 plugin API version 2.0
@@ -40,6 +44,13 @@ The banner opens with the tool's own name. The default `(?P<version>\\S+)`
 regex reads that first token, so every RPM front-end reported its version as
 the string `dnf5`, failed its own requirement and left the pool.
 """
+
+DNF5_VERSION_DE = """dnf5 Version 5.4.3.0
+dnf5 Plugin-API-Version 2.0
+libdnf5-Version 5.4.3.0
+libdnf5-Plugin API-Version 2.2
+"""
+"""`dnf5 --version` under `LANG=de_DE.UTF-8`: the banner is translated."""
 
 DNF4_VERSION = """4.24.0
   Installed: rpm-0:6.0.2-1.fc44.aarch64 at Fri 04 Sep 2026 08:23:20 AM GMT
@@ -96,6 +107,47 @@ def test_version_probe_reads_both_generations(
     assert str(version) == expected_version
     fresh = version in VersionRange(manager_class.requirement)
     assert fresh is expected_fresh
+
+
+@skip_windows
+@pytest.mark.parametrize(
+    ("manager_class", "expected_fresh"),
+    (
+        pytest.param(DNF5, True, id="dnf5"),
+        pytest.param(YUM, True, id="yum"),
+        pytest.param(DNF, False, id="dnf"),
+    ),
+)
+def test_version_probe_reads_dnf5_in_a_german_locale(
+    manager_class, expected_fresh, tmp_path, monkeypatch
+):
+    """The probe gets the English banner on a German host.
+
+    The fake binary picks its banner like gettext does, `LC_ALL` before `LANG`.
+    In the German one, the `version` word that `dnf5` and `yum` look for is
+    `Version`, so without a forced locale `dnf5` reads no version and `yum`
+    reads the word `dnf5` as its version.
+    """
+    for name, banner in (("de", DNF5_VERSION_DE), ("en", DNF5_VERSION)):
+        (tmp_path / name).write_text(banner, encoding="UTF-8")
+    fake = tmp_path / "dnf5"
+    fake.write_text(
+        "#!/bin/sh\n"
+        'case "${LC_ALL:-$LANG}" in\n'
+        f"  de_*) cat {shlex.quote(str(tmp_path / 'de'))} ;;\n"
+        f"  *) cat {shlex.quote(str(tmp_path / 'en'))} ;;\n"
+        "esac\n",
+        encoding="UTF-8",
+    )
+    fake.chmod(0o755)
+    monkeypatch.setenv("LANG", "de_DE.UTF-8")
+    monkeypatch.delenv("LC_ALL", raising=False)
+
+    manager = manager_class()
+    manager.cli_path = fake
+    version = manager._parse_version(manager._probe_version())
+    assert str(version) == "5.4.3.0"
+    assert (version in VersionRange(manager_class.requirement)) is expected_fresh
 
 
 @pytest.mark.parametrize(

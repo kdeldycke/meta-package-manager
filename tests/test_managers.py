@@ -403,12 +403,16 @@ def test_cli_search_path(manager):
 
 @all_managers
 def test_extra_env_type(manager):
-    """Check that definitions environment variables as a dict of strings."""
+    """Check that definitions environment variables as a dict of strings.
+
+    A value may carry a dot, for a locale name like `C.UTF-8`.
+    """
     if manager.extra_env:
         for key, value in manager.extra_env.items():
-            for item in (key, value):
-                assert item
-                assert set(item).issubset(ascii_letters + digits + "_-")
+            assert key
+            assert set(key).issubset(ascii_letters + digits + "_-")
+            assert value
+            assert set(value).issubset(ascii_letters + digits + "_-.")
 
 
 @all_managers

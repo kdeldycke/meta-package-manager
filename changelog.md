@@ -25,6 +25,7 @@
 - [bar-plugin,mpm] Strip a terminal hyperlink from manager output together with its URI, which stayed in the text.
 - [brew,composer,mpm,npm,yarn] Query OSV with the full name of a namespaced package, so `mpm --network sbom` finds its advisories.
 - [bun,dotnet,go,mpm,pipxu,pnpm,uv,uvx,volta] Scan the packages of `bun`, `dotnet`, `go`, `pipxu`, `pnpm`, `uv`, `uvx` and `volta` for vulnerabilities: `mpm --network sbom` skipped them.
+- [dnf,dnf5,yum] Run `dnf`, `dnf5` and `yum` in the `C.UTF-8` locale, so `dnf5` and `yum` read their version under a non-English locale. Closes [#2218](https://github.com/kdeldycke/meta-package-manager/issues/2218).
 - [mpm] Skip `test_extra_labels_in_pyproject` outside a git checkout, where a newer `extra-platforms` failed it for a packager.
 - [mpm] Test the sdist in CI the way a distribution builds it: a new job runs the hermetic layer from the unpacked sdist on the newest dependencies.
 - [mpm] Replace the benchmark's 🟡 mark with 🪫, for coarse support that only runs inside a wider operation.

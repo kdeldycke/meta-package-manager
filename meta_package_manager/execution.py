@@ -1667,22 +1667,21 @@ class CLIExecutor:
         session, which a session of its own would hide.
 
         A call mpm escalates itself leads no process group of its own, so its
-        timeout kill reaches the `sudo` process alone. `sudo` runs the command
-        under a monitor process whenever `use_pty` is on, its upstream default
-        since `1.9.14`, so the manager binary survives the kill: an `apt upgrade`
-        outlasting the state-change timeout keeps `/var/lib/dpkg/lock-frontend`,
-        and the next `apt` or `aptitude` call fails on a lock mpm already
-        declared finished.
+        timeout kill sends `SIGKILL` to `sudo`, then to each of its descendants.
+        `sudo` cannot forward a `SIGKILL`, and an unprivileged mpm cannot signal
+        the command `sudo` runs as root. The manager binary therefore survives
+        the kill: an `apt upgrade` outlasting the state-change timeout keeps
+        `/var/lib/dpkg/lock-frontend`, and the next `apt` or `aptitude` call
+        fails on a lock mpm already declared finished. Both hold for a command
+        that exits on `SIGTERM` and for one that ignores it (click-extra
+        `10.2.0`, `sudo` `1.9.17p2`).
 
         ```{todo}
-        Delete the paragraph above once the click-extra floor reaches the
-        release whose `run_cli` also kills a child's descendants one PID at a
-        time. It reads the process tree before the kill and signals every
-        descendant, which reaps the escalated command with the `sudo` that
-        spawned it. mpm cannot do this itself: it never sees the child's PID,
-        and the kill reparents the descendants before
-        {exc}`subprocess.TimeoutExpired` surfaces, cutting the links a walk
-        follows.
+        Re-scope the paragraph above once the timeout of `run_cli` sends
+        `SIGTERM`, then waits, before its `SIGKILL` to a child sharing the
+        caller's process group. `sudo` forwards a `SIGTERM` to its command,
+        which then exits. A command that ignores `SIGTERM` still survives, so
+        the paragraph stays true for that case.
         ```
 
         :param must_succeed: if `True`, raise

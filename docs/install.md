@@ -40,7 +40,7 @@ invoke(mpm, args=["--help"])
 
 `````{tab-item} Specific version
 ```shell-session
-$ uvx meta-package-manager@8.2.0 --help
+$ uvx meta-package-manager@8.3.0 --help
 ```
 `````
 

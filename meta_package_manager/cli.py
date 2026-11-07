@@ -205,22 +205,8 @@ The wording is uniform across the unmaintained managers rather than drawn from e
 markdown paragraphs with links, sized for the manager's own page, where a help label
 has one line to spend.
 
-```{note}
-click-extra paints Click's own spelling and no other (`DEPRECATED_RE` matches the
-literal word), so this marker renders unstyled where Click's took the `deprecated`
-theme slot.
-```
-
-```{todo}
-Declare the marker so it takes that slot back, once a click-extra release carries a
-`deprecated` field on {class}`~click_extra.highlight.HelpKeywords`, in the
-`extra_keywords` the `mpm` group is built with:
-
-    extra_keywords=HelpKeywords(..., deprecated={UNMAINTAINED_MARKER})
-
-Naming it on a release without the field raises `TypeError` at import, so this waits
-on the floor rather than being guarded.
-```
+The `mpm` group lists it in the `deprecated` field of its `extra_keywords`, so the
+help screen paints it with the theme slot Click's own marker takes.
 """
 
 UNMAINTAINED_REASON = "upstream is unmaintained"
@@ -613,9 +599,11 @@ def _debug_rerun_command(ctx: Context, restrict_to: Iterable[str] | None = None)
     # Swaps --version for the brand-mark screen, which degrades to the plain
     # message below whenever colors, width or accessibility rule it out.
     params=partial(default_params, screen=VERSION_SCREEN),
-    # Highlight placeholder option names that appear in the help text prose.
+    # Highlight placeholder option names that appear in the help text prose, and
+    # paint the marker of an unmaintained manager like Click's `(DEPRECATED)`.
     extra_keywords=HelpKeywords(
         long_options={"--<manager-id>", "--no-<manager-id>"},
+        deprecated={UNMAINTAINED_MARKER},
     ),
     # "version" is a --sort-by choice but too common a word in help text.
     excluded_keywords=HelpKeywords(choices={"version"}),

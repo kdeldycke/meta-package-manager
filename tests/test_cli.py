@@ -47,11 +47,20 @@ from textwrap import dedent
 from types import SimpleNamespace
 
 import pytest
-from click_extra import SERIALIZATION_FORMATS, TableFormat, strip_ansi
+from click_extra import (
+    SERIALIZATION_FORMATS,
+    TableFormat,
+    get_current_theme,
+    strip_ansi,
+)
 from extra_platforms import is_any_windows
 
 from meta_package_manager import __version__, bar_plugin
-from meta_package_manager.cli import XKCD_MANAGER_ORDER, _debug_rerun_command
+from meta_package_manager.cli import (
+    UNMAINTAINED_MARKER,
+    XKCD_MANAGER_ORDER,
+    _debug_rerun_command,
+)
 from meta_package_manager.execution import CLIError
 from meta_package_manager.package import Package
 from meta_package_manager.pool import pool
@@ -413,6 +422,13 @@ def test_invalid_manager_selector(invoke, selector):
     assert not result.stdout
     assert "Error: Invalid value for " in result.stderr
     assert selector in result.stderr
+
+
+def test_unmaintained_marker_takes_the_deprecated_style(invoke):
+    """The `(unmaintained)` marker of a selector is painted like `(DEPRECATED)`."""
+    result = invoke("--color", "--help")
+    assert result.exit_code == 0
+    assert get_current_theme().deprecated(UNMAINTAINED_MARKER) in result.stdout
 
 
 def test_default_all_managers(invoke):

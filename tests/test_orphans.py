@@ -540,6 +540,7 @@ EXPLICIT_INSTALL_NOT_MARKED = {
     "emerge": "`emerge` adds its target to the world set.",
     "juliaup": "`gc` keeps every version a channel points at.",
     "pkg-tools": "`pkg_add` tags an installed package as installed manually.",
+    "pmerge": "`pmerge` adds its target to the world set.",
     "spack": "`spack install` marks an installed spec as explicit.",
     "vagrant": "`box prune` removes older box versions, whatever the reason.",
     "zypper": "zypper has no command that changes only the install reason.",

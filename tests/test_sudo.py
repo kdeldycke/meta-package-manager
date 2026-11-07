@@ -137,6 +137,7 @@ def test_default_sudo_matches_system_managers():
         "pkg",
         "pkg-tools",
         "pkgin",
+        "pmerge",
         "ports",
         "prt-get",
         "slapt-get",

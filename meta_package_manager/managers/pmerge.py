@@ -41,6 +41,11 @@ class Pmerge(PackageManager):
     The queries run through `pquery`, the inventory and search tool of pkgcore,
     and the maintenance through `pmaint` and `pclean`. All four ship together.
 
+    A fresh stage3 ships `/var/cache/distfiles` owned by `root` with mode
+    `0755`, and every `pmerge` fetch then fails with `Permission denied`.
+    Give the directory to the `portage` user first:
+    `chown portage:portage /var/cache/distfiles`.
+
     :::{caution}
     Installs and upgrades compile from source, so their duration comes from the
     package rather than from the network. A small program finishes well inside
@@ -91,8 +96,10 @@ class Pmerge(PackageManager):
     replays as printed."""
 
     _INSTALLED_REGEXP = re.compile(
-        r"^(?P<package_id>[^=\s]+)=(?P<installed_version>\S+)$",
+        r"^(?P<package_id>[^/\s]+/(?P<name>[^=\s]+))=(?P<installed_version>\S+)$",
     )
+    """The package ID is `category/name`, and the bare `name` is captured too:
+    it is what an exact query for a package matches, the category aside."""
 
     _SLOTTED_FORMAT = "{category}/{package}:{slot}={fullver}"
     """`pquery` row carrying the slot, the key `outdated` joins its two listings
@@ -120,6 +127,13 @@ class Pmerge(PackageManager):
     followed by the package object, whose `category/name-version` is split
     downstream through
     {meth}`~meta_package_manager.manager.PackageManager.split_name_version`."""
+
+    _GLOBBABLE_QUERY = re.compile(r"^[\w.+*-]+(?:/[\w.+*-]+)?$")
+    """A query `pquery` accepts inside a name glob.
+
+    Any other character, like a space, makes `pquery` refuse the glob ("globs
+    must be composed of [\\w-.+], with optional '*'"), and no package name
+    holds one anyway."""
 
     _REGEX_METACHARACTERS = re.compile(r"([\\.^$*+?{}\[\]|()])")
     """Characters `pquery --description` reads as regular expression syntax.
@@ -210,6 +224,7 @@ class Pmerge(PackageManager):
         for match in self._SLOTTED_REGEXP.finditer(output):
             yield self.package(
                 id=match["package_id"],
+                name=match["package_id"].rpartition("/")[2],
                 installed_version=installed.get((match["package_id"], match["slot"])),
                 latest_version=match["version"],
             )
@@ -236,14 +251,19 @@ class Pmerge(PackageManager):
         for match in self._ORPHANS_REGEXP.finditer(output):
             if split := self.split_name_version(match["cpv"]):
                 package_id, version = split
-                yield self.package(id=package_id, installed_version=version)
+                yield self.package(
+                    id=package_id,
+                    name=package_id.rpartition("/")[2],
+                    installed_version=version,
+                )
 
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
 
         A query matches package names, and is a glob around the query unless the
-        search is exact. An extended search adds a second call, matching the
-        query against descriptions: it reads the metadata of the whole
+        search is exact. A query no package name can hold, like one with a
+        space, skips that call. An extended search adds a second call, matching
+        the query against descriptions: it reads the metadata of the whole
         repository, and is the slow part.
 
         ```{code-block} shell-session
@@ -274,7 +294,9 @@ class Pmerge(PackageManager):
         ```
         """  # noqa: E501
         pquery_path = self.sibling_cli("pquery", same_dir=True)
-        targets: list[tuple[str, ...]] = [(query if exact else f"*{query}*",)]
+        targets: list[tuple[str, ...]] = []
+        if self._GLOBBABLE_QUERY.match(query):
+            targets.append((query if exact else f"*{query}*",))
         if extended:
             targets.append((
                 "--description",
@@ -297,6 +319,7 @@ class Pmerge(PackageManager):
                 seen.add(match["package_id"])
                 yield self.package(
                     id=match["package_id"],
+                    name=match["package_id"].rpartition("/")[2],
                     description=match["description"],
                     latest_version=match["latest_version"],
                 )
@@ -378,6 +401,12 @@ class Pmerge(PackageManager):
 
     def cleanup_orphan(self) -> None:
         """Remove every package outside the `@world` and `@system` sets.
+
+        The sweep stops at the first removal that fails, and `pmerge` still
+        exits `0`. On a stage3 it removed `app-text/build-docbook-catalog`, then
+        stopped on a DocBook package whose `pkg_postrm` calls that tool: seven
+        of the hundred orphans went. `mpm` counts what the sweep removed, and
+        `mpm orphans` lists what is left.
 
         ```{code-block} shell-session
 

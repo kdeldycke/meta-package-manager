@@ -24,192 +24,10 @@ env:
 
 jobs:
 
-  octave:
-    name: Octave pkg on Ubuntu
-    runs-on: ubuntu-26.04
-    timeout-minutes: 30
-    steps:
-      - name: Install Octave
-        run: |
-          sudo apt-get --quiet update
-          sudo apt-get --quiet --yes install --no-install-recommends octave
-      - name: Drive Octave
-        shell: bash {0}
-        run: |
-          run() {
-            printf '\n=== %s\n' "$*"
-            "$@" > /tmp/out 2> /tmp/err
-            printf -- '--- exit=%s\n--- stdout\n' "$?"
-            cat /tmp/out
-            printf -- '--- stderr\n'
-            cat /tmp/err
-          }
-          INDEX='[s, ok] = urlread ("https://packages.octave.org/packages.json"); if (! ok) s = urlread ("https://gnu-octave.github.io/packages/packages.json"); endif; x = jsondecode (s, "makeValidName", false);'
-          cat > /tmp/installed.m <<'EOF'
-          l = pkg ("list"); for i = 1:numel (l) printf ("%s %s\n", l{i}.name, l{i}.version); endfor
-          EOF
-          cat > /tmp/outdated.m <<'EOF'
-          l = pkg ("list"); for i = 1:numel (l) n = l{i}.name; if (isfield (x, n)) v = x.(n).versions(1); if (iscell (v)) v = v{1}; endif; try if (compare_versions (v.id, l{i}.version, ">")) printf ("%s %s %s\n", n, l{i}.version, v.id); endif; catch; end_try_catch; endif; endfor
-          EOF
-          cat > /tmp/search.m <<'EOF'
-          n = fieldnames (x); for i = 1:numel (n) e = x.(n{i}); v = e.versions(1); if (iscell (v)) v = v{1}; endif; printf ("%s %s %s\n", n{i}, v.id, strtrim (regexprep (e.description, "\\s+", " "))); endfor
-          EOF
-          INSTALLED="$(cat /tmp/installed.m)"
-          OUTDATED="${INDEX} $(cat /tmp/outdated.m)"
-          SEARCH="${INDEX} $(cat /tmp/search.m)"
-          FLAGS=(--no-init-file --quiet --no-window-system)
-          OLD='https://downloads.sourceforge.net/project/octave/Octave%20Forge%20Packages/Individual%20Package%20Releases/doctest-0.8.1.tar.gz'
-
-          run command -v octave octave-cli
-          run octave-cli --version
-          run octave --version
-          run octave-cli --help
-          run octave-cli "${FLAGS[@]}" --eval 'disp (version ()); disp (OCTAVE_HOME ()); disp (argv ())'
-          run octave-cli "${FLAGS[@]}" --eval 'disp (argv ())' alpha beta
-          run octave-cli "${FLAGS[@]}" --eval 'disp (argv ())' -- alpha beta
-          run octave-cli "${FLAGS[@]}" --eval 'pkg prefix; pkg local_list; pkg global_list'
-
-          echo 'disp ("PROJECT OCTAVERC")' > .octaverc
-          run octave-cli --quiet --eval '1;'
-          run octave-cli --no-init-file --quiet --eval '1;'
-          run octave-cli --norc --quiet --eval '1;'
-          rm .octaverc
-
-          run octave-cli "${FLAGS[@]}" --eval 'pkg list'
-          run octave-cli "${FLAGS[@]}" --eval "$INSTALLED"
-          run octave-cli "${FLAGS[@]}" --eval "$OUTDATED"
-          run octave-cli "${FLAGS[@]}" --eval "$SEARCH"
-          run octave-cli "${FLAGS[@]}" --eval 'pkg search doc'
-          run octave-cli "${FLAGS[@]}" --eval 'pkg search io'
-
-          run octave-cli "${FLAGS[@]}" --eval "pkg install \"$OLD\""
-          run octave-cli "${FLAGS[@]}" --eval 'pkg list'
-          run octave-cli "${FLAGS[@]}" --eval "$INSTALLED"
-          run octave-cli "${FLAGS[@]}" --eval "$OUTDATED"
-          run octave-cli "${FLAGS[@]}" --eval 'pkg update doctest'
-          run octave-cli "${FLAGS[@]}" --eval "$INSTALLED"
-          run octave-cli "${FLAGS[@]}" --eval 'pkg ("uninstall", "doctest")'
-          run octave-cli "${FLAGS[@]}" --eval "$INSTALLED"
-          run octave-cli "${FLAGS[@]}" --eval 'pkg ("install", "-forge", "doctest")'
-          run octave-cli "${FLAGS[@]}" --eval 'pkg list'
-          run octave-cli "${FLAGS[@]}" --eval 'pkg update'
-          run octave-cli "${FLAGS[@]}" --eval 'pkg ("uninstall", "nosuchpackage")'
-          run octave-cli "${FLAGS[@]}" --eval 'pkg ("install", "-forge", "nosuchpackage")'
-          run octave-cli "${FLAGS[@]}" --eval 'pkg ("update", "nosuchpackage")'
-          run ls -la "$HOME/.local/share/octave" "$HOME/.config/octave"
-          run octave-cli "${FLAGS[@]}" --eval 'pkg ("uninstall", "doctest")'
-
-          sudo apt-get --quiet --yes install --no-install-recommends octave-doctest > /dev/null
-          run octave-cli "${FLAGS[@]}" --eval 'pkg list'
-          run octave-cli --norc --quiet --no-window-system --eval 'pkg list'
-          run octave-cli "${FLAGS[@]}" --eval "$INSTALLED"
-          run octave-cli "${FLAGS[@]}" --eval "$OUTDATED"
-          run octave-cli "${FLAGS[@]}" --eval 'pkg ("uninstall", "doctest")'
-
-  r:
-    name: R on Ubuntu
-    runs-on: ubuntu-26.04
-    timeout-minutes: 30
-    steps:
-      - name: Install R
-        run: |
-          sudo apt-get --quiet update
-          sudo apt-get --quiet --yes install --no-install-recommends r-base-core r-cran-r6
-      - name: Drive R
-        shell: bash {0}
-        run: |
-          run() {
-            printf '\n=== %s\n' "$*"
-            "$@" > /tmp/out 2> /tmp/err
-            printf -- '--- exit=%s\n--- stdout\n' "$?"
-            cat /tmp/out
-            printf -- '--- stderr\n'
-            cat /tmp/err
-          }
-          # A dated Posit Package Manager snapshot of CRAN, seven days old: the
-          # cooldown for the installs below, which CRAN itself cannot express.
-          SNAPSHOT='https://packagemanager.posit.co/cran/2026-10-31'
-          cat > /tmp/prelude.R <<'EOF'
-          r <- getOption("repos"); if (is.na(r["CRAN"]) || r["CRAN"] == "@CRAN@") { r["CRAN"] <- "https://cloud.r-project.org"; options(repos = r) }; w <- Filter(function(l) file.access(l, 2L) == 0L, .libPaths())
-          EOF
-          cat > /tmp/installed.R <<'EOF'
-          p <- installed.packages(lib.loc = w, noCache = TRUE); p <- p[!duplicated(p[, "Package"]) & (is.na(p[, "Priority"]) | p[, "Priority"] != "base"), , drop = FALSE]; cat(sprintf("%s %s\n", p[, "Package"], p[, "Version"]), sep = "")
-          EOF
-          cat > /tmp/outdated.R <<'EOF'
-          o <- old.packages(lib.loc = w); if (!is.null(o)) { o <- o[!duplicated(o[, "Package"]), , drop = FALSE]; cat(sprintf("%s %s %s\n", o[, "Package"], o[, "Installed"], o[, "ReposVer"]), sep = "") }
-          EOF
-          cat > /tmp/search.R <<'EOF'
-          a <- available.packages(); q <- tolower(commandArgs(TRUE)[1L]); a <- a[grepl(q, tolower(a[, "Package"]), fixed = TRUE), , drop = FALSE]; cat(sprintf("%s %s\n", a[, "Package"], a[, "Version"]), sep = "")
-          EOF
-          cat > /tmp/install.R <<'EOF'
-          if (!length(w)) { w <- path.expand(strsplit(Sys.getenv("R_LIBS_USER"), .Platform$path.sep)[[1L]][1L]); dir.create(w, recursive = TRUE, showWarnings = FALSE); .libPaths(c(w, .libPaths())) }; options(warn = 2L); install.packages(commandArgs(TRUE), lib = w[1L])
-          EOF
-          cat > /tmp/remove.R <<'EOF'
-          p <- commandArgs(TRUE); remove.packages(p, lib = dirname(find.package(p, lib.loc = w)))
-          EOF
-          cat > /tmp/upgrade_one.R <<'EOF'
-          update.packages(lib.loc = w, oldPkgs = commandArgs(TRUE), ask = FALSE)
-          EOF
-          cat > /tmp/upgrade_all.R <<'EOF'
-          update.packages(lib.loc = w, ask = FALSE)
-          EOF
-          PRELUDE="$(cat /tmp/prelude.R)"
-          INSTALLED="$(cat /tmp/installed.R)"
-          OUTDATED="$(cat /tmp/outdated.R)"
-          SEARCH="$(cat /tmp/search.R)"
-          INSTALL="$(cat /tmp/install.R)"
-          REMOVE="$(cat /tmp/remove.R)"
-          UPGRADE_ONE="$(cat /tmp/upgrade_one.R)"
-          UPGRADE_ALL="$(cat /tmp/upgrade_all.R)"
-
-          run command -v R Rscript
-          run Rscript --version
-          run R --version
-          run Rscript --help
-          run Rscript --no-init-file -e 'print(R.version.string); print(.libPaths()); print(file.access(.libPaths(), 2L)); print(getOption("repos")); print(Sys.getenv(c("R_LIBS_USER", "R_LIBS", "R_LIBS_SITE", "R_HOME")))'
-          run Rscript --no-init-file -e 'print(commandArgs(TRUE))' alpha 'beta gamma' --flag
-          run cat /etc/R/Rprofile.site
-
-          printf 'cat("PROJECT RPROFILE\\n")\n' > .Rprofile
-          run Rscript -e 'invisible(1)'
-          run Rscript --no-init-file -e 'invisible(1)'
-          rm .Rprofile
-
-          run Rscript --no-init-file -e 'ip <- installed.packages(); print(ip[, c("LibPath", "Version", "Priority")])'
-          run Rscript --no-init-file -e "$PRELUDE" -e "$INSTALLED"
-          run Rscript --no-init-file -e "$PRELUDE" -e "$OUTDATED"
-          run Rscript --no-init-file -e "$PRELUDE" -e 'print(w); print(getOption("repos"))'
-          run Rscript --no-init-file -e "$PRELUDE" -e "system.time(a <- available.packages()); print(dim(a))"
-          run Rscript --no-init-file -e "$PRELUDE" -e "$SEARCH" praise
-          run Rscript --no-init-file -e "$PRELUDE" -e "$SEARCH" R6
-          run Rscript --no-init-file -e "$PRELUDE" -e "system.time(d <- tools::CRAN_package_db()); print(dim(d)); print(intersect(c('Published', 'Date/Publication', 'Title'), names(d)))"
-
-          # Pin the snapshot through the site profile, which the prelude honors.
-          printf 'options(repos = c(CRAN = "%s"))\n' "$SNAPSHOT" | sudo tee --append /etc/R/Rprofile.site
-          run Rscript --no-init-file -e "options(repos = c(CRAN = '$SNAPSHOT')); install.packages('praise')"
-          run Rscript --no-init-file -e "$PRELUDE" -e "$INSTALL" praise
-          run Rscript --no-init-file -e "$PRELUDE" -e 'print(w)'
-          run Rscript --no-init-file -e "$PRELUDE" -e "$INSTALLED"
-          run Rscript --no-init-file -e "$PRELUDE" -e "$INSTALL" nosuchpackage
-          run Rscript --no-init-file -e "options(repos = c(CRAN = '$SNAPSHOT')); install.packages('nosuchpackage', lib = .libPaths()[1L])"
-          run Rscript --no-init-file -e "$PRELUDE" -e "install.packages('https://cran.r-project.org/src/contrib/Archive/R6/R6_2.5.1.tar.gz', repos = NULL, type = 'source', lib = w[1L])"
-          run Rscript --no-init-file -e "$PRELUDE" -e "$INSTALLED"
-          run Rscript --no-init-file -e "$PRELUDE" -e "$OUTDATED"
-          run Rscript --no-init-file -e "$PRELUDE" -e "$UPGRADE_ONE" praise
-          run Rscript --no-init-file -e "$PRELUDE" -e "$UPGRADE_ONE" R6
-          run Rscript --no-init-file -e "$PRELUDE" -e "$INSTALLED"
-          run Rscript --no-init-file -e "$PRELUDE" -e "install.packages('https://cran.r-project.org/src/contrib/Archive/R6/R6_2.5.1.tar.gz', repos = NULL, type = 'source', lib = w[1L])"
-          run Rscript --no-init-file -e "$PRELUDE" -e "$UPGRADE_ALL"
-          run Rscript --no-init-file -e "$PRELUDE" -e "$OUTDATED"
-          run Rscript --no-init-file -e "$PRELUDE" -e "$REMOVE" praise
-          run Rscript --no-init-file -e "$PRELUDE" -e "$REMOVE" nosuchpackage
-          run Rscript --no-init-file -e "$PRELUDE" -e "$INSTALLED"
-          run sudo Rscript --no-init-file -e "$PRELUDE" -e "$INSTALLED"
-
   pmerge:
     name: pkgcore pmerge in a Gentoo container
     runs-on: ubuntu-26.04
-    timeout-minutes: 60
+    timeout-minutes: 90
     steps:
       - name: Drive pmerge
         shell: bash {0}
@@ -219,68 +37,63 @@ jobs:
             printf '\n=== %s\n' "$*"
             "$@" > /tmp/out 2> /tmp/err
             printf -- '--- exit=%s\n--- stdout\n' "$?"
-            head -n 120 /tmp/out
+            head -n 80 /tmp/out
             printf -- '--- stderr\n'
-            head -n 60 /tmp/err
+            head -n 40 /tmp/err
           }
           printf 'FEATURES="${FEATURES} -ipc-sandbox -network-sandbox -pid-sandbox -sandbox -usersandbox"\n' >> /etc/portage/make.conf
           printf 'MAKEOPTS="-j4"\n' >> /etc/portage/make.conf
-          run cat /etc/portage/make.conf
+          emerge-webrsync --quiet > /tmp/webrsync.log 2>&1
+          printf 'emerge-webrsync exit=%s\n' "$?"
+          tail -n 5 /tmp/webrsync.log
           emerge --quiet --getbinpkg --oneshot sys-apps/pkgcore > /tmp/emerge.log 2>&1 \
             || emerge --quiet --oneshot sys-apps/pkgcore > /tmp/emerge.log 2>&1
           printf 'emerge pkgcore exit=%s\n' "$?"
-          tail -n 30 /tmp/emerge.log
-          FORMAT='{category}/{package} {fullver}'
+          tail -n 5 /tmp/emerge.log
+          INSTALLED='{category}/{package}={fullver}'
+          SLOTTED='{category}/{package}:{slot}={fullver}'
+          SEARCH='{category}/{package}={fullver}={description}'
 
+          run cat /usr/share/portage/config/repos.conf
           run pmerge --version
-          run pquery --version
-          run pmerge --help
-          run pquery --installed --format "$FORMAT"
-          run pquery --installed --format '{category}/{package}={fullver}'
-          run pquery --installed --cpv --format '{fullver}'
-          run pquery --installed --slot
-          run pquery --installed --max --format "$FORMAT"
-          run pquery --max --format '{category}/{package} {fullver} {description}' nyancat
-          run pquery --max --format '{category}/{package} {fullver} {description}' '*nyan*'
-          run pquery --max --format '{category}/{package} {fullver} {description}' 'games-misc/*'
-          run pquery --max --format '{category}/{package} {fullver} {description}' --description rainbow
-          run pquery --max --format '{category}/{package} {fullver} {description}' nosuchpackage
-          run pquery --upgrade --format "$FORMAT"
-          run pmerge --pretend --clean
-          run pmerge --pretend --upgrade --deep --formatter pkgcore @world
-          run pmerge --pretend --upgrade --deep --formatter basic @world
-          run pmerge --pretend --upgrade --deep --noreplace --formatter pkgcore @world
-          run pmerge --pretend --upgrade --deep @world
+          run pmerge --color no --version
+          run pquery --color no --installed --format "$INSTALLED"
+          run pquery --color no --installed --format "$SLOTTED"
+          run pmerge --color no --list-sets
+          run pmerge --color no --pretend --upgrade --deep --newuse @world @system
+          run pmerge --color no games-misc/nyancat
+          run pmerge --color no --oneshot dev-libs/libevent
+          printf 'sys-apps/pkgcore\n' >> /var/lib/portage/world
+          run cat /var/lib/portage/world
+          run pmerge --color no --pretend --clean
+          run pquery --color no --installed --format "$INSTALLED" nyancat libevent pkgcore
 
-          run pmerge --pretend games-misc/nyancat
-          run pmerge games-misc/nyancat
-          run pquery --installed --format "$FORMAT" nyancat
-          run cat /var/lib/portage/world
-          run pmerge --pretend --noreplace games-misc/nyancat
-          run pmerge --pretend --upgrade games-misc/nyancat
-          run pmerge --pretend --unmerge games-misc/nyancat
-          run pmerge --unmerge games-misc/nyancat
-          run pquery --installed --format "$FORMAT" nyancat
-          run cat /var/lib/portage/world
-          run pmerge --unmerge games-misc/nyancat
-          run pmerge games-misc/nosuchpackage
-          run pmerge --oneshot dev-libs/libevent
-          run pmerge --pretend --clean
+          run pquery --color no --max --format "$SEARCH" '*nyan*'
+          run pquery --color no --max --format "$SEARCH" nyancat
+          run pquery --color no --max --format "$SEARCH" --description 'ANSI escape'
+          run pquery --color no --max --format "$SEARCH" '*cowsay*'
+          run bash -c "time pquery --color no --max --format '$SEARCH' '*py*' | wc -l"
+          run bash -c "time pquery --color no --max --format '$SEARCH' --description 'terminal' | wc -l"
 
           printf 'ACCEPT_KEYWORDS="~amd64"\n' >> /etc/portage/make.conf
-          run pquery --upgrade --format "$FORMAT"
-          run pquery --upgrade --format "$FORMAT" --installed
-          run pmerge --pretend --upgrade --deep --formatter pkgcore @world
-          run pmerge --pretend --upgrade --deep @world
-          run pmerge --pretend --upgrade --formatter pkgcore app-misc/ca-certificates
+          run pquery --color no --upgrade --format "$SLOTTED"
+          run pquery --color no --installed --format "$SLOTTED"
+          run bash -c "time pquery --color no --upgrade --format '$SLOTTED' | wc -l"
+          run pmerge --color no --pretend --upgrade --deep --newuse @world @system
+          run pmerge --color no --pretend --upgrade app-crypt/libmd
+          run pmerge --color no --upgrade app-crypt/libmd
+          run pquery --color no --installed --format "$SLOTTED" libmd
+          run cat /var/lib/portage/world
 
-          run pclean dist --pretend
-          run timeout 600 pmaint sync gentoo
-          run pclean --help
-          run pmaint --help
+          run pmerge --color no --clean
+          run pquery --color no --installed --format "$INSTALLED" libevent
+          run pmerge --color no --unmerge games-misc/nyancat
+          run pclean --color no dist --installed --pretend
+          run pclean --color no dist --installed
+          run ls /var/cache/distfiles
+          run timeout 900 pmaint --color no sync
+          run timeout 900 pmaint --color no sync gentoo
           EOF
-          docker create --volume /var/db/repos/gentoo --name portage \
-            'gentoo/portage:20261102@sha256:0ce9a5b16b1a3181d65cb243c9b9ba88371995809f0046d599351aacb6db8fb6' /bin/true
-          docker run --rm --privileged --volumes-from portage --volume /tmp/probe.sh:/probe.sh:ro \
+          docker run --rm --privileged --volume /tmp/probe.sh:/probe.sh:ro \
             'gentoo/stage3:amd64-openrc-20261102@sha256:dcf796a992c7b1a507c9c564bd11faf9b3a39bea0b4474ef64240cd6554dc691' \
             bash /probe.sh

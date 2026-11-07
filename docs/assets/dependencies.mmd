@@ -96,35 +96,48 @@ flowchart LR
     end
 
     subgraph grp_docs [--group docs]
-        sphinx{{"`sphinx >=8`"}}
-        myst_parser{{"`myst-parser >=5.1`"}}
-        furo{{"`furo >=2025.9.25`"}}
-        sphinx_datatables{{"`sphinx-datatables >=1`"}}
-        sphinxcontrib_mermaid{{"`sphinxcontrib-mermaid >=1.2.3`"}}
-        sphinx_autodoc_typehints{{"`sphinx-autodoc-typehints >=2.4`"}}
-        sphinxcontrib_jquery{{"`sphinxcontrib-jquery >=4`"}}
-        tomlrt{{"`tomlrt >=2`"}}
-        sphinx_copybutton{{"`sphinx-copybutton >=0.5.2`"}}
-        sphinx_design{{"`sphinx-design >=0.6`"}}
-        sphinx_sitemap{{"`sphinx-sitemap >=2.6`"}}
-        sphinxext_opengraph{{"`sphinxext-opengraph >=0.13`"}}
-    end
-
-    subgraph grp_test [--group test]
+        sphinx{{"`sphinx >=9.1`"}}
         pytest{{"`pytest >=9`"}}
         spdx_tools{{"`spdx-tools`"}}
         cyclonedx_python_lib{{"`cyclonedx-python-lib`"}}
+        myst_parser{{"`myst-parser >=5.1`"}}
+        furo{{"`furo >=2025.12.19`"}}
         httpx{{"`httpx >=0.27`"}}
         pyyaml{{"`pyyaml >=6`"}}
         pytest_cov{{"`pytest-cov >=7`"}}
         pytest_xdist{{"`pytest-xdist >=3.7`"}}
+        sphinx_datatables{{"`sphinx-datatables >=1`"}}
+        sphinxcontrib_mermaid{{"`sphinxcontrib-mermaid >=1.2.3`"}}
+        sphinx_autodoc_typehints{{"`sphinx-autodoc-typehints >=3.14`"}}
+        sphinxcontrib_jquery{{"`sphinxcontrib-jquery >=4`"}}
+        tomlrt{{"`tomlrt >=2`"}}
         coverage{{"`coverage >=7.11`"}}
         packageurl_python{{"`packageurl-python >=0.17.6`"}}
         pytest_github_actions_annotate_failures{{"`pytest-github-actions-annotate-failures >=0.3`"}}
         pytest_randomly{{"`pytest-randomly >=4.0.1`"}}
         respx{{"`respx >=0.22`"}}
+        sphinx_copybutton{{"`sphinx-copybutton >=0.5.2`"}}
+        sphinx_design{{"`sphinx-design >=0.7`"}}
+        sphinx_sitemap{{"`sphinx-sitemap >=2.6`"}}
+        sphinxext_opengraph{{"`sphinxext-opengraph >=0.13`"}}
         pyproject_fmt{{"`pyproject-fmt >=2.25.1`"}}
+    end
+
+    subgraph grp_test [--group test]
+        grp_test_pytest{{"`pytest >=9`"}}
+        grp_test_spdx_tools{{"`spdx-tools`"}}
+        grp_test_cyclonedx_python_lib{{"`cyclonedx-python-lib`"}}
+        grp_test_httpx{{"`httpx >=0.27`"}}
+        grp_test_pyyaml{{"`pyyaml >=6`"}}
+        grp_test_pytest_cov{{"`pytest-cov >=7`"}}
+        grp_test_pytest_xdist{{"`pytest-xdist >=3.7`"}}
         grp_test_tomlrt{{"`tomlrt >=2`"}}
+        grp_test_coverage{{"`coverage >=7.11`"}}
+        grp_test_packageurl_python{{"`packageurl-python >=0.17.6`"}}
+        grp_test_pytest_github_actions_annotate_failures{{"`pytest-github-actions-annotate-failures >=0.3`"}}
+        grp_test_pytest_randomly{{"`pytest-randomly >=4.0.1`"}}
+        grp_test_respx{{"`respx >=0.22`"}}
+        grp_test_pyproject_fmt{{"`pyproject-fmt >=2.25.1`"}}
     end
 
     subgraph grp_typing [--group typing]
@@ -284,7 +297,20 @@ flowchart LR
     ext_sbom-offline_cyclonedx_python_lib -.- cyclonedx_python_lib
     ext_sbom-offline_packageurl_python -.- packageurl_python
     ext_sbom-online_httpx -.- httpx
+    grp_test_pytest -.- pytest
+    grp_test_spdx_tools -.- spdx_tools
+    grp_test_cyclonedx_python_lib -.- cyclonedx_python_lib
+    grp_test_httpx -.- httpx
+    grp_test_pyyaml -.- pyyaml
+    grp_test_pytest_cov -.- pytest_cov
+    grp_test_pytest_xdist -.- pytest_xdist
     grp_test_tomlrt -.- tomlrt
+    grp_test_coverage -.- coverage
+    grp_test_packageurl_python -.- packageurl_python
+    grp_test_pytest_github_actions_annotate_failures -.- pytest_github_actions_annotate_failures
+    grp_test_pytest_randomly -.- pytest_randomly
+    grp_test_respx -.- respx
+    grp_test_pyproject_fmt -.- pyproject_fmt
 
     click accessible_pygments "https://pypi.org/project/accessible-pygments/" _blank
     click alabaster "https://pypi.org/project/alabaster/" _blank
@@ -398,7 +424,20 @@ flowchart LR
     click ext_sbom-offline_cyclonedx_python_lib "https://pypi.org/project/cyclonedx-python-lib/" _blank
     click ext_sbom-offline_packageurl_python "https://pypi.org/project/packageurl-python/" _blank
     click ext_sbom-online_httpx "https://pypi.org/project/httpx/" _blank
+    click grp_test_pytest "https://pypi.org/project/pytest/" _blank
+    click grp_test_spdx_tools "https://pypi.org/project/spdx-tools/" _blank
+    click grp_test_cyclonedx_python_lib "https://pypi.org/project/cyclonedx-python-lib/" _blank
+    click grp_test_httpx "https://pypi.org/project/httpx/" _blank
+    click grp_test_pyyaml "https://pypi.org/project/pyyaml/" _blank
+    click grp_test_pytest_cov "https://pypi.org/project/pytest-cov/" _blank
+    click grp_test_pytest_xdist "https://pypi.org/project/pytest-xdist/" _blank
     click grp_test_tomlrt "https://pypi.org/project/tomlrt/" _blank
+    click grp_test_coverage "https://pypi.org/project/coverage/" _blank
+    click grp_test_packageurl_python "https://pypi.org/project/packageurl-python/" _blank
+    click grp_test_pytest_github_actions_annotate_failures "https://pypi.org/project/pytest-github-actions-annotate-failures/" _blank
+    click grp_test_pytest_randomly "https://pypi.org/project/pytest-randomly/" _blank
+    click grp_test_respx "https://pypi.org/project/respx/" _blank
+    click grp_test_pyproject_fmt "https://pypi.org/project/pyproject-fmt/" _blank
 
     style meta_package_manager stroke-width:3px
     style click_extra stroke-width:3px
@@ -435,7 +474,20 @@ flowchart LR
     style ext_sbom-offline_cyclonedx_python_lib stroke-width:3px,stroke-dasharray:5 5
     style ext_sbom-offline_packageurl_python stroke-width:3px,stroke-dasharray:5 5
     style ext_sbom-online_httpx stroke-width:3px,stroke-dasharray:5 5
+    style grp_test_pytest stroke-width:3px,stroke-dasharray:5 5
+    style grp_test_spdx_tools stroke-width:3px,stroke-dasharray:5 5
+    style grp_test_cyclonedx_python_lib stroke-width:3px,stroke-dasharray:5 5
+    style grp_test_httpx stroke-width:3px,stroke-dasharray:5 5
+    style grp_test_pyyaml stroke-width:3px,stroke-dasharray:5 5
+    style grp_test_pytest_cov stroke-width:3px,stroke-dasharray:5 5
+    style grp_test_pytest_xdist stroke-width:3px,stroke-dasharray:5 5
     style grp_test_tomlrt stroke-width:3px,stroke-dasharray:5 5
+    style grp_test_coverage stroke-width:3px,stroke-dasharray:5 5
+    style grp_test_packageurl_python stroke-width:3px,stroke-dasharray:5 5
+    style grp_test_pytest_github_actions_annotate_failures stroke-width:3px,stroke-dasharray:5 5
+    style grp_test_pytest_randomly stroke-width:3px,stroke-dasharray:5 5
+    style grp_test_respx stroke-width:3px,stroke-dasharray:5 5
+    style grp_test_pyproject_fmt stroke-width:3px,stroke-dasharray:5 5
 
     style primary-deps fill:#1565C020,stroke:#42A5F5
     style ext_sbom-offline fill:#7B1FA220,stroke:#BA68C8

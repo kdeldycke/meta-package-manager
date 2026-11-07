@@ -101,8 +101,11 @@ class Emerge(PackageManager):
     _INSTALLED_REGEXP = re.compile(
         r"""
         (?P<package_id>        # Named group must not split (?P< across lines.
-            \S+                # Non-whitespace string...
-            (?!-r)             # ...if not directly followed by the "-r" string.
+            [^/\s]+/           # The category and its slash...
+            (?P<name>          # ...then the bare name, which an exact query
+                \S+            #   matches: a non-whitespace string...
+                (?!-r)         # ...if not directly followed by the "-r" string.
+            )
         )
         -                      # A dash.
         (?P<installed_version> # Named group must not split (?P< across lines.
@@ -116,7 +119,11 @@ class Emerge(PackageManager):
         r"""
         \[.+\]                               # Update state.
         \                                    # A space.
-        (?P<package_id>\S+)                  # Non-whitespace string.
+        (?P<package_id>                      # Named group must not split
+                                             #   (?P< across lines.
+            [^/\s]+/                         # The category and its slash...
+            (?P<name>\S+)                    # ...then the bare name.
+        )
         \s+                                  # Any spacing.
         (?:\[                                # Non-matching group
                                              #   starting with a '['.
@@ -256,7 +263,11 @@ class Emerge(PackageManager):
         for atom in match.group("atoms").split():
             if split := self.split_name_version(atom.lstrip("=")):
                 package_id, version = split
-                yield self.package(id=package_id, installed_version=version)
+                yield self.package(
+                    id=package_id,
+                    name=package_id.rpartition("/")[2],
+                    installed_version=version,
+                )
 
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
@@ -319,6 +330,7 @@ class Emerge(PackageManager):
         for package_id, version, description in self._SEARCH_REGEXP.findall(output):
             yield self.package(
                 id=package_id,
+                name=package_id.rpartition("/")[2],
                 description=description,
                 latest_version=version,
             )

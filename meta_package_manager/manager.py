@@ -812,10 +812,10 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
             cli_names = ", ".join(self.cli_names) or self.id
             return f"no executable named {cli_names!r} found in PATH"
         if not self.executable:
-            return f"{self.cli_path!r} is not executable"
+            return f"{str(self.cli_path)!r} is not executable"
         if not self.fresh:
             if not self.version:
-                return f"could not parse version from {self.cli_path!r} output"
+                return f"could not parse version from {str(self.cli_path)!r} output"
             return (
                 f"version {self.version} does not satisfy "
                 f"{self.requirement!r} requirement"

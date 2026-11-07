@@ -214,6 +214,10 @@ def _documented_packages(manager, member, output, monkeypatch) -> list:
     return list(getattr(manager, member))
 
 
+PROBE_CACHES = ("version_output", "version")
+"""Cached properties of the version probe, dropped around each stubbed probe."""
+
+
 @pytest.mark.parametrize("manager, member, output", list(_fixtures()))
 def test_documented_output_still_parses(
     manager, member, output, monkeypatch, stub_run_cli
@@ -225,15 +229,16 @@ def test_documented_output_still_parses(
         # Drive the real version probe (PackageManager.version) with the
         # documented output instead of re-implementing its regex loop: stub the
         # two host gates and the CLI call so the extraction runs unchanged. All
-        # three (`supported`, `executable`, `version`) are cached
-        # properties on the shared pool instance, so patch the two gates on the
-        # instance to shadow any host-cached value, and drop `version` from the
-        # instance cache before and after so it recomputes with the stubs here
-        # and does not leak the stubbed result to another test.
+        # four (`supported`, `executable`, `version_output`, `version`) are
+        # cached properties on the shared pool instance, so patch the two gates
+        # on the instance to shadow any host-cached value, and drop the other
+        # two from the instance cache before and after so they recompute with
+        # the stubs here and do not leak the stubbed result to another test.
         monkeypatch.setattr(manager, "supported", True)
         monkeypatch.setattr(manager, "executable", True)
         stub_run_cli(manager, output)
-        manager.__dict__.pop("version", None)
+        for cached in PROBE_CACHES:
+            manager.__dict__.pop(cached, None)
         try:
             version = manager.version
             assert version is not None, (
@@ -263,7 +268,8 @@ def test_documented_output_still_parses(
                     "the sample was left behind"
                 )
         finally:
-            manager.__dict__.pop("version", None)
+            for cached in PROBE_CACHES:
+                manager.__dict__.pop(cached, None)
         return
 
     packages = _documented_packages(manager, member, output, monkeypatch)

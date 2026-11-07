@@ -32,6 +32,7 @@ import tomli_w
 from click_extra import ValidationError, strip_ansi
 
 from meta_package_manager.config import (
+    AGENT_REPORT_CAUTION,
     AUTO_UPDATES_REPLACEMENT,
     CONTRIBUTION_HINT_FIELDS,
     INVALIDATED_CACHED_PROPS,
@@ -44,6 +45,7 @@ from meta_package_manager.config import (
     apply_manager_overrides,
     dump_manager_overrides,
     format_contribution_hints,
+    override_experiment,
     validate_manager_overrides_section,
 )
 from meta_package_manager.cooldown import CooldownPolicy
@@ -54,10 +56,13 @@ from meta_package_manager.definitions import (
     parse_operation_overrides,
 )
 from meta_package_manager.manager import PackageManager
+from meta_package_manager.managers.dnf import DNF, DNF5, YUM
 from meta_package_manager.pool import pool
+from meta_package_manager.version import parse_version
 
 from .conftest import all_manager_ids, tomllib
 from .test_manager_definition import skip_windows
+from .test_manager_dnf import DNF5_VERSION, DNF5_VERSION_DE
 
 OVERRIDE_TARGET = "pip"
 """Manager ID used as a fixture target for override tests.
@@ -764,8 +769,10 @@ def test_build_issue_url_url_decodes_back_to_useful_body():
     body = params["bug-description"]
     assert "winget" in body
     assert "cli_names" in body
-    assert "winget.exe" in body
-    assert "not found" in body  # detected_cli_path was None
+    experiment = params["override-experiment"]
+    assert "[mpm.overrides.winget]" in experiment
+    assert "winget.exe" in experiment
+    assert "not found" in experiment  # detected_cli_path was None
 
 
 def test_build_issue_url_includes_detected_cli_path_when_available():
@@ -776,10 +783,40 @@ def test_build_issue_url_includes_detected_cli_path_when_available():
         detected_cli_path="/opt/homebrew/bin/brew",
     )
     url = _build_issue_url(hint)
-    body = dict(urllib.parse.parse_qsl(urllib.parse.urlparse(url).query))[
-        "bug-description"
+    experiment = dict(urllib.parse.parse_qsl(urllib.parse.urlparse(url).query))[
+        "override-experiment"
     ]
-    assert "/opt/homebrew/bin/brew" in body
+    assert "/opt/homebrew/bin/brew" in experiment
+
+
+BUG_REPORT_FORM = (
+    Path(__file__).parent.parent / ".github" / "ISSUE_TEMPLATE" / "bug-report.yml"
+)
+"""The form `_build_issue_url` fills. Absent from the sdist, which ships no
+`.github/` folder."""
+
+
+@pytest.mark.skipif(
+    not BUG_REPORT_FORM.exists(), reason="No issue template outside a checkout."
+)
+def test_build_issue_url_fills_fields_of_the_form():
+    """Each field the URL fills is a field of the bug report form.
+
+    GitHub ignores a query key that names no field `id`, so a renamed field
+    would leave the report empty with no error.
+    """
+    hint = ContributionHint(
+        manager_id="brew",
+        field="cli_search_path",
+        user_value=("/opt/custom",),
+        detected_cli_path=None,
+    )
+    params = dict(
+        urllib.parse.parse_qsl(urllib.parse.urlparse(_build_issue_url(hint)).query)
+    )
+    form = BUG_REPORT_FORM.read_text(encoding="UTF-8")
+    for key in params.keys() - {"template", "title", "labels"}:
+        assert f"    id: {key}\n" in form, key
 
 
 def test_format_contribution_hints_empty_returns_empty_string():
@@ -809,6 +846,117 @@ def test_format_contribution_hints_lists_each_with_url():
     )
     # Mentions the opt-out so the user knows how to silence.
     assert "--no-suggest-contribs" in msg
+
+
+@pytest.mark.parametrize("agent", (True, False))
+def test_format_contribution_hints_cautions_an_agent(monkeypatch, agent):
+    """An AI agent is told to ask its user before it files the report."""
+    monkeypatch.setattr("meta_package_manager.config.is_any_agent", lambda: agent)
+    hint = ContributionHint(
+        manager_id="cargo",
+        field="version_regexes",
+        user_value=("foo",),
+        detected_cli_path="/usr/bin/cargo",
+    )
+    assert (AGENT_REPORT_CAUTION in format_contribution_hints([hint])) is agent
+
+
+def _detected(manager_class: type[PackageManager], **state) -> PackageManager:
+    """A fresh instance of `manager_class`, its detection pinned to `state`.
+
+    Each keyword sets a cached property, so nothing is probed on the host.
+    """
+    manager = manager_class()
+    manager.__dict__.update(state)
+    return manager
+
+
+FOUND = {"supported": True, "cli_path": Path("/usr/bin/dnf5"), "executable": True}
+"""Detection state of a binary found on a supported platform."""
+
+
+@pytest.mark.parametrize(
+    ("manager_class", "state", "expected"),
+    (
+        pytest.param(
+            DNF5,
+            {**FOUND, "version_output": DNF5_VERSION_DE},
+            (
+                "Version probe output:\n  dnf5 Version 5.4.3.0\n",
+                "If this output holds the version",
+                "[mpm.overrides.dnf5]",
+                "version_regexes = [",
+                "Then run `mpm --dnf5 managers`.",
+            ),
+            id="unread-version",
+        ),
+        pytest.param(
+            DNF5,
+            {**FOUND, "version_output": ""},
+            ("printed nothing", "version_cli_options = ["),
+            id="silent-probe",
+        ),
+        pytest.param(
+            YUM,
+            {**FOUND, "version": parse_version("3.4.0")},
+            ("If yum 3.4.0 works, test a lower floor", 'requirement = ">=4.0.0"'),
+            id="below-floor",
+        ),
+        pytest.param(
+            DNF5,
+            {"supported": True, "cli_path": None},
+            ('cli_names = [\n      "dnf5",\n  ]', "cli_search_path = ["),
+            id="not-found",
+        ),
+    ),
+)
+def test_override_experiment_names_the_field_to_test(
+    manager_class, state, expected, monkeypatch
+):
+    """Each cause gets the table of the field that controls it."""
+    monkeypatch.setattr("meta_package_manager.config.is_any_agent", lambda: False)
+    experiment = override_experiment(_detected(manager_class, **state))
+    for fragment in expected:
+        assert fragment in experiment
+    assert "AI agent" not in experiment
+
+
+@pytest.mark.parametrize(
+    ("manager_class", "state"),
+    (
+        pytest.param(DNF5, {**FOUND, "version_output": DNF5_VERSION}, id="available"),
+        pytest.param(DNF5, {"supported": False}, id="unsupported"),
+        pytest.param(
+            DNF5,
+            {"supported": True, "cli_path": Path("/usr/bin/dnf5"), "executable": False},
+            id="not-executable",
+        ),
+        # An alternate `version_cli` that is missing leaves no output to read.
+        pytest.param(DNF5, {**FOUND, "version_output": None}, id="no-probe"),
+        # The `<5` ceiling that leaves dnf5 to the `dnf5` manager is deliberate.
+        pytest.param(DNF, {**FOUND, "version_output": DNF5_VERSION}, id="ceiling"),
+    ),
+)
+def test_override_experiment_stays_silent_when_no_override_helps(manager_class, state):
+    assert override_experiment(_detected(manager_class, **state)) == ""
+
+
+def test_override_experiment_quotes_the_head_of_a_long_output(monkeypatch):
+    """Only the first lines are quoted: dnf5 lists every plugin after its version."""
+    monkeypatch.setattr("meta_package_manager.config.is_any_agent", lambda: False)
+    output = DNF5_VERSION_DE + "".join(f"plugin {n}\n" for n in range(20))
+    experiment = override_experiment(_detected(DNF5, **FOUND, version_output=output))
+    assert "  [...]" in experiment
+    assert "plugin 19" not in experiment
+
+
+def test_override_experiment_guides_an_agent(monkeypatch):
+    """An AI agent is told to test in a scratch file and show the user the result."""
+    monkeypatch.setattr("meta_package_manager.config.is_any_agent", lambda: True)
+    experiment = override_experiment(
+        _detected(DNF5, **FOUND, version_output=DNF5_VERSION_DE)
+    )
+    assert "AI agent: test the override in a scratch configuration file" in experiment
 
 
 @pytest.mark.parametrize(
@@ -873,6 +1021,40 @@ def test_cli_contribution_hint(
     assert ("issues/new" in result.stderr) is hinted
     if hinted:
         assert "cli_search_path" in result.stderr
+
+
+@skip_windows
+def test_cli_managers_suggests_an_override_for_an_unread_version(
+    invoke, create_config, reset_overrides, tmp_path
+):
+    """A named manager whose version no pattern reads gets the override to test.
+
+    The overrides point `pip` at a fake binary printing `mytool 1.2.3`, which
+    the pattern misses: the hint under the table quotes that output beside the
+    current patterns.
+    """
+    tool = tmp_path / "mytool"
+    tool.write_text('#!/bin/sh\necho "mytool 1.2.3"\n', encoding="UTF-8")
+    tool.chmod(0o755)
+    conf_path = create_config(
+        "conf.toml",
+        dedent(
+            f"""\
+            [mpm.overrides.pip]
+            cli_names = ["mytool"]
+            cli_search_path = ["{tmp_path}"]
+            version_regexes = ['mytool version (?P<version>\\S+)']
+            """
+        ),
+    )
+    result = invoke("--config", str(conf_path), "--pip", "managers")
+    assert result.exit_code == 0
+    stderr = strip_ansi(result.stderr)
+    # The path reads as text, not as the `PosixPath(...)` repr of the object.
+    assert f"pip: could not parse version from '{tool}' output.\n" in stderr
+    assert "Version probe output:\n    mytool 1.2.3\n" in stderr
+    assert "[mpm.overrides.pip]" in stderr
+    assert "version_regexes = [" in stderr
 
 
 # dump_manager_overrides + config-template subcommand.

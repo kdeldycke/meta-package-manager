@@ -76,7 +76,7 @@ from .cli import (
     serialized_errors,
     snapshot_installed,
 )
-from .config import dump_manager_overrides
+from .config import dump_manager_overrides, override_experiment
 from .definitions import OVERRIDES_SECTION
 from .dispatch import collect_from_managers
 from .execution import SPINNER_DELAY, CLIError, highlight_cli_name
@@ -275,6 +275,15 @@ def managers(ctx, view):
         table,
         default_ids=MANAGERS_DETECTED_COLUMNS if view == "detected" else None,
     )
+
+    # A manager the user named but mpm cannot use gets the override to test. Not
+    # for the whole pool: most rows there are managers this host never installed.
+    if ctx.obj.user_selection:
+        for manager in selection:
+            experiment = override_experiment(manager)
+            if experiment:
+                body = "\n".join(f"  {line}" for line in experiment.splitlines())
+                echo(f"{manager.id}: {manager.unavailable_reason}.\n{body}", err=True)
 
 
 def _manager_result(

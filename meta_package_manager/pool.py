@@ -24,6 +24,7 @@ from click_extra import get_current_context
 
 from . import definitions
 from .capabilities import implements
+from .config import override_experiment
 from .dispatch import warm_availability
 from .managers.am import AM
 from .managers.antidote import Antidote
@@ -541,11 +542,12 @@ class ManagerPool:
             # Filters out managers whose CLI was not found.
             if drop_not_found and not manager.available:
                 reason = manager.unavailable_reason or "unavailable"
-                logging.log(
-                    logging.INFO if explicit_selection else logging.DEBUG,
-                    f"Skipped: {reason}.",
-                    extra={"label": manager_id},
-                )
+                level = logging.INFO if explicit_selection else logging.DEBUG
+                logging.log(level, f"Skipped: {reason}.", extra={"label": manager_id})
+                # A manager the user named gets the override to test, in a record
+                # of its own: the `Skipped:` line keeps its one-line shape.
+                if explicit_selection and (experiment := override_experiment(manager)):
+                    logging.log(level, experiment, extra={"label": manager_id})
                 continue
 
             # Apply manager-level options. Skip a field that the user explicitly

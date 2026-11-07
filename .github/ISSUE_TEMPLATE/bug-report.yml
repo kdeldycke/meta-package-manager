@@ -25,6 +25,12 @@ body:
         package managers.
 
 
+        If `mpm` cannot use a manager, `mpm --<manager_id> managers` says why and suggests an
+        `[mpm.overrides.<manager_id>]` table to test in your configuration file. `mpm config-template <manager_id>`
+        prints every field you can override. An override that fixes the problem is the fastest way to a fix
+        upstream: paste it in the form below.
+
+
         Then run `mpm --<manager_id> doctor`. It relays the manager's own health check, like `brew doctor` or
         `pip check`. If the manager reports problems, fix them first: they can cause what looks like an `mpm` bug.
 
@@ -61,6 +67,16 @@ body:
       placeholder: Show us what you see!
     validations:
       required: true
+
+  - type: textarea
+    id: override-experiment
+    attributes:
+      label: Override experiment
+      description: >
+        The `[mpm.overrides.<manager_id>]` table that fixed or worked around the problem, if any, and what it changed.
+        The link `mpm` prints after a successful override fills this field.
+      placeholder: |
+        [mpm.overrides.<manager_id>]
 
   - type: textarea
     id: mpm-config

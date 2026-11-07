@@ -1376,14 +1376,28 @@ class CLIExecutor:
         """Invoke the manager and extract its own reported version string.
 
         Returns a parsed and normalized version in the form of a
-        {class}`meta_package_manager.version.TokenizedString` instance.
+        {class}`meta_package_manager.version.TokenizedString` instance, read from
+        {attr}`version_output`.
+        """
+        output = self.version_output
+        if output is None:
+            return None
+        return self._parse_version(output)
 
-        Skipped on platforms where the manager is not supported, even if
-        {attr}`cli_path` resolved to an executable: that binary almost
-        certainly belongs to a different tool that happens to share the
-        same name (e.g. GNU `make` on macOS getting matched by the
-        FreeBSD `ports` manager), so probing it would either misreport
-        the version or surface confusing error output.
+    @cached_property
+    def version_output(self) -> str | None:
+        """Text of the version probe, which {attr}`version_regexes` search.
+
+        `None` when no probe ran. The probe is skipped on platforms where the
+        manager is not supported, even if {attr}`cli_path` resolved to an
+        executable: that binary almost certainly belongs to a different tool
+        that happens to share the same name (e.g. GNU `make` on macOS getting
+        matched by the FreeBSD `ports` manager), so probing it would either
+        misreport the version or surface confusing error output.
+
+        Kept apart from {attr}`version` so a probe whose output no regex reads
+        can still be shown: `mpm --<id> managers` prints it beside the override
+        to test.
         """
         # `supported` is declared on the `PackageManager` subclass, not on
         # this mixin: mypy does not see it, but every concrete instance does.
@@ -1391,10 +1405,7 @@ class CLIExecutor:
             return None
         if not self.executable:
             return None
-        output = self._probe_version()
-        if output is None:
-            return None
-        return self._parse_version(output)
+        return self._probe_version()
 
     def _probe_version(self) -> str | None:
         """Run the version probe and return the text to search for the version.
@@ -1439,7 +1450,7 @@ class CLIExecutor:
         unknown.
         """
         for regex in self.version_regexes:
-            logging.debug(f"Use {regex!r} to extracting version.")
+            logging.debug(f"Use {regex!r} to extract the version.")
             parts = re.search(regex, output, re.MULTILINE)
             if parts:
                 version_string = parts.groupdict().get("version")
@@ -1449,6 +1460,9 @@ class CLIExecutor:
                     logging.debug(f"Parsed version: {parsed_version!r}")
                     if parsed_version:
                         return parsed_version
+        # The output goes to the log, so a `--verbosity DEBUG` report carries
+        # what a new pattern has to read.
+        logging.debug(f"No version found in the probe output: {output!r}")
         return None
 
     @cached_property

@@ -34,6 +34,7 @@ owns the loading policy and mutates the pool through the
 from __future__ import annotations
 
 import logging
+import operator
 import os
 import stat
 import sys
@@ -54,6 +55,7 @@ from click_extra import (
     read_file,
 )
 from click_extra.context import CONF_FULL, CONF_SOURCE
+from extra_platforms import is_any_agent
 
 from .cooldown import parse_cooldown_section
 from .definitions import (
@@ -65,6 +67,7 @@ from .definitions import (
     parse_manager_definition,
     parse_operation_overrides,
 )
+from .version import VersionRange
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
@@ -207,6 +210,7 @@ INVALIDATED_CACHED_PROPS: Final[tuple[str, ...]] = (
     "fresh",
     "supported",
     "version",
+    "version_output",
 )
 """Cached properties on {class}`meta_package_manager.manager.PackageManager` that may
 have been computed from attributes covered by
@@ -296,7 +300,9 @@ class ContributionHint:
 def _build_issue_url(hint: ContributionHint) -> str:
     """Build a GitHub new-issue URL for the bug-report template.
 
-    The relevant fields are pre-filled from `hint`.
+    The relevant fields are pre-filled from `hint`: `bug-description` says why the
+    report exists, and `override-experiment` holds the override and what mpm found
+    without it. Each query key is the `id` of a field of `bug-report.yml`.
 
     Returns the URL only: it's the caller's job to render and surface it. Length
     stays well under GitHub's URL-length cap because the body summarizes the
@@ -323,6 +329,11 @@ def _build_issue_url(hint: ContributionHint) -> str:
         f"`{hint.field}` attribute on the `{hint.manager_id}` manager because "
         f"the upstream defaults did not work for my setup.\n"
         f"\n"
+        f"This invitation was generated automatically by `mpm` to help improve "
+        f"the upstream detection heuristics. Please attach the diagnostic "
+        f"command outputs requested in the sections below before submitting."
+    )
+    override_experiment = (
         f"My override:\n"
         f"\n"
         f"```toml\n"
@@ -332,10 +343,6 @@ def _build_issue_url(hint: ContributionHint) -> str:
         f"What mpm detected without the override:\n"
         f"\n"
         f"- `cli_path`: {detected}\n"
-        f"\n"
-        f"This invitation was generated automatically by `mpm` to help improve "
-        f"the upstream detection heuristics. Please attach the diagnostic "
-        f"command outputs requested in the sections below before submitting."
     )
 
     params = urllib.parse.urlencode(
@@ -347,6 +354,7 @@ def _build_issue_url(hint: ContributionHint) -> str:
             ),
             "labels": "🐛 bug",
             "bug-description": bug_description,
+            "override-experiment": override_experiment,
         },
         quote_via=urllib.parse.quote,
     )
@@ -394,6 +402,110 @@ def format_contribution_hints(hints: list[ContributionHint]) -> str:
         "",
         "  (Disable with `--no-suggest-contribs` or `[mpm] suggest_contribs = false`.)",
     ))
+    if is_any_agent():
+        lines.append(f"  {AGENT_REPORT_CAUTION}")
+    return "\n".join(lines)
+
+
+AGENT_REPORT_CAUTION: Final[str] = (
+    "AI agent: show this to your user, and ask before you file a report: "
+    "GitHub issues are public."
+)
+"""Line closing an invitation to report, when an AI agent runs `mpm`.
+
+{func}`format_contribution_hints` prints it when
+{func}`extra_platforms.is_any_agent` detects one: an agent acts on what `mpm`
+prints, and a report it files without asking publishes details of the user's
+machine.
+"""
+
+
+EXPERIMENT_OUTPUT_LINES: Final[int] = 5
+"""Lines of version probe output that {func}`override_experiment` quotes."""
+
+
+def override_experiment(manager: PackageManager) -> str:
+    """Suggest the `[mpm.overrides.<id>]` table to test on an unusable `manager`.
+
+    The table holds the current value of the field that controls the cause, for
+    the user to edit and test with `mpm --<id> managers`. Once the override
+    works, {func}`format_contribution_hints` prints the link that reports it, so
+    the report arrives with a tested fix.
+
+    - No binary found: `cli_names` and `cli_search_path`.
+    - A probe that printed nothing: `version_cli_options`.
+    - A probe output that no pattern reads: `version_regexes`, after the first
+      lines of that output.
+    - A version below a floor of `requirement`: `requirement`.
+
+    Returns an empty string when no override can help: the manager is available,
+    not supported on this platform, not executable, or its alternate
+    {attr}`~meta_package_manager.execution.CLIExecutor.version_cli` is missing. A
+    version above a ceiling gets nothing either: a ceiling is deliberate, like
+    the `<5` that leaves dnf5 to the `dnf5` manager.
+    """
+    if manager.available or not manager.supported:
+        return ""
+    lines = []
+    fields: dict[str, Any]
+    if not manager.cli_path:
+        intro = (
+            "If it is installed under another name or outside your `PATH`, test "
+            "this in your configuration file:"
+        )
+        fields = {
+            "cli_names": list(manager.cli_names),
+            "cli_search_path": ["{directory}"],
+        }
+    elif not manager.executable:
+        return ""
+    elif not manager.version:
+        output = manager.version_output
+        if output is None:
+            return ""
+        quoted = [line for line in output.splitlines() if line.strip()]
+        if quoted:
+            lines.append("Version probe output:")
+            lines.extend(f"  {line}" for line in quoted[:EXPERIMENT_OUTPUT_LINES])
+            if len(quoted) > EXPERIMENT_OUTPUT_LINES:
+                lines.append("  [...]")
+            intro = (
+                "If this output holds the version, test a pattern that reads it in "
+                "your configuration file:"
+            )
+            fields = {"version_regexes": list(manager.version_regexes)}
+        else:
+            intro = (
+                "The version probe printed nothing. If another option prints the "
+                "version, test it in your configuration file:"
+            )
+            fields = {"version_cli_options": list(manager.version_cli_options)}
+    else:
+        assert manager.requirement
+        version = manager.version
+        misses_floor = any(
+            op in (operator.ge, operator.gt) and not op(version, bound)
+            for op, bound in VersionRange(manager.requirement).constraints
+        )
+        if not misses_floor:
+            return ""
+        intro = (
+            f"If {manager.id} {version} works, test a lower floor in your "
+            "configuration file:"
+        )
+        fields = {"requirement": manager.requirement}
+    table = tomli_w.dumps({"mpm": {OVERRIDES_SECTION: {manager.id: fields}}})
+    lines.append(intro)
+    lines.extend(f"  {line}" for line in table.rstrip().splitlines())
+    lines.append(
+        f"Then run `mpm --{manager.id} managers`. Once it works, mpm prints a link "
+        "to report it."
+    )
+    if is_any_agent():
+        lines.append(
+            "AI agent: test the override in a scratch configuration file passed "
+            "with `--config`, then show the result to your user."
+        )
     return "\n".join(lines)
 
 

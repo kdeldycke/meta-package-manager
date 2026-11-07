@@ -18,6 +18,9 @@
 - [mpm] Color the program name and version on the `--version` screen with the active theme, like the plain message.
 - [mpm] Color the `(unmaintained)` marker of a manager option in `--help` with the `deprecated` theme style, like Click's `(DEPRECATED)`.
 - [mpm] Stop announcing each manager in `sync`, `cleanup`, `upgrade --all`, `doctor`, `dump`, `restore` and `sbom`, whose labeled `$` command lines already name it.
+- [mpm] Suggest the `[mpm.overrides.<id>]` table to test when `mpm --<id> managers` cannot use a manager, quoting the version probe output when no pattern reads it.
+- [mpm] Add an *Override experiment* field to the bug report form, which the link `mpm` prints after a working override fills.
+- [mpm] Tell an AI agent running `mpm` to test an override in a scratch configuration file, and to ask its user before it files a report.
 - [mpm] Read purl specifiers by the rules of purl-spec `v1.1.0`, normalizing the case each registered type ignores, and warn about a purl breaking its type.
 - [brew,cask] Resolve a `pkg:brew/` purl of the `homebrew/cask` tap to `cask`, and one of the `homebrew/core` tap to `brew`, by the bare name.
 - [vscode,vscodium] Resolve a `pkg:vscode-extension/` purl to the `vscode` and `vscodium` extension it names.
@@ -28,6 +31,7 @@
 - [brew,composer,mpm,npm,yarn] Query OSV with the full name of a namespaced package, so `mpm --network sbom` finds its advisories.
 - [bun,dotnet,go,mpm,pipxu,pnpm,uv,uvx,volta] Scan the packages of `bun`, `dotnet`, `go`, `pipxu`, `pnpm`, `uv`, `uvx` and `volta` for vulnerabilities: `mpm --network sbom` skipped them.
 - [dnf,dnf5,yum] Run `dnf`, `dnf5` and `yum` in the `C.UTF-8` locale, so `dnf5` and `yum` read their version under a non-English locale. Closes [#2218](https://github.com/kdeldycke/meta-package-manager/issues/2218).
+- [mpm] Print the path of a skipped manager's binary as text, instead of as a `PosixPath(...)` object.
 - [mpm] Skip `test_extra_labels_in_pyproject` outside a git checkout, where a newer `extra-platforms` failed it for a packager.
 - [mpm] Test the sdist in CI the way a distribution builds it: a new job runs the hermetic layer from the unpacked sdist on the newest dependencies.
 - [mpm] Replace the benchmark's 🟡 mark with 🪫, for coarse support that only runs inside a wider operation.

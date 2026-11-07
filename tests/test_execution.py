@@ -1414,19 +1414,27 @@ def test_run_spawns_in_the_forced_locale(manager_env, expected):
 
 
 def test_c_locale_falls_back_to_c_without_c_utf8(monkeypatch):
-    """A C library without `C.UTF-8` gets `C`, and the probe leaves mpm's locale."""
-    before = locale.setlocale(locale.LC_CTYPE)
+    """A C library without `C.UTF-8` gets `C`, and the probe leaves mpm's locale.
+
+    The process starts in `C`, as it must on such a host: a runner whose own
+    locale is `C.UTF-8` would otherwise ask the stand-in to restore it.
+    """
     real_setlocale = locale.setlocale
+    before = real_setlocale(locale.LC_CTYPE)
+    real_setlocale(locale.LC_CTYPE, "C")
 
     def without_c_utf8(category, value=None):
         if value == "C.UTF-8":
             raise locale.Error("unsupported locale setting")
         return real_setlocale(category, value)
 
-    monkeypatch.setattr(locale, "setlocale", without_c_utf8)
-    assert _c_locale() == "C"
-    monkeypatch.undo()
-    assert locale.setlocale(locale.LC_CTYPE) == before
+    try:
+        monkeypatch.setattr(locale, "setlocale", without_c_utf8)
+        assert _c_locale() == "C"
+        monkeypatch.undo()
+        assert real_setlocale(locale.LC_CTYPE) == "C"
+    finally:
+        real_setlocale(locale.LC_CTYPE, before)
 
 
 def test_run_forwards_nothing_across_an_escalator_that_needs_no_help():

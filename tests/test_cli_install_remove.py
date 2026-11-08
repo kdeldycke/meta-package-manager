@@ -21,7 +21,10 @@ The two operations are siblings, so they share one module.
 from __future__ import annotations
 
 import json
+import os
 import re
+import subprocess
+import sys
 from functools import partial
 
 import pytest
@@ -541,3 +544,65 @@ def test_collection_hook_runs_before_xdist_stamps_the_group():
         "the collection hook must keep tryfirst=True: xdist's worker-side hook "
         "would otherwise stamp node ids before the xdist_group markers are added"
     )
+
+
+def test_loadgroup_keeps_a_group_on_one_worker(tmp_path):
+    """`--dist=loadgroup` must run every test of one `xdist_group` on one worker.
+
+    The test above only orders the hooks: the scheduling itself belongs to
+    pytest-xdist, and a pytest release can break it with no error. Under
+    pytest-xdist `3.8.0`, pytest `9.2.0` drops the `@<group>` suffix from the node
+    IDs, so the groups spread across workers and `apt` meets `aptitude` on the dpkg
+    lock. This runs a real session, with no other plugin, to catch such a release.
+
+    ```{todo}
+    Drop the `pytest<9.2` cap of the `test` dependency group once a pytest-xdist
+    release ships
+    [pytest-dev/pytest-xdist#1388](https://github.com/pytest-dev/pytest-xdist/pull/1388),
+    which [pytest-dev/pytest-xdist#1407](https://github.com/pytest-dev/pytest-xdist/issues/1407)
+    asks for.
+    ```
+    """
+    pytest.importorskip("xdist")
+    fruits = ("apple", "pear", "plum", "quince")
+    (tmp_path / "pytest.ini").write_text("[pytest]\n", encoding="UTF-8")
+    (tmp_path / "test_orchard.py").write_text(
+        "import os\n"
+        "from pathlib import Path\n"
+        "\n"
+        "import pytest\n"
+        "\n"
+        "\n"
+        f"@pytest.mark.parametrize('fruit', {fruits!r})\n"
+        "@pytest.mark.xdist_group(name='orchard')\n"
+        "def test_fruit(fruit):\n"
+        f"    Path({str(tmp_path)!r}, fruit).write_text(\n"
+        "        os.environ['PYTEST_XDIST_WORKER'], encoding='UTF-8'\n"
+        "    )\n",
+        encoding="UTF-8",
+    )
+    # Only xdist loads, and no variable of the outer session leaks in.
+    env = {key: value for key, value in os.environ.items() if "PYTEST" not in key}
+    env["PYTEST_DISABLE_PLUGIN_AUTOLOAD"] = "1"
+    result = subprocess.run(
+        (
+            sys.executable,
+            "-m",
+            "pytest",
+            "-p",
+            "xdist.plugin",
+            "-p",
+            "no:cacheprovider",
+            "--numprocesses=2",
+            "--dist=loadgroup",
+        ),
+        cwd=tmp_path,
+        env=env,
+        capture_output=True,
+        text=True,
+        encoding="UTF-8",
+        check=False,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    workers = {(tmp_path / fruit).read_text(encoding="UTF-8") for fruit in fruits}
+    assert len(workers) == 1, f"one xdist_group ran on {sorted(workers)}"

@@ -420,7 +420,8 @@ test = [
   # hermetic distro builds working. 2.25.1 is the verified style.
   "pyproject-fmt>=2.25.1",
   # pytest 9.0.0 reads native TOML config from the [tool.pytest] table used in this file.
-  "pytest>=9",
+  # XXX 9.2 stops --dist=loadgroup from grouping: https://github.com/pytest-dev/pytest-xdist/issues/1407
+  "pytest>=9,<9.2",
   # pytest-cov 7.x is the release series wired to pytest 9's plugin interface.
   "pytest-cov>=7",
   # CI annotation plugin; auto-registers, so any recent release works.

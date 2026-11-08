@@ -96,7 +96,7 @@ prints `dnf5 Version 5.4.3.0` in German, `dnf5versão 5.4.3.0` in Brazilian
 Portuguese and `dnf5 verzió: 5.4.3.0` in Hungarian. In German, apt `3.0.3`
 marks an upgrade `[aktualisierbar von: 1:2.41-5]` where the `outdated` parser
 reads `[upgradable from: 1:2.41-5]`, so `mpm --apt outdated` lists nothing, and sudo
-`1.9.16p2` answers `Ein Passwort ist notwendig` where the failure detection
+`1.9.16p2` answers `In Passwort ist notwendig` where the failure detection
 reads `a password is required`.
 
 - `LC_ALL` overrides every other locale variable. `C.UTF-8` and not `C`, so a

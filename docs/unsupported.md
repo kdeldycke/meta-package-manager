@@ -740,7 +740,7 @@ This is a big feature for the future, but is already delimited by the {attr}`~me
 | Ecosystem             | Project files                                                                        | `mpm` manager                                                                    |
 | :-------------------- | :----------------------------------------------------------------------------------- | :------------------------------------------------------------------------------- |
 | C/C++                 | `conanfile.txt` (Conan), `vcpkg.json` (vcpkg)                                        | —                                                                                |
-| Clojure               | `project.clj` (Leiningen), `deps.edn` (Clojure CLI)                                  | —                                                                                |
+| Clojure               | `project.clj` (Leiningen), `deps.end` (Clojure CLI)                                  | —                                                                                |
 | Conda                 | `conda-lock.yml`                                                                     | [`conda`](managers/conda.md)                                                     |
 | Elm                   | `elm.json` (`elm install`, formerly `elm-package`)                                   | —                                                                                |
 | Go                    | `go.mod`, `go.sum`                                                                   | —                                                                                |

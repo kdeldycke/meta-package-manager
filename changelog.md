@@ -49,6 +49,7 @@
 - [mpm] Raise the docs floor of `sphinx-autodoc-typehints` to `3.14`, below which the docs build fails, and those of Sphinx, `furo` and `sphinx-design` with it.
 - [mpm] Point the `oh-my-bash` links of the documentation at its current site, in place of the dead `ohmybash.nntoan.com`.
 - [mpm] Fix the API reference of the test suite, whose pages published empty, and the links to the `click-extra` symbols that `10.0.0` moved.
+- [mpm] Record `easy-install` and `docker` as unsupported, queue `sagemath`, and list Elm and Clojure among the project-scoped ecosystems.
 
 ## [`8.2.0` (2026-10-25)](https://github.com/kdeldycke/meta-package-manager/compare/v8.1.2...v8.2.0)
 

@@ -93,11 +93,11 @@ Declined in {mpm-release}`8.0.0`.
 
 ## Container runtimes ❌ 🛟
 
-[`colima`](https://colima.run), [`containers`](https://github.com/containers/podman), [`distrobox`](https://distrobox.it), [`podman`](https://podman.io), [`toolbx`](https://containertoolbx.org) and [`waydroid`](https://waydro.id).
+[`colima`](https://colima.run), [`containers`](https://github.com/containers/podman), [`distrobox`](https://distrobox.it), [`docker`](https://www.docker.com), [`podman`](https://podman.io), [`toolbx`](https://containertoolbx.org) and [`waydroid`](https://waydro.id).
 
 Manage containers and the systems running inside them, not packages. An image is a filesystem bundle addressed by tag or digest rather than a versioned package, and pulling a newer tag is not an upgrade `mpm` can reason about. What runs inside a container is another system's own inventory, out of reach of the host's package managers, so neither the runtime nor its guest can be listed, searched, installed by name or removed from here. `waydroid` is the plainest case of that second half: it runs a whole Android system in a container and installs no packages of its own.
 
-Wikipedia: [Podman](https://en.wikipedia.org/wiki/Podman), [Distrobox](https://en.wikipedia.org/wiki/Distrobox) and [Waydroid](https://en.wikipedia.org/wiki/Waydroid).
+Wikipedia: [Docker](https://en.wikipedia.org/wiki/Docker_(software)), [Podman](https://en.wikipedia.org/wiki/Podman), [Distrobox](https://en.wikipedia.org/wiki/Distrobox) and [Waydroid](https://en.wikipedia.org/wiki/Waydroid).
 
 Declined in {mpm-release}`8.0.0`.
 
@@ -168,6 +168,12 @@ Declined in {mpm-release}`8.0.0`.
 Vim and Neovim plugin manager, the live successor to [`dein`](#retired-plugin-managers), but drivable only from inside the editor: its work happens in a Deno process ([denops.vim](https://github.com/vim-denops/denops.vim)) that Vim starts, and it documents no headless entry point. It reports no version and ships no binary of its own either, so it fails the same two requirements `dein` does, with nothing left to key the manager on.
 
 Declined in {mpm-release}`8.0.0`.
+
+## [`easy-install`](https://setuptools.pypa.io/en/latest/deprecated/easy_install.html) ☠️
+
+The package installer of setuptools, run as `easy_install`. setuptools removed the command in `80.0.0`, whose [changelog](https://github.com/pypa/setuptools/blob/3895f9829fc0e51882981773a823a658eb1d1636/NEWS.rst#L376) reads "*Removed support for the easy_install command including the sandbox module.*" Python packages stay reachable through [`pip`](managers/pip.md), [`pipx`](managers/pipx.md) and [`uv`](managers/uv.md).
+
+Declined in {mpm-release}`8.3.0`.
 
 ## [`entropy`](https://github.com/Sabayon/entropy) ☠️
 
@@ -734,7 +740,9 @@ This is a big feature for the future, but is already delimited by the {attr}`~me
 | Ecosystem             | Project files                                                                        | `mpm` manager                                                                    |
 | :-------------------- | :----------------------------------------------------------------------------------- | :------------------------------------------------------------------------------- |
 | C/C++                 | `conanfile.txt` (Conan), `vcpkg.json` (vcpkg)                                        | —                                                                                |
+| Clojure               | `project.clj` (Leiningen), `deps.edn` (Clojure CLI)                                  | —                                                                                |
 | Conda                 | `conda-lock.yml`                                                                     | [`conda`](managers/conda.md)                                                     |
+| Elm                   | `elm.json` (`elm install`, formerly `elm-package`)                                   | —                                                                                |
 | Go                    | `go.mod`, `go.sum`                                                                   | —                                                                                |
 | Haskell               | `stack.yaml` (Stack), `package.yaml` (hpack), `*.cabal`, `cabal.project` (Cabal)     | —                                                                                |
 | Java                  | `pom.xml` (Maven), `build.gradle` (Gradle), `ivy.xml`                                | —                                                                                |

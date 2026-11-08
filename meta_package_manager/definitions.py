@@ -392,9 +392,13 @@ ALL_DEFINITION_OPERATIONS: Final[frozenset[str]] = QUERY_OPERATIONS | COMMAND_OP
 
 
 RECOGNIZED_PARSE_FIELDS: Final[frozenset[str]] = frozenset(
-    {"package_id", "installed_version", "latest_version"},
+    {"package_id", "installed_version", "latest_version", "name"},
 )
-"""Named regex groups / JSON field keys a query parser may map to a package."""
+"""Named regex groups / JSON field keys a query parser may map to a package.
+
+`name` is the bare name of a package whose ID carries a namespace, like the
+`gzip` of `app-arch/gzip`: an exact query matches either one.
+"""
 
 
 REQUIRED_PARSE_FIELDS: Final[Mapping[str, frozenset[str]]] = {

@@ -38,6 +38,8 @@
 - [mpm] Print the path of a skipped manager's binary as text, instead of as a `PosixPath(...)` object.
 - [emerge] Match an exact search or an exact `installed` or `outdated` filter against the bare package name, like `tmux` for `app-misc/tmux`.
 - [emerge] List only upgrades in `outdated`, leaving out the packages an upgrade would newly pull in, add in a new slot or downgrade.
+- [cave,mpm] Let a manager definition capture the bare `name` of a package, which `cave` now does, so an exact query like `gzip` matches `app-arch/gzip`.
+- [ips] Match an exact search or an exact `installed` filter against the last component of a package name, like `gnu-tar` for `archiver/gnu-tar`.
 - [mpm] Skip `test_extra_labels_in_pyproject` outside a git checkout, where a newer `extra-platforms` failed it for a packager.
 - [mpm] Test the sdist in CI the way a distribution builds it: a new job runs the hermetic layer from the unpacked sdist on the newest dependencies.
 - [mpm] Replace the benchmark's 🟡 mark with 🪫, for coarse support that only runs inside a wider operation.

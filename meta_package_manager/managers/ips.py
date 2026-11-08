@@ -121,7 +121,7 @@ class IPS(PackageManager):
     """
 
     _LIST_REGEXP = re.compile(
-        r"^(?P<package_id>\S+)(?:\s+\([^)]+\))?\s+"
+        r"^(?P<package_id>(?:\S+/)?(?P<name>[^/\s]+))(?:\s+\([^)]+\))?\s+"
         r"(?P<installed_version>\S+)\s+[a-z-]{3}$",
     )
     """Matches one `pkg list` row, anchored on the three-character `IFO` column.
@@ -133,10 +133,15 @@ class IPS(PackageManager):
     The optional parenthesized group absorbs the publisher, which the `NAME`
     column carries as `name (publisher)` whenever a package comes from other
     than the preferred publisher.
+
+    The last component of the name is also captured as the bare `name`, the
+    `gnu-tar` of `archiver/gnu-tar`, which IPS resolves on its own and an exact
+    query matches.
     """
 
     _SEARCH_REGEXP = re.compile(
-        r"^pkg:/(?P<package_id>[^@\s]+)@(?P<latest_version>\S+)\s+\S+$",
+        r"^pkg:/(?P<package_id>(?:[^@\s]+/)?(?P<name>[^@\s/]+))"
+        r"@(?P<latest_version>\S+)\s+\S+$",
     )
     """Matches one `pkg search -p` row: an FMRI and its publisher, tab-separated.
 

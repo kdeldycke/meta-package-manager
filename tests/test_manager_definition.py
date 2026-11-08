@@ -2006,3 +2006,21 @@ def test_bundled_parsing(manager_id, operation, output, expected):
         for p in packages
     ]
     assert results == expected
+
+
+def test_bundled_definition_captures_the_bare_name():
+    """A `name` group gives a namespaced ID the bare name an exact query matches.
+
+    `cave` reports `category/package` IDs, which its samples hold.
+    """
+    manager = _fresh_bundled("cave")
+    manager.which = lambda name: Path("/fake/bin") / name
+    manager.run_cli = lambda *args, **kwargs: "app-arch/gzip 1.14\nsys-apps/sed 4.9"
+    packages = list(manager.installed)
+    assert [(p.id, p.name) for p in packages] == [
+        ("app-arch/gzip", "gzip"),
+        ("sys-apps/sed", "sed"),
+    ]
+    assert [p.id for p in packages if p.matches("gzip", exact=True)] == [
+        "app-arch/gzip"
+    ]

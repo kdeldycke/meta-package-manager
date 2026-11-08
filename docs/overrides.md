@@ -159,7 +159,8 @@ There is no `cleanup` operation to declare: a plain `mpm cleanup` runs the decla
 
 - `package_id` (always required),
 - `installed_version` (optional: some tools track no per-package version, like [`swupd`](managers/swupd.md)'s Clear Linux bundles),
-- `latest_version` (required by `outdated`).
+- `latest_version` (required by `outdated`),
+- `name` (optional: the bare name of a package whose ID carries a namespace, like the `gzip` of `app-arch/gzip`, which an exact query then matches too).
 
 A JSON field maps to a key name, optionally suffixed with a `[N]` list index to pick one element out of a list-valued key: `installed_version = "installed_versions[0]"` reads the first entry of each package's version array.
 

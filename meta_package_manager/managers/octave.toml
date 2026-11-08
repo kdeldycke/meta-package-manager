@@ -70,8 +70,8 @@ args = [
 regex = '^(?P<package_id>\S+) (?P<installed_version>\S+) (?P<latest_version>\S+)$'
 
 # The whole index, one `name version description` row per package. The
-# description is printed but not captured: the definition DSL reads only IDs and
-# versions.
+# description is printed but not captured: the definition DSL reads no
+# description.
 [mpm.overrides.octave.operations.search]
 args = [
   "--eval",

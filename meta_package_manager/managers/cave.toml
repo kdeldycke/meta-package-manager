@@ -31,17 +31,19 @@ default_sudo = true
 version_regexes = ['(?P<version>\d+\.\d+\.\d+)']
 
 # The format string is interpreted by cave itself (%c category, %p package,
-# %v version, \n newline): single-quoted TOML keeps the backslash literal.
+# %v version, \n newline): single-quoted TOML keeps the backslash literal. The
+# package part is also captured as the bare `name`, which an exact query
+# matches, like `gzip` for `app-arch/gzip`.
 [mpm.overrides.cave.operations.installed]
 args = ["print-ids", "--matching", "*/*::installed", "--format", '%c/%p %v\n']
-regex = '^(?P<package_id>\S+) (?P<installed_version>\S+)$'
+regex = '^(?P<package_id>[^/\s]+/(?P<name>\S+)) (?P<installed_version>\S+)$'
 
 # `purge` without `--execute` displays the resolution without acting (Paludis
 # refuses to act unless --execute is given), listing each would-be uninstall as a
 # `<   category/name-version:slot::repo` line of the plan.
 [mpm.overrides.cave.operations.orphans]
 args = ["purge"]
-regex = '^<\s+(?P<package_id>[^\s:]+)-(?P<installed_version>\d[^\s:]*):'
+regex = '^<\s+(?P<package_id>[^\s:/]+/(?P<name>[^\s:]+))-(?P<installed_version>\d[^\s:]*):'
 
 [mpm.overrides.cave.operations.install]
 args = ["resolve", "--execute", "{package_id}"]

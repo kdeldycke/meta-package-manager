@@ -201,10 +201,11 @@ PACKAGE_IDS = {
     "nimble": "parsetoml",
     "nix": "hello",
     "npm": "ms",
-    # Pure m-files, with no compiled code and no dependency, downloaded from a GitHub
-    # release asset: the packages the Octave index hosts on SourceForge time out on
-    # the arm runners.
-    "octave": "queueing",
+    # Pure m-files, with no compiled code and no dependency, in a 17 KiB tarball.
+    # Octave 11 downloads it through `urlwrite`, which gives up after 5 seconds and
+    # takes no other timeout from `pkg install`, so a larger package times out on a
+    # slow runner.
+    "octave": "octest",
     # Tiny single-function plugin of Oh My Fish's own package index.
     "oh-my-fish": "bak",
     # The smallest model in ollama's library, at a few hundred megabytes;

@@ -639,6 +639,15 @@ default.extend-ignore-re = [
   # not exist. Anchored on the whole prefix, which keeps a standalone `gir`
   # checked.
   "\\bgir1\\.2-",
+  # `deps.edn` is the project file of the Clojure CLI, in the project-scoped table
+  # of docs/unsupported.md. typos reads `edn` as a misspelling of `end`. Anchored
+  # on the whole file name, which keeps a standalone `edn` checked.
+  "\\bdeps\\.edn\\b",
+  # sudo's German answer to a missing password, quoted verbatim in the locale
+  # rationale of meta_package_manager/shell_env.py. typos reads the German `Ein`
+  # as a misspelling of `In`. Anchored on the whole sentence, which keeps a
+  # standalone `Ein` checked.
+  "Ein Passwort ist notwendig",
 ]
 default.extend-ignore-identifiers-re = [
   # error: `ba` should be `by`, `be`

@@ -496,8 +496,11 @@ def generate_file_rules() -> TLabelRules:
 
     A manager label matches its members' definition files (Python modules and
     bundled TOML files alike, anchored on the full stem so `pkg.*` never swallows
-    `pkgin.toml` or `pkcon.py`) and any test file carrying a member's stem or
-    ID. Platform labels have no file rule: no file is platform-specific.
+    `pkgin.toml` or `pkcon.py`) and the `tests/test_manager_<stem>.py` module of
+    each member's stem or ID. The test glob names the whole module, since one
+    carrying the stem anywhere also claims `test_manager_tazpkg.py` for `pkg` and
+    `test_logo.py` for `go`. Platform labels have no file rule: no file is
+    platform-specific.
     """
     rules = list(FILE_RULES_STATIC)
     for label_name, manager_ids in _label_members().items():
@@ -507,6 +510,6 @@ def generate_file_rules() -> TLabelRules:
             f"meta_package_manager/managers/{stem}.*"
             for stem in sorted(definition_stems)
         ]
-        globs.extend(f"tests/*{stem}*" for stem in sorted(test_stems))
+        globs.extend(f"tests/test_manager_{stem}.py" for stem in sorted(test_stems))
         rules.append((label_name, tuple(globs)))
     return sorted(rules, key=lambda rule: str.casefold(rule[0]))

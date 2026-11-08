@@ -23,6 +23,7 @@ import importlib.util
 import re
 import shutil
 from datetime import UTC, date, datetime
+from fnmatch import fnmatchcase
 from itertools import permutations
 from pathlib import Path
 from textwrap import indent
@@ -430,6 +431,40 @@ def test_label_rules_in_pyproject():
         (label, tuple(globs)) for label, globs in labels_config["file-rules"].items()
     ]
     assert checked_in_file == generate_file_rules()
+
+
+@pytest.mark.parametrize(
+    "label", sorted(set(MANAGER_LABELS.values()) - {MANAGER_LABELS["mpm"]})
+)
+def test_manager_file_rule_claims_only_its_own_tests(label):
+    """A manager label's file rule claims only the test modules of its members.
+
+    A substring glob like `tests/*go*` also claims `tests/test_logo.py`, and a
+    one-letter manager ID would claim most of the suite: a change to an unrelated
+    test then labels the pull request with that manager.
+    """
+    test_globs = {
+        name: [glob for glob in globs if glob.startswith("tests/")]
+        for name, globs in generate_file_rules()
+        if name.startswith(MANAGER_PREFIX) and name != MANAGER_LABELS["mpm"]
+    }
+    test_files = [f"tests/{path.name}" for path in (PROJECT_ROOT / "tests").iterdir()]
+
+    def claimed(name: str) -> set[str]:
+        return {
+            path
+            for path in test_files
+            if any(fnmatchcase(path, glob) for glob in test_globs[name])
+        }
+
+    own = claimed(label)
+    strays = sorted(
+        path for path in own if not re.fullmatch(r"tests/test_manager_\w+\.py", path)
+    )
+    assert not strays, f"{label} claims files outside the manager tests: {strays}"
+    for other in sorted(test_globs.keys() - {label}):
+        shared = sorted(own & claimed(other))
+        assert not shared, f"{label} and {other} both claim {shared}"
 
 
 def test_pyproject_updates_are_pyproject_fmt_fixpoint(

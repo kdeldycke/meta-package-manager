@@ -201,8 +201,10 @@ PACKAGE_IDS = {
     "nimble": "parsetoml",
     "nix": "hello",
     "npm": "ms",
-    # Pure m-file documentation tests, with no compiled code and no dependency.
-    "octave": "doctest",
+    # Pure m-files, with no compiled code and no dependency, downloaded from a GitHub
+    # release asset: the packages the Octave index hosts on SourceForge time out on
+    # the arm runners.
+    "octave": "queueing",
     # Tiny single-function plugin of Oh My Fish's own package index.
     "oh-my-fish": "bak",
     # The smallest model in ollama's library, at a few hundred megabytes;

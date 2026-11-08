@@ -47,9 +47,11 @@
    tests.test_manager_cpan
    tests.test_manager_definition
    tests.test_manager_dnf
+   tests.test_manager_emerge
    tests.test_manager_fwupd
    tests.test_manager_guix
    tests.test_manager_homebrew
+   tests.test_manager_ips
    tests.test_manager_mas
    tests.test_manager_microdnf
    tests.test_manager_miktex
@@ -60,6 +62,7 @@
    tests.test_manager_pip
    tests.test_manager_pipx
    tests.test_manager_pkg
+   tests.test_manager_pmerge
    tests.test_manager_protonplus
    tests.test_manager_pwsh_gallery
    tests.test_manager_scoop

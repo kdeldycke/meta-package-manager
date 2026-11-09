@@ -380,15 +380,12 @@ jobs:
         run: |
           guix pull
           echo "${HOME}/.config/guix/current/bin" >> "${GITHUB_PATH}"
-      # The installer confines the daemon with an AppArmor profile that reads only a few files under `/etc`.
-      # The `git-fetch` checkout of the definition below runs git under it, and git then stops on the runner's
-      # `/etc/gitconfig` with "unknown error occurred while reading the configuration files". The profile
-      # includes `local/guix-daemon`, which takes the extra rule.
-      - name: Let the Guix daemon read the system git config
-        run: |
-          sudo mkdir --parents /etc/apparmor.d/local
-          echo "/etc/gitconfig r," | sudo tee --append /etc/apparmor.d/local/guix-daemon
-          sudo apparmor_parser --replace /etc/apparmor.d/guix-daemon
+      # The installer confines the daemon with an AppArmor profile. Its builds run under the nested `guix-builder`
+      # and `guix-helper` profiles, which deny the runner's `/etc/gitconfig` to the `git-fetch` checkout of the
+      # definition below: git then stops with "unknown error occurred while reading the configuration files". The
+      # nested profiles take no local rule, so the job unloads the whole profile.
+      - name: Unload the AppArmor profile of the Guix daemon
+        run: sudo apparmor_parser --remove /etc/apparmor.d/guix-daemon
       # Guix leaves a failed builder's log on disk and prints only its path, so
       # the job goes red saying nothing. Dump the recent ones: a break in an
       # upstream dependency can be read off ci.guix.gnu.org, but one in the

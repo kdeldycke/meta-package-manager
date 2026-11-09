@@ -105,10 +105,10 @@ operation `_escalating_manager` marks privileged."""
 def test_default_sudo_matches_system_managers():
     """Exactly the system package managers escalate by default.
 
-    Classes, their subclasses and bundled definitions alike. User-level managers do not,
-    the dual-scope language managers (npm, pip, gem, cpan) keep their privileged markers
-    dormant, and the polkit-native daemon clients (flatpak, fwupd, pkcon) never mark an
-    operation at all.
+    That holds for classes, their subclasses and bundled definitions alike. User-level
+    managers do not escalate, the dual-scope language managers (npm, pip, gem, cpan)
+    keep their privileged markers dormant, and the polkit-native daemon clients
+    (flatpak, fwupd, pkcon) never mark an operation at all.
 
     `choco` is the lone Windows entry, and belongs on the same grounds as the
     rest: Chocolatey installs into a `ProgramData` tree it locks to
@@ -193,7 +193,7 @@ def test_internal_sudo_matches_internal_escalators():
 def test_resets_sudo_timestamp_matches_the_tools_dropping_the_cache():
     """The markers name exactly the managers that drop cached credentials.
 
-    Those whose CLI drops the cached credentials before its own `sudo`. Each one is an
+    Their CLI drops the cached credentials before its own `sudo`. Each one is an
     internal escalator: the marker qualifies that escalation and is read nowhere else.
     """
     resetting = {
@@ -207,7 +207,7 @@ def test_resets_sudo_timestamp_matches_the_tools_dropping_the_cache():
 def test_internal_sudo_operations_are_narrowed_by_cask_alone():
     """An internal escalator may run its `sudo` in every mutating operation.
 
-    Except `cask`: `brew update` and `brew cleanup` never escalate.
+    `cask` is the exception: `brew update` and `brew cleanup` never escalate.
     """
     narrowed = {
         mid: manager.internal_sudo_operations
@@ -235,9 +235,7 @@ def test_internal_sudo_operations_are_narrowed_by_cask_alone():
 def test_hidden_prompt_risk_follows_the_operations_a_tool_escalates_in(
     manager_id, operation, at_risk
 ):
-    """A cold-cache call prompts only in operations its tool escalates in.
-
-    On a terminal, a call may prompt in each of those operations, and in no other.
+    """On a terminal, a cold-cache call may prompt only where its tool escalates.
 
     `fink` and the AUR helpers escalate to refresh and to clean up, like every
     internal escalator by default. `cask` does not, and no read does.
@@ -345,7 +343,7 @@ class _EscalatingFakeManager(FakeManager):
 def _escalating_manager() -> FakeManager:
     """A fake manager whose policy escalates its `install`.
 
-    To trip prime_sudo in an {data}`INSTALL_RUN`.
+    It trips prime_sudo in an {data}`INSTALL_RUN`.
     """
     manager = _EscalatingFakeManager()
     manager.sudo = True
@@ -410,7 +408,7 @@ def test_prime_sudo_skips_when_no_manager_escalates():
 def test_prime_sudo_skips_a_run_of_unprivileged_operations():
     """A manager forced to escalate asks for nothing in a run without need.
 
-    A run that reaches none of its privileged operations.
+    Such a run reaches none of its privileged operations.
 
     The case of `gem` under `[mpm.overrides.gem] sudo = true`: its `sync` runs
     `gem sources --update`, which carries no marker, so the password `mpm sync`
@@ -620,8 +618,8 @@ def test_passwordless_probe_answers_no_when_unsure(
 ):
     """A manager without a binary, or a failed policy probe, answers `False`.
 
-    An escalated manager whose binary was not found, or a policy probe that cannot run:
-    the cold-cache path then handles the run.
+    That covers an escalated manager whose binary was not found, and a policy probe that
+    cannot run. The cold-cache path then handles the run.
     """
     sudo = next(e for e in ESCALATORS if e.id == "sudo")
     manager = _escalating_manager()
@@ -638,17 +636,19 @@ def test_passwordless_probe_answers_no_when_unsure(
 def test_prime_sudo_authenticates_and_keeps_alive_on_tty():
     """A cold cache on a terminal: probe, prompt, then keepalive.
 
-    One branded password prompt, then the keepalive until the context closes.
+    The prompt is one branded password prompt, and the keepalive runs until the context
+    closes.
     """
     ctx = click.Context(click.Command("mpm"))
     with prime_sudo_env(stdin_tty=True, stderr_tty=True) as run:
         authenticated = []
 
         def answer(argv, **kwargs):
-            """A cold cache until the interactive prompt succeeds.
+            """Answer a cold cache until the interactive prompt succeeds.
 
-            And a policy granting nothing unauthenticated, as sudo behaves. Keyed on
-            argv rather than on call order, which the probes ahead of it may shift.
+            The policy grants nothing unauthenticated, as sudo behaves. The answer is
+            keyed on argv rather than on call order, which the probes ahead of it may
+            shift.
             """
             if "--prompt" in argv:
                 authenticated.append(argv)
@@ -697,7 +697,8 @@ def test_prime_sudo_is_idempotent():
 def test_prime_sudo_warm_probe_stays_silent_on_tty(capsys):
     """A warm credential cache gets no notice and no prompt, just a keepalive.
 
-    Pre-authenticated or NOPASSWD: the keepalive runs until the context closes.
+    The cache is pre-authenticated or NOPASSWD, and the keepalive runs until the context
+    closes.
     """
     ctx = click.Context(click.Command("mpm"))
     with prime_sudo_env(stdin_tty=True, stderr_tty=True) as run:
@@ -746,7 +747,7 @@ def _wait_for(predicate: Callable[[], bool], timeout: float = 5.0) -> bool:
 def test_keepalive_drop_warns_once_and_rearms(monkeypatch, caplog):
     """A refresh finding the credentials gone clears the warm flag.
 
-    Homebrew resets them on purpose. One warning per drop, and a later successful
+    Homebrew resets them on purpose. Each drop gets one warning, and a later successful
     refresh sets the flag back, saying so at INFO.
     """
     monkeypatch.setattr("meta_package_manager.sudo._SUDO_KEEPALIVE_INTERVAL", 0.01)
@@ -867,7 +868,7 @@ def test_keepalive_drops_a_refresh_answered_after_the_stop_request(monkeypatch, 
 def test_prime_sudo_narrates_warm_probe_at_info(caplog):
     """A warm probe and the keepalive arming both tell their story at INFO.
 
-    So a `--verbosity INFO` run shows why no password prompt appeared.
+    A `--verbosity INFO` run then shows why no password prompt appeared.
     """
     ctx = click.Context(click.Command("mpm"))
     with prime_sudo_env() as run, caplog.at_level(logging.INFO):
@@ -884,7 +885,7 @@ def test_prime_sudo_narrates_warm_probe_at_info(caplog):
 def test_prime_sudo_narrates_internal_only_skip_at_info(caplog):
     """Not prompting for an internal-only selection surfaces at INFO.
 
-    Never as a warning.
+    It never surfaces as a warning.
     """
     ctx = click.Context(click.Command("mpm"))
     with (
@@ -905,7 +906,7 @@ def test_prime_sudo_narrates_internal_only_skip_at_info(caplog):
 def test_prime_sudo_cold_internal_only_never_prompts_on_tty(capsys, caplog):
     """A cold cache with only internal escalators probes, then never prompts.
 
-    Like a stock cask/fink selection: most such runs never escalate, and the stall
+    A stock cask/fink selection is one: most such runs never escalate, and the stall
     notice covers the rare mid-run prompt instead.
     """
     ctx = click.Context(click.Command("mpm"))
@@ -945,8 +946,8 @@ def test_prime_sudo_cold_internal_only_stays_silent_off_tty(caplog):
 def test_prime_sudo_denied_user_skips_prompt(caplog):
     """A probe reporting a sudoers denial skips the password prompt.
 
-    Even on a terminal: a password could only be collected then rejected. One warning
-    names the managers and the remedy.
+    It does so even on a terminal: a password could only be collected then rejected. One
+    warning names the managers and the remedy.
     """
     ctx = click.Context(click.Command("mpm"))
     with (
@@ -1027,8 +1028,8 @@ def test_prime_sudo_denied_internal_only_stays_silent(caplog):
 def test_prime_sudo_audits_escalated_binaries(tmp_path, caplog, mode, expect_warning):
     """The binary of an escalated manager gets the config-file tamper test.
 
-    One warning per manager when others can modify it, and the escalation still proceeds
-    (the probe still runs).
+    Each manager gets one warning when others can modify it, and the escalation still
+    proceeds (the probe still runs).
     """
     ctx = click.Context(click.Command("mpm"))
     binary = tmp_path / "fake-mpm"
@@ -1140,7 +1141,7 @@ def test_prime_sudo_notice_names_managers_and_subcommand(
 def test_sudo_prompt_respects_sudo_constraints(manager_ids):
     """The `--prompt` argument of `sudo` stays within sudo's constraints.
 
-    Whatever the prompt copy becomes.
+    That holds whatever the prompt copy becomes.
 
     Locks the properties rather than the wording, so a future rewording trips here
     only if it breaks sudo: the only expandable escapes left are the ones the
@@ -1395,7 +1396,7 @@ def test_inspect_install_root_swallows_probe_failures():
 def test_inspect_install_root_needs_posix_ownership(monkeypatch, tmp_path):
     """A host whose `os` has no `getuid` reports no install root.
 
-    As on Windows, even for a root that exists.
+    It reports none even for a root that exists, as on Windows.
 
     The module's `os` is replaced by a stand-in without `getuid`, so the check
     runs on every platform: on POSIX, the real module would report the root.
@@ -1413,7 +1414,7 @@ def test_inspect_install_root_needs_posix_ownership(monkeypatch, tmp_path):
 def test_inspect_install_root_names_an_unknown_owner_by_uid(monkeypatch, tmp_path):
     """A root owned by a uid with no account names its owner by the bare uid.
 
-    Like files unpacked from a container image.
+    Files unpacked from a container image are such a case.
     """
 
     def no_account(uid):
@@ -1467,7 +1468,7 @@ def test_install_root_probes_run_the_documented_verb(manager_id, expected_argv):
 def test_escalator_registry_prefers_sudo():
     """`sudo` stays the first choice.
 
-    So a host carrying several keeps the behavior it has today, and only an explicit
+    A host carrying several then keeps the behavior it has today, and only an explicit
     override moves it.
 
     `run0` sits behind them on purpose: it authorizes through polkit and needs
@@ -1540,7 +1541,7 @@ def test_win_sudo_identity_rejects_every_other_sudo(returncode, stdout, expected
 def test_win_sudo_probe_only_accepts_inline_mode(returncode, stdout, expected):
     """`--inline` errors against any other mode rather than falling back.
 
-    So a mode mpm cannot drive has to read as cold before a manager reaches it.
+    A mode mpm cannot drive then has to read as cold before a manager reaches it.
     """
     win_sudo = next(e for e in ESCALATORS if e.id == "win-sudo")
     probe = subprocess.CompletedProcess((), returncode, stdout=stdout.encode())
@@ -1598,7 +1599,7 @@ def test_denial_matches_both_subjects_of_the_sudo_wording(error):
 def test_gsudo_probe_reads_its_output_not_its_exit_code(returncode, stdout, expected):
     """`gsudo status` exits `0` whether or not elevation is ready.
 
-    So the answer is only in its JSON.
+    The answer is then only in its JSON.
 
     Reading the exit code alone would report every Windows host as warm, and
     the up-front prompt that keeps a UAC dialog out of the concurrent fan-out
@@ -1612,7 +1613,7 @@ def test_gsudo_probe_reads_its_output_not_its_exit_code(returncode, stdout, expe
 def test_run0_forwards_a_forced_environment():
     """`run0` forks its payload off the service manager, which inherits nothing.
 
-    So a forced variable has to travel as an argument or be lost.
+    A forced variable then has to travel as an argument or be lost.
 
     Spliced ahead of the `--` the prefix closes on, leaving a manager's own
     flags shielded, and sorted so the disclosed command is stable.
@@ -1669,7 +1670,7 @@ def test_probe_without_markers_reads_the_exit_code(escalator):
 def test_pkexec_probe_substitutes_the_running_pid():
     """`pkcheck` asks about a subject and refuses to guess one.
 
-    So the probe carries a `{pid}` token mpm fills with its own.
+    The probe then carries a `{pid}` token mpm fills with its own.
 
     Left unsubstituted it would reach polkit as a literal, and every probe
     would report a cold cache on a host that authorizes the action.
@@ -1706,7 +1707,7 @@ def test_resolve_escalator_detects_what_the_host_carries(installed, expected):
 def _both_escalators_installed():
     """Pretend the host carries both `sudo` and `doas`, neither pinned genuine.
 
-    So the identity probe is what decides between them.
+    The identity probe then decides between them.
     """
     return patch(
         "meta_package_manager.sudo.shutil.which",
@@ -1749,7 +1750,7 @@ def test_escalator_identity_probe_reads_the_binary(returncode, stdout, expected)
 def test_escalator_without_identity_args_is_genuine():
     """An escalator opts into the identity check by declaring its argv.
 
-    So the ones with no known stand-in spend no subprocess.
+    The ones with no known stand-in then spend no subprocess.
     """
     doas = ESCALATORS[1]
     assert doas.id == "doas"
@@ -1850,7 +1851,7 @@ def test_resolve_escalator_skips_an_impostor_for_the_real_thing():
 def test_resolve_escalator_keeps_sudo_on_a_sudo_rs_host():
     """A host whose `sudo` is sudo-rs keeps escalating through it.
 
-    Even when it carries `doas` too.
+    It does so even when it carries `doas` too.
 
     The identity probe reads the binary's own banner, and sudo-rs prints
     `sudo-rs <version>` where the original prints `Sudo version <version>`.
@@ -1882,7 +1883,7 @@ def test_resolve_escalator_keeps_sudo_on_a_sudo_rs_host():
 def test_resolve_escalator_falls_back_to_a_lone_impostor_off_windows(windows, expected):
     """An impostor still escalates, so it beats reporting no escalator.
 
-    Except on Windows.
+    Windows is the exception.
 
     Disabled, Microsoft's `sudo.exe` fails both identity probes: its `--help`
     prints only how to enable it. The fallback then drove it as POSIX `sudo`,
@@ -1904,7 +1905,7 @@ def test_resolve_escalator_falls_back_to_a_lone_impostor_off_windows(windows, ex
 def test_resolve_escalator_override_wins_over_detection():
     """An override is honored even when its binary is missing.
 
-    So the failure names the escalator the user asked for.
+    The failure then names the escalator the user asked for.
     """
     with only_escalator("sudo"):
         escalator = resolve_escalator("doas")
@@ -1951,7 +1952,7 @@ def test_per_manager_sudo_command_is_refused(invoke, tmp_path):
 def test_sudo_command_reaches_the_config_file(invoke, tmp_path):
     """`[mpm] sudo_command` is honored, and validated like the flag.
 
-    Against the same choices: an unknown escalator is a usage error, not a silent
+    It takes the same choices: an unknown escalator is a usage error, not a silent
     fallback.
     """
     config = tmp_path / "config.toml"
@@ -1980,7 +1981,7 @@ def test_build_cli_escalates_with_the_selected_binary(escalator_id, expected_pre
 def test_build_cli_skips_escalation_without_an_escalator():
     """A host carrying neither binary runs the command unprivileged.
 
-    Rather than prefixing a `sudo` that is not there.
+    It does not prefix a `sudo` that is not there.
     """
     manager = _escalating_manager()
     with only_escalator(None):
@@ -2058,10 +2059,9 @@ def test_doas_gets_no_keepalive_thread(caplog):
 
 @pytest.mark.parametrize("escalator", ESCALATORS, ids=[e.id for e in ESCALATORS])
 def test_prime_sudo_names_the_remedy_without_tty(escalator, caplog):
-    """Off a terminal, the warning closes on what the policy needs.
+    """Off a terminal, the warning closes on what the escalator's policy needs.
 
-    What the escalator's policy needs, rather than a pre-authentication that most
-    escalators do not keep.
+    It does not close on a pre-authentication, which most escalators do not keep.
     """
     ctx = click.Context(click.Command("mpm"))
     with (
@@ -2086,8 +2086,8 @@ the authorization."""
 def test_prime_sudo_warns_when_the_prompt_keeps_nothing(escalator, caplog):
     """A prompt answered, then a probe still cold: the policy keeps nothing.
 
-    Like `doas` without `persist` or `run0` over SSH. One warning names the remedy, and
-    no keepalive pretends otherwise.
+    `doas` without `persist` and `run0` over SSH are two such policies. One warning
+    names the remedy, and no keepalive pretends otherwise.
     """
     ctx = click.Context(click.Command("mpm"))
     prompt_args = escalator.prompt_args
@@ -2448,7 +2448,7 @@ def test_diagnose_escalation_under_a_passwordless_policy():
 def test_diagnose_escalation_when_polkit_keeps_the_authorization():
     """polkit under `auth_admin_keep` keeps what a password buys.
 
-    So the report says a prompt would hold for the whole run.
+    The report then says a prompt would hold for the whole run.
 
     The `pkcheck` answer of the credential probe is the one measured on Fedora 44
     with polkit 127.
@@ -2498,7 +2498,7 @@ def _slitaz_sudo_answer(argv, **kwargs):
 def test_diagnose_escalation_flags_a_chosen_stand_in():
     """A stand-in named with `--sudo-command` is driven anyway.
 
-    So the report warns that its answers may be misread.
+    The report then warns that its answers may be misread.
 
     SliTaz's wrapper exits 0 on the credential probe, which reads as ready: the
     identity line is what tells the user not to trust it.
@@ -2538,10 +2538,10 @@ def _stalling_script(line: str, sleep: float) -> str:
 
 
 def test_stall_watchdog_notices_silent_internal_escalator(monkeypatch, caplog):
-    """A mutating escalator call on a cold cache warns once per silence.
+    """A silent internal escalator call on a cold cache warns once per silence.
 
-    A mutating call of an internal escalator, on a terminal with a cold cache, warns
-    once per silence episode, naming the manager and quoting its last output line.
+    The call is a mutating one, on a terminal. The warning names the manager and quotes
+    its last output line.
     """
     assert not _SUDO_CACHE_WARM.is_set()
     manager = FakeManager()
@@ -2660,7 +2660,7 @@ def test_stall_watchdog_notice_without_an_output_line(monkeypatch, caplog):
 def test_stall_watchdog_reports_a_record_it_cannot_format(monkeypatch):
     """A record that cannot be formatted goes to the handler's error report.
 
-    As `logging` expects of every handler. It is not raised into the call.
+    `logging` expects that of every handler. The record is not raised into the call.
     """
     monkeypatch.setattr("meta_package_manager.sudo._terminal_modes", lambda: None)
     watchdog = _StallWatchdog(FakeManager().subject)
@@ -2885,8 +2885,8 @@ def test_terminal_helpers_answer_nothing_on_windows(monkeypatch):
 def test_terminal_echo_reads_the_local_flags(echoes):
     """The echo is the `ECHO` bit of the local flags.
 
-    The fourth item of what `termios.tcgetattr` returns: a password read clears it, a
-    line read keeps it.
+    The local flags are the fourth item `termios.tcgetattr` returns. A password read
+    clears the bit, and a line read keeps it.
     """
     local_flags = termios.ICANON | (termios.ECHO if echoes else 0)
     assert _terminal_echo([0, 0, 0, local_flags, 0, 0, []]) is echoes
@@ -3054,7 +3054,7 @@ def test_stall_watchdog_tee_gates_debug_lines_at_default_verbosity(caplog):
 def test_stall_watchdog_tee_forwards_verbatim_at_debug(caplog):
     """At DEBUG, an armed call streams child lines through the tee.
 
-    With the same message, level and manager label as an un-teed run.
+    The lines keep the message, level and manager label of an un-teed run.
     """
     manager = FakeManager()
     manager.internal_sudo = True

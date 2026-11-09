@@ -86,7 +86,14 @@ try:
     from ._purl import normalized_purls, package_purl, registered_purl
 except ImportError as import_error:
     spdx_support = False
-    spdx_unavailable_reason = writer_unavailable_reason("spdx-tools", import_error)
+    # spdx-tools does not depend on packageurl-python, which the `[sbom-offline]`
+    # extra installs beside it: a failed `packageurl` import names its own package.
+    spdx_unavailable_reason = writer_unavailable_reason(
+        "packageurl-python"
+        if (import_error.name or "").partition(".")[0] == "packageurl"
+        else "spdx-tools",
+        import_error,
+    )
     logging.getLogger("meta_package_manager").debug(
         f"SPDX support disabled: {spdx_unavailable_reason}",
     )

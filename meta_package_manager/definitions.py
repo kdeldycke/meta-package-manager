@@ -582,8 +582,9 @@ class OperationSpec:
     regex: str | None = None
     """Regular expression matched against each stdout line in `"regex"` mode.
 
-    Recognized named groups: `package_id` (required), `installed_version` and
-    `latest_version` (optional). Compiled with {data}`re.MULTILINE`.
+    Its named groups are those of {data}`RECOGNIZED_PARSE_FIELDS`, and
+    {data}`REQUIRED_PARSE_FIELDS` names the ones each query needs. Compiled with
+    {data}`re.MULTILINE`.
     """
 
     list_path: str | None = None
@@ -593,8 +594,10 @@ class OperationSpec:
     """
 
     fields: dict[str, str] | None = None
-    """Mapping of recognized package field (`package_id`, `installed_version`,
-    `latest_version`) to its JSON selector, in `"json"` mode.
+    """Mapping of package fields to their JSON selectors, in `"json"` mode.
+
+    The fields are those of {data}`RECOGNIZED_PARSE_FIELDS`, and
+    {data}`REQUIRED_PARSE_FIELDS` names the ones each query needs.
 
     A selector is a key name with an optional `[N]` list index (`versions[0]`); see
     {data}`~meta_package_manager.manager.JSON_FIELD_SELECTOR_REGEX`.
@@ -1375,7 +1378,7 @@ def build_manager_class(definition: ManagerDefinition) -> type[ConfigDrivenManag
 
 # Bundled manager definitions.
 #
-# mpm ships a few managers as data rather than Python classes: a TOML file per
+# mpm ships many of its managers as data rather than Python classes: a TOML file per
 # manager under meta_package_manager/managers/, each a single [mpm.overrides.<id>]
 # section in the exact schema a user would write. They are parsed and built through
 # the same parse_manager_definition / build_manager_class path as any user

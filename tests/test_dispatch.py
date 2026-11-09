@@ -751,7 +751,7 @@ def test_internal_escalator_runs_in_a_sequential_tail(
 ):
     """A manager escalating internally runs once the concurrent batch is done.
 
-    So its hidden `sudo` prompt lands on a terminal nothing else writes to.
+    Its hidden `sudo` prompt then lands on a terminal nothing else writes to.
 
     The tail runs at `jobs=1`, which `run_lanes` executes inline, so the held-back
     manager is the one that ran on the calling thread. An operation in which the
@@ -806,7 +806,7 @@ def test_internal_escalator_runs_in_a_sequential_tail(
 def test_sequential_tail_reports_one_batch_wide_finisher(monkeypatch):
     """Two phases, one finisher: the tail closes the batch with the whole tally.
 
-    So a held-back manager never reads as a second run of its own.
+    A held-back manager then never reads as a second run of its own.
     """
     assert not _SUDO_CACHE_WARM.is_set()
     monkeypatch.setattr(meta_package_manager.dispatch, "SPINNER_DELAY", 0.0)

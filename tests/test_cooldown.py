@@ -745,8 +745,8 @@ def test_paru_gated_upgrade_all_without_holds_keeps_native_cli(monkeypatch):
 def test_mas_release_date(capture_run_cli, output, expected):
     """The release date is the `currentVersionReleaseDate` of the catalog record.
 
-    The record `mas lookup` prints. The date is `None` when the record holds no readable
-    date.
+    `mas lookup` prints that record. The date is `None` when the record holds no
+    readable date.
     """
     manager = MAS()
     calls = capture_run_cli(manager, output)

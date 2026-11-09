@@ -126,6 +126,12 @@ SHARED_LOCK_FAMILIES: Final[tuple[LockFamily, ...]] = (
         "the first one to finish or fails on its lock",
     ),
     LockFamily(
+        "Gentoo package database",
+        frozenset({"emerge", "pmerge"}),
+        "they record into the same database of installed packages, and each one "
+        "sees what the other installed",
+    ),
+    LockFamily(
         "pacman database",
         frozenset({
             "aura",
@@ -197,6 +203,11 @@ serialize on its lock:
   `rpmdb[process] already locked by microdnf(PID)`, while a `microdnf` arriving
   during a `dnf` transaction waits for it. Measured on AlmaLinux 10.2 with
   microdnf `3.10.1` and dnf `4.20.0`.
+- `emerge` and `pmerge` record into the same database of installed packages:
+  pkgcore reads the ebuild repositories of Portage, and each one sees what the other
+  installed. No one measured how Portage and pkgcore lock that database against each
+  other. Serializing them covers both cases: a second writer that waits, and one that
+  corrupts the database.
 - `pacman` and the AUR helpers `pacaur`, `pamac`, `paru`, `pikaur`, `trizen` and
   `yay` all reach the pacman database (`/var/lib/pacman/db.lck`). The helpers are
   front-ends rather than reimplementations: each shells out to `sudo pacman` for the
@@ -239,8 +250,8 @@ once per run.
 
 Concurrency is safe *across* families and unsafe *within* one, just as it is unsafe
 within a single manager (which is why a manager's own packages stay serial). For every
-family above *except* the conda one, two members running at once *block or fail*
-rather than corrupt: each backend holds a real lock and the loser is told so, save
+family above *except* the conda and Gentoo ones, two members running at once *block or
+fail* rather than corrupt: each backend holds a real lock and the loser is told so, save
 `vcpkg`, whose port build fails on a `cmake` error that names no other manager. That is
 a property of those backends rather than of this mechanism, so a family added later
 earns the guarantee only by inspection, and conda is the standing proof that some do
@@ -536,10 +547,10 @@ class OperationTrail(_OperationTrail):
         jobs: int = 1,
         coverage: bool = False,
     ) -> None:
-        """Derive the upstream trail options from the batch's *managers*.
+        """Derive the upstream trail options from the `managers` of the batch.
 
         The trail shows when any manager has `progress` on, and a concurrent
-        batch with a known *total* draws a determinate bar.
+        batch with a known `total` draws a determinate bar.
         """
         self._managers = tuple(managers)
         progress = any(manager.progress for manager in self._managers)

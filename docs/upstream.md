@@ -134,7 +134,7 @@ The SPDX documents [`brew`](managers/brew.md) generates point their `documentNam
 
 ### [packageurl-python](https://github.com/package-url/packageurl-python)
 
-- [package-url/packageurl-python#188](https://github.com/package-url/packageurl-python/pull/188): add `PURL_TYPES` and enforce validation of purl types. Until it lands, `mpm` ships its own purl-type mapping in `meta_package_manager/specifier.py`.
+- [package-url/packageurl-python#188](https://github.com/package-url/packageurl-python/pull/188): add `PURL_TYPES` and enforce validation of purl types. `mpm` parses purls without packageurl-python, which only its `[sbom-offline]` extra installs, so it keeps its own table of the registered types: `PURL_TYPES` in `meta_package_manager/package.py`.
 
 ### [license-expression](https://github.com/aboutcode-org/license-expression)
 

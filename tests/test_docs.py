@@ -22,6 +22,7 @@ import functools
 import importlib.util
 import re
 import shutil
+import tomllib
 from datetime import UTC, date, datetime
 from fnmatch import fnmatchcase
 from itertools import permutations
@@ -60,7 +61,7 @@ from meta_package_manager.platforms import MAIN_PLATFORMS
 from meta_package_manager.pool import pool
 from meta_package_manager.tables import PackageOutcome
 
-from .conftest import PROJECT_ROOT, all_managers, tomllib
+from .conftest import PROJECT_ROOT, all_managers
 
 
 @functools.cache
@@ -333,7 +334,7 @@ def test_new_package_manager_issue_template():
 def test_extra_labels_in_pyproject():
     """Check the generated label block is consistent with `LABELS`.
 
-    The `[tool.repomatic.labels.extra]` block of `pyproject.toml`.
+    That block is `[tool.repomatic.labels.extra]` in `pyproject.toml`.
 
     Repo-maintenance guard: the platform labels are regenerated from the installed
     `extra_platforms` release, whose platform groups a downstream packager cannot be
@@ -554,7 +555,8 @@ def test_string_array_wraps_where_pyproject_fmt_wraps(
 def test_benchmark_toml_well_formed():
     """Check `docs/benchmark.toml` encodes only known flags and homepages.
 
-    Flags from the known competitor set, and homepage URLs for non-pool managers.
+    The flags come from the known competitor set, and the homepage URLs belong to
+    non-pool managers.
 
     A duplicate manager-id row anywhere in the file (in any table) is a
     `tomllib.TOMLDecodeError` at load time, below, rather than a silently
@@ -679,7 +681,7 @@ def test_benchmark_toml_well_formed():
 def test_benchmark_homepages_cover_non_pool_managers():
     """Every non-pool manager of `benchmark.toml` has a `homepages` entry.
 
-    So the table can link the identifier.
+    The table then links the identifier.
 
     Pool-implemented managers are excluded: their URL is sourced from the
     class's `homepage_url` attribute, and a redundant entry in the TOML
@@ -1255,8 +1257,8 @@ def test_manager_logo_assets():
 def test_manager_logos_resolve():
     """Check the `logo` slug of every manager points at a vendored mark.
 
-    Also enforces the reverse: a mark nobody claims is dead weight, mirroring
-    the orphan sweep `update_manager_stubs` performs on `docs/managers/`.
+    The test also checks the credits: each vendored mark lists exactly the managers
+    that declare it.
     """
     icons = _docs.logo_manifest()["icons"]
     claimed: dict[str, list[str]] = {}
@@ -1545,7 +1547,7 @@ def test_api_stubs_are_reachable_from_a_toctree():
 def test_manager_page_headings_survive_a_build(tmp_path):
     """Check a real Sphinx build turns the generated headings into sections.
 
-    Under a generated title and below the lede.
+    The sections sit under a generated title and below the lede.
 
     The stub carries no heading at all, not even the page title: every one is
     printed by `manager_page()` and parsed out of the directive's output, which
@@ -1934,7 +1936,7 @@ def test_trail_glyph_matches_the_emitted_one():
 def test_self_referencing_urls_name_a_file_the_tree_holds():
     """A raw URL to this repository's `main` names a file the tree carries.
 
-    Applies to `raw.githubusercontent.com` URLs.
+    The rule covers the `raw.githubusercontent.com` URLs.
 
     Nothing else resolves these: they are fetched by a reader far from any test.
     The `<xbar.image>` header of the bar plugin is what xbarapp.com renders as
@@ -2218,8 +2220,9 @@ def _row_manager_id(row: str) -> str:
 def test_managers_index_table_renders():
     """Check the manager index renders as one well-formed table.
 
-    Six verdict groups, each opening on its own title row, wrapped managers linking to
-    their documentation page and declined ones to their verdict, in the same columns.
+    It holds six verdict groups, each opening on its own title row. Wrapped managers
+    link to their documentation page and declined ones to their verdict, in the same
+    columns.
 
     The table is rendered live at Sphinx build time by the ``{python:render}``
     block in `docs/managers.md`, so there is no checked-in copy to compare
@@ -2532,7 +2535,7 @@ def test_mirror_blocks_in_sync(monkeypatch):
 def test_unsupported_page_matches_benchmark():
     """Check `docs/unsupported.md` covers the benchmark's `unsupported` set.
 
-    Exactly that set, with matching glyphs, sorted by anchor.
+    It covers exactly that set, with matching glyphs, sorted by anchor.
 
     The benchmark renders each `unsupported` manager as a glyph linking into
     that page for the reason, so the two must stay in lockstep. A manager
@@ -2603,7 +2606,7 @@ def test_unsupported_page_matches_benchmark():
 def test_unsupported_verdicts_cite_a_release():
     """Check every verdict of `docs/unsupported.md` closes on its release.
 
-    The release that published it, which the changelog must declare.
+    That release published the verdict, and the changelog must declare it.
 
     The page invites a reassessment of any verdict it carries, and the release
     is what dates one: without it a reader cannot tell a decision taken two

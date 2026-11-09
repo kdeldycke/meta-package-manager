@@ -108,14 +108,14 @@ def built_docs(tmp_path_factory: pytest.TempPathFactory) -> Path:
 
 
 def page_file(name: str) -> str:
-    """Name the file the builder writes for the document *name*."""
+    """Name the file the builder writes for the document `name`."""
     if SPHINX_BUILDER == "dirhtml" and name != "index":
         return f"{name}/index.html"
     return f"{name}.html"
 
 
 def read_html(built_docs: Path, name: str) -> str:
-    """Read the built HTML page of the document *name*."""
+    """Read the built HTML page of the document `name`."""
     html_path = built_docs / page_file(name)
     assert html_path.exists(), f"HTML file not found: {html_path}"
     return html_path.read_text(encoding="utf-8")

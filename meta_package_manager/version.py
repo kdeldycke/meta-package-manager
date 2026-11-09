@@ -113,8 +113,7 @@ References
   numeric/string tokens (falsehoods 2, 3).
 
 - [Gentoo Perl version scheme](https://wiki.gentoo.org/wiki/Project:Perl/Version-Scheme)
-  —
-  illustrates how two incompatible formats (dotted-decimal and
+  — illustrates how two incompatible formats (dotted-decimal and
   floating-point) require careful mapping. A reminder that version
   comparison cannot be reduced to "split on dots, compare integers."
 

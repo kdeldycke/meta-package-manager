@@ -218,9 +218,7 @@ class BarPluginRenderer(MPMPlugin):
 
     @cached_property
     def max_version_width(self) -> int:
-        """Maximum width of a rendered version, before the renderer shortens it.
-
-        In characters.
+        """Widest a version renders, in characters, before the renderer shortens it.
 
         The value comes from the `VAR_MAX_VERSION_WIDTH` environment variable,
         and its default is {data}`MAX_VERSION_WIDTH`. A value lower than `2`

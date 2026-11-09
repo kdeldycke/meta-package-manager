@@ -1404,17 +1404,20 @@ class CLIExecutor:
 
     @cached_property
     def version_output(self) -> str | None:
-        """Text of the version probe, which {attr}`version_regexes` search.
+        """Text of the version probe, which the version regexes search.
 
         `None` when no probe ran. The probe is skipped on platforms where the
-        manager is not supported, even if {attr}`cli_path` resolved to an
-        executable: that binary almost certainly belongs to a different tool
-        that happens to share the same name (e.g. GNU `make` on macOS getting
-        matched by the FreeBSD `ports` manager), so probing it would either
-        misreport the version or surface confusing error output.
+        manager is not supported, even if
+        {attr}`~meta_package_manager.execution.CLIExecutor.cli_path` resolved to an
+        executable: that binary almost certainly belongs to a different tool that
+        happens to share the same name, like GNU `make` on macOS getting matched by
+        the FreeBSD `ports` manager, so probing it would either misreport the version
+        or surface confusing error output.
 
-        Kept apart from {attr}`version` so a probe whose output no regex reads
-        can still be shown: `mpm --<id> managers` prints it beside the override
+        Kept apart from {attr}`~meta_package_manager.execution.CLIExecutor.version`
+        so a probe whose output no
+        {attr}`~meta_package_manager.execution.CLIExecutor.version_regexes` pattern
+        reads can still be shown: `mpm --<id> managers` prints it beside the override
         to test.
         """
         # `supported` is declared on the `PackageManager` subclass, not on

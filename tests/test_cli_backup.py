@@ -17,6 +17,7 @@
 
 from __future__ import annotations
 
+import tomllib
 from functools import partial
 from pathlib import Path
 
@@ -24,7 +25,7 @@ import pytest
 
 from meta_package_manager.capabilities import Operations
 
-from .conftest import default_manager_ids, tomllib
+from .conftest import default_manager_ids
 from .test_cli import assert_no_manager_selected, check_manager_selection
 
 

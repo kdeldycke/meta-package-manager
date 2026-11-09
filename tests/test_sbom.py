@@ -128,7 +128,7 @@ def assert_valid_cyclonedx(content: str, export_format: ExportFormat | str) -> N
 def test_package_purl_carries_the_namespace():
     """The pURL of a scoped npm package holds its scope as namespace.
 
-    As the npm type definition expects.
+    The npm type definition expects it there.
     """
     package = Package(id="@babel/core", manager_id="npm", installed_version="7.26.0")
     assert package_purl(package) == "pkg:npm/%40babel/core@7.26.0"
@@ -446,7 +446,7 @@ def test_bundled_mode_spdx_populates_rich_fields():
 def test_bundled_mode_cyclonedx_populates_rich_fields():
     """The CycloneDX renderer projects the same metadata.
 
-    Into hashes, licenses, supplier, external references, and dependency edges.
+    It lands in hashes, licenses, supplier, external references, and dependency edges.
     """
     c = CycloneDX()
     c.init_doc()
@@ -494,7 +494,8 @@ def test_cyclonedx_compound_license_expression_details(
 ):
     """Compound expressions emit `LicenseExpression.details`.
 
-    With a canonical SPDX URL per identifier, deduped and sorted by identifier.
+    The details carry a canonical SPDX URL per identifier, deduped and sorted by
+    identifier.
     """
     c = CycloneDX()
     c.init_doc()
@@ -534,10 +535,7 @@ def test_cyclonedx_compound_license_expression_details(
     ),
 )
 def test_spdx_license_normalization(declared, expected_present):
-    """The SPDX renderer produces a document valid against the SPDX schema.
-
-    For every input it accepts.
-    """
+    """The SPDX renderer makes a schema-valid document for every input it accepts."""
     s = SPDX()
     s.init_doc()
     md = PackageMetadata(license_declared=declared)
@@ -558,7 +556,8 @@ def test_spdx_license_normalization(declared, expected_present):
 def test_spdx_merges_external_per_package_sbom(tmp_path):
     """The renderer adopts transitive deps from an upstream SPDX file.
 
-    A per-package upstream file, and it records the merge in `externalDocumentRefs`.
+    The file is a per-package one, and the renderer records the merge in
+    `externalDocumentRefs`.
 
     The fixture mirrors the shape of Homebrew's
     `<prefix>/Cellar/<formula>/<version>/sbom.spdx.json`.

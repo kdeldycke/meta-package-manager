@@ -93,7 +93,7 @@ def test_check_mpm_missing_binary():
 def test_ranked_mpm_orders_candidates(monkeypatch):
     """Candidates rank on runnability, freshness and version only.
 
-    Whatever their other fields hold: two failed probes carry exceptions, which do not
+    Their other fields play no part: two failed probes carry exceptions, which do not
     compare, and a runnable probe with no version sits beside one with a version.
     """
     candidates = {
@@ -139,8 +139,8 @@ def test_check_mpm_keeps_the_release_suffix():
 def test_search_mpm_stops_at_home(monkeypatch, tmp_path):
     """The venv walk stops at Home.
 
-    So a lockfile sitting in a shared parent above it is never mistaken for the plugin's
-    own project.
+    A lockfile sitting in a shared parent above it is then never mistaken for the
+    plugin's own project.
     """
     home = tmp_path / "home"
     project = home / "project"
@@ -424,8 +424,8 @@ def test_elide_versions(old, new, expected):
 def test_elide_versions_keeps_the_diff_boundary():
     """The `…` lands where the gray prefix hands over to the colored suffix.
 
-    So the elision and {func}`~meta_package_manager.version.diff_versions` agree on one
-    split point.
+    The elision and {func}`~meta_package_manager.version.diff_versions` then agree on
+    one split point.
     """
     old, new = elide_versions("1.0.0+build.20260101", "1.0.0+build.20260102", 16)
     assert (old, new) == ("1.0.0+\u2026.20260101", "1.0.0+\u2026.20260102")
@@ -627,7 +627,8 @@ def test_renderer_hides_when_up_to_date(monkeypatch, hide, errors, renders):
 def test_plugin_empty_mpm_output(monkeypatch, capsys, hide, reports_error):
     """An `mpm` producing nothing is a failure to report.
 
-    Unless the user asked for the icon to vanish while everything is up to date.
+    The exception is a user who asked for the icon to vanish while everything is up to
+    date.
     """
     monkeypatch.delenv("SWIFTBAR", raising=False)
     monkeypatch.setenv("VAR_ALWAYS_VISIBLE", str(not hide))
@@ -695,8 +696,8 @@ def test_plugin_failure_reads_the_exit_code(
 def test_plugin_options_reach_every_call(monkeypatch):
     """`VAR_MPM_OPTIONS` lands between the plugin options and the subcommand.
 
-    On the sync and outdated calls. It keeps its case, and never reaches the version
-    probe.
+    It does so on the sync and outdated calls, keeps its case, and never reaches the
+    version probe.
     """
     _pin_plugin_env(monkeypatch, align_columns=True)
     monkeypatch.setenv("VAR_MPM_OPTIONS", "--verbosity INFO --no-cpan")
@@ -775,7 +776,7 @@ def test_plugin_shell_env_follows_the_mpm_version(monkeypatch, version, passes):
 def test_renderer_actions_carry_the_options(monkeypatch):
     """The embedded upgrade commands carry the same options.
 
-    Read from the environment the `outdated` call inherits.
+    They read them from the environment the `outdated` call inherits.
     """
     _pin_plugin_env(monkeypatch, align_columns=True)
     monkeypatch.setenv("VAR_MPM_OPTIONS", "--dry-run")
@@ -785,7 +786,7 @@ def test_renderer_actions_carry_the_options(monkeypatch):
 def test_renderer_ties_each_upgrade_to_its_manager(monkeypatch):
     """An upgrade command names its package with a pURL of the section manager.
 
-    So `mpm` upgrades it without first looking for it in the installed packages.
+    `mpm` then upgrades it without first looking for it in the installed packages.
     """
     _pin_plugin_env(monkeypatch, align_columns=True)
     data = BarPluginRenderer().add_upgrade_cli({

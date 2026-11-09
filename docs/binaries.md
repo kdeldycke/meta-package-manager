@@ -91,12 +91,12 @@ What `file(1)` reports for each published binary:
 
 ```{code-block} shell-session
 $ file ./meta-package-manager-*
-./meta-package-manager-8.1.2-linux-arm64.bin:   ELF 64-bit LSB executable, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-aarch64.so.1, BuildID[sha1]=d9e693cb3d923e2d4eaab6578a415cd50c21df4c, for GNU/Linux 3.7.0, stripped
-./meta-package-manager-8.1.2-linux-x64.bin:     ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=975e46301a662dd07a4b0f82d7922e3d36df39a4, for GNU/Linux 3.2.0, stripped
-./meta-package-manager-8.1.2-macos-arm64.bin:   Mach-O 64-bit executable arm64
-./meta-package-manager-8.1.2-macos-x64.bin:     Mach-O 64-bit executable x86_64
-./meta-package-manager-8.1.2-windows-arm64.exe: PE32+ executable (console) Aarch64, for MS Windows
-./meta-package-manager-8.1.2-windows-x64.exe:   PE32+ executable (console) x86-64, for MS Windows
+./meta-package-manager-8.2.0-linux-arm64.bin:   ELF 64-bit LSB executable, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-aarch64.so.1, BuildID[sha1]=72866bfd676b028be848906350fc8d906564c3cf, for GNU/Linux 3.7.0, stripped
+./meta-package-manager-8.2.0-linux-x64.bin:     ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=0e9750e08716c7f7ca4886cb28eaccd53a9063a2, for GNU/Linux 3.2.0, stripped
+./meta-package-manager-8.2.0-macos-arm64.bin:   Mach-O 64-bit executable arm64
+./meta-package-manager-8.2.0-macos-x64.bin:     Mach-O 64-bit executable x86_64
+./meta-package-manager-8.2.0-windows-arm64.exe: PE32+ executable (console) Aarch64, for MS Windows
+./meta-package-manager-8.2.0-windows-x64.exe:   PE32+ executable (console) x86-64, for MS Windows
 ```
 
 ## Antivirus false positives on Windows binaries

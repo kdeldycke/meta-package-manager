@@ -56,7 +56,7 @@ The override directories are searched before `$PATH`, so the real binary wins ov
 
 ## Example: relax a version requirement
 
-A few managers gate themselves behind a minimum version. If you ship a custom build that reports an unconventional version string, override `requirement`:
+Most managers gate themselves behind a minimum version. If you ship a custom build that reports an unconventional version string, override `requirement`:
 
 ```toml
 [mpm.overrides.guix]
@@ -207,7 +207,7 @@ A definition covers managers whose listings parse line-by-line or as a flat JSON
 ```
 
 ```{note}
-mpm ships one such definition itself, as a worked and tested example: [`meta_package_manager/managers/gh_ext.toml`](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/gh_ext.toml) defines the `gh-ext` manager (GitHub CLI extensions) using exactly the schema above, and mpm loads it at startup like a built-in. Bundled definitions are the same mechanism as a personal definition, only read from trusted package data instead of your configuration file.
+mpm ships many of its own managers as such definitions, the `.toml` files of `meta_package_manager/managers/`. One worked and tested example: [`meta_package_manager/managers/gh_ext.toml`](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/gh_ext.toml) defines the [`gh-ext`](managers/gh-ext.md) manager (GitHub CLI extensions) using exactly the schema above, and mpm loads it at startup like a built-in. Bundled definitions are the same mechanism as a personal definition, only read from trusted package data instead of your configuration file.
 ```
 
 ## Help improve detection upstream

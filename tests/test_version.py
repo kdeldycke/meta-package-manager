@@ -236,7 +236,7 @@ def test_token_format():
 def test_token_mixed_type_not_equal():
     """Integer and string tokens are never equal.
 
-    Even if the string is digit-like when compared cross-type.
+    This holds even for a digit-like string compared across types.
     """
     assert Token(0) != Token("a")
     assert Token("beta") != Token(1)

@@ -639,7 +639,7 @@ class ProbedFakeManager(ChangingFakeManager):
 def probed_fake_pool(patch_pool_with):
     """Yield a fake manager whose pinned package a week of cooldown holds back.
 
-    A {class}`ProbedFakeManager`.
+    It is a {class}`ProbedFakeManager`.
     """
     return patch_pool_with(ProbedFakeManager())
 

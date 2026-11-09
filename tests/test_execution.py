@@ -84,7 +84,7 @@ _NON_UNIX_PLATFORM = next(p for p in ALL_PLATFORMS if p not in UNIX)
 def test_operation_timeouts_cover_all_operations():
     """Every routable operation has a per-operation timeout default.
 
-    So the map and the `Operations` enum never drift apart.
+    The map and the `Operations` enum then never drift apart.
     """
     for operation in Operations:
         assert operation.name in OPERATION_TIMEOUTS
@@ -121,7 +121,7 @@ def test_read_only_tier_is_shorter_than_mutating_tier():
 def test_resolve_timeout_explicit_wins(active_operation):
     """An explicit timeout wins for every operation, including unknown ones.
 
-    `--timeout` or a per-manager override.
+    That timeout comes from `--timeout` or from a per-manager override.
     """
     manager = FakeManager()
     manager.timeout = 42
@@ -396,8 +396,8 @@ FAIL_ON_STDERR = "import sys; sys.stderr.write('boom'); sys.exit(8)"
 def test_run_failure_gate(stop_on_error, must_succeed, script, expectation):
     """The failure gate decides to raise, accumulate or tolerate.
 
-    From the exit code, the `<stderr>` content, and the `stop_on_error`/`must_succeed`
-    context.
+    It reads the exit code, the `<stderr>` content, and the
+    `stop_on_error`/`must_succeed` context.
     """
     manager = FakeManager()
     manager.stop_on_error = stop_on_error
@@ -551,7 +551,7 @@ def test_cli_error_diagnosis_keeps_an_opening_error():
 def test_failed_run_relays_diagnosis(stop_on_error, script, expected, caplog):
     """The failure gate logs the diagnosis at WARNING, tagged with the manager.
 
-    For accumulated and raised failures alike.
+    It does so for accumulated and raised failures alike.
     """
     manager = FakeManager()
     manager.stop_on_error = stop_on_error
@@ -584,7 +584,7 @@ def test_failed_run_relays_diagnosis(stop_on_error, script, expected, caplog):
 def test_no_diagnosis_relay(script, level, caplog):
     """No WARNING relay without a genuine failure.
 
-    Nor when DEBUG already streamed the raw output inline.
+    There is none either when DEBUG already streamed the raw output inline.
     """
     manager = FakeManager()
     with caplog.at_level(level):
@@ -897,8 +897,8 @@ class _SynthesizedUpgradeFakeManager(FakeManager):
 def test_plan_synthesized_upgrade_all_resolves_reads(invoke, patch_pool_with):
     """`mpm --plan upgrade` on a synthesized upgrade-all prints each command.
 
-    The per-package upgrade commands, resolved against a really-executed `outdated`
-    read.
+    Those are the per-package upgrade commands, resolved against a really-executed
+    `outdated` read.
 
     Guards the read-stamp of the synthesized fallback in
     `PackageManager.upgrade`: the whole run is stamped `upgrade_all` (a
@@ -975,9 +975,7 @@ def test_run_registers_live_process_then_discards_it():
 
 
 def test_build_cli_escalates_with_sudo_n_when_policy_on():
-    """A privileged op escalates to `sudo --non-interactive` when opted in.
-
-    When the manager's policy opts in.
+    """A privileged op escalates to `sudo --non-interactive` on the manager's opt-in.
 
     The escalator is pinned rather than detected: a Windows runner carries no
     `sudo` on `PATH`, and detection finding none would skip the wrapping this
@@ -1069,7 +1067,7 @@ def test_build_cli_escalation_follows_the_escalator_not_the_platform():
 def test_build_cli_no_escalation_without_an_escalator():
     """A host carrying none runs unprivileged on any platform.
 
-    Rather than crashing on a missing binary.
+    It does not crash on a missing binary.
     """
     manager = FakeManager()
     manager.sudo = True
@@ -1099,7 +1097,7 @@ def test_build_cli_marker_required_for_escalation():
 def test_npm_sudo_marker_dormant_until_opted_in():
     """npm marks its global installs privileged, but stays unescalated.
 
-    Until the user opts in via --sudo / config (default_sudo is False).
+    It escalates only once the user opts in via --sudo / config (default_sudo is False).
     """
     manager = NPM()
     assert manager.default_sudo is False
@@ -1155,8 +1153,8 @@ def test_dormant_marker_permission_failure_hints_the_opt_in(caplog):
 def test_dormant_marker_hint_negative_gates(caplog, marker, stderr, euid):
     """Each gate individually silences the hint.
 
-    No privileged marker, a failure that is not a permission refusal, or a process
-    already root.
+    The gates are a missing privileged marker, a failure that is not a permission
+    refusal, and a process already root.
     """
     manager = FakeManager()
     script = f"import sys; sys.stderr.write({stderr!r}); sys.exit(1)"
@@ -1188,8 +1186,8 @@ def test_dormant_marker_hint_negative_gates(caplog, marker, stderr, euid):
 def test_failed_run_names_a_prompt_its_sudo_gave_up_on(caplog, stderr, named):
     """A tool whose `sudo` stopped waiting for a password fails like a timeout.
 
-    Like a timeout of mpm on that prompt: the same advice, after the tool's own account,
-    and the same cause for the trail line.
+    It gets what a timeout of mpm on that prompt gets: the same advice, after the tool's
+    own account, and the same cause for the trail line.
 
     The two controls keep the plain relay: a line no `sudo` signed, and a
     `sudo` that refuses for another reason.
@@ -1310,7 +1308,8 @@ def test_internal_escalator_spends_a_warm_cache_in_the_terminal_session(
 ):
     """An internal escalator call stays in the terminal session while cached.
 
-    While the credential cache is warm, in each operation where its tool may run `sudo`.
+    This holds while the credential cache is warm, in each operation where its tool may
+    run `sudo`.
 
     `sudo` keys a ticket on the terminal and on its session. Detached, the
     tool's own `sudo` finds no ticket and no terminal to prompt on, so its
@@ -1440,7 +1439,7 @@ def test_c_locale_falls_back_to_c_without_c_utf8(monkeypatch):
 def test_run_forwards_nothing_across_an_escalator_that_needs_no_help():
     """`sudo` resets the environment through a `sudoers` policy the host owns.
 
-    So mpm splices nothing of its own.
+    mpm then splices nothing of its own.
     """
     manager = FakeManager()
     manager.sudo = True
@@ -1470,7 +1469,7 @@ def test_run_forwards_nothing_across_an_escalator_that_needs_no_help():
 def test_mutating_subcommands_prime_sudo(invoke, fake_pool, args):
     """Every mutating subcommand authenticates sudo up front.
 
-    So a future command cannot silently skip the priming.
+    A future command then cannot silently skip the priming.
     """
     with patch("meta_package_manager.cli_maintenance.prime_sudo") as prime:
         invoke("--dry-run", *args)

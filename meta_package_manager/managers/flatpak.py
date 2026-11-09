@@ -127,6 +127,10 @@ class Flatpak(PackageManager):
 
     The `Origin:` and `Date:` field labels parsed by {meth}`release_date` are
     localized by flatpak, and the probes key on their English spelling.
+    {data}`~meta_package_manager.shell_env.FORCED_LOCALE_ENV` already keeps them
+    in English. Passed as `override_extra_env`, this mapping also replaces any
+    `extra_env` override, so another locale a user sets for flatpak never reaches
+    the probes.
     """
 
     version_regexes = (r"Flatpak\s+(?P<version>\S+)",)

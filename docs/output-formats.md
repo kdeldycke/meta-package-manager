@@ -13,50 +13,50 @@ $ mpm --table-format json installed > installed_package.json
 ```
 
 ```shell-session
-$ jq installed_package.json
+$ jq . installed_package.json
 ```
 
 ```json
 {
-    "pip": {
-        "errors": [],
-        "id": "pip",
-        "name": "Pip",
-        "packages": [
-            {
-                "id": "arrow",
-                "installed_version": "1.2.3",
-                "name": null
-            },
-            {
-                "id": "boltons",
-                "installed_version": "21.0.0",
-                "name": null
-            }
-        ]
-    },
-    "vscode": {
-        "errors": [],
-        "id": "vscode",
-        "name": "Visual Studio Code",
-        "packages": [
-            {
-                "id": "charliermarsh.ruff",
-                "installed_version": "2023.6.0",
-                "name": null
-            },
-            {
-                "id": "ExecutableBookProject.myst-highlight",
-                "installed_version": "0.11.0",
-                "name": null
-            },
-            {
-                "id": "GitHub.copilot",
-                "installed_version": "1.73.8685",
-                "name": null
-            }
-        ]
-    },
+  "pip": {
+    "id": "pip",
+    "name": "Python pip",
+    "packages": [
+      {
+        "id": "arrow",
+        "name": null,
+        "installed_version": "1.2.3"
+      },
+      {
+        "id": "boltons",
+        "name": null,
+        "installed_version": "21.0.0"
+      }
+    ],
+    "errors": []
+  },
+  "vscode": {
+    "id": "vscode",
+    "name": "Visual Studio Code",
+    "packages": [
+      {
+        "id": "charliermarsh.ruff",
+        "name": null,
+        "installed_version": "2023.6.0"
+      },
+      {
+        "id": "ExecutableBookProject.myst-highlight",
+        "name": null,
+        "installed_version": "0.11.0"
+      },
+      {
+        "id": "GitHub.copilot",
+        "name": null,
+        "installed_version": "1.73.8685"
+      }
+    ],
+    "errors": []
+  }
 }
 ```
 
@@ -85,7 +85,7 @@ CSV flattens the per-manager grouping into one row per package, with `Manager` a
 
 ## Accessibility
 
-For screen readers, pass `--accessible` (or set `ACCESSIBLE=1` in the environment) to strip ANSI colors, replace the Unicode box-drawing characters with plain `+--` / `|` separators, and stop the progress output (see [the accessibility section](configuration.md#accessibility)). This switch is independent of `--table-format`: `mpm --accessible --table-format json installed` still emits JSON, just without color codes interleaved in log messages.
+For screen readers, pass `--accessible` (or set `ACCESSIBLE=1` in the environment) to strip ANSI colors, render tables without borders, and stop the progress output (see [the accessibility section](configuration.md#accessibility)). This switch is independent of `--table-format`: `mpm --accessible --table-format json installed` still emits JSON, just without color codes interleaved in log messages.
 
 ## See also
 

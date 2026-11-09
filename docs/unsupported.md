@@ -739,15 +739,15 @@ This is a big feature for the future, but is already delimited by the {attr}`~me
 
 | Ecosystem             | Project files                                                                        | `mpm` manager                                                                    |
 | :-------------------- | :----------------------------------------------------------------------------------- | :------------------------------------------------------------------------------- |
-| C/C++                 | `conanfile.txt` (Conan), `vcpkg.json` (vcpkg)                                        | —                                                                                |
+| C/C++                 | `conanfile.txt` (Conan), `vcpkg.json` (vcpkg)                                        | [`vcpkg`](managers/vcpkg.md)                                                     |
 | Clojure               | `project.clj` (Leiningen), `deps.edn` (Clojure CLI)                                  | —                                                                                |
 | Conda                 | `conda-lock.yml`                                                                     | [`conda`](managers/conda.md)                                                     |
 | Elm                   | `elm.json` (`elm install`, formerly `elm-package`)                                   | —                                                                                |
-| Go                    | `go.mod`, `go.sum`                                                                   | —                                                                                |
+| Go                    | `go.mod`, `go.sum`                                                                   | [`go`](managers/go.md)                                                           |
 | Haskell               | `stack.yaml` (Stack), `package.yaml` (hpack), `*.cabal`, `cabal.project` (Cabal)     | —                                                                                |
 | Java                  | `pom.xml` (Maven), `build.gradle` (Gradle), `ivy.xml`                                | —                                                                                |
 | JavaScript            | `package.json`, `package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`                   | [`npm`](managers/npm.md), [`yarn`](managers/yarn.md), [`pnpm`](managers/pnpm.md) |
-| .NET                  | `*.csproj`, `packages.config` (NuGet)                                                | —                                                                                |
+| .NET                  | `*.csproj`, `packages.config` (NuGet)                                                | [`dotnet`](managers/dotnet.md)                                                   |
 | Perl                  | `cpanfile`                                                                           | [`cpan`](managers/cpan.md)                                                       |
 | PHP                   | `composer.json`, `composer.lock`                                                     | [`composer`](managers/composer.md)                                               |
 | Python                | `requirements.txt`, `pyproject.toml`, `poetry.lock`, `uv.lock`                       | [`pip`](managers/pip.md), [`uv`](managers/uv.md)                                 |

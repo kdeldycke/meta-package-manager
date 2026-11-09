@@ -143,8 +143,7 @@ class Aptitude(PackageManager):
     """A comma joins the fields because neither a Debian package name
     (`[a-z0-9+.-]`) nor a version (`[0-9A-Za-z.+:~-]`) can contain one, while a
     space appears in every description and an epoch puts a colon in half the
-    versions. It also keeps the disclosed `--display-format` free of spaces, so
-    the command mpm prints can be pasted back into a shell unquoted.
+    versions.
 
     Only the description may hold a comma, so it is matched last and greedily.
     """

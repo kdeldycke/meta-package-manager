@@ -83,10 +83,7 @@ class Emerge(PackageManager):
     pre_args = ("--quiet", "--color", "n", "--nospinner")
 
     _PARSED_PRE_ARGS = tuple(arg for arg in pre_args if arg != "--quiet")
-    """The pre-arguments without `--quiet`, for output a regex reads.
-
-    {attr}`~meta_package_manager.execution.CLIExecutor.pre_args` without `--quiet`,
-    for the operations whose output a regex reads instead of a person.
+    """The `pre_args` without `--quiet`, for output a regex reads, not a person.
 
     `--quiet` changes the shape of what emerge prints, beyond dropping noise.
     `--search` collapses each hit to a bare `*  category/name` line,

@@ -156,10 +156,10 @@ def managers(ctx, view):
     platforms and the unmaintained ones, and is what the global `--all-managers` flag
     selects here.
 
-    User's own selection configuration are intentionally ignored, so a manager dropped
-    from regular operations is still visible here for troubleshooting. To narrow down
-    the report to a subset of managers, pass the same selectors as for other subcommands
-    (like `--pip` or `--no-apt`).
+    Exclusions from the user's configuration are intentionally ignored, so a manager
+    dropped from regular operations is still visible here for troubleshooting. To
+    narrow down the report to a subset of managers, pass the same selectors as for
+    other subcommands (like `--pip` or `--no-apt`).
     """
     if ctx.obj.user_drops:
         dropped = ", ".join(map(theme().invoked_command, sorted(ctx.obj.user_drops)))

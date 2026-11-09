@@ -167,7 +167,7 @@ def test_network_client_works_without_a_cache(tmp_path):
 def test_network_client_reports_a_client_that_cannot_start(client, monkeypatch):
     """An HTTP client that fails to build fails as `NetworkError`.
 
-    Like one behind a SOCKS proxy with no `socksio`. It does not fail as the raw
+    A client behind a SOCKS proxy with no `socksio` is one. It does not fail as the raw
     `ImportError`.
     """
 
@@ -385,8 +385,8 @@ def test_osv_ecosystems_cover_every_canonical_alias_type():
 def test_osv_ecosystems_cover_every_manager_of_an_indexed_type(manager_id, purl_type):
     """A package's own purl takes its manager ID as the type.
 
-    So each manager `PURL_MAP` ties to a type OSV indexes must map to the ecosystem
-    of that type, or the scan skips every package of that manager.
+    Each manager `PURL_MAP` ties to a type OSV indexes must then map to the ecosystem of
+    that type, or the scan skips every package of that manager.
     """
     assert OSV_ECOSYSTEMS.get(manager_id) == OSV_ECOSYSTEMS[purl_type]
 

@@ -22,72 +22,83 @@ For example:
 
 ```shell-session
 $ mpm --brew --gem sbom --spdx --format yaml
-291 packages total (brew: 229, gem: 62).
-229/291 packages enriched with metadata.
+224 packages total (brew: 219, gem: 5).
+219/224 packages enriched with metadata.
+207 upstream SBOM documents merged, adding 1300 transitive packages.
+1457 dependency relationships emitted.
 ```
 
 ```yaml
 SPDXID: SPDXRef-DOCUMENT
 creationInfo:
-  created: '2024-07-30T15:48:45Z'
+  created: '2026-11-09T08:09:25Z'
   creators:
-  - 'Tool: meta-package-manager-5.18.0'
+  - 'Tool: meta-package-manager-8.2.0'
 dataLicense: CC0-1.0
-documentNamespace: https://github.com/kdeldycke/meta-package-manager/releases/tag/v5.18.0/dd72ff542938a2d40620dc249e91e35
-name: macOS-Darwin-23.6.0-arm64
+documentNamespace: https://github.com/kdeldycke/meta-package-manager/releases/tag/v8.2.0/fb9774113469b3dc18067c28c672cff
+externalDocumentRefs:
+(...)
+- checksum:
+    algorithm: SHA1
+    checksumValue: b3cfbc28b08631ceb1d4a18712c4709a7f663a85
+  externalDocumentId: DocumentRef-brew-xz
+  spdxDocument: https://formulae.brew.sh/spdx/xz-5.8.4.json
+(...)
+name: macOS-Darwin-27.2.0-arm64
 packages:
-- SPDXID: SPDXRef-Package-brew-curl
-  downloadLocation: https://www.example.com
+(...)
+- SPDXID: SPDXRef-pkg-brew-xz-5.8.4
+  checksums:
+  - algorithm: SHA256
+    checksumValue: b2b5d6523153be05c20bcc51cd358ea3dd1f4bf893748fdedb779ab508ea63ce
+  description: General-purpose data compression with high compression ratio
+  downloadLocation: https://github.com/tukaani-project/xz/releases/download/v5.8.4/xz-5.8.4.tar.gz
+  externalRefs:
+  - referenceCategory: PACKAGE_MANAGER
+    referenceLocator: pkg:brew/xz@5.8.4
+    referenceType: purl
   filesAnalyzed: false
-  name: curl
-  primaryPackagePurpose: INSTALL
-  supplier: 'Organization: Homebrew Formulae'
-  versionInfo: 8.9.0
-- SPDXID: SPDXRef-Package-brew-ffmpeg
-  downloadLocation: https://www.example.com
-  filesAnalyzed: false
-  name: ffmpeg
-  primaryPackagePurpose: INSTALL
-  supplier: 'Organization: Homebrew Formulae'
-  versionInfo: 7.0.1
-- SPDXID: SPDXRef-Package-brew-xz
-  downloadLocation: https://www.example.com
-  filesAnalyzed: false
+  homepage: https://tukaani.org/xz/
+  licenseConcluded: 0BSD AND GPL-2.0-or-later
+  licenseDeclared: 0BSD AND GPL-2.0-or-later
   name: xz
   primaryPackagePurpose: INSTALL
+  summary: General-purpose data compression with high compression ratio
   supplier: 'Organization: Homebrew Formulae'
-  versionInfo: 5.6.2
-(...)
-- SPDXID: SPDXRef-Package-gem-bundler
-  downloadLocation: https://www.example.com
+  versionInfo: 5.8.4
+- SPDXID: SPDXRef-brew-xz-clang
+  copyrightText: NOASSERTION
+  downloadLocation: NOASSERTION
   filesAnalyzed: false
-  name: bundler
-  primaryPackagePurpose: INSTALL
-  supplier: 'Organization: RubyGems'
-  versionInfo: 2.4.22
-- SPDXID: SPDXRef-Package-gem-libxml-ruby
-  downloadLocation: https://www.example.com
+  licenseConcluded: NOASSERTION
+  licenseDeclared: NOASSERTION
+  name: clang
+  primaryPackagePurpose: LIBRARY
+  supplier: 'Organization: Upstream (merged)'
+  versionInfo: '27.0'
+(...)
+- SPDXID: SPDXRef-pkg-gem-libxml-ruby-3.2.1
+  downloadLocation: NOASSERTION
+  externalRefs:
+  - referenceCategory: PACKAGE_MANAGER
+    referenceLocator: pkg:gem/libxml-ruby@3.2.1
+    referenceType: purl
   filesAnalyzed: false
   name: libxml-ruby
   primaryPackagePurpose: INSTALL
   supplier: 'Organization: RubyGems'
-  versionInfo: 4.1.2
+  versionInfo: 3.2.1
 (...)
 relationships:
-- relatedSpdxElement: SPDXRef-Package-brew-curl
-  relationshipType: DESCRIBES
-  spdxElementId: SPDXRef-DOCUMENT
-- relatedSpdxElement: SPDXRef-Package-brew-ffmpeg
-  relationshipType: DESCRIBES
-  spdxElementId: SPDXRef-DOCUMENT
-- relatedSpdxElement: SPDXRef-Package-brew-xz
-  relationshipType: DESCRIBES
-  spdxElementId: SPDXRef-DOCUMENT
 (...)
-- relatedSpdxElement: SPDXRef-Package-gem-bundler
+- relatedSpdxElement: SPDXRef-pkg-brew-xz-5.8.4
   relationshipType: DESCRIBES
   spdxElementId: SPDXRef-DOCUMENT
-- relatedSpdxElement: SPDXRef-Package-gem-libxml-ruby
+- relatedSpdxElement: SPDXRef-pkg-brew-xz-5.8.4
+  relationshipType: BUILD_TOOL_OF
+  spdxElementId: SPDXRef-brew-xz-clang
+(...)
+- relatedSpdxElement: SPDXRef-pkg-gem-libxml-ruby-3.2.1
   relationshipType: DESCRIBES
   spdxElementId: SPDXRef-DOCUMENT
 (...)
@@ -131,7 +142,7 @@ For the same data in CycloneDX, the per-formula file is attached to its componen
 
 Both formats also read one field out of the upstream document without merging it: the purl Homebrew derives from the formula's source URL. It names the package in its own registry. `mpm` indexes it as an alias of the formula's `pkg:brew/…` purl, which is what makes a formula scannable for vulnerabilities. See [§ Vulnerability scanning](#vulnerability-scanning).
 
-The file can be missing: a `brew` older than `6.0.7`, a formula installed before it, a cask, or an opted-out install. There, `mpm` falls back to `brew info --json=v2` for the same fields. A reinstall writes one:
+The file can be missing: a [`brew`](managers/brew.md) older than `6.0.7`, a formula installed before it, a cask, or an opted-out install. There, `mpm` falls back to `brew info --json=v2` for the same fields. A reinstall writes one:
 
 ```shell-session
 $ brew reinstall <formula>
@@ -152,7 +163,7 @@ $ mpm --brew sbom > deep.spdx.json
 
 Coverage will expand. Every manager exposes its metadata differently, and more extractors are added per manager over time.
 
-The `Vulnerabilities` row tracks [OSV.dev's indexed ecosystems](https://ossf.github.io/osv-schema/#defined-ecosystems). Under `Others`, it covers the managers that install from the same registries: [`bun`](managers/bun.md), [`dotnet`](managers/dotnet.md), [`go`](managers/go.md), [`pipx`](managers/pipx.md), [`pipxu`](managers/pipxu.md), [`pnpm`](managers/pnpm.md), [`uv`](managers/uv.md), [`uvx`](managers/uvx.md), [`volta`](managers/volta.md) and [`yarn`](managers/yarn.md). A `go` command installed from a subdirectory of its module matches no advisory, because OSV indexes the module path. A manager OSV does not index returns no advisories, and reports no error. That covers [`mas`](managers/mas.md), and the distro managers OSV needs a release qualifier for.
+The `Vulnerabilities` row tracks [OSV.dev's indexed ecosystems](https://ossf.github.io/osv-schema/#defined-ecosystems). Under `Others`, it covers the managers that install from a registry OSV indexes: [`bun`](managers/bun.md), [`cran`](managers/cran.md), [`dotnet`](managers/dotnet.md), [`go`](managers/go.md), [`pipx`](managers/pipx.md), [`pipxu`](managers/pipxu.md), [`pnpm`](managers/pnpm.md), [`uv`](managers/uv.md), [`uvx`](managers/uvx.md), [`volta`](managers/volta.md) and [`yarn`](managers/yarn.md). A `go` command installed from a subdirectory of its module matches no advisory, because OSV indexes the module path. A manager OSV does not index returns no advisories, and reports no error. That covers [`mas`](managers/mas.md), and the distro managers OSV needs a release qualifier for.
 
 [`brew`](managers/brew.md) is the exception. OSV indexes no formula, but it does index the upstream package a formula builds from. Under `--network`, `mpm` queries that coordinate like the rest. Its cell is marked partial because only a formula built from a registry archive carries one.
 

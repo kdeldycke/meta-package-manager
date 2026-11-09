@@ -23,6 +23,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from meta_package_manager.managers.emerge import Emerge
 
 SEARCH_OUTPUT = """\
@@ -97,27 +99,27 @@ Dependency resolution took 2.77 s (backtrack: 0/20).
 """The same plan once `=sys-process/htop-3.5.3` is masked."""
 
 
-def replaying(monkeypatch, output: str) -> Emerge:
-    """A manager whose every command prints `output`."""
+@pytest.fixture
+def emerge(monkeypatch):
+    """A manager whose companion tools, like `qlist`, resolve in `/usr/bin`."""
     manager = Emerge()
-    monkeypatch.setattr(manager, "run_cli", lambda *args, **kwargs: output)
     monkeypatch.setattr(
         manager, "sibling_cli", lambda name, **kwargs: Path("/usr/bin") / name
     )
     return manager
 
 
-def test_exact_search_matches_the_bare_name(monkeypatch):
+def test_exact_search_matches_the_bare_name(emerge, stub_run_cli):
     """An exact query names the package without the category its ID carries."""
-    manager = replaying(monkeypatch, SEARCH_OUTPUT)
-    results = manager.refiltered_search("tmux", extended=False, exact=True)
+    stub_run_cli(emerge, SEARCH_OUTPUT)
+    results = emerge.refiltered_search("tmux", extended=False, exact=True)
     assert [package.id for package in results] == ["app-misc/tmux"]
 
 
-def test_installed_rows_carry_the_bare_name(monkeypatch):
+def test_installed_rows_carry_the_bare_name(emerge, stub_run_cli):
     """The inventory splits each ID into its category and bare name."""
-    manager = replaying(monkeypatch, INSTALLED_OUTPUT)
-    packages = list(manager.installed)
+    stub_run_cli(emerge, INSTALLED_OUTPUT)
+    packages = list(emerge.installed)
     assert [(p.id, p.name, str(p.installed_version)) for p in packages] == [
         ("app-admin/sudo", "sudo", "1.9.17_p2"),
         ("dev-perl/SGMLSpm", "SGMLSpm", "1.1-r2"),
@@ -128,12 +130,11 @@ def test_installed_rows_carry_the_bare_name(monkeypatch):
     ]
 
 
-def test_outdated_reads_upgrades_only(monkeypatch):
+def test_outdated_reads_upgrades_only(emerge, stub_run_cli):
     """New dependencies, new slots and downgrades are not outdated packages."""
-    manager = replaying(monkeypatch, NEW_DEPENDENCIES_PLAN)
+    stub_run_cli(emerge, NEW_DEPENDENCIES_PLAN)
     assert [
-        (p.id, str(p.installed_version), str(p.latest_version))
-        for p in manager.outdated
+        (p.id, str(p.installed_version), str(p.latest_version)) for p in emerge.outdated
     ] == [("sys-process/htop", "3.5.3", "9999")]
-    manager = replaying(monkeypatch, DOWNGRADE_PLAN)
-    assert list(manager.outdated) == []
+    stub_run_cli(emerge, DOWNGRADE_PLAN)
+    assert list(emerge.outdated) == []

@@ -411,9 +411,9 @@ test = [
   "extra-platforms",
   # respx requires httpx as a peer; pin the same floor as [sbom-online].
   "httpx>=0.27",
-  # tests/test_specifier.py checks parse_purl() against
-  # PackageURL.from_string(normalize_purl=False), an argument 0.17.6 added.
-  "packageurl-python>=0.17.6",
+  # tests/test_cli_sbom.py imports `PackageURL` to give a fake package the pURL
+  # alias of its registry. The `sbom-offline` extra floors it.
+  "packageurl-python",
   # Guards the pyproject-fmt fixpoint of the pyproject.toml sections
   # docs/docs_update.py rewrites, so update-docs and format-pyproject never rewrite
   # each other's output. Optional: the test skips when it is missing, keeping
@@ -448,8 +448,9 @@ test = [
 ]
 docs = [
   # 10.2.0 ships `click_extra.sphinx.announcement`, which docs/conf.py imports,
-  # the build hooks conf.py no longer copies, and the `tabs-vertical` layout of
-  # docs/install.md. Below it, the build stops at that import.
+  # the build hooks its `click_extra.sphinx` extension registers, and the
+  # `tabs-vertical` layout of docs/install.md. Below it, the build stops at that
+  # import.
   "click-extra[sphinx]>=10.2",
   # furo 2025.12.19 is the first release that accepts Sphinx 9 (`sphinx<10`):
   # 2025.9.25 caps it below 9.
@@ -1032,8 +1033,9 @@ test-matrix.full-include = [
 ]
 # Sync optional-dependencies into the build venv so the Nuitka binary ships
 # every feature gated behind try/except imports in click-extra and mpm:
-#   - sbom-offline: cyclonedx-python-lib + spdx-tools, for `mpm sbom --spdx`
-#                   and `mpm sbom --cyclonedx` rendering from local data.
+#   - sbom-offline: cyclonedx-python-lib, spdx-tools and packageurl-python,
+#                   for `mpm sbom --spdx` and `mpm sbom --cyclonedx` rendering
+#                   from local data.
 #   - sbom-online: httpx, for the opt-in `mpm --network sbom` mode that
 #                  queries OSV.dev for vulnerability data and caches
 #                  responses on disk.

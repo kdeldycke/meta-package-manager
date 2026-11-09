@@ -197,9 +197,6 @@ class PrtGet(PackageManager):
         tree is local and small, so dumping it costs less than enriching each
         hit: 789 ports rendered in 34 ms on the host this was driven on.
 
-        The format string holds no space, so the command `mpm` discloses at
-        `--verbosity INFO` can be pasted back into a shell unquoted.
-
         ```{code-block} shell-session
 
         $ prt-get printf %n|%v|%d\\n

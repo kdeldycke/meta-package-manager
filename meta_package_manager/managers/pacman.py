@@ -641,8 +641,12 @@ class Paru(Pacman):
 
     paru localizes the `Repository` and `Last Modified` field labels and
     renders the timestamp in the host's local timezone with no offset marker
-    (`src/fmt.rs` formats `%a, %e %b %Y %T` after a `with_timezone(&Local)`),
-    so the probe pins both to parse a stable English UTC rendering.
+    (`src/fmt.rs` formats `%a, %e %b %Y %T` after a `with_timezone(&Local)`).
+    `TZ=UTC` pins the timestamp to UTC.
+    {data}`~meta_package_manager.shell_env.FORCED_LOCALE_ENV` already keeps the
+    labels in English. Passed as `override_extra_env`, this mapping also replaces
+    any `extra_env` override, so another locale a user sets for paru never reaches
+    the probe.
     """
     _REPOSITORY_REGEXP = re.compile(r"^Repository\s*:\s*(?P<repo>\S+)", re.MULTILINE)
     _LAST_MODIFIED_REGEXP = re.compile(

@@ -370,7 +370,7 @@ def test_serialized_output_notes_ignored_columns(
 ):
     """A serialized document carries every field.
 
-    So a `--columns` selection is reported as ignored there, and applied to a table.
+    A `--columns` selection is then reported as ignored there, and applied to a table.
     """
     result = invoke(
         "--verbosity",

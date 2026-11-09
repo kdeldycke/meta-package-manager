@@ -14,13 +14,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-"""Tests for the per-manager override mechanism.
-
-Driven by the `[mpm.overrides.<id>]` configuration section.
-"""
+"""Tests for the per-manager overrides of the `[mpm.overrides.<id>]` section."""
 
 from __future__ import annotations
 
+import tomllib
 import urllib.parse
 from dataclasses import fields
 from pathlib import Path
@@ -60,7 +58,7 @@ from meta_package_manager.managers.dnf import DNF, DNF5, YUM
 from meta_package_manager.pool import pool
 from meta_package_manager.version import parse_version
 
-from .conftest import all_manager_ids, tomllib
+from .conftest import all_manager_ids
 from .test_manager_definition import skip_windows
 from .test_manager_dnf import DNF5_VERSION, DNF5_VERSION_DE
 
@@ -234,7 +232,7 @@ def test_str_tuple_override_coerces_list_to_tuple(reset_overrides):
 def test_override_applies(reset_overrides, field, value, expected):
     """An override of the right type sets the field on the manager.
 
-    As the type the field holds.
+    The value takes the type the field holds.
     """
     apply_manager_overrides(pool, {OVERRIDE_TARGET: {field: value}})
     applied = getattr(pool[OVERRIDE_TARGET], field)
@@ -322,7 +320,7 @@ def test_per_manager_override_beats_global_default(
 ):
     """A per-manager override survives the global `setattr` loop.
 
-    The loop in `_select_managers`: the most specific value wins.
+    That loop runs in `_select_managers`, and the most specific value wins.
     """
     apply_manager_overrides(pool, {OVERRIDE_TARGET: {field: override}})
     selected = list(
@@ -363,7 +361,7 @@ def test_timeout_binds_detection_phase(
     class _StopProbe(Exception):
         """Halt the generator right after the recording point.
 
-        So the test never reaches the real availability loop and stays hermetic.
+        The test then never reaches the real availability loop, and stays hermetic.
         """
 
     def fake_warm(managers):
@@ -429,7 +427,7 @@ def test_risky_override_from_untrusted_source_warns(
 ):
     """One warning per shipped manager whose override sets a risky field.
 
-    When the configuration comes from a remote URL or an unsafe file.
+    Only a configuration from a remote URL or an unsafe file triggers them.
 
     The source and its trust are stubbed, so the test reads the same on every
     platform. An unknown ID and a section that is not a table carry no field to
@@ -537,7 +535,7 @@ def test_removed_auto_updates_field_names_replacement(reset_overrides):
 def test_unknown_manager_with_override_operations_reads_as_typo():
     """A section whose operations only add arguments is a mistyped override.
 
-    Not a definition missing its platforms.
+    It is not a definition missing its platforms.
     """
     with pytest.raises(ValidationError, match=r"unknown manager ID 'caks'"):
         apply_manager_overrides(
@@ -697,10 +695,7 @@ def test_apply_raises_on_unknown_manager_so_no_hint_emitted():
 
 
 def test_apply_returns_hints_for_each_detection_field(reset_overrides):
-    """Several detection-related overrides on one manager make one hint each.
-
-    One hint per field.
-    """
+    """Several detection-related overrides on one manager make one hint per field."""
     hints = apply_manager_overrides(
         pool,
         {
@@ -738,7 +733,7 @@ def test_build_issue_url_targets_bug_template():
 def test_build_issue_url_asserts_on_oversize_url():
     """A pathological override value trips the URL-length assertion.
 
-    Rather than silently producing a URL that GitHub would truncate.
+    It never produces a URL that GitHub would truncate.
     """
     # 10 KiB of path entries is well past the 8 KiB cap.
     pathological_value = tuple(f"/very/long/path/{i:05d}" for i in range(500))
@@ -1091,7 +1086,7 @@ def test_dump_manager_overrides_keys_are_alphabetical():
 def test_dump_manager_overrides_lists_buildable_operations(reset_overrides):
     """The template names each operation an override can reach.
 
-    With its current `extra_args`.
+    Each operation shows its current `extra_args`.
     """
     apply_manager_overrides(
         pool,

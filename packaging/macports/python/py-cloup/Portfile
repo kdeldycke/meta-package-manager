@@ -28,6 +28,14 @@ checksums           rmd160  5026a77b425664f46e216f22e1a165faf793b5fe \
 
 python.versions     311 312 313 314
 
+# cloup 3.1.0 declares `setup_requires=['setuptools_scm<10']` in its setup.py,
+# and MacPorts has moved past that ceiling: py-setuptools_scm is 10.3.4, so the
+# PEP 517 build aborts on an unmet build dependency. setuptools_scm 10 still
+# reads the `write_to` option cloup passes, so the ceiling is widened here.
+post-extract {
+    reinplace {s|setuptools_scm<10|setuptools_scm|} ${worksrcpath}/setup.py
+}
+
 if {${name} ne ${subport}} {
     depends_build-append \
                     port:py${python.version}-setuptools_scm

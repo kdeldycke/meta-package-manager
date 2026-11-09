@@ -282,7 +282,7 @@ def test_mas_brewfile_entry_falls_back_to_id_when_name_missing():
 def test_vscodium_brewfile_skip_warning_set():
     """VSCodium's definition declares no `brewfile_entry_type`.
 
-    So its extensions are not silently emitted as `vscode`, which would install to VS
+    Its extensions are then not silently emitted as `vscode`, which would install to VS
     Code instead of VSCodium. The warning is the audible signal.
     """
     assert pool["vscode"].brewfile_entry_type == "vscode"

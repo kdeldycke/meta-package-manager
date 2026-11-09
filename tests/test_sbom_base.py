@@ -16,16 +16,19 @@
 
 from __future__ import annotations
 
+import subprocess
+import sys
 from collections import Counter
+from textwrap import dedent
 
 import pytest
 
 from meta_package_manager.sbom.base import SBOM, writer_unavailable_reason
 from meta_package_manager.summary import sbom_summary
 
-# No `importorskip` here on purpose, unlike every other SBOM test module: what
-# this covers is the message shown when a writer library is missing or too old,
-# so skipping it exactly when that is true would cover nothing.
+# No module-level `importorskip` here on purpose, unlike every other SBOM test
+# module: what this covers is the message shown when a writer library is missing or
+# too old, so skipping it exactly when that is true would cover nothing.
 
 
 def test_writer_unavailable_reason_separates_absent_from_outdated():
@@ -51,6 +54,47 @@ def test_writer_unavailable_reason_separates_absent_from_outdated():
     assert "is installed but too old" in outdated
     assert "PredefinedLifecycle" in outdated
     assert "--upgrade" in outdated
+
+
+def test_spdx_names_a_missing_packageurl_python():
+    """A missing packageurl-python disables the SPDX writer under its own name.
+
+    spdx-tools does not depend on it, so an install can carry spdx-tools alone. A
+    message calling spdx-tools too old would send the user to upgrade the wrong
+    package. Runs in a fresh interpreter, where a blocked `packageurl` import and a
+    hidden distribution stand for the missing one.
+    """
+    pytest.importorskip("spdx_tools")
+    probe = dedent("""
+        import sys
+        from importlib import metadata
+
+        sys.modules["packageurl"] = None
+        installed_version = metadata.version
+
+
+        def version(name):
+            if name == "packageurl-python":
+                raise metadata.PackageNotFoundError(name)
+            return installed_version(name)
+
+
+        metadata.version = version
+
+        from meta_package_manager.sbom import spdx
+
+        print(spdx.spdx_unavailable_reason)
+    """)
+    result = subprocess.run(
+        (sys.executable, "-c", probe),
+        capture_output=True,
+        text=True,
+        encoding="UTF-8",
+        check=True,
+    )
+    assert result.stdout.startswith("packageurl-python is not installed."), (
+        result.stdout
+    )
 
 
 class CannedStatsSBOM(SBOM):

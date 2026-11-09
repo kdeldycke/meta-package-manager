@@ -54,7 +54,7 @@ BASE_SEARCH_ARGS = ["search", "--raw", "--raw-format", "json-compact"]
 def test_search(capture_run_cli, exact, extended, search_fields):
     """A match gives its name, comment and version.
 
-    Whichever of the three documented searches produced it.
+    This holds for each of the three documented searches.
     """
     manager = PKG()
     calls = capture_run_cli(manager, SEARCH_OUTPUT)

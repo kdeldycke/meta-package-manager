@@ -42,7 +42,8 @@ After the steps above, you are free to play with the bleeding edge version of `m
 ```shell-session
 $ uv run -- mpm --version
 (...)
-mpm, version 8.2.0.dev0+8c250de6
+mpm, version 8.3.0.dev0+22a48b32
+Python 3.15.2, macOS ARM64 (AArch64)
 ```
 
 ### Unit-tests

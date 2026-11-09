@@ -184,6 +184,18 @@ def test_pacman_subclasses_share_the_pacman_lock():
         )
 
 
+def test_ebuild_based_managers_share_one_lock_family():
+    """The `ebuild-based` label group is one lock family.
+
+    Its managers record into the same database of installed packages of a Gentoo
+    host, so two of them mutating at once would be two writers of that database.
+    """
+    members = MANAGER_LABEL_GROUPS["ebuild-based"]
+    assert any(members <= family.members for family in SHARED_LOCK_FAMILIES), (
+        f"no lock family holds the ebuild-based managers {sorted(members)}"
+    )
+
+
 def test_cached_pool():
     assert pool == pool  # noqa: PLR0124
     assert pool is pool  # noqa: PLR0124
@@ -398,10 +410,11 @@ def test_select_managers_allow_empty_lets_an_empty_selection_through():
 def test_select_managers_timeout_stamping():
     """The user's `--timeout` lands on every selected manager.
 
-    Even when unavailable ones are kept (`mpm managers`), whose version probes fire
-    lazily at rendering time, after selection: an unstamped instance would fall back to
-    the read-only default and let a wedged binary hold each table row for 120 seconds. A
-    per-manager `[mpm.overrides.<id>]` override keeps precedence over the global option.
+    It does so even when unavailable ones are kept (`mpm managers`), whose version
+    probes fire lazily at rendering time, after selection: an unstamped instance would
+    fall back to the read-only default and let a wedged binary hold each table row for
+    120 seconds. A per-manager `[mpm.overrides.<id>]` override keeps precedence over the
+    global option.
     """
     originals = {mid: pool[mid].timeout for mid in ("gem", "uv")}
     try:
@@ -558,7 +571,7 @@ def test_merge_into_probe_lanes_partitions_the_whole_pool():
 def test_warm_availability_shares_one_cache_within_a_lane():
     """A lane's managers probe against one shared `run_cache`.
 
-    Then each gets its own value back: that dict is what collapses `brew` and `cask`
+    Each then gets its own value back: that dict is what collapses `brew` and `cask`
     both running `brew --version` into a single subprocess.
     """
     accessed: list = []

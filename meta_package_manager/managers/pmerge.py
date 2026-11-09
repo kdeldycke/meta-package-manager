@@ -75,12 +75,12 @@ class Pmerge(PackageManager):
         {"cleanup", "install", "remove", "sync", "upgrade", "upgrade_all"},
     )
 
-    # `pquery --format`, which every query below prints its rows with, first
-    # shipped in pkgcore 0.12.29.
     requirement = ">=0.12.29"
+    """`pquery --format`, which prints the rows every query reads, first shipped in
+    pkgcore `0.12.29`."""
 
-    # A base option of all four pkgcore tools, so it reaches the siblings too.
     pre_args = ("--color", "no")
+    """A base option of all four pkgcore tools, so it reaches the siblings too."""
 
     version_regexes = (r"pkgcore\s+(?P<version>\S+)",)
     """
@@ -92,8 +92,7 @@ class Pmerge(PackageManager):
     """
 
     _INSTALLED_FORMAT = "{category}/{package}={fullver}"
-    """`pquery` row of the inventory, free of spaces so the disclosed command
-    replays as printed."""
+    """`pquery` row of the inventory: the package ID, an `=` and the version."""
 
     _INSTALLED_REGEXP = re.compile(
         r"^(?P<package_id>[^/\s]+/(?P<name>[^=\s]+))=(?P<installed_version>\S+)$",
@@ -264,7 +263,8 @@ class Pmerge(PackageManager):
         search is exact. A query no package name can hold, like one with a
         space, skips that call. An extended search adds a second call, matching
         the query against descriptions: it reads the metadata of the whole
-        repository, and is the slow part.
+        repository, and is the slow part. An exact search skips that call too,
+        since an exact query must equal the ID or the name of a package.
 
         ```{code-block} shell-session
 
@@ -297,7 +297,7 @@ class Pmerge(PackageManager):
         targets: list[tuple[str, ...]] = []
         if self._GLOBBABLE_QUERY.match(query):
             targets.append((query if exact else f"*{query}*",))
-        if extended:
+        if extended and not exact:
             targets.append((
                 "--description",
                 self._REGEX_METACHARACTERS.sub(r"\\\1", query),

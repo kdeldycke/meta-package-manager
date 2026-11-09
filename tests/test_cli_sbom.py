@@ -161,8 +161,8 @@ def test_default_spdx_json_output_to_console(invoke, subcmd):
 def test_unrecognized_extension_without_format(invoke, subcmd):
     """A target path with no recognized extension fails early.
 
-    Before any package collection happens, with an actionable message pointing at
-    `--format`.
+    It fails before any package collection happens, with an actionable message pointing
+    at `--format`.
     """
     result = invoke(subcmd, "help")
     assert result.exit_code == 2
@@ -177,7 +177,7 @@ def test_unrecognized_extension_with_explicit_format(
 ):
     """An explicit `--format` overrides extension auto-detection.
 
-    Even when the filename carries no recognizable suffix.
+    It does so even when the filename carries no recognizable suffix.
 
     The subject is the filename, so the inventory behind it is the fake one:
     collecting the host's real packages to prove a suffix was overridden costs
@@ -192,7 +192,9 @@ def test_unrecognized_extension_with_explicit_format(
 
 @pytest.mark.parametrize("export_format", (None, *ExportFormat))
 @pytest.mark.parametrize("standard_name", ("SPDX", "CycloneDX"))
-def test_output_to_file(invoke, subcmd, fake_pool, export_format, standard_name):
+def test_output_to_file(
+    request, invoke, subcmd, fake_pool, export_format, standard_name
+):
     """Every standard and format pair renders and lands where it was asked to.
 
     Runs on the fake pool: twelve cases serializing one inventory differ in
@@ -200,6 +202,13 @@ def test_output_to_file(invoke, subcmd, fake_pool, export_format, standard_name)
     case made this the most expensive block left in the suite (up to eighty-six
     seconds a case). Selection is asserted by the live-inventory test above,
     once, as it is shared by every subcommand.
+
+    ```{todo}
+    Drop the Python `3.16` `xfail` of the CycloneDX XML case once py-serializable
+    releases the fix of
+    [madpah/serializable#200](https://github.com/madpah/serializable/issues/200).
+    The `xfail` is strict, so that release turns this case red on Python `3.16`.
+    ```
     """
     # Let the CLI auto-detect the format. `--verbosity DEBUG` keeps the
     # per-manager export lines in stderr, which the assertions below read.
@@ -237,6 +246,16 @@ def test_output_to_file(invoke, subcmd, fake_pool, export_format, standard_name)
             ExportFormat.JSON,
             ExportFormat.XML,
         ):
+            # From Python 3.16, ElementTree prefixes an attribute that names the
+            # default namespace, and py-serializable puts every attribute there.
+            if export_format == ExportFormat.XML and sys.version_info >= (3, 16):
+                request.applymarker(
+                    pytest.mark.xfail(
+                        raises=AssertionError,
+                        reason="madpah/serializable#200",
+                        strict=True,
+                    )
+                )
             assert_valid_cyclonedx(content, export_format)
 
         if export_format == ExportFormat.JSON:
@@ -295,8 +314,8 @@ def test_sbom_query_filter(invoke, fake_pool, args, listed):
 def test_minimal_mode_skips_metadata_extractor(invoke):
     """`--minimal` avoids the rich-metadata code path.
 
-    So the export matches the historical bare shape, even for managers that implement an
-    extractor (Homebrew, pip).
+    The export then matches the historical bare shape, even for managers that implement
+    an extractor (Homebrew, pip).
     """
     result = invoke("sbom", "--minimal")
     assert result.exit_code == 0

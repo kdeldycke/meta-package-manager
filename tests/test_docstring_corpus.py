@@ -122,7 +122,7 @@ def _dispatch(
 ) -> Callable[..., str]:
     """A `run_cli` stub returning the output of the best-matching command.
 
-    The documented command that best matches the invocation.
+    That command is the documented one that best matches the invocation.
 
     An `outdated` that cross-references two commands (`list` + `latest`) gets
     each call routed to its own block: the match is the documented command
@@ -290,7 +290,8 @@ def test_documented_output_still_parses(
 def test_documented_ids_read_back_from_their_purl(manager, member, output, monkeypatch):
     """Every documented package ID reads back from the pURL of a menu action.
 
-    The pURL a menu action passes to `mpm upgrade`, tied to the same manager.
+    A menu action passes that pURL to `mpm upgrade`, and the ID reads back tied to the
+    same manager.
     """
     _neutralize_binaries(manager, monkeypatch)
     for package in _documented_packages(manager, member, output, monkeypatch):
@@ -584,7 +585,7 @@ def _matches(
 def _mutation_fixtures():
     """Yield one `pytest.param` per manager mutation with documented commands.
 
-    Only for members with literal documented commands.
+    Only the members with literal documented commands get one.
     """
     for manager in pool.values():
         for member in MUTATION_MEMBERS:
@@ -748,7 +749,7 @@ def _class_command_map(cls: type) -> list[tuple[list[str], str]]:
 def _query_fixtures():
     """Yield one `pytest.param` per manager query with documented commands.
 
-    Only for members with literal documented commands.
+    Only the members with literal documented commands get one.
     """
     for manager in pool.values():
         for member in QUERY_MEMBERS:

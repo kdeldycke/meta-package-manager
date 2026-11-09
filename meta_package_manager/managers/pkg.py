@@ -20,8 +20,7 @@ Two managers share this module because they share the FreeBSD ecosystem and
 the same on-disk install database:
 
 - {class}`~meta_package_manager.managers.pkg.PKG` wraps the binary `pkg` frontend, which
-  fetches
-  pre-compiled artifacts from the official FreeBSD repository.
+  fetches pre-compiled artifacts from the official FreeBSD repository.
 - {class}`Ports` wraps the source-build workflow rooted at `/usr/ports`,
   driving {command}`make` recipes directly and delegating registry queries
   back to `pkg`.

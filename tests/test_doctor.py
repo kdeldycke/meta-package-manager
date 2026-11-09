@@ -152,7 +152,8 @@ def test_doctor_verdict(monkeypatch, code, stdout, stderr, verdict):
 def test_doctor_incomplete_run_stays_an_error(monkeypatch):
     """A spawn that never completed is a plumbing error.
 
-    Like a timeout or an interrupt: unhealthy, and its `CLIError` stays in the tally.
+    A timeout or an interrupt is one: the manager is unhealthy, and its `CLIError` stays
+    in the tally.
     """
     manager = _doctor_with_stubbed_run(
         monkeypatch, code=0, stdout="", stderr="", completed=False

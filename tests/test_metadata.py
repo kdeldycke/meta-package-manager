@@ -30,18 +30,17 @@ import json
 import re
 import shutil
 import subprocess
+import tomllib
 
 import pytest
+from click_extra import UsageError
 from extra_platforms.pytest import skip_hermetic_build
 
-from .conftest import PROJECT_ROOT, tomllib
+from .conftest import PROJECT_ROOT
 
 pytestmark = pytest.mark.once
 """These read `pyproject.toml` and the generated matrix, so they answer the same
 on every OS and Python: the `once-tests` job runs them on a single runner."""
-
-CLICK_USAGE_ERROR_EXIT_CODE = 2
-"""Exit code of a Click CLI refusing its arguments, like a renamed option."""
 
 PYTHON_CLASSIFIER_PREFIX = "Programming Language :: Python :: "
 """Prefix of the trove classifiers enumerating supported Python versions."""
@@ -164,9 +163,10 @@ def test_matrix_python_floor_matches_requires_python():
             check=True,
         )
     except subprocess.CalledProcessError as error:
-        # A fetch failure exits 1. Exit 2 is a Click usage error: the pinned
-        # repomatic refuses this invocation, which is drift to fix, not a skip.
-        if error.returncode == CLICK_USAGE_ERROR_EXIT_CODE:
+        # A fetch failure exits 1. A Click usage error, like a renamed option,
+        # means the pinned repomatic refuses this invocation: drift to fix, not a
+        # skip.
+        if error.returncode == UsageError.exit_code:
             pytest.fail(f"repomatic refused the invocation:\n{error.stderr}")
         pytest.skip(f"Could not run repomatic to read the matrix: {error}")
     except (OSError, subprocess.SubprocessError) as error:

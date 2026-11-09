@@ -53,7 +53,6 @@ class Zypper(PackageManager):
     and `--no-cd --no-refresh` so it never touches removable media or
     auto-refreshes metadata (`mpm` refreshes explicitly through `sync`).
 
-
     Command equivalences with other managers are listed in
     [Pacman/Rosetta](https://wiki.archlinux.org/title/Pacman/Rosetta).
     """
@@ -176,9 +175,7 @@ class Zypper(PackageManager):
         # Group packages by ID.
         key_func = itemgetter("name")
 
-        # Skip old packages reported in the results as 'other-version'. The path
-        # yields a list for any number of solvables, an empty or missing list
-        # included.
+        # Skip old packages reported in the results as 'other-version'.
         fresh_packages = sorted(
             (
                 solvable.attrib

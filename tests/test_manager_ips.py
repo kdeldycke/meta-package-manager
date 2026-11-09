@@ -42,16 +42,10 @@ SEARCH_OUTPUT = (
 """`pkg search -H -p tar`, whose columns are tab-separated."""
 
 
-def replaying(monkeypatch, output: str) -> IPS:
-    """A manager whose every command prints `output`."""
-    manager = IPS()
-    monkeypatch.setattr(manager, "run_cli", lambda *args, **kwargs: output)
-    return manager
-
-
-def test_installed_rows_carry_the_bare_name(monkeypatch):
+def test_installed_rows_carry_the_bare_name(stub_run_cli):
     """Each name is split into its path and its last component."""
-    manager = replaying(monkeypatch, INSTALLED_OUTPUT)
+    manager = IPS()
+    stub_run_cli(manager, INSTALLED_OUTPUT)
     packages = list(manager.installed)
     assert [(p.id, p.name) for p in packages] == [
         ("SUNWcs", "SUNWcs"),
@@ -65,8 +59,9 @@ def test_installed_rows_carry_the_bare_name(monkeypatch):
     ]
 
 
-def test_exact_search_matches_the_bare_name(monkeypatch):
+def test_exact_search_matches_the_bare_name(stub_run_cli):
     """An exact query names the package without the path of its name."""
-    manager = replaying(monkeypatch, SEARCH_OUTPUT)
+    manager = IPS()
+    stub_run_cli(manager, SEARCH_OUTPUT)
     results = manager.refiltered_search("archive-tar", extended=False, exact=True)
     assert [package.id for package in results] == ["library/perl-5/archive-tar"]

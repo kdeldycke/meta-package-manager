@@ -112,7 +112,7 @@ class MAS(PackageManager):
     def _parse_json_stream(output: str) -> Iterator[dict]:
         """Parse mas `--json` output as a stream of concatenated JSON objects.
 
-        One object per app.
+        Each object describes one app.
 
         ```{note}
         `mas` emits one JSON object per record but does not escape control
@@ -180,9 +180,7 @@ class MAS(PackageManager):
             )
 
     def release_date(self, package_id: str) -> datetime | None:
-        """Publication timestamp of the latest release of an app.
-
-        Read from the App Store catalog.
+        """Publication timestamp of the latest release of an app, from the App Store.
 
         `mas lookup --json` relays the App Store's own catalog record, whose
         `currentVersionReleaseDate` is stamped by the store when the version

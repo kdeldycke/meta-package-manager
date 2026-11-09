@@ -38,7 +38,7 @@ The panel icons shown on the {doc}`GNOME Shell extension <gnome-shell>` page are
 
 The page titles and sidebar entries use [Octicons](https://primer.style/foundations/icons/), MIT-licensed and copyright GitHub Inc., reached through [sphinx-design](https://github.com/executablebooks/sphinx-design)'s bundled copy for the `{octicon}` role and inlined into `docs/_static/custom.css` for the sidebar.
 
-[XKCD #1654 - *Universal Install Script*](https://xkcd.com/1654/), shown on the [home page](index.md) and in [duplicate packages](duplicates.md), is the work of Randall Munroe under a [Creative Commons Attribution-NonCommercial 2.5 License](https://xkcd.com/license.html).
+[XKCD #1654 - *Universal Install Script*](https://xkcd.com/1654/), shown on the [cross-manager operations](duplicates.md) page, is the work of Randall Munroe under a [Creative Commons Attribution-NonCommercial 2.5 License](https://xkcd.com/license.html).
 
 ## Dependency licenses
 

@@ -37,7 +37,7 @@ from .test_cli import (
 def subcmd(create_config):
     """Seed common subcommand tests with a dummy file and content.
 
-    So the CLI does not fail on its required file input.
+    The CLI then does not fail on its required file input.
     """
     toml_path = create_config(
         "dummy.toml",

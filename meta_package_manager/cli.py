@@ -592,9 +592,9 @@ def _debug_rerun_command(ctx: Context, restrict_to: Iterable[str] | None = None)
         build_manager_overrides_validator(pool),
     ),
     # Layer every discovered configuration file, the most local one winning key by
-    # key. With a single file, a machine-wide `verbosity` or manager exclusion was
-    # dropped in full the moment the working directory held a `pyproject.toml`
-    # carrying any `[tool.mpm]` key. `--params` then names the file of each value.
+    # key. A single file would drop a machine-wide `verbosity` or manager exclusion
+    # in full whenever the working directory holds a `pyproject.toml` carrying any
+    # `[tool.mpm]` key. `--params` then names the file of each value.
     config_cascade=True,
     # Swaps --version for the brand-mark screen, which degrades to the plain
     # message below whenever colors, width or accessibility rule it out.
@@ -1283,7 +1283,7 @@ def package_task(
 ) -> Callable[[], tuple[bool, str]]:
     """Build one per-package task.
 
-    For {func}`~meta_package_manager.dispatch.collect_per_package`.
+    {func}`~meta_package_manager.dispatch.collect_per_package` runs the task.
 
     Runs the attempt through {func}`run_manager_action` and returns
     `(ok, message)` for the `✓`/`✘` trail. On failure it appends the spec to a
@@ -1398,8 +1398,7 @@ def _outcome_row(
 ) -> dict[str, object]:
     """One row of the change report.
 
-    In the field vocabulary of
-    {data}`~meta_package_manager.tables.CHANGE_REPORT_COLUMNS`.
+    Its fields are those of {data}`~meta_package_manager.tables.CHANGE_REPORT_COLUMNS`.
 
     The status travels as its bare string, the payload being serialized by
     encoders that do not all accept a `str` subclass. The two timestamps of a

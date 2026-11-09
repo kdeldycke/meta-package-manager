@@ -380,6 +380,11 @@ jobs:
         run: |
           guix pull
           echo "${HOME}/.config/guix/current/bin" >> "${GITHUB_PATH}"
+      # The `git-fetch` checkout of the definition below runs git as a user that
+      # cannot read the runner's `/etc/gitconfig`, and git then stops with "unknown
+      # error occurred while reading the configuration files".
+      - name: Let the Guix checkout read the system git config
+        run: "[ ! -e /etc/gitconfig ] || sudo chmod a+r /etc/gitconfig"
       # Guix leaves a failed builder's log on disk and prints only its path, so
       # the job goes red saying nothing. Dump the recent ones: a break in an
       # upstream dependency can be read off ci.guix.gnu.org, but one in the

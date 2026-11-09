@@ -198,9 +198,8 @@ class MpmConfig:
     are manager IDs (data, not flag names) and its leaf entries are validated by
     {func}`~meta_package_manager.config.validate_manager_overrides_section` registered
     as a {class}`~click_extra.config.schema.ConfigValidator`. The field carries no CLI
-    flag — it only exists in the schema to declare opacity and to enable
-    `--validate-config`
-    coverage of the override block."""
+    flag: it only exists in the schema to declare opacity and to enable
+    `--validate-config` coverage of the override block."""
 
 
 INVALIDATED_CACHED_PROPS: Final[tuple[str, ...]] = (

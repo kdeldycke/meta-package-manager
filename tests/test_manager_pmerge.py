@@ -35,26 +35,20 @@ NAME_OUTPUT = (
 nyancat`."""
 
 
-def replaying(monkeypatch, output: str) -> tuple[Pmerge, list[tuple[str, ...]]]:
-    """A manager whose every `pquery` call prints `output`, and the calls it made."""
+@pytest.fixture
+def pmerge(monkeypatch):
+    """A manager whose sibling pkgcore tools, like `pquery`, resolve in `/usr/bin`."""
     manager = Pmerge()
-    calls: list[tuple[str, ...]] = []
-
-    def run_cli(*args, **kwargs) -> str:
-        calls.append(args)
-        return output
-
-    monkeypatch.setattr(manager, "run_cli", run_cli)
     monkeypatch.setattr(
         manager, "sibling_cli", lambda name, **kwargs: Path("/usr/bin") / name
     )
-    return manager, calls
+    return manager
 
 
-def test_exact_search_matches_the_bare_name(monkeypatch):
+def test_exact_search_matches_the_bare_name(pmerge, stub_run_cli):
     """An exact query names the package without the category its ID carries."""
-    manager, _ = replaying(monkeypatch, NAME_OUTPUT)
-    results = manager.refiltered_search("nyancat", extended=False, exact=True)
+    stub_run_cli(pmerge, NAME_OUTPUT)
+    results = pmerge.refiltered_search("nyancat", extended=False, exact=True)
     assert [package.id for package in results] == ["games-misc/nyancat"]
 
 
@@ -70,9 +64,31 @@ def test_exact_search_matches_the_bare_name(monkeypatch):
         ("ANSI escape", False, []),
     ),
 )
-def test_search_globs_only_what_pquery_accepts(monkeypatch, query, extended, targets):
+def test_search_globs_only_what_pquery_accepts(
+    pmerge, capture_run_cli, query, extended, targets
+):
     """A name glob is only built from characters `pquery` accepts in one."""
-    manager, calls = replaying(monkeypatch, "")
-    tuple(manager.search(query, extended=extended, exact=False))
+    calls = capture_run_cli(pmerge)
+    tuple(pmerge.search(query, extended=extended, exact=False))
     # Each call opens on `--max --format <format>`, then carries its target.
+    assert [call[3:] for call in calls] == targets
+
+
+@pytest.mark.parametrize(
+    ("query", "targets"),
+    (
+        ("nyancat", [("nyancat",)]),
+        ("games-misc/nyancat", [("games-misc/nyancat",)]),
+        # No package name holds a space, so no package can match it exactly.
+        ("ANSI escape", []),
+    ),
+)
+def test_exact_search_reads_no_description(pmerge, capture_run_cli, query, targets):
+    """An exact search makes no description call, even an extended one.
+
+    An exact query must equal the ID or the bare name of a package, so a package
+    whose description alone matches never passes the refilter.
+    """
+    calls = capture_run_cli(pmerge)
+    tuple(pmerge.search(query, extended=True, exact=True))
     assert [call[3:] for call in calls] == targets

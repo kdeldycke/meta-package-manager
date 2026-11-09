@@ -24,7 +24,6 @@ from click_extra import env_summary, strip_ansi
 
 from meta_package_manager import logo
 from meta_package_manager.logo import (
-    GUTTER,
     LOGO,
     LOGO_LINES,
     LOGO_WIDTH,
@@ -142,10 +141,11 @@ def test_version_screen_opens_on_a_blank_line():
 
 def test_version_screen_aligns_the_metadata_column():
     """The metadata starts at the same column on every line that carries some."""
-    start = LOGO_WIDTH + len(GUTTER)
+    gutter = VERSION_SCREEN.gutter
+    start = LOGO_WIDTH + len(gutter)
     for line in screen_lines(PROG, VERSION):
         if len(line) > start:
-            assert line[start - len(GUTTER) : start] == GUTTER
+            assert line[start - len(gutter) : start] == gutter
             assert not line[start].isspace()
 
 

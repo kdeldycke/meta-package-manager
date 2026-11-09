@@ -46,14 +46,15 @@ version_cli_options = ["--version"]
 version_from_stderr = true
 version_regexes = ['version\s+(?P<version>\d+\.\d+\.\d+)']
 
-# Every operation opens on the same first `-e` expression: it turns warnings
-# into errors, falls back to the CRAN cloud mirror where no profile set one,
-# and collects the writable libraries as `w`. It cannot live in `pre_args`,
-# which holds plain options only.
 [mpm.overrides.cran.operation_notes]
 search = "Matches package names only: the repository index carries no description."
 sync = "Each operation reads the repository index online, so nothing needs a refresh."
 
+# Every operation opens on the same first `-e` expression: it turns warnings
+# into errors, falls back to the CRAN cloud mirror where no profile set one,
+# and collects the writable libraries as `w`. It cannot live in `pre_args`,
+# which holds plain options only.
+#
 # A package installed in two writable libraries is listed once, from the first,
 # which is the copy R loads.
 [mpm.overrides.cran.operations.installed]

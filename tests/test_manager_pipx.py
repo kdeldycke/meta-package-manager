@@ -159,7 +159,7 @@ def test_outdated_native_handles_empty(manager, stub_run_cli, output):
 def test_outdated_legacy_silences_dependencies(manager, monkeypatch):
     """The per-venv pip probe only reports the main package of the venv.
 
-    Even when the probe also lists its outdated dependencies.
+    The outdated dependencies the probe also lists are left out.
     """
     manager.__dict__["version"] = parse_version("1.15.2")
     calls = []

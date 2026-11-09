@@ -24,9 +24,10 @@
 #   - Colors are unconditional. bob writes the SGR escapes around its status and
 #     around the stable entry of the catalog whether or not it is writing to a
 #     terminal, and honors neither `NO_COLOR` nor `TERM=dumb`, all three
-#     verified. Nothing is forced to suppress them: mpm searches each line
-#     rather than anchoring it, so the patterns step over the escapes instead of
-#     fighting them.
+#     verified. Nothing is forced to suppress them: mpm strips the ANSI escapes
+#     from every capture before a parser reads it. A sample that keeps the
+#     escapes still parses: mpm searches each line rather than matching the whole
+#     of it, so the patterns step over them.
 #   - Both patterns are deliberately insensitive to whitespace and column width.
 #     The table widens from seven columns to sixteen when a nightly rollback
 #     exists, and upstream removed the padding from the catalog outright in
@@ -78,9 +79,10 @@ version_regexes = ['bob-nvim[ \t]+(?P<version>\S+)']
 args = ["list"]
 regex = '^│[ \t]+(?P<package_id>\S+)[ \t]+│[^│]*(?:Installed|Used)'
 
-# The catalog takes no query, so mpm narrows it. Matching a version-shaped token
-# anywhere in the line is what steps over the color escapes wrapping the stable
-# entry, and it leaves the trailing `(stable)` marker out of the id.
+# The catalog takes no query, so mpm narrows it. mpm strips the color escapes
+# wrapping the stable entry before this pattern reads the line. Matching a
+# version-shaped token anywhere in the line leaves the trailing `(stable)` marker
+# out of the id.
 [mpm.overrides.bob.operations.search]
 args = ["list-remote"]
 regex = '(?P<package_id>v\d+(?:\.\d+)+)'

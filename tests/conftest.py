@@ -17,8 +17,6 @@
 
 from __future__ import annotations
 
-# Re-exported for the whole test suite.
-import tomllib  # noqa: F401
 from concurrent.futures import ThreadPoolExecutor
 from functools import partial
 from operator import attrgetter
@@ -415,7 +413,7 @@ def patch_pool_with(monkeypatch, request):
 def fake_pool(patch_pool_with):
     """Yield a single deterministic fake manager from the pool.
 
-    A {class}`~tests.fake_manager.FakeManager`.
+    It is a {class}`~tests.fake_manager.FakeManager`.
 
     Use for CLI plumbing tests (stats lines, table rendering, exit codes)
     that need a stable package set regardless of host PATH.
@@ -427,7 +425,7 @@ def fake_pool(patch_pool_with):
 def slow_fake_pool(patch_pool_with):
     """Yield a fake manager whose `outdated` exceeds `--timeout`.
 
-    A {class}`~tests.fake_manager.TimingOutFakeManager`.
+    It is a {class}`~tests.fake_manager.TimingOutFakeManager`.
 
     Use only for tests that need to verify
     {meth}`meta_package_manager.execution.CLIExecutor.run` catches
@@ -440,7 +438,7 @@ def slow_fake_pool(patch_pool_with):
 def changing_fake_pool(patch_pool_with):
     """Yield a fake manager whose inventory changes when a command acts on it.
 
-    A {class}`~tests.fake_manager.ChangingFakeManager`.
+    It is a {class}`~tests.fake_manager.ChangingFakeManager`.
 
     Use for the tests of the change report closing the commands that install,
     remove or upgrade packages.
@@ -450,9 +448,10 @@ def changing_fake_pool(patch_pool_with):
 
 @fixture
 def queries_through_a_cli(monkeypatch):
-    """Answer the `installed` and `search` queries through a command.
+    """Answer `installed` and `search` through a command, as a real manager does.
 
-    As a real manager does, for {class}`~tests.fake_manager.ChangingFakeManager`.
+    The fixture patches the two queries of
+    {class}`~tests.fake_manager.ChangingFakeManager`.
 
     `--dry-run` simulates that command, where `--plan` runs it.
     """

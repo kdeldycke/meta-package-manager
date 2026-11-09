@@ -118,10 +118,8 @@ A `Requires-Dist` entry whose marker compares `extra`, like
 class Pip(PackageManager):
     """The pip package installer for Python, driven as `python -m pip`.
 
-    Not through the `pip` executable.
-
-    Calling the module through the interpreter lets `pip` upgrade itself, an
-    advantage on Windows in particular: see
+    Calling the module through the interpreter, not the `pip` executable, lets
+    `pip` upgrade itself, an advantage on Windows in particular: see
     [why you should use `python -m pip`](https://snarky.ca/why-you-should-use-python-m-pip/).
 
     Installed and outdated packages are read from pip's `list --format=json`

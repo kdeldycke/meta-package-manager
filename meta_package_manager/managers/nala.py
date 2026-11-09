@@ -50,13 +50,12 @@ class Nala(PackageManager):
     mpm runs it serially against them.
     """
 
-    # Every invocation forces `LC_ALL=C`, and it is doing two jobs at once:
     # Nala translates its own output at runtime, so a French host reports
-    # `est installé` where the parsers expect `is installed`; and it picks
-    # its tree glyphs from the encoding of its output stream. The same flag
-    # that pins the language to the untranslated strings also selects the
-    # ASCII glyphs, giving one stable shape to parse instead of a matrix of
-    # locale and encoding.
+    # `est installé` where the parsers expect `is installed`, and it picks its
+    # tree glyphs from the encoding of its output stream. The locale mpm forces
+    # on every command (`FORCED_LOCALE_ENV`) keeps the strings untranslated.
+    # The `LC_ALL=C` of `extra_env` takes precedence over it and selects the
+    # ASCII glyphs, giving one stable shape to parse instead of two glyph sets.
     #
     # A listing is a record of three lines, not a line per package: a header
     # naming the package and its version, a branch giving its status, and
@@ -100,8 +99,8 @@ class Nala(PackageManager):
     """
 
     extra_env: ClassVar = {
-        # Pins the language to the untranslated strings the parsers below
-        # expect, and selects the ASCII tree glyphs at the same time.
+        # Selects the ASCII tree glyphs. It replaces the `LC_ALL` of
+        # `FORCED_LOCALE_ENV`, which already keeps the strings untranslated.
         "LC_ALL": "C",
     }
 

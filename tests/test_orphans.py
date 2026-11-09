@@ -128,7 +128,7 @@ def test_plain_remove_no_longer_cascades(monkeypatch, manager_id, cascade_token)
 def test_remove_orphan_unsupported_raises_not_implemented(manager_id):
     """A manager with no scoped cascade leaves `remove_orphan` unimplemented.
 
-    So the CLI action catches the `NotImplementedError` and falls back to a plain
+    The CLI action then catches the `NotImplementedError` and falls back to a plain
     removal.
     """
     with pytest.raises(NotImplementedError):
@@ -219,8 +219,8 @@ def test_cleanup_orphan_unsupported_raises_not_implemented(manager_id):
 def test_cleanup_orphan_capability_matrix(manager_id, synthesized, supported):
     """The synthesized sweep covers exactly the managers that need it.
 
-    Those with an orphan listing and per-package removal but no native sweep verb,
-    mirroring `upgrade --all`.
+    Those managers have an orphan listing and per-package removal but no native sweep
+    verb, which mirrors `upgrade --all`.
     """
     manager = pool[manager_id]
     assert cleanup_orphan_is_synthesized(manager) is synthesized
@@ -472,10 +472,9 @@ def test_orphans_parsing(monkeypatch, stub_run_cli, manager_id, output, expected
 
 @pytest.mark.parametrize("manager_id", ("cask", "npm", "pip", "snap"))
 def test_orphans_query_unsupported(manager_id):
-    """Managers without a native orphan listing do not advertise `orphans`.
+    """Managers without a native read-only orphan listing do not advertise `orphans`.
 
-    A native read-only orphan listing. This includes cask: casks are never installed as
-    dependencies.
+    This includes cask: casks are never installed as dependencies.
     """
     assert implements(pool[manager_id], Operations.orphans) is False
 
@@ -505,10 +504,9 @@ def test_orphans_query_supported(manager_id):
 
 
 def test_implements_method_introspection():
-    """`implements_method` reports overrides of the base stubs.
+    """`implements_method` reports overrides of the base `NotImplementedError` stubs.
 
-    The base `NotImplementedError` stubs, with the same MRO walk the CLI and the docs
-    generator rely on.
+    It uses the same MRO walk the CLI and the docs generator rely on.
     """
     assert implements_method(pool["apt"], "remove_orphan") is True
     assert implements_method(pool["apt"], "cleanup_orphan") is True
@@ -563,10 +561,7 @@ def _removes_orphans(manager: PackageManager) -> bool:
     ids=lambda manager: manager.id,
 )
 def test_orphan_removal_spares_explicit_installs(manager):
-    """A manager that removes orphans marks an explicit install.
-
-    Or it says why it needs not.
-    """
+    """A manager that removes orphans marks an explicit install, or says why not."""
     assert implements_method(manager, "mark_explicit") is (
         manager.id not in EXPLICIT_INSTALL_NOT_MARKED
     )
@@ -825,11 +820,10 @@ def test_cleanup_orphans_reports_the_sweep(invoke, changing_fake_pool):
 def test_cleanup_category_selection(
     invoke, patch_pool_with, manager_class, args, expected_calls
 ):
-    """The tri-state category flags compose, whatever the cleanup steps.
+    """The tri-state category flags compose, whatever cleanup steps a manager has.
 
-    Whatever cleanup steps a manager has: an orphan and a cache category, a cache
-    category alone, or a sweep it can only synthesize from its orphan listing and its
-    removal.
+    Those steps can be an orphan and a cache category, a cache category alone, or a
+    sweep it can only synthesize from its orphan listing and its removal.
     """
     fake = patch_pool_with(manager_class())
     result = invoke("cleanup", *args)
@@ -926,7 +920,8 @@ def test_restore_marks_an_installed_package_explicit(invoke, patch_pool_with, tm
 def test_invocation_drops_inventory_caches(invoke, patch_pool_with):
     """The inventory an invocation cached is gone once it closes.
 
-    So the next invocation in the same process sees the package the first one installed.
+    The next invocation in the same process then sees the package the first one
+    installed.
     """
     fake = patch_pool_with(ReasonKeepingFakeManager())
     fake.__dict__["installed_ids"] = frozenset({"fake-pkg-alpha"})

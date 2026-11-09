@@ -22,6 +22,7 @@ import os
 import re
 import sys
 import textwrap
+import tomllib
 from functools import cached_property
 from pathlib import Path, PurePath
 from string import ascii_letters, ascii_lowercase, digits
@@ -54,7 +55,7 @@ from meta_package_manager.package import Package
 from meta_package_manager.pool import pool
 from meta_package_manager.version import TokenizedString
 
-from .conftest import PROJECT_ROOT, all_managers, manager_classes_params, tomllib
+from .conftest import PROJECT_ROOT, all_managers, manager_classes_params
 from .fake_manager import FakeManager
 
 """ Test the structure, data and types returned by all package managers.
@@ -94,9 +95,7 @@ def test_unmaintained(manager):
 
 @all_managers
 def test_maintenance_note(manager):
-    """A `maintenance_note` is MyST markdown with well-formed URLs.
-
-    Its embedded URLs must be well-formed `http(s)` links.
+    """A `maintenance_note` is MyST markdown whose URLs are `http(s)` links.
 
     It is mutually exclusive with the `unmaintained` flag: a confirmed-dead manager
     documents itself with an `unmaintained_message` instead of a watch note.
@@ -184,7 +183,7 @@ def _privileged_methods(cls: type[PackageManager]) -> set[str]:
 def test_privileged_operations(manager):
     """`privileged_operations` names exactly the `sudo=True` operations.
 
-    The operations whose methods carry a `sudo=True` marker.
+    Those are the operations whose methods carry a `sudo=True` marker.
 
     `prime_sudo` reads the set to choose the managers of the up-front password
     prompt. A missing operation lets an escalated command meet a cold cache
@@ -403,16 +402,12 @@ def test_cli_search_path(manager):
 
 @all_managers
 def test_extra_env_type(manager):
-    """Check that definitions environment variables as a dict of strings.
-
-    A value may carry a dot, for a locale name like `C.UTF-8`.
-    """
+    """Check that definitions declare environment variables as a dict of strings."""
     if manager.extra_env:
         for key, value in manager.extra_env.items():
-            assert key
-            assert set(key).issubset(ascii_letters + digits + "_-")
-            assert value
-            assert set(value).issubset(ascii_letters + digits + "_-.")
+            for item in (key, value):
+                assert item
+                assert set(item).issubset(ascii_letters + digits + "_-")
 
 
 @all_managers
@@ -959,9 +954,7 @@ props_ref = tuple(collect_props_ref())
 
 
 def test_operation_order():
-    """Operation IDs are ordered and aligned to the base class and CLI.
-
-    Aligned to the base manager class and the CLI implementation.
+    """Operation IDs follow the order of the base manager class and of the CLI.
 
     The subcommands span two section modules: the read-only queries in
     `cli_explore`, the state changers and diagnostics in `cli_maintenance`.
@@ -1230,8 +1223,8 @@ def test_reads_inside_mutating_methods_survive_plan_mode():
 def test_operation_vocabularies_agree():
     """The operation, capability and schema maps name the same methods.
 
-    The method-to-operation map, the capability map and the definition schema name the
-    same methods and operations.
+    Those are the method-to-operation map, the capability map and the definition
+    schema. They also agree on the operations.
 
     `OPERATION_KEYS_BY_METHOD` decides which `operations` entry a command takes its
     `extra_args` from. A method it misses builds commands that no entry reaches, and
@@ -1247,7 +1240,7 @@ def test_operation_vocabularies_agree():
 def test_extra_args_call_sites_are_explicit():
     """Each CLI call says whether it takes the user's `extra_args`.
 
-    Each call that may not be the command of its operation.
+    This applies to each call that may not be the command of its operation.
 
     `build_cli` adds the `extra_args` of the operation in flight to every command
     an operation method builds, the calls of the helpers it reaches included. A
@@ -1315,9 +1308,9 @@ def test_extra_args_call_sites_are_explicit():
 
 @all_managers
 def test_build_cli_adds_extra_args(manager, monkeypatch):
-    """`build_cli` adds the `extra_args` of the operation in flight.
+    """The `build_cli` of every manager adds the `extra_args` of the operation.
 
-    Every manager's `build_cli` does, and leaves them out on request.
+    It adds those of the operation in flight, and leaves them out on request.
 
     The shell-plugin managers override `build_cli` to wrap their command in a
     `bash -c` or `fish -c` string, without calling the base one: they splice the

@@ -235,7 +235,7 @@ def test_build_package_store_uses_msstore_sentinel(winget, package_id):
 def test_search_orders_native_before_store(winget, stub_run_cli):
     """Microsoft Store entries come after winget-native ones in the search.
 
-    Regardless of the order winget returned them in.
+    The order winget returned them in does not matter.
     """
     rows = [
         "Store App         XP99BNH2JZBBQR    1.0.0        Tag: vscode     msstore",

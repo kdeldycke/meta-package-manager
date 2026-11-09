@@ -167,7 +167,7 @@ def test_import_shell_env_reports_an_unchanged_path(tmp_path, caplog):
 def test_import_shell_env_skips_inside_a_probe(tmp_path):
     """The guard stops `mpm --shell-env` from spawning a shell in a shell.
 
-    When a shell configuration runs `mpm --shell-env`.
+    A shell configuration that runs `mpm --shell-env` would do so.
     """
     sentinel = tmp_path / "spawned"
     shell = fake_shell(tmp_path, f"touch {sentinel}")

@@ -155,10 +155,6 @@ LOGO_WIDTH = len(LOGO[0])
 LOGO_LINES = len(LOGO) // 2
 """Terminal lines the mark renders to, two sub-pixel rows making one."""
 
-GUTTER = "   "
-"""Blank columns separating the mark from the facts beside it, and each label from
-its value."""
-
 _UPPER = "▀"
 _LOWER = "▄"
 _FULL = "█"
@@ -259,12 +255,7 @@ def facts() -> dict[str, str]:
     )
 
 
-VERSION_SCREEN = VersionScreen(
-    logo=render_logo,
-    tagline=TAGLINE,
-    facts=facts,
-    gutter=GUTTER,
-)
+VERSION_SCREEN = VersionScreen(logo=render_logo, tagline=TAGLINE, facts=facts)
 """The `--version` screen, which click-extra lays out and measures.
 
 The mark and the facts are both callables, so only a `--version` that draws the

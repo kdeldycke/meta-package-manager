@@ -317,9 +317,7 @@ class ManagerPool:
 
     @cached_property
     def overridden_fields(self) -> dict[str, set[str]]:
-        """Per-manager attribute names the user overrode.
-
-        Via `[mpm.overrides.<id>]`.
+        """Per-manager attribute names the user overrode in `[mpm.overrides.<id>]`.
 
         Populated by {func}`meta_package_manager.config.apply_manager_overrides`.
         Read by `_select_managers` to skip the global `--<flag>` defaults

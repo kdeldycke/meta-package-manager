@@ -14,10 +14,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-"""Tests for new package managers defined from the configuration.
-
-From the `[mpm.overrides.<id>]` configuration section.
-"""
+"""Tests for new package managers defined in an `[mpm.overrides.<id>]` section."""
 
 from __future__ import annotations
 
@@ -26,6 +23,7 @@ import json
 import os
 import re
 import sys
+import tomllib
 from operator import attrgetter
 from pathlib import Path
 from types import SimpleNamespace
@@ -64,8 +62,6 @@ from meta_package_manager.definitions import (
     parse_manager_definition,
 )
 from meta_package_manager.pool import pool
-
-from .conftest import tomllib
 
 skip_windows = pytest.mark.skipif(
     not hasattr(os, "getuid"),
@@ -624,10 +620,9 @@ def test_parse_definition_rejects_bad_id():
 
 
 def test_parse_definition_multi_binary_and_sudo():
-    """A definition can span binaries, mark privileged operations, and more.
+    """A definition can span sibling binaries and mark privileged operations.
 
-    It can span sibling binaries, mark privileged operations, and declare an alternate
-    version probe.
+    It can also declare an alternate version probe.
     """
     definition = parse_manager_definition(
         "urpmi-like",
@@ -688,7 +683,7 @@ def test_parse_definition_internal_sudo():
 def test_parse_definition_resets_sudo_timestamp():
     """A definition can mark its tool as dropping cached `sudo` credentials.
 
-    Like Homebrew, beside the internal escalation it qualifies.
+    Homebrew does so. The flag sits beside the internal escalation it qualifies.
     """
     definition = parse_manager_definition(
         "brewlike",
@@ -1029,8 +1024,8 @@ def test_factory_operation_sudo(monkeypatch):
 def test_factory_query_sudo(monkeypatch):
     """A query marked `sudo = true` runs privileged.
 
-    For tools that gate even their read-only listings behind root (deb-get's upgradable
-    check).
+    Some tools gate even their read-only listings behind root, like the upgradable
+    check of `deb-get`.
     """
     manager = build_manager_class(
         _definition(
@@ -1168,7 +1163,7 @@ def test_factory_json_array_field(stub_run_cli):
 def test_factory_install_ignores_a_version_pin(capture_run_cli, caplog):
     """A config-defined install drops a requested version and says so.
 
-    Rather than failing, or passing a version its args have no place for.
+    It neither fails nor passes a version its args have no place for.
     """
     manager = build_manager_class(
         _definition(install=OperationSpec(args=("install", "{package_id}"))),
@@ -1312,9 +1307,9 @@ def test_config_file_is_trusted_rejects_a_missing_file(tmp_path):
 
 @skip_windows
 def test_config_file_is_trusted_rejects_another_owner(tmp_path, monkeypatch):
-    """A private file owned by another account, and not root, is not trusted.
+    """A private file owned by another account is not trusted.
 
-    Another account than the current one.
+    The owner is neither the current account nor root.
     """
     real_uid = os.getuid()
     if real_uid == 0:
@@ -1644,7 +1639,7 @@ def test_factory_functional(tmp_path, fake_tool, reset_definitions):
 def test_factory_functional_version_cli(tmp_path, fake_tool, reset_definitions):
     """The version probe runs the `version_cli` binary instead of the main CLI.
 
-    Like OS-versioned tool suites exposing no version flag of their own.
+    OS-versioned tool suites need it, having no version flag of their own.
     """
     probe = tmp_path / "myuname"
     probe.write_text("#!/bin/sh\necho '7.7'\n")
@@ -1696,7 +1691,7 @@ def test_cli_refuses_definition_from_untrusted_file(
 ):
     """The trust gate checks the file the CLI loads.
 
-    Not only the file the eager pass of `main()` finds.
+    The file the eager pass of `main()` finds is not the only one it checks.
     """
     conf_path = create_config("conf.toml", DEFINITION_TOML)
     conf_path.chmod(0o666)
@@ -1744,7 +1739,7 @@ manager (with its samples) extends those tests without touching this module.
 def _fresh_bundled(manager_id):
     """Build a throwaway config-defined manager instance.
 
-    So parsing tests can monkeypatch `run_cli` without mutating the shared pool
+    Parsing tests can then monkeypatch `run_cli` without changing the shared pool
     singleton.
     """
     for definition, _ in load_bundled_definitions():
@@ -1766,8 +1761,8 @@ def test_bundled_definitions_are_valid():
 def test_bundled_loader_skips_broken_files(monkeypatch, tmp_path, caplog):
     """A broken bundled file is logged and skipped, and the valid files load.
 
-    A file that does not parse, or that defines an invalid manager: one bad resource
-    cannot break the start of `mpm`.
+    A file is broken when it does not parse or defines an invalid manager. One bad
+    resource cannot break the start of `mpm`.
     """
     (tmp_path / "broken.toml").write_text("[mpm.overrides.mytool\n", encoding="UTF-8")
     (tmp_path / "invalid.toml").write_text(

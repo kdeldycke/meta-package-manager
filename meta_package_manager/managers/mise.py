@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 class Mise(PackageManager):
     """mise (formerly rtx) installs and switches versions of developer tools.
 
-    Like Node, Python, Ruby and any tool reachable through its plugin backends.
+    The tools include Node, Python, Ruby and any tool its plugin backends reach.
 
     ```{note}
     `mpm` is system-scoped, so this wrapper reports every tool version

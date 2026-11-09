@@ -7,10 +7,16 @@
 
 - **Breaking:** [mpm] Drop Python `3.10`, past its end of life: `mpm` needs Python `3.11`. The PPA stops building for Ubuntu `22.04`, whose Python is `3.10`.
 - **Breaking:** [mpm] Remove the `jsonc` and `xml` extras: JSONC and XML configuration files and the `xml` table format need no extra dependency anymore.
-- **Breaking:** [mpm] Give each package of `mpm sbom` the purl of its registered type, like `pkg:pypi/` for a `pip` package. The purl naming its manager moves to the CycloneDX `bom-ref` and to the second SPDX reference.
+- **Breaking:** [mpm] Give each package of `mpm sbom` the purl of its registered type when one fits, like `pkg:pypi/` for a `pip` package. The purl naming its manager stays the CycloneDX `bom-ref`, and becomes the second SPDX reference.
 - [octave] Add GNU Octave's `pkg` package manager, with `installed`, `outdated`, `search`, `install`, `upgrade` and `remove` support.
 - [pmerge] Add pkgcore's `pmerge` package manager for Gentoo, with `installed`, `outdated`, `orphans`, `search`, `install`, `upgrade`, `remove`, `sync` and `cleanup` support.
-- [cran] Add the R package manager, driving `install.packages()` through `Rscript` for `installed`, `outdated`, `search`, `install`, `upgrade` and `remove`.
+- [cran] Add R's own package manager, driven through `Rscript`, with `installed`, `outdated`, `search`, `install`, `upgrade` and `remove` support.
+- [mpm] Suggest the `[mpm.overrides.<id>]` table to test when `mpm --<id> managers` cannot use a manager, quoting the version probe output when no pattern reads it.
+- [mpm] Add an *Override experiment* field to the bug report form, which the link `mpm` prints after a working override fills.
+- [mpm] Tell an AI agent running `mpm` to test an override in a scratch configuration file, and to ask its user before it files a report.
+- [mpm] Read purl specifiers by the rules of purl-spec `v1.1.0`, normalizing the case each registered type ignores, and warn about a purl breaking its type.
+- [brew,cask] Resolve a `pkg:brew/` purl of the `homebrew/cask` tap to `cask`, and one of the `homebrew/core` tap to `brew`, by the bare name.
+- [vscode,vscodium] Resolve a `pkg:vscode-extension/` purl to the `vscode` and `vscodium` extension it names.
 - [mpm] Replace `tomlkit` with `tomlrt` in `docs/docs_update.py`. Packagers can drop `tomlkit` from the test dependencies: the tests that need `tomlrt` skip without it.
 - [mpm] Drop the `boltons` dependency: version parsing, manager detection and the SPDX export use the standard library, and ANSI stripping comes from `click-extra`.
 - [mpm] Split a version string at its non-ASCII characters, instead of first spelling its accented letters in ASCII.
@@ -18,38 +24,32 @@
 - [mpm] Move `packageurl-python` from the default install to the `sbom-offline` extra: `mpm` parses pURL specifiers itself.
 - [mpm] Drop `platformdirs` from the `sbom-online` extra: `click-extra` locates the cache of `mpm --network sbom`, which moves to `%LOCALAPPDATA%\meta-package-manager\Cache\sbom` on Windows.
 - [mpm] Raise the `click-extra` floor to `10.0.0`: below it, `mpm` cannot import the `strip_ansi()` it applies to manager output.
+- [mpm] Cap `pytest` below `9.2` in the `test` group, since that release stops `pytest-xdist` `3.8.0` from grouping tests under `--dist=loadgroup`.
 - [mpm] Color the program name and version on the `--version` screen with the active theme, like the plain message.
 - [mpm] Color the `(unmaintained)` marker of a manager option in `--help` with the `deprecated` theme style, like Click's `(DEPRECATED)`.
 - [mpm] Stop announcing each manager in `sync`, `cleanup`, `upgrade --all`, `doctor`, `dump`, `restore` and `sbom`, whose labeled `$` command lines already name it.
-- [mpm] Suggest the `[mpm.overrides.<id>]` table to test when `mpm --<id> managers` cannot use a manager, quoting the version probe output when no pattern reads it.
-- [mpm] Add an *Override experiment* field to the bug report form, which the link `mpm` prints after a working override fills.
-- [mpm] Tell an AI agent running `mpm` to test an override in a scratch configuration file, and to ask its user before it files a report.
-- [mpm] Read purl specifiers by the rules of purl-spec `v1.1.0`, normalizing the case each registered type ignores, and warn about a purl breaking its type.
-- [brew,cask] Resolve a `pkg:brew/` purl of the `homebrew/cask` tap to `cask`, and one of the `homebrew/core` tap to `brew`, by the bare name.
-- [vscode,vscodium] Resolve a `pkg:vscode-extension/` purl to the `vscode` and `vscodium` extension it names.
 - [brew,cask,vcpkg] Run `vcpkg` one at a time with `brew` and `cask`, so a `brew upgrade` no longer deletes the `cmake` a `vcpkg` port build is using.
 - [mpm] Take a list that both layered configuration files set from the project file alone, as documented, instead of joining the two.
 - [mpm] Stop the SPDX export of `mpm sbom` from looking up the DNS name of the machine, which the document never used.
 - [bar-plugin,mpm] Strip a terminal hyperlink from manager output together with its URI, which stayed in the text.
 - [brew,composer,mpm,npm,yarn] Query OSV with the full name of a namespaced package, so `mpm --network sbom` finds its advisories.
 - [bun,dotnet,go,mpm,pipxu,pnpm,uv,uvx,volta] Scan the packages of `bun`, `dotnet`, `go`, `pipxu`, `pnpm`, `uv`, `uvx` and `volta` for vulnerabilities: `mpm --network sbom` skipped them.
-- [apt,dnf,dnf5,mpm,yum] Run every manager in the `C.UTF-8` locale, `C` where it is missing, with `LANGUAGE` unset, so its output parses under a non-English locale. Closes [#2218](https://github.com/kdeldycke/meta-package-manager/issues/2218).
+- [apt,dnf,dnf5,mpm,yum] Run every manager outside Windows in the `C.UTF-8` locale, `C` where it is missing, with `LANGUAGE` unset, so its output parses under a non-English locale. Closes [#2218](https://github.com/kdeldycke/meta-package-manager/issues/2218).
 - [mpm] Run the probes of `sudo` and the other privilege escalators in the same locale, so `mpm` recognizes their answers on a non-English host.
 - [mpm] Print the path of a skipped manager's binary as text, instead of as a `PosixPath(...)` object.
-- [emerge] Match an exact search or an exact `installed` or `outdated` filter against the bare package name, like `tmux` for `app-misc/tmux`.
+- [emerge] Show the bare name of each package, like `tmux` for `app-misc/tmux`, and match an exact search or an exact `installed` or `outdated` filter against it.
 - [emerge] List only upgrades in `outdated`, leaving out the packages an upgrade would newly pull in, add in a new slot or downgrade.
 - [cave,mpm] Let a manager definition capture the bare `name` of a package, which `cave` now does, so an exact query like `gzip` matches `app-arch/gzip`.
-- [ips] Match an exact search or an exact `installed` filter against the last component of a package name, like `gnu-tar` for `archiver/gnu-tar`.
+- [ips] Show the last component of each package name as its name, like `gnu-tar` for `archiver/gnu-tar`, and match an exact search or an exact `installed` filter against it.
 - [mpm] Skip `test_extra_labels_in_pyproject` outside a git checkout, where a newer `extra-platforms` failed it for a packager.
-- [mpm] Test the sdist in CI the way a distribution builds it: a new job runs the hermetic layer from the unpacked sdist on the newest dependencies.
 - [mpm] Replace the benchmark's 🟡 mark with 🪫, for coarse support that only runs inside a wider operation.
 - [mpm] Copy only the commands of a shell example on the documentation site, without its prompt and output lines.
 - [mpm] Restore the sidebar icons of the API reference, test suite and index pages on the documentation site.
 - [mpm] Render the live `mpm --help` screen in the installation page, in place of a typed excerpt.
-- [mpm] Raise the docs floor of `sphinx-autodoc-typehints` to `3.14`, below which the docs build fails, and those of Sphinx, `furo` and `sphinx-design` with it.
-- [mpm] Cap `pytest` below `9.2` in the `test` group, since that release stops `pytest-xdist` `3.8.0` from grouping tests under `--dist=loadgroup`.
+- [mpm] Trim the Python and `click-extra` compatibility tables of the documentation to their support envelope, and list the releases left out.
+- [mpm] Raise the docs floors of `click-extra[sphinx]` to `10.2.0` and `sphinx-autodoc-typehints` to `3.14`, below which the docs build fails, and those of Sphinx, `furo` and `sphinx-design` with them.
 - [mpm] Point the `oh-my-bash` links of the documentation at its current site, in place of the dead `ohmybash.nntoan.com`.
-- [mpm] Fix the API reference of the test suite, whose pages published empty, and the links to the `click-extra` symbols that `10.0.0` moved.
+- [mpm] Fix the API reference of the test suite, whose pages published empty.
 - [mpm] Record `easy-install` and `docker` as unsupported, queue `sagemath`, and list Elm and Clojure among the project-scoped ecosystems.
 
 ## [`8.2.0` (2026-10-25)](https://github.com/kdeldycke/meta-package-manager/compare/v8.1.2...v8.2.0)

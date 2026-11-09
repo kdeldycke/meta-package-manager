@@ -23,8 +23,8 @@ Find which of `mpm`'s runtime dependencies the target already ships and which ar
 
 Write one recipe for `mpm` and one per missing dependency, in the target's format, under `packaging/{channel}/`. Recurring decisions, each backed by a fact on the [packaging page](packaging.md#test-suite):
 
-- **Source tarball.** The PyPI sdist ships no tests. If the build's check phase must run `mpm`'s suite, build from the GitHub tag tarball (`.../archive/v{version}/...`), which carries `tests/`, `docs/`, and the workflow files the docs tests parse. If it only needs an import check, the sdist is fine.
-- **Check-phase scope.** Run only the hermetic unit layer; the integration layer drives real package managers and cannot run in a builder. Deselect the repo-maintenance sync test if it asserts against the installed `extra-platforms` release rather than a packaging invariant.
+- **Source tarball.** The PyPI sdist carries `tests/`, `docs/` and the workflow files the docs tests parse, so the check phase can run `mpm`'s suite straight from it. Releases up to `7.3.0` shipped no tests: build one of those from the GitHub tag tarball (`.../archive/v{version}/...`) instead.
+- **Check-phase scope.** Run only the hermetic unit layer; the integration layer drives real package managers and cannot run in a builder. The repo-maintenance guards, which compare a committed artifact against the installed tooling, skip themselves outside a git checkout.
 - **Dependencies without tests.** Some dependency sdists ship no tests (import-smoke-test the built wheel instead); some ship tests that need a file ignored (`packageurl`'s spec suite loads a git submodule absent from its sdist).
 - **Build backend.** `mpm` and several dependencies build with `uv-build`; confirm the target ships it (Alpine ships it on edge only, which also gates `py3-boltons >= 25`).
 

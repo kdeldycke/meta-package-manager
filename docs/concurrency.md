@@ -78,6 +78,7 @@ Serialized managers,RPM database,6
 Serialized managers,dpkg lock,6
 Serialized managers,Homebrew prefix,3
 Serialized managers,conda environment prefix,3
+Serialized managers,Gentoo package database,2
 Serialized managers,Scoop tree,2
 Serialized managers,pkg install database,2
 pacman database,aura,1
@@ -106,6 +107,8 @@ Homebrew prefix,vcpkg,1
 conda environment prefix,conda,1
 conda environment prefix,mamba,1
 conda environment prefix,micromamba,1
+Gentoo package database,emerge,1
+Gentoo package database,pmerge,1
 Scoop tree,scoop,1
 Scoop tree,sfsu,1
 pkg install database,pkg,1
@@ -130,6 +133,7 @@ print(lock_families_table())
 | dpkg lock                | [`apt`](managers/apt.md), [`apt-mint`](managers/apt-mint.md), [`aptitude`](managers/aptitude.md), [`deb-get`](managers/deb-get.md), [`nala`](managers/nala.md), [`pacstall`](managers/pacstall.md)                                             | they all install through `dpkg` and serialize on its `/var/lib/dpkg/lock`                                                                                                                                              |
 | Homebrew prefix          | [`brew`](managers/brew.md), [`cask`](managers/cask.md), [`vcpkg`](managers/vcpkg.md)                                                                                                                                                           | `brew` and `cask` are the same `brew` binary, and two concurrent `brew update` collide on Homebrew's own update lock, while `vcpkg` builds its ports with Homebrew's `cmake`, which a `brew upgrade` deletes mid-build |
 | conda environment prefix | [`conda`](managers/conda.md), [`mamba`](managers/mamba.md), [`micromamba`](managers/micromamba.md)                                                                                                                                             | they act on one environment prefix and one package cache, and `conda` honors none of the locks `mamba` takes on them                                                                                                   |
+| Gentoo package database  | [`emerge`](managers/emerge.md), [`pmerge`](managers/pmerge.md)                                                                                                                                                                                 | they record into the same database of installed packages, and each one sees what the other installed                                                                                                                   |
 | Scoop tree               | [`scoop`](managers/scoop.md), [`sfsu`](managers/sfsu.md)                                                                                                                                                                                       | they work on the same `~/scoop` tree, `sfsu` delegating its mutating operations to the `scoop` binary itself                                                                                                           |
 | pkg install database     | [`pkg`](managers/pkg.md), [`ports`](managers/ports.md)                                                                                                                                                                                         | `ports` keeps no registry of its own and registers what it builds through `pkg`, whose advisory lock on that shared install database refuses a second writer                                                           |
 

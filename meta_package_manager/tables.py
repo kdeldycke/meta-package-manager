@@ -74,7 +74,7 @@ class SortableField(StrEnum):
 class PackageOutcome(StrEnum):
     """What a command did to one package.
 
-    As the `status` column of {data}`CHANGE_REPORT_COLUMNS` spells it.
+    The `status` column of {data}`CHANGE_REPORT_COLUMNS` spells it.
 
     Classified by {func}`meta_package_manager.cli.package_outcomes` from the
     inventory a manager reports before and after the command changes it. The

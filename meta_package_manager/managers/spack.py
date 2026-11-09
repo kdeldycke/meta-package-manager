@@ -134,13 +134,10 @@ class Spack(PackageManager):
     """One installed spec, as projected by `--format`: the package name, an `@`
     and the version.
 
-    The projection is deliberately written without a space, which keeps the whole
-    format string a single shell word. mpm discloses the command it runs so the
-    user can replay it by hand, and it does not quote arguments, so `{name}
-    {version}` would disclose a line that no longer runs when pasted back into a
-    shell. `{name}@{version}` needs no quoting and is Spack's own spec syntax
-    besides. Anchoring at both ends rejects the progress and error lines Spack
-    writes around a listing.
+    `{name}@{version}` is Spack's own spec syntax. mpm discloses the command it
+    runs with each argument quoted for the shell, so the line replays as printed
+    whatever the projection holds. Anchoring at both ends rejects the progress and
+    error lines Spack writes around a listing.
     """
 
     def _newest_per_name(

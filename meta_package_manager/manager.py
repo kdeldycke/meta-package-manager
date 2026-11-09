@@ -194,7 +194,7 @@ def _json_field(item: dict, selector: str) -> Any:
 class CooldownHold:
     """A package the release-age cooldown holds back.
 
-    As {meth}`PackageManager.cooldown_hold` reports it.
+    {meth}`PackageManager.cooldown_hold` reports it.
 
     Both timestamps are `None` for a release the probe could not date, which
     the gate holds fail-closed.
@@ -736,9 +736,7 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     def brewfile_entry(
         self, package: Package
     ) -> tuple[str, dict[str, object] | None] | None:
-        """Return `(entry_name, entry_options)` for a Brewfile line.
-
-        Or `None` to skip the package.
+        """Return `(entry_name, entry_options)` for a Brewfile line, or `None` to skip.
 
         Default: emit {attr}`meta_package_manager.package.Package.id` as the entry name
         with no options. Override on managers whose Brewfile DSL counterpart expects a

@@ -102,7 +102,7 @@ Name the release that drops the deprecated `[mpm] cooldown = "<duration>"` top-l
 
 ### Accessibility
 
-The `--accessible` flag (or the `ACCESSIBLE=1` environment variable) is a shortcut for `--no-color --table-format plain --no-progress`: it strips ANSI codes, replaces Unicode box-drawing characters with plain ASCII, and stops the progress output, so what reaches a screen reader or a braille display is the result alone.
+The `--accessible` flag (or the `ACCESSIBLE=1` environment variable) is a shortcut for `--no-color --table-format plain --no-progress`: it strips ANSI codes, renders tables without borders, and stops the progress output, so what reaches a screen reader or a braille display is the result alone.
 
 ```{code-block} shell-session
 $ mpm --accessible managers

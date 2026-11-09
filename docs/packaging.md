@@ -233,7 +233,7 @@ No package built against the Ubuntu archive could work. Ubuntu ships neither `cl
 
 `build-source.py` assembles one `3.0 (native)` source tree per series, pinning the dependency closure from the release tag's own lockfile. It resolves there rather than on the builder, which has no network. The package is `Architecture: all` and everything it carries is pure Python, so one build serves every architecture a series has, and `dh_python3` byte-compiles the private tree at install time for the Python that series ships.
 
-The build runs no test suite, the one channel that does not: what it installs is the published wheels, which `mpm`'s own test matrix already covered. Its check phase exercises the vendoring instead, the one thing assembled here and tested nowhere else, by importing the private tree and building the CLI's command graph. A dependency left out, a module mangled by the shebang strip or an unreachable private directory all surface there. The `ppa-source` job then drives the installed CLI against the host `apt`, which a builder could not do.
+The build runs no test suite, the one channel that does not: what it installs is the published wheels, which `mpm`'s own test matrix already covered. Its check phase exercises the vendoring instead, the one thing assembled here and tested nowhere else, by importing the private tree and building the CLI's command graph. A dependency left out, a module mangled by the shebang strip or an unreachable private directory all surface there. The `ppa-source` job then drives the installed CLI against the host [`apt`](managers/apt.md), which a builder could not do.
 
 Install from [the PPA](https://launchpad.net/~kdeldycke/+archive/ubuntu/mpm), on Ubuntu `24.04` and later:
 
@@ -250,8 +250,8 @@ To build one series by hand instead, with [`uv`](https://docs.astral.sh/uv/) on 
 $ sudo apt-get install --no-install-recommends build-essential debhelper dh-python dpkg-dev fakeroot git
 $ git clone https://github.com/kdeldycke/meta-package-manager.git
 $ cd ./meta-package-manager
-$ ./packaging/ppa/build-source.py --mpm-version 8.1.2 --series noble --output ./dist
-$ cd ./dist/meta-package-manager-8.1.2ppa1~noble1
+$ ./packaging/ppa/build-source.py --mpm-version 8.2.0 --series noble --output ./dist
+$ cd ./dist/meta-package-manager-8.2.0ppa1~noble1
 $ dpkg-buildpackage --build=binary --no-sign
 $ sudo apt-get install ../meta-package-manager_*.deb
 ```
@@ -260,7 +260,7 @@ Uploading signs the source package instead, once per series:
 
 ```{code-block} shell-session
 $ debuild -S -sa
-$ dput ppa:kdeldycke/mpm ../meta-package-manager_8.1.2ppa1~noble1_source.changes
+$ dput ppa:kdeldycke/mpm ../meta-package-manager_8.2.0ppa1~noble1_source.changes
 ```
 
 The `~{series}` suffixes sort in release order, the Ubuntu codenames happening to be alphabetical, so a machine upgrading from one series to the next picks the newer build up on its own. The targets are `noble`, `resolute` and `stonking`. `questing` reached its end of life in July 2026, and `jammy` is left out because its `python3` is `3.10`, below the floor of `mpm`.

@@ -270,7 +270,7 @@ def parse_purl(purl: str, *, strict: bool = True) -> PurlParts:
     if not purl_type or not sep:
         msg = f"pURL is missing the required type component: {purl!r}."
         raise ValueError(msg)
-    if not set(purl_type) <= _PURL_KEY_CHARS or purl_type[0] in string.digits:
+    if not _is_purl_key(purl_type):
         msg = f"pURL type is not valid: {purl_type!r}."
         raise ValueError(msg)
     purl_type = purl_type.lower()
@@ -315,9 +315,9 @@ def parse_purl(purl: str, *, strict: bool = True) -> PurlParts:
     )
 
     if strict:
-        problem = _purl_rule_problem(purl_type, namespace, name, version, qualifiers)
-        if any(key != key.lower() for key in keys):
-            problem = "takes its qualifier keys in lowercase"
+        problem = _purl_rule_problem(
+            purl_type, namespace, name, version, qualifiers, keys
+        )
         if problem:
             msg = f"A {purl_type} pURL {problem}: {purl!r}."
             raise PurlRuleError(msg)
@@ -343,11 +343,7 @@ def render_purl(
     `tests/test_purl_spec.py` runs the build cases of the purl-spec test suite against
     it.
     """
-    if (
-        not purl_type
-        or not set(purl_type) <= _PURL_KEY_CHARS
-        or purl_type[0] in string.digits
-    ):
+    if not _is_purl_key(purl_type):
         msg = f"pURL type is not valid: {purl_type!r}."
         raise ValueError(msg)
     purl_type = purl_type.lower()
@@ -356,15 +352,15 @@ def render_purl(
         raise ValueError(msg)
     qualifiers = {key: value for key, value in (qualifiers or {}).items() if value}
     for key in qualifiers:
-        if not key or not set(key) <= _PURL_KEY_CHARS or key[0] in string.digits:
+        if not _is_purl_key(key):
             msg = f"pURL qualifier key is not valid: {key!r}."
             raise ValueError(msg)
     namespace, name, version = _normalize_purl_parts(
         purl_type, namespace or "", name, version or "", qualifiers
     )
-    problem = _purl_rule_problem(purl_type, namespace, name, version, qualifiers)
-    if any(key != key.lower() for key in qualifiers):
-        problem = "takes its qualifier keys in lowercase"
+    problem = _purl_rule_problem(
+        purl_type, namespace, name, version, qualifiers, tuple(qualifiers)
+    )
     if problem:
         msg = f"A {purl_type} pURL {problem}."
         raise PurlRuleError(msg)
@@ -443,12 +439,20 @@ def _purl_qualifiers(query: str) -> tuple[dict[str, str], tuple[str, ...]]:
         key = raw_key.strip()
         if not key or not value.strip():
             continue
-        if not set(key) <= _PURL_KEY_CHARS or key[0] in string.digits:
+        if not _is_purl_key(key):
             msg = f"pURL qualifier key is not valid: {key.lower()!r}."
             raise ValueError(msg)
         keys.append(key)
         qualifiers[key.lower()] = unquote(value)
     return qualifiers, tuple(keys)
+
+
+def _is_purl_key(text: str) -> bool:
+    """Whether `text` spells a pURL type or a qualifier key.
+
+    It holds only the characters of `_PURL_KEY_CHARS`, and starts with no digit.
+    """
+    return bool(text) and set(text) <= _PURL_KEY_CHARS and text[0] not in string.digits
 
 
 def _purl_rule_problem(
@@ -457,8 +461,15 @@ def _purl_rule_problem(
     name: str,
     version: str,
     qualifiers: dict[str, str],
+    keys: tuple[str, ...],
 ) -> str | None:
-    """Say which rule of its registered type a pURL breaks, or `None` for none."""
+    """Say which rule a pURL breaks, or `None` for none.
+
+    `keys` are the qualifier keys as written, which a pURL of any type takes in
+    lowercase. The other rules are those of its registered type.
+    """
+    if any(key != key.lower() for key in keys):
+        return "takes its qualifier keys in lowercase"
     rules = PURL_TYPES.get(purl_type)
     if not rules:
         return None
@@ -498,6 +509,9 @@ class Package:
     name: str | None = None
     """Optional human-readable display name. Falls back to `id` in output rendering,
     so only set this when the manager provides a name that differs from the package ID.
+
+    An exact query matches it as well as the ID, so a manager whose IDs carry a
+    namespace sets it to the bare name, like the `gzip` of `app-arch/gzip`.
     """
 
     description: str | None = None

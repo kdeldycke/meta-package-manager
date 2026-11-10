@@ -25,6 +25,8 @@ Pick the skip path that fits the builder. Either way no per-module ignore list i
 
   A builder whose user has no login shell, no passwd entry or no sudo policy deselects the smaller host layer as well, with `-m "not integration and not host_environment"`. Alpine's abuild and RPM mock need neither: they run as a real user with a real shell.
 
+  A builder that runs the suite as root, like `abuild -F` in a container, needs mpm > `8.3.0`. As root, `8.3.0` fails eight privilege escalation tests, which the Alpine recipe of the repository deselects.
+
 - **Sandbox builders that set `HOME=/homeless-shelter`** (Guix, Nix) get the integration and host layers **auto-skipped** through `extra_platforms.pytest.skip_hermetic_build` (wired up in `tests/conftest.py`), so a plain `pytest` already runs only the hermetic layer. Do **not** override `$HOME` back to a writable path, or the auto-skip stops firing and the integration tests fail.
 
 Repo-maintenance sync guards (which regenerate a committed artifact from the installed tooling and compare) skip automatically outside a git checkout, so a tarball or sdist build never trips on a tooling-version mismatch. A builder that packages the SBOM extras can install `[sbom-offline]` / `[sbom-online]` to exercise the SBOM tests instead of skipping them.
@@ -41,6 +43,10 @@ As of mpm > `7.3.0`, the PyPI sdist ships `tests/`, `docs/` and the `.github/` w
 
 ```{todo}
 When a recipe in `packaging/` moves to the first release after `8.2.0`, drop `tomlkit` from its test dependencies. The Nix recipe can name `tomlrt` in its place, since nixpkgs packages it.
+```
+
+```{todo}
+When the Alpine recipe in `packaging/` moves past `8.3.0`, drop the `--deselect` options of its `check()`: the next release pins a regular user for those tests.
 ```
 
 ## Dependencies

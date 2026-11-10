@@ -385,9 +385,10 @@ jobs:
       # the job goes red saying nothing. Dump the recent ones: a break in an
       # upstream dependency can be read off ci.guix.gnu.org, but one in the
       # definition below is built nowhere else and has no log to consult.
-      - name: Install mpm from the local definition
+      - name: Install mpm from the local definition and expose its profile
         run: |
           set -o pipefail
+          echo "${HOME}/.guix-profile/bin" >> "${GITHUB_PATH}"
           guix install --load-path=./packaging/guix meta-package-manager \
             2>&1 | tee guix-install.log && exit 0
           echo "::group::Tail of the failed build logs"

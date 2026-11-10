@@ -33,8 +33,19 @@ check() {
 	.testenv/bin/python3 -m installer .dist/*.whl
 	.testenv/bin/mpm --version
 	# Run the hermetic unit layer only, skipping the integration tests
-	# (marked "integration") that drive the real package managers.
-	.testenv/bin/python3 -m pytest -m "not integration"
+	# (marked "integration") that drive the real package managers. The
+	# deselected tests expect a privilege escalator, which mpm drops when the
+	# check runs as root, like abuild -F does: the 8.3.0 suite does not pin a
+	# regular user for them.
+	.testenv/bin/python3 -m pytest -m "not integration" \
+		--deselect tests/test_doctor.py::test_doctor_opens_on_the_escalation_report \
+		--deselect tests/test_execution.py::test_build_cli_escalation_follows_the_escalator_not_the_platform \
+		--deselect tests/test_execution.py::test_npm_sudo_marker_dormant_until_opted_in \
+		--deselect 'tests/test_execution.py::test_escalated_calls_keep_the_controlling_terminal[True]' \
+		--deselect tests/test_execution.py::test_run_forwards_a_forced_environment_across_run0 \
+		--deselect tests/test_execution.py::test_run_forwards_the_forced_locale_across_run0 \
+		--deselect 'tests/test_sudo.py::test_build_cli_escalates_with_the_selected_binary[sudo]' \
+		--deselect 'tests/test_sudo.py::test_build_cli_escalates_with_the_selected_binary[doas]'
 }
 
 package() {

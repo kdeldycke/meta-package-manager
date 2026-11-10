@@ -8,6 +8,7 @@
   jsonschema,
   myst-parser,
   packaging,
+  ps,
   pygments,
   pytest-httpserver,
   pyyaml,
@@ -64,6 +65,10 @@ buildPythonPackage (finalAttrs: {
     # The `toml` extra, which the TOML rendering and configuration export tests
     # call into.
     tomlrt
+    # Outside Linux, click-extra reads the process table with `ps`, which the
+    # build environment lacks. Without it, the process-group kill tests find no
+    # descendant to stop.
+    ps
   ];
 
   # Tests marked ``network`` make HTTPS requests; the build sandbox has no

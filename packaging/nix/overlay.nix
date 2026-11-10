@@ -7,44 +7,29 @@
 self: super: {
   click-extra = self.callPackage ./click-extra.nix { };
 
-  # click-extra 9 declares `click>=8.4.1`, above the 8.3.x nixpkgs ships, so
-  # its runtime dependency check rejects it before mpm is reached.
+  # click-extra 10 and cloup 4 declare `click>=8.5`, above the 8.4.x nixpkgs
+  # ships, so their runtime dependency check rejects them before mpm is reached.
   #
-  # Pinned to that floor rather than to the newer release `uv.lock` records,
-  # because an override here reaches every package in this set, not just
-  # click-extra: 8.5.0 deprecates `CliRunner.isolated_filesystem`, and httpx2
-  # turns that warning into an error, which broke respx and with it mpm's own
-  # check inputs. Pinning click-extra itself to the lowest 9.x is what keeps
-  # this to one override: 9.2 onwards also raises boltons to >=26.2 and wcwidth
-  # to >=0.8.3, neither of which nixpkgs carries.
+  # Pinned to that floor, the smallest step from what nixpkgs ships: an override
+  # here reaches every package in this set, not just click-extra, and runs the
+  # test suites of those it rebuilds, some of which turn the deprecation
+  # warnings of a newer click into errors.
   #
-  # Drop this once nixpkgs ships click 8.4.1 or newer, which
-  # https://github.com/NixOS/nixpkgs/pull/544890 (8.3.3 -> 8.4.2) would do.
-  # That same PR is what lets NixOS/nixpkgs#506145 be refreshed past mpm
-  # 7.6.1: click-extra 9 cannot build in nixpkgs until it lands.
+  # Drop this once nixpkgs ships click 8.5.0 or newer. NixOS/nixpkgs#506145
+  # needs it there too, with cloup 4, before it can package mpm 8.3.0.
   click = super.click.overridePythonAttrs (_: rec {
-    version = "8.4.1";
+    version = "8.5.0";
     src = pkgs.fetchFromGitHub {
       owner = "pallets";
       repo = "click";
       tag = version;
-      hash = "sha256-c+Bt6h14WDLjjyemuRjAt6OZ2tqJ9yIRAiB9N6RZ0KE=";
+      hash = "sha256-VYdaEN9l2MRVz42I8t8IDOpG5XeDM8bf34dLZy3yf10=";
     };
   });
 
-  # cloup pins its setuptools-scm build requirement below 10, which nixpkgs no
-  # longer ships, so pypa/build's --no-isolation dependency check fails. Relax
-  # the pin when present: version detection is bypassed anyway through
-  # SETUPTOOLS_SCM_PRETEND_VERSION. Use --replace-quiet, not --replace-fail:
-  # recent nixpkgs cloup revisions strip the pin in their own postPatch (which
-  # runs first), so ours must no-op rather than error.
-  # Reported at https://github.com/janluke/cloup/issues/206.
-  cloup = super.cloup.overridePythonAttrs (old: {
-    postPatch = (old.postPatch or "") + ''
-      substituteInPlace setup.py \
-        --replace-quiet "setuptools_scm<10" "setuptools_scm"
-    '';
-  });
+  # click-extra 10 declares `cloup>=4`, above the 3.1.0 nixpkgs ships. Drop this
+  # once nixpkgs ships cloup 4.0.0 or newer.
+  cloup = self.callPackage ./cloup.nix { };
 
   extra-platforms = self.callPackage ./extra-platforms.nix { };
 

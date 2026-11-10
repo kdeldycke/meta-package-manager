@@ -1,0 +1,47 @@
+# Contributor: Thomas Boerger <thomas@webhippie.de>
+# Maintainer: Thomas Boerger <thomas@webhippie.de>
+
+# Copy of aports community/py3-wcwidth, raised from 0.6.0 to 0.9.4: click-extra
+# 10 needs wcwidth >= 0.8.3. 0.9.4 builds with setuptools and an optional C
+# extension. WCWIDTH_NO_EXTENSION builds the pure-Python wheel, so the package
+# stays noarch like the 0.6.0 one.
+pkgname=py3-wcwidth
+_pkgname=wcwidth
+pkgver=0.9.4
+pkgrel=0
+pkgdesc="Measures number of Terminal column cells of wide-character codes"
+url="https://pypi.org/project/wcwidth"
+arch="noarch"
+license="MIT"
+makedepends="py3-gpep517 py3-setuptools py3-wheel"
+checkdepends="py3-pytest-cov"
+subpackages="$pkgname-pyc"
+source="https://files.pythonhosted.org/packages/source/${_pkgname:0:1}/$_pkgname/$_pkgname-$pkgver.tar.gz"
+builddir="$srcdir/$_pkgname-$pkgver"
+
+replaces="py-wcwidth" # Backwards compatibility
+provides="py-wcwidth=$pkgver-r$pkgrel" # Backwards compatibility
+# circular dependency on pytest
+options="$options !check"
+
+build() {
+	WCWIDTH_NO_EXTENSION=1 \
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+check() {
+	python3 -m venv --clear --without-pip --system-site-packages .testenv
+	.testenv/bin/python3 -m installer .dist/*.whl
+	.testenv/bin/python3 -m pytest
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/*.whl
+}
+
+sha512sums="
+a3f33da4a1eb427f664c740f03e447cdf25409939c33b8aafa720a2afcdc0d0085cb3c69444bf0a9513ef63c8bba23a9e50c00c0716531264a5d0f0e78879276  wcwidth-0.9.4.tar.gz
+"

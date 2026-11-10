@@ -1,6 +1,6 @@
 # Maintainer: Kevin Deldycke <kevin@deldycke.com>
 pkgname=py3-extra-platforms
-pkgver=13.10.1
+pkgver=14.0.1
 pkgrel=0
 pkgdesc="Detect platforms, OSes, distributions and group them by family"
 url="https://github.com/kdeldycke/extra-platforms"
@@ -21,13 +21,12 @@ build() {
 
 check() {
 	# Run the sdist's test suite against the installed wheel, minus the network
-	# tests (the build sandbox has no outbound network) and test_import_time,
-	# which budgets a cold import in wall-clock milliseconds: it measures the
-	# builder rather than the package, and the emulated arches exceed it.
+	# tests (the build sandbox has no outbound network) and the benchmark tests,
+	# which budget wall-clock time: they measure the builder rather than the
+	# package, and the emulated arches exceed them.
 	python3 -m venv --clear --without-pip --system-site-packages .testenv
 	.testenv/bin/python3 -m installer .dist/*.whl
-	.testenv/bin/python3 -m pytest -m "not network" \
-		--deselect tests/test_root.py::test_import_time
+	.testenv/bin/python3 -m pytest -m "not network and not benchmark"
 }
 
 package() {
@@ -36,5 +35,5 @@ package() {
 }
 
 sha512sums="
-5c9d0fa6afb3eabeff900ba3a1819f7571ec4db41a982e257dea32b6b5cc6172e98beded202a05cea82e6ec1fc82eba551e1be577f70be78e097dc086858d035  extra_platforms-13.10.1.tar.gz
+9b93f63c69ddfe832dfc41647447f2956da6721f9b5ffb0336e0cfc7afd98b36674763c2ce6909eb7080d74b2205f2c00e7b6edad1e464f690122746272f5a3c  extra_platforms-14.0.1.tar.gz
 "

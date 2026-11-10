@@ -5,8 +5,9 @@
 #   nix-env -f ./packaging/nix -i
 #   nix-shell -p -f ./packaging/nix --run "mpm --version"
 #
-# Once click-extra and extra-platforms land in nixpkgs, the overlay below
-# becomes unnecessary and this file reduces to a single callPackage.
+# Once click-extra and extra-platforms land in nixpkgs, and nixpkgs ships the
+# click and cloup releases they need, the overlay below becomes unnecessary and
+# this file reduces to a single callPackage.
 { pkgs ? import <nixpkgs> { } }:
 
 let

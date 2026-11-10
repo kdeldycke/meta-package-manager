@@ -11,12 +11,6 @@ Files: *
 Copyright: Copyright 2016-2026 Kevin Deldycke <kevin@deldycke.com> and contributors
 License: GPL-2+
 
-Files: vendor/boltons/*
- vendor/boltons.py
- vendor/boltons-*
-Copyright: Copyright (c) 2013, Mahmoud Hashemi
-License: BSD-3-Clause
-
 Files: vendor/bracex/*
  vendor/bracex.py
  vendor/bracex-*
@@ -41,12 +35,6 @@ Files: vendor/cloup/*
 Copyright: Copyright (c) 2021, Gianluca Gippetto
 License: BSD-3-Clause
 
-Files: vendor/deepmerge/*
- vendor/deepmerge.py
- vendor/deepmerge-*
-Copyright: Copyright (c) 2016 Yusuke Tsutsumi
-License: MIT
-
 Files: vendor/extra_platforms/*
  vendor/extra_platforms.py
  vendor/extra_platforms-*
@@ -59,13 +47,6 @@ Files: vendor/meta_package_manager/*
 Copyright: Copyright 2016-2026 Kevin Deldycke <kevin@deldycke.com> and contributors
 License: GPL-2+
 
-Files: vendor/packageurl/*
- vendor/packageurl.py
- vendor/packageurl-*
-Copyright: Copyright the purl authors
-License: MIT
-Comment: packageurl-python ships no year in its license.
-
 Files: vendor/tabulate/*
  vendor/tabulate.py
  vendor/tabulate-*
@@ -75,9 +56,8 @@ License: MIT
 Files: vendor/tomli_w/*
  vendor/tomli_w.py
  vendor/tomli_w-*
-Copyright: Copyright Taneli Hukkinen
+Copyright: Copyright (c) 2021 Taneli Hukkinen
 License: MIT
-Comment: tomli-w ships no year in its license.
 
 Files: vendor/typing_extensions/*
  vendor/typing_extensions.py
@@ -96,12 +76,6 @@ Files: vendor/wcwidth/*
  vendor/wcwidth.py
  vendor/wcwidth-*
 Copyright: Copyright (c) 2014 Jeff Quast <contact@jeffquast.com>
-License: MIT
-
-Files: vendor/xmltodict/*
- vendor/xmltodict.py
- vendor/xmltodict-*
-Copyright: Copyright (C) 2012 Martin Blech and individual contributors
 License: MIT
 
 License: GPL-2+

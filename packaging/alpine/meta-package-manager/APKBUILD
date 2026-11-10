@@ -1,13 +1,6 @@
 # Maintainer: Kevin Deldycke <kevin@deldycke.com>
-
-# Targets Alpine edge: py3-uv-build (mpm's native build backend) and the
-# py3-boltons >= 25 floor are not available in the stable branches.
-# backports-strenum and tomli are omitted from depends: both are
-# Python < 3.11 markers and edge's python3 is newer.
-# Held at 7.6.1: 8.x needs click-extra >= 9.3, which edge cannot satisfy yet.
-# See the note in py3-click-extra.
 pkgname=meta-package-manager
-pkgver=7.6.1
+pkgver=8.3.0
 pkgrel=0
 pkgdesc="Wraps all package managers with a unifying CLI"
 url="https://mpm.run/"
@@ -15,15 +8,16 @@ arch="noarch"
 license="GPL-2.0-or-later"
 depends="
 	python3
-	py3-boltons
 	py3-click-extra
 	py3-extra-platforms
-	py3-packageurl
 	py3-tomli-w
-	py3-xmltodict
 	"
 makedepends="py3-gpep517 py3-installer py3-uv-build"
-checkdepends="py3-pytest py3-tomlkit py3-yaml"
+# Beyond pytest, the hermetic test layer imports pyyaml and applies the
+# xdist_group marker, which pytest-xdist registers: strict_markers rejects an
+# unregistered one. The SBOM and tomlrt tests skip themselves when their
+# libraries are absent.
+checkdepends="py3-pytest py3-pytest-xdist py3-yaml"
 subpackages="$pkgname-pyc"
 source="https://files.pythonhosted.org/packages/source/m/meta-package-manager/meta_package_manager-$pkgver.tar.gz"
 builddir="$srcdir/meta_package_manager-$pkgver"
@@ -49,5 +43,5 @@ package() {
 }
 
 sha512sums="
-aee6f41b9f0be0a063ba59ef5aa9666378a0a6b00b32f20ae9bcf0fcc196bec195ddf20e96a556fb0067c9111872ce525326f2edc00bc8f9d2b2c7f07376ee8c  meta_package_manager-7.6.1.tar.gz
+4436cf879b033e9bbc19b5021a33b9c6b02f6b10fb5658726e2e6cfedc9d7c41b7bfb7a35cd8bde0963e6e4147aee920b312c52b4115344db5a4d58c321cae47  meta_package_manager-8.3.0.tar.gz
 "

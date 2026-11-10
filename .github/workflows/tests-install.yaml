@@ -79,12 +79,12 @@ jobs:
   # https://gitlab.alpinelinux.org/alpine/aports/-/merge_requests/105566
   # Build and install from the in-repo APKBUILD overlay while the aports merge
   # request above is pending review: meta-package-manager plus the dependency
-  # packages missing from the official aports tree
-  # (py3-click-extra, py3-cloup, py3-extra-platforms, py3-packageurl).
-  # Targets Alpine edge, the only branch shipping py3-uv-build (mpm's build
-  # backend) and py3-boltons >= 25. Packages are built in dependency order:
-  # abuild resolves the previously-built ones from the local ~/packages
-  # repository, whose signing key is trusted system-wide by the keygen step.
+  # packages missing from the official aports tree (py3-click-extra, py3-cloup,
+  # py3-extra-platforms, py3-tomlrt) or too old in it (py3-click, py3-wcwidth).
+  # Targets Alpine edge, the branch the merge request targets. Packages are
+  # built in dependency order: abuild resolves the previously-built ones from
+  # the local ~/packages repository, whose signing key is trusted system-wide by
+  # the keygen step.
   apk-source:
     name: "✅ apk-source"
     runs-on: ubuntu-26.04
@@ -111,14 +111,20 @@ jobs:
           echo "REPODEST=$HOME/packages" >> "$HOME"/.config/abuild/abuild.conf
       # abuild has no long-form options: -F builds as the container's root
       # user, -r installs missing build dependencies.
-      - name: Build py3-cloup
-        working-directory: packaging/alpine/py3-cloup
+      - name: Build py3-click
+        working-directory: packaging/alpine/py3-click
         run: abuild -F -r
       - name: Build py3-extra-platforms
         working-directory: packaging/alpine/py3-extra-platforms
         run: abuild -F -r
-      - name: Build py3-packageurl
-        working-directory: packaging/alpine/py3-packageurl
+      - name: Build py3-tomlrt
+        working-directory: packaging/alpine/py3-tomlrt
+        run: abuild -F -r
+      - name: Build py3-wcwidth
+        working-directory: packaging/alpine/py3-wcwidth
+        run: abuild -F -r
+      - name: Build py3-cloup
+        working-directory: packaging/alpine/py3-cloup
         run: abuild -F -r
       - name: Build py3-click-extra
         working-directory: packaging/alpine/py3-click-extra
@@ -321,21 +327,9 @@ jobs:
   # Guix is Linux-only and the official install script is heavyweight; mark
   # as continue-on-error until the setup is proven stable.
   #
-  # Currently blocked, and not by anything this repository controls. The
-  # checkout derivation runs `git init` as an unprivileged Guix build user,
-  # which gets EACCES on /etc/gitconfig and dies: git 2.52 turned that from a
-  # warning into `fatal: unknown error occurred while reading the configuration
-  # files`, exit 128. The host file is already mode 644, so chmod changes
-  # nothing -- the denial is the build container's own /etc, which the build
-  # user cannot traverse, and no host-side step reaches inside it. The
-  # content-addressed mirrors then 404, which reads as a network fault and
-  # hides the real cause. Fixing it means either a git that tolerates EACCES
-  # again, or switching the definition from git-fetch to url-fetch on the tag
-  # tarball, which drops the git dependency entirely.
-  #
-  # A second blocker waits behind that one: the definition is at mpm 8.1.0,
-  # which needs click-extra 9.3 and extra-platforms 13.10, and the Guix channel
-  # it builds against has 8.8.1 and 13.6.0.
+  # The definition needs newer dependencies than the Guix channel ships, so
+  # packaging/guix/meta-package-manager/dependencies.scm defines them, and this
+  # job builds them from source.
   guix-source:
     name: ⁉️ guix-source
     continue-on-error: true
@@ -374,7 +368,7 @@ jobs:
           exit 1
       # The installer lays down the 1.5.0 binary, whose bundled channel predates
       # `python-click-extra` and `python-extra-platforms` landing in Guix. The
-      # definition below takes both from upstream, so without this pull they
+      # definition below inherits both from upstream, so without this pull they
       # resolve to "unbound variable" and nothing gets built.
       - name: Refresh channel and expose the pulled guix
         run: |
@@ -446,14 +440,14 @@ jobs:
 
   # https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/macports
   # Build and install from the in-repo Portfile overlay: a local ports tree
-  # providing meta-package-manager plus its dependency ports (py-click-extra,
-  # py-cloup, py-deepmerge, py-extra-platforms, py-packageurl-python) and a
-  # py-boltons version bump (the official port was stuck below mpm's
-  # boltons >= 25 floor). All of them landed in the official macports-ports
-  # tree via https://github.com/macports/macports-ports/pull/33609; the
-  # overlay is kept to validate the documented build instructions and to
-  # stage version bumps ahead of their upstream submission. Listed first in
-  # sources.conf, it shadows the official tree for the ports it carries.
+  # providing meta-package-manager, the version bumps of its dependency ports
+  # (py-click-extra, py-cloup, py-extra-platforms) and py-tomlrt, a test
+  # dependency the official tree lacks. meta-package-manager and its dependency
+  # closure first landed in the official macports-ports tree via
+  # https://github.com/macports/macports-ports/pull/33609; the overlay is kept
+  # to validate the documented build instructions and to stage version bumps
+  # ahead of their upstream submission. Listed first in sources.conf, it
+  # shadows the official tree for the ports it carries.
   # MacPorts installer pkgs are built per macOS version, so the asset is
   # resolved from the runner's major version (15 -> Sequoia, 26 -> Tahoe).
   # The overlay is served from /Users/Shared because the unprivileged macports
@@ -498,12 +492,10 @@ jobs:
         run: >
           port lint --nitpick
           meta-package-manager
-          py-boltons
           py-click-extra
           py-cloup
-          py-deepmerge
           py-extra-platforms
-          py-packageurl-python
+          py-tomlrt
       - name: Install mpm
         run: sudo port -v install meta-package-manager
       - run: mpm --version
@@ -715,7 +707,7 @@ jobs:
   # Assemble and build the in-repo Debian source package on every Ubuntu series
   # still receiving updates, plus the development one, minus jammy, whose python3 is
   # below requires-python. Ubuntu ships neither
-  # click-extra nor extra-platforms, and its click and deepmerge are older than
+  # click-extra nor extra-platforms, and its click and cloup are older than
   # click-extra accepts, so the package carries its whole dependency tree and
   # depends on python3 alone. That is what the job asserts: a Depends naming an
   # archive python3-* library is the regression it exists to catch.

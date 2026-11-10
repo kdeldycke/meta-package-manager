@@ -1,0 +1,39 @@
+# Maintainer: Kevin Deldycke <kevin@deldycke.com>
+
+# Missing from aports. click-extra's TOML tests need it. typing_extensions is
+# omitted from depends: it is a Python < 3.12 marker and edge's python3 is
+# newer.
+pkgname=py3-tomlrt
+pkgver=2.3.3
+pkgrel=0
+pkgdesc="Format-preserving TOML reader and writer"
+url="https://github.com/dimbleby/tomlrt"
+arch="noarch"
+license="MIT"
+depends="python3"
+makedepends="py3-flit-core py3-gpep517 py3-installer"
+subpackages="$pkgname-pyc"
+source="https://files.pythonhosted.org/packages/source/t/tomlrt/tomlrt-$pkgver.tar.gz"
+builddir="$srcdir/tomlrt-$pkgver"
+
+build() {
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+check() {
+	# The PyPI sdist ships no test suite: import the installed wheel instead.
+	python3 -m venv --clear --without-pip --system-site-packages .testenv
+	.testenv/bin/python3 -m installer .dist/*.whl
+	.testenv/bin/python3 -c "import tomlrt"
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/*.whl
+}
+
+sha512sums="
+6fc05022099d795454bbcee5f995067531fed84aa7799214d6017fbebef49951b57baa135636bcd29b4100f4ae87526c91bcaf9422c45005d8bfdea7cb325d42  tomlrt-2.3.3.tar.gz
+"

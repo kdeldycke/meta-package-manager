@@ -1,10 +1,10 @@
 ﻿$ErrorActionPreference = 'Stop'
 
 $toolsDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
-$urlX64 = 'https://github.com/kdeldycke/meta-package-manager/releases/download/v7.6.1/meta-package-manager-7.6.1-windows-x64.exe'
-$checksumX64 = '2544B48C6E90BFADA2DA4A61195267F11CF7C33B7DEEE7E70DDB355C453A4F0E'
-$urlArm64 = 'https://github.com/kdeldycke/meta-package-manager/releases/download/v7.6.1/meta-package-manager-7.6.1-windows-arm64.exe'
-$checksumArm64 = '3766AB116095F538483000B61FCE5C2345019962F49F26FE9F8888C376393788'
+$urlX64 = 'https://github.com/kdeldycke/meta-package-manager/releases/download/v8.3.0/meta-package-manager-8.3.0-windows-x64.exe'
+$checksumX64 = '502C4C5F1DA095A8AC915B49A004AB18EBF857A0688EB9509D9A7DD37122961A'
+$urlArm64 = 'https://github.com/kdeldycke/meta-package-manager/releases/download/v8.3.0/meta-package-manager-8.3.0-windows-arm64.exe'
+$checksumArm64 = '1BBBE355AAF8748C49764CB1A8D1C1F316F8DE811A1ECFB09522523DCF3B351E'
 
 if ($env:PROCESSOR_ARCHITECTURE -eq 'ARM64') {
     $url = $urlArm64

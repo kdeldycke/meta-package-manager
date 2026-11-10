@@ -236,22 +236,24 @@ To build the bleeding-edge version instead, install from [the definition maintai
 `````
 
 `````{tab-item} Alpine Linux
-Build and install from [the APKBUILD overlay maintained in the repository](packaging.md#alpine-linux), as a member of the `abuild` group with a signing key set up. It targets Alpine edge, the only branch shipping `mpm`'s build backend:
+Build and install from [the APKBUILD overlay maintained in the repository](packaging.md#alpine-linux), as a member of the `abuild` group with a signing key set up. It targets Alpine edge:
 
 ```{code-block} shell-session
 $ doas apk add alpine-sdk
 $ abuild-keygen --append --install -n
 $ git clone https://github.com/kdeldycke/meta-package-manager.git
 $ cd ./meta-package-manager/packaging/alpine
-$ abuild -C ./py3-cloup -r
+$ abuild -C ./py3-click -r
 $ abuild -C ./py3-extra-platforms -r
-$ abuild -C ./py3-packageurl -r
+$ abuild -C ./py3-tomlrt -r
+$ abuild -C ./py3-wcwidth -r
+$ abuild -C ./py3-cloup -r
 $ abuild -C ./py3-click-extra -r
 $ abuild -C ./meta-package-manager -r
 $ doas apk add --repository ~/.local/share/abuild/alpine meta-package-manager
 ```
 
-The 4 intermediate `abuild` runs produce the dependency packages missing from the official aports tree.
+The 6 intermediate `abuild` runs produce the dependency packages that the official aports tree lacks or ships too old.
 
 ````{admonition} Help land it in aports
 :class: important
@@ -298,7 +300,7 @@ $ sudo apt install meta-package-manager
 
 ````{admonition} Why a PPA rather than the Ubuntu archive
 :class: note
-Ubuntu ships neither `click-extra` nor `extra-platforms`, and its `python3-click` and `python3-deepmerge` are older than `click-extra` accepts on every series up to and including `26.04`, so no package built against the archive could work. [The packaging page](packaging.md#ubuntu-ppa) covers that trade-off, and how to build the source package by hand.
+Ubuntu ships neither `click-extra` nor `extra-platforms`, and its `python3-click` and `python3-cloup` are older than `click-extra` accepts on every series up to and including `26.04`, so no package built against the archive could work. [The packaging page](packaging.md#ubuntu-ppa) covers that trade-off, and how to build the source package by hand.
 ````
 
 ````{admonition} Help land it in deb-get

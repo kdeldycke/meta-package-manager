@@ -4,7 +4,7 @@
 The package ships its whole Python dependency tree under
 `/usr/share/meta-package-manager`, which this wrapper puts first on
 `sys.path`. Ubuntu carries neither `click-extra` nor `extra-platforms`, and
-its `click` and `deepmerge` are older than `click-extra` accepts, so no import
+its `click` and `cloup` are older than `click-extra` accepts, so no import
 mpm makes can resolve from `/usr/lib/python3/dist-packages`. Prepending is
 what keeps the vendored copies ahead of the system ones, and it changes
 nothing outside this process.

@@ -9,9 +9,9 @@ One tree per Ubuntu series, each a `3.0 (native)` source package carrying
 
 Vendoring is what lets one package serve every live series. Ubuntu ships
 neither `click-extra` nor `extra-platforms`, and its `python3-click` and
-`python3-deepmerge` are older than `click-extra` accepts on every series up to
-and including the current LTS, so a package built against the archive would
-reach nobody. Shipping newer copies of those two as PPA packages instead would
+`python3-cloup` are older than `click-extra` accepts on every series up to and
+including the current LTS, so a package built against the archive would reach
+nobody. Shipping newer copies of those two as PPA packages instead would
 upgrade `click` for every Python application on any machine that adds the PPA.
 
 Resolution happens here rather than on the builder: a Launchpad builder has no
@@ -23,9 +23,9 @@ Building and uploading the assembled trees:
 
 ```shell-session
 $ ./packaging/ppa/build-source.py --output ./dist
-$ cd ./dist/meta-package-manager-8.2.0ppa1~noble1
+$ cd ./dist/meta-package-manager-8.3.0ppa1~noble1
 $ debuild -S -sa
-$ dput ppa:kdeldycke/mpm ../meta-package-manager_8.2.0ppa1~noble1_source.changes
+$ dput ppa:kdeldycke/mpm ../meta-package-manager_8.3.0ppa1~noble1_source.changes
 ```
 """
 

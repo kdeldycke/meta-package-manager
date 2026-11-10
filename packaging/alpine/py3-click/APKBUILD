@@ -1,0 +1,50 @@
+# Contributor: Fabian Affolter <fabian@affolter-engineering.ch>
+# Contributor: Celeste <cielesti@protonmail.com>
+maintainer="Achill Gilgenast <achill@achill.org>"
+
+# Copy of aports main/py3-click, raised from 8.4.2 to 8.5.0: click-extra 10 and
+# cloup 4 need click >= 8.5. 8.5.0 already carries the test fix that aports
+# patches into 8.4.2.
+pkgname=py3-click
+pkgver=8.5.0
+pkgrel=0
+pkgdesc="Simple wrapper around optparse for powerful command line utilities"
+url="https://click.palletsprojects.com"
+arch="noarch"
+license="BSD-3-Clause"
+makedepends="
+	py3-flit-core
+	py3-gpep517
+	"
+checkdepends="py3-pytest"
+subpackages="$pkgname-pyc"
+source="https://files.pythonhosted.org/packages/source/c/click/click-$pkgver.tar.gz"
+builddir="$srcdir/click-$pkgver"
+
+replaces="py-click" # Backwards compatibility
+provides="py-click=$pkgver-r$pkgrel" # Backwards compatibility
+
+build() {
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+check() {
+	python3 -m venv --clear --without-pip --system-site-packages .testenv
+	.testenv/bin/python3 -m installer .dist/*.whl
+	if [ "$CARCH" = "loongarch64" ]; then
+		.testenv/bin/python3 -m pytest -k "not test_echo_via_pager"
+	else
+		.testenv/bin/python3 -m pytest
+	fi
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/*.whl
+}
+
+sha512sums="
+3594dca82adc59a4056a4e25bdbfcd2aea62b9ed3fe702695018739b2c7e842d51688b47f08bf135c45a121937a430ddeaa797f7902a895fb9ff55b6ede6f567  click-8.5.0.tar.gz
+"

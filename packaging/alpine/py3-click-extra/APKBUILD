@@ -1,32 +1,28 @@
 # Maintainer: Kevin Deldycke <kevin@deldycke.com>
 
-# Held at the lowest 9.x: 9.2 onwards raises boltons to >= 26.2 and wcwidth
-# to >= 0.8.3, and edge carries 26.1.0 and 0.6.0. Raise this once aports
-# ships both, which is also what meta-package-manager 8.x waits on.
+# py3-click and py3-wcwidth come from this overlay: edge carries 8.4.2 and
+# 0.6.0, below the click >= 8.5 and wcwidth >= 0.8.3 floors.
 pkgname=py3-click-extra
-pkgver=9.0.0
+pkgver=10.2.0
 pkgrel=0
 pkgdesc="Drop-in replacement for Click to build user-friendly and colorful CLIs"
 url="https://github.com/kdeldycke/click-extra"
 arch="noarch"
 license="GPL-2.0-or-later"
-# tabulate's widechars extra resolves to wcwidth, listed explicitly. tomli is
-# omitted: it is a Python < 3.11 marker and edge's python3 is newer.
 depends="
 	python3
-	py3-boltons
 	py3-click
 	py3-cloup
-	py3-deepmerge
 	py3-extra-platforms
 	py3-tabulate
 	py3-wcmatch
 	py3-wcwidth
 	"
 makedepends="py3-gpep517 py3-installer py3-uv-build"
-# Libraries the test modules import at collection time. Sphinx and myst-parser
-# are omitted: they only serve tests/sphinx/, which asserts on the exact HTML
-# Sphinx and Pygments emit; upstream skips that tree when they are absent.
+# Libraries and tools the tests need: tomlrt writes the TOML tables and
+# exports they check. Sphinx and myst-parser are omitted: they only serve
+# tests/sphinx/, which asserts on the exact HTML Sphinx and Pygments emit;
+# upstream skips that tree when they are absent.
 checkdepends="
 	git
 	py3-hjson
@@ -35,8 +31,7 @@ checkdepends="
 	py3-pytest
 	py3-pytest-httpserver
 	py3-requests
-	py3-tomlkit
-	py3-xmltodict
+	py3-tomlrt
 	py3-yaml
 	"
 subpackages="$pkgname-pyc"
@@ -63,5 +58,5 @@ package() {
 }
 
 sha512sums="
-a41babd3fbc2dae597e84e3fe1ea8a1a70935539be59e79a7c2f402cdb5380ce89547eaef56a7197485fe337dc5b5f8ba2ced1c8a18dbeec44fb9e3371b3eef4  click_extra-9.0.0.tar.gz
+cb129b6bf265a37bc438afbfbeb73cca4e92f0f0155f213554559ae39fa987d3a8239e0f12cdd4ed1c1aa481eeb7d12192b3514818d12878689e245af0871466  click_extra-10.2.0.tar.gz
 "

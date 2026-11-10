@@ -4,7 +4,7 @@ PortSystem          1.0
 PortGroup           python 1.0
 
 name                py-click-extra
-version             8.9.0
+version             10.2.0
 revision            0
 
 categories-append   devel
@@ -25,19 +25,17 @@ homepage            https://github.com/kdeldycke/click-extra
 
 python.rootname     click_extra
 
-checksums           rmd160  41229696ddd7cd4d70f16f1c5822e5602ce00fa1 \
-                    sha256  6586bd80d21b13d6343fc987c2279e170ad7213c972e638e8a6259c8241189cf \
-                    size    1294893
+checksums           rmd160  cf5fe5dff748e0a0250c6f8ed828fb16cf070bff \
+                    sha256  499b8ad73f9fa9182f799fbb14ebbc7e61a6dde9c2977954173fdcef4b32994e \
+                    size    1983138
 
 python.versions     311 312 313 314
 python.pep517_backend uv
 
 if {${name} ne ${subport}} {
     depends_lib-append \
-                    port:py${python.version}-boltons \
                     port:py${python.version}-click \
                     port:py${python.version}-cloup \
-                    port:py${python.version}-deepmerge \
                     port:py${python.version}-extra-platforms \
                     port:py${python.version}-tabulate \
                     port:py${python.version}-wcmatch \
@@ -52,8 +50,7 @@ if {${name} ne ${subport}} {
                     port:py${python.version}-pytest-httpserver \
                     port:py${python.version}-requests \
                     port:py${python.version}-sphinx \
-                    port:py${python.version}-tomlkit \
-                    port:py${python.version}-xmltodict \
+                    port:py${python.version}-tomlrt \
                     port:py${python.version}-yaml
 
     # Exclude the network tests (marked "network") that reach external services.

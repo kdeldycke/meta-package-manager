@@ -7,18 +7,16 @@
   hjson,
   jsonschema,
   myst-parser,
+  packaging,
   pygments,
   pytest-httpserver,
   pyyaml,
   requests,
   sphinx,
-  tomlkit,
-  xmltodict,
+  tomlrt,
   uv-build,
-  boltons,
   click,
   cloup,
-  deepmerge,
   extra-platforms,
   tabulate,
   wcmatch,
@@ -27,16 +25,14 @@
 
 buildPythonPackage (finalAttrs: {
   pname = "click-extra";
-  # update-hold: 9.2 onwards raises boltons to >= 26.2 and wcwidth to >= 0.8.3,
-  # neither of which nixpkgs carries. See the override in overlay.nix.
-  version = "9.0.0";
+  version = "10.2.0";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "kdeldycke";
     repo = "click-extra";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-boswFU+u+LmZtz+r9tHFDP0igXh37JsGzwb7I+md89w=";
+    hash = "sha256-eFvfdNx+i6mNTW1gdZVNsSPsvjHqs1fHHS9DBK3WtP4=";
   };
 
   build-system = [ uv-build ];
@@ -44,10 +40,8 @@ buildPythonPackage (finalAttrs: {
   # wcwidth backs the ``tabulate[widechars]`` extra pinned in pyproject.toml
   # and is also a direct runtime dependency since 8.4.
   dependencies = [
-    boltons
     click
     cloup
-    deepmerge
     extra-platforms
     tabulate
     wcmatch
@@ -61,13 +55,15 @@ buildPythonPackage (finalAttrs: {
     hjson
     jsonschema
     myst-parser
+    packaging
     pygments
     pytest-httpserver
     pyyaml
     requests
     sphinx
-    tomlkit
-    xmltodict
+    # The `toml` extra, which the TOML rendering and configuration export tests
+    # call into.
+    tomlrt
   ];
 
   # Tests marked ``network`` make HTTPS requests; the build sandbox has no

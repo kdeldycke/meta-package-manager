@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
   <metadata>
     <id>meta-package-manager</id>
-    <version>7.6.1</version>
+    <version>8.3.0</version>
     <title>Meta Package Manager</title>
     <authors>Kevin Deldycke</authors>
     <owners>denim924</owners>
@@ -38,7 +38,7 @@ Full documentation at https://mpm.run/
          so the icon tracks the artwork with no tag or commit ref to bump here. -->
     <iconUrl>https://mpm.run/_static/icon.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <releaseNotes>https://github.com/kdeldycke/meta-package-manager/releases/tag/v7.6.1</releaseNotes>
+    <releaseNotes>https://github.com/kdeldycke/meta-package-manager/releases/tag/v8.3.0</releaseNotes>
     <copyright>Kevin Deldycke and contributors</copyright>
     <tags>package-manager cli mpm foss oss</tags>
   </metadata>

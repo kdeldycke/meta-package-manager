@@ -1,16 +1,12 @@
 {
   lib,
-  stdenv,
   python3Packages,
   fetchFromGitHub,
-  zsh,
 }:
 
 python3Packages.buildPythonApplication (finalAttrs: {
   pname = "meta-package-manager";
-  # update-hold: 8.x needs click-extra >= 9.3, which this overlay cannot carry
-  # while nixpkgs lacks the boltons and wcwidth floors click-extra.nix names.
-  version = "8.0.1";
+  version = "8.3.0";
   pyproject = true;
   __structuredAttrs = true;
 
@@ -18,70 +14,38 @@ python3Packages.buildPythonApplication (finalAttrs: {
     owner = "kdeldycke";
     repo = "meta-package-manager";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-GRtgU9mz6bYxixFy94eSvGE1/hyw0R/Rqg8BKgA/Hp8=";
+    hash = "sha256-NNSmy2kmMOjY9ENBWnD0ZKuNrhdQbDY/t6yXtO/SkWo=";
   };
 
   build-system = with python3Packages; [ uv-build ];
 
   dependencies = with python3Packages; [
-    boltons
     click-extra
     extra-platforms
-    packageurl-python
     tomli-w
-    xmltodict
   ];
 
-  nativeCheckInputs =
-    with python3Packages;
-    [
-      pytestCheckHook
-      # tests/test_docs.py parses the GitHub workflow YAML files and loads
-      # docs/docs_update.py, which round-trips pyproject.toml with tomlkit.
-      pyyaml
-      tomlkit
-      # The SBOM unit tests import the CycloneDX renderer and its JSON/XML
-      # schema validators, the SPDX writers, and the mocked HTTP client of
-      # the OSV adapter.
-      cyclonedx-python-lib
-      httpx
-      jsonschema
-      lxml
-      platformdirs
-      respx
-      spdx-tools
-    ]
-    # The Xbar/SwiftBar plugin tests only run on macOS and drive the plugin
-    # through the login shells it targets.
-    ++ lib.optionals stdenv.hostPlatform.isDarwin [ zsh ];
-
-  # Temporary, and deletable at the first release carrying the `integration`
-  # and `host_environment` markers: `tests/conftest.py` skips both inside a
-  # hermetic build automatically, and `tests/test_sbom.py` now skips itself
-  # when cyclonedx-python-lib is too old. Until then this builds the v8.0.1
-  # tarball, whose suite predates all three, so the names stay listed here.
-  disabledTests = [
-    # Drive the CLI, which exits 2 on `No manager selected`: there are none.
-    "test_cli_cooldown_config_table"
-    "test_cli_cooldown_keyword_without_window_is_a_noop"
-    "test_cli_cooldown_legacy_config_spelling"
-    # `NameError: PredefinedLifecycle` against nixpkgs' cyclonedx-python-lib,
-    # below the floor `[sbom-offline]` declares. Both spellings are needed:
-    # these match parametrised ids, so each case's SPDX half keeps running.
-    "cyclonedx"
-    "CycloneDX"
-    # Probe for a sudo binary and a policy the sandbox does not have.
-    "test_prime_sudo"
-  ]
-  # Compares the label list frozen in pyproject.toml at release time with the
-  # one computed from the installed extra-platforms, so it fails on any newer
-  # extra-platforms that adds a platform to a group, like 13.13.0. The markers
-  # above do not cover it.
-  ++ [ "test_extra_labels_in_pyproject" ];
-
-  # Imports the environment of a login shell, which the build user has neither
-  # a passwd entry nor a shell for.
-  disabledTestPaths = [ "tests/test_shell_env.py" ];
+  nativeCheckInputs = with python3Packages; [
+    pytestCheckHook
+    # Registers the `xdist_group` marker the suite applies, which the strict
+    # marker check of 8.3.0 refuses to collect unregistered. Its setup hook
+    # also spreads the suite over every build core.
+    pytest-xdist
+    # tests/test_docs.py parses the GitHub workflow YAML files and loads
+    # docs/docs_update.py, which round-trips pyproject.toml with tomlrt.
+    pyyaml
+    tomlrt
+    # The SBOM unit tests import the `[sbom-offline]` and `[sbom-online]`
+    # extras: the CycloneDX renderer and its JSON/XML schema validators, the
+    # purl and SPDX writers, and the mocked HTTP client of the OSV adapter.
+    cyclonedx-python-lib
+    httpx
+    jsonschema
+    lxml
+    packageurl-python
+    respx
+    spdx-tools
+  ];
 
   pythonImportsCheck = [ "meta_package_manager" ];
 

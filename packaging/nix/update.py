@@ -24,11 +24,15 @@ GITHUB_REPOS = {
     "extra-platforms.nix": "kdeldycke/extra-platforms",
     "package.nix": "kdeldycke/meta-package-manager",
 }
-"""Upstream repository each definition in this directory tracks.
+"""Upstream repository each first-party definition in this directory tracks.
 
 Keyed on file name rather than taken from the caller: a definition and the
 releases it is bumped against then cannot be paired by mistake, which is the
 one way this script could write a version belonging to another project.
+
+`cloup.nix` is absent on purpose. This script takes the newest release with no
+cooldown, which only a package of this project's own maintainer can take, so a
+third-party definition is bumped by hand.
 """
 
 HOLD_MARKER = "# update-hold:"
@@ -36,9 +40,9 @@ HOLD_MARKER = "# update-hold:"
 
 A definition carrying it is left alone, and the text after the marker says
 why. The reason sits in the file it governs rather than in a sibling, since
-this script reads no other: `click-extra.nix` is held because 9.2 onwards
-raises floors nixpkgs does not carry, and an unguarded bump past it turns
-every `nix-source` cell of `tests-install.yaml` red.
+this script reads no other. Hold a definition whose newest release raises a
+floor the overlay cannot meet: an unguarded bump past it turns every
+`nix-source` cell of `tests-install.yaml` red.
 """
 
 RELEASES_API = "https://api.github.com/repos/{repo}/releases/latest"

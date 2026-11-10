@@ -26,7 +26,7 @@ Write one recipe for `mpm` and one per missing dependency, in the target's forma
 - **Source tarball.** The PyPI sdist carries `tests/`, `docs/` and the workflow files the docs tests parse, so the check phase can run `mpm`'s suite straight from it. Releases up to `7.3.0` shipped no tests: build one of those from the GitHub tag tarball (`.../archive/v{version}/...`) instead.
 - **Check-phase scope.** Run only the hermetic unit layer; the integration layer drives real package managers and cannot run in a builder. The repo-maintenance guards, which compare a committed artifact against the installed tooling, skip themselves outside a git checkout.
 - **Dependencies without tests.** Some dependency sdists ship no tests (import-smoke-test the built wheel instead); some ship tests that need a file ignored (`packageurl`'s spec suite loads a git submodule absent from its sdist).
-- **Build backend.** `mpm` and several dependencies build with `uv-build`; confirm the target ships it (Alpine ships it on edge only, which also gates `py3-boltons >= 25`).
+- **Build backend.** `mpm` and several dependencies build with `uv-build`; confirm the target ships it (Alpine ships it on edge and from `3.24`).
 
 Keep the load-bearing comments that explain a non-obvious choice (why the tag tarball, why a test is ignored or deselected) and drop overlay-only chatter that means nothing upstream.
 

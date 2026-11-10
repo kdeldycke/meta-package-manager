@@ -91,7 +91,7 @@ The `*-source` jobs of [`tests-install.yaml`](https://github.com/kdeldycke/meta-
 
 ### Alpine Linux
 
-Build and install from [the APKBUILD overlay maintained in the repository](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/alpine). It targets Alpine edge, the only branch shipping `py3-uv-build` (`mpm`'s build backend) and `py3-boltons` >= `25`.
+Build and install from [the APKBUILD overlay maintained in the repository](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/alpine). It targets Alpine edge, the branch the [aports merge request](https://gitlab.alpinelinux.org/alpine/aports/-/merge_requests/105566) targets.
 
 As a member of the `abuild` group, with a signing key set up:
 
@@ -100,9 +100,11 @@ $ doas apk add alpine-sdk
 $ abuild-keygen --append --install -n
 $ git clone https://github.com/kdeldycke/meta-package-manager.git
 $ cd ./meta-package-manager/packaging/alpine
-$ abuild -C ./py3-cloup -r
+$ abuild -C ./py3-click -r
 $ abuild -C ./py3-extra-platforms -r
-$ abuild -C ./py3-packageurl -r
+$ abuild -C ./py3-tomlrt -r
+$ abuild -C ./py3-wcwidth -r
+$ abuild -C ./py3-cloup -r
 $ abuild -C ./py3-click-extra -r
 $ abuild -C ./meta-package-manager -r
 $ doas apk add --repository ~/.local/share/abuild/alpine meta-package-manager
@@ -110,7 +112,7 @@ $ doas apk add --repository ~/.local/share/abuild/alpine meta-package-manager
 
 Each `abuild` run drops its packages in `~/.local/share/abuild/alpine` (abuild's default `REPODEST`), where the next builds and the final `apk add` pick them up.
 
-The overlay carries the 4 dependency packages missing from the official aports tree (`py3-click-extra`, `py3-cloup`, `py3-extra-platforms`, `py3-packageurl`).
+The overlay carries the 4 dependency packages missing from the official aports tree (`py3-click-extra`, `py3-cloup`, `py3-extra-platforms`, `py3-tomlrt`), and 2 that edge ships too old (`py3-click`, `py3-wcwidth`).
 
 ### Chocolatey
 
@@ -136,7 +138,7 @@ $ guix install --load-path=./meta-package-manager/packaging/guix meta-package-ma
 
 ### MacPorts
 
-`mpm` [landed in MacPorts](https://ports.macports.org/port/meta-package-manager/) on 2026-07-22, along with [its full dependency closure](https://github.com/macports/macports-ports/pull/33609): 5 new dependency ports (`py-click-extra`, `py-cloup`, `py-deepmerge`, `py-extra-platforms`, `py-packageurl-python`) and a `py-boltons` version bump. The in-repo overlay is now only needed to stage version bumps ahead of their upstream submission.
+`mpm` [landed in MacPorts](https://ports.macports.org/port/meta-package-manager/) on 2026-07-22, along with [its full dependency closure](https://github.com/macports/macports-ports/pull/33609): 5 new dependency ports (`py-click-extra`, `py-cloup`, `py-deepmerge`, `py-extra-platforms`, `py-packageurl-python`) and a `py-boltons` version bump. The in-repo overlay is now only needed to stage version bumps and new dependency ports ahead of their upstream submission.
 
 Build and install from [the Portfile overlay maintained in the repository](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/macports):
 
@@ -228,7 +230,7 @@ The package is not in openSUSE proper yet: it awaits review in [request 1394245]
 
 ### Ubuntu (PPA)
 
-No package built against the Ubuntu archive could work. Ubuntu ships neither `click-extra` nor `extra-platforms`, and its `python3-click` and `python3-deepmerge` are older than `click-extra` accepts on every series up to and including `26.04`. Publishing newer copies of those two in the PPA would upgrade `click` for every Python application on any machine that adds it. So [the source package maintained in the repository](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/ppa) carries the whole dependency tree under `/usr/share/meta-package-manager` and depends on `python3` alone: adding the PPA installs no Python library system-wide, and upgrades none of the ones already there.
+No package built against the Ubuntu archive could work. Ubuntu ships neither `click-extra` nor `extra-platforms`, and its `python3-click` and `python3-cloup` are older than `click-extra` accepts on every series up to and including `26.04`. Publishing newer copies of those two in the PPA would upgrade `click` for every Python application on any machine that adds it. So [the source package maintained in the repository](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/ppa) carries the whole dependency tree under `/usr/share/meta-package-manager` and depends on `python3` alone: adding the PPA installs no Python library system-wide, and upgrades none of the ones already there.
 
 `build-source.py` assembles one `3.0 (native)` source tree per series, pinning the dependency closure from the release tag's own lockfile. It resolves there rather than on the builder, which has no network. The package is `Architecture: all` and everything it carries is pure Python, so one build serves every architecture a series has, and `dh_python3` byte-compiles the private tree at install time for the Python that series ships.
 
@@ -249,8 +251,8 @@ To build one series by hand instead, with [`uv`](https://docs.astral.sh/uv/) on 
 $ sudo apt-get install --no-install-recommends build-essential debhelper dh-python dpkg-dev fakeroot git
 $ git clone https://github.com/kdeldycke/meta-package-manager.git
 $ cd ./meta-package-manager
-$ ./packaging/ppa/build-source.py --mpm-version 8.2.0 --series noble --output ./dist
-$ cd ./dist/meta-package-manager-8.2.0ppa1~noble1
+$ ./packaging/ppa/build-source.py --mpm-version 8.3.0 --series noble --output ./dist
+$ cd ./dist/meta-package-manager-8.3.0ppa1~noble1
 $ dpkg-buildpackage --build=binary --no-sign
 $ sudo apt-get install ../meta-package-manager_*.deb
 ```
@@ -259,7 +261,7 @@ Uploading signs the source package instead, once per series:
 
 ```{code-block} shell-session
 $ debuild -S -sa
-$ dput ppa:kdeldycke/mpm ../meta-package-manager_8.2.0ppa1~noble1_source.changes
+$ dput ppa:kdeldycke/mpm ../meta-package-manager_8.3.0ppa1~noble1_source.changes
 ```
 
 The `~{series}` suffixes sort in release order, the Ubuntu codenames happening to be alphabetical, so a machine upgrading from one series to the next picks the newer build up on its own. The targets are `noble`, `resolute` and `stonking`. `questing` reached its end of life in July 2026, and `jammy` is left out because its `python3` is `3.10`, below the floor of `mpm`.

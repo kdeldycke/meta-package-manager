@@ -215,7 +215,7 @@ jobs:
           # Held equal to `[tool.repomatic] minimum-release-age`, like the workflow's UV_EXCLUDE_NEWER.
           PIP_UPLOADED_PRIOR_TO: P7D
         run: >
-          uvx --no-progress 'pip==26.2.2' --python "$(python -c 'import sys; print(sys.executable)')"
+          uvx --no-progress 'pip==26.3' --python "$(python -c 'import sys; print(sys.executable)')"
           install --upgrade pip pipx setuptools
 
       # Homebrew

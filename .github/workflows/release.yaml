@@ -138,13 +138,18 @@ jobs:
           ref: >-
             ${{ fromJSON(needs.build.outputs.release_commits_matrix
             || '{"include":[{"commit":""}]}').include[0].commit }}
-      # The gnome-extensions CLI lives in the gnome-shell package; skipping the
-      # recommends keeps the desktop stack out of the runner.
+      # The gnome-extensions CLI ships in the gnome-shell package, whose hard
+      # dependencies pull in the whole desktop. So install only the libraries the
+      # CLI links against, and extract the CLI from the package without installing it.
       - name: Install gnome-extensions CLI
+        working-directory: ${{ runner.temp }}
         run: |
           sudo apt-get update
-          sudo apt-get install --yes --no-install-recommends gnome-shell
-      # The canonical packer: validates metadata.json, compiles the schemas, and
+          sudo apt-get install --yes --no-install-recommends libgnome-autoar-0-0 libjson-glib-1.0-0 libsoup-3.0-0
+          apt-get download gnome-shell
+          dpkg-deb --extract gnome-shell_*.deb gnome-shell
+          echo "${RUNNER_TEMP}/gnome-shell/usr/bin" >> "${GITHUB_PATH}"
+      # The canonical packer: validates metadata.json, copies the schemas, and
       # packs from an explicit file whitelist so stray files never leak into the
       # zip. Non-standard files must be declared via --extra-source.
       - name: Pack the extension

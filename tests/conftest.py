@@ -32,6 +32,7 @@ from pytest import fixture
 from meta_package_manager.cli import mpm
 from meta_package_manager.dispatch import merge_into_probe_lanes
 from meta_package_manager.pool import ManagerPool, manager_classes, pool
+from meta_package_manager.sudo import _running_as_root
 
 from .destructive_plan import destructive_group
 from .fake_manager import ChangingFakeManager, FakeManager, TimingOutFakeManager
@@ -328,6 +329,22 @@ def isolate_user_config(isolated_app_dir):
     itself.
     """
     return isolated_app_dir
+
+
+@fixture(autouse=True)
+def run_as_regular_user(monkeypatch):
+    """Make `mpm` see a regular user, even when the suite runs as root.
+
+    As root, `mpm` drops the privilege escalator from every command, so a test
+    that expects a `sudo`, `doas` or `run0` prefix passes only for a regular
+    user. A container build runs the suite as root, like `abuild -F` does. A
+    test of the root case patches `os.geteuid` itself, which takes precedence
+    for its duration.
+
+    The patch stays in the test process: a subprocess sees the real user.
+    """
+    if _running_as_root():
+        monkeypatch.setattr("os.geteuid", lambda: 1000)
 
 
 @fixture

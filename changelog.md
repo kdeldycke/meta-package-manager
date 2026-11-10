@@ -9,6 +9,9 @@
 
 ## [`8.3.0` (2026-11-09)](https://github.com/kdeldycke/meta-package-manager/compare/v8.2.0...v8.3.0)
 
+> [!NOTE]
+> `8.3.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/8.3.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v8.3.0).
+
 - **Breaking:** [mpm] Drop Python `3.10`, past its end of life: `mpm` needs Python `3.11`. The PPA stops building for Ubuntu `22.04`, whose Python is `3.10`.
 - **Breaking:** [mpm] Remove the `jsonc` and `xml` extras: JSONC and XML configuration files and the `xml` table format need no extra dependency anymore.
 - **Breaking:** [mpm] Give each package of `mpm sbom` the purl of its registered type when one fits, like `pkg:pypi/` for a `pip` package. The purl naming its manager stays the CycloneDX `bom-ref`, and becomes the second SPDX reference.

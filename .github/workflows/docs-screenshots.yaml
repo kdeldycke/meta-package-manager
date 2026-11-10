@@ -154,19 +154,6 @@ jobs:
           # uv release clears the cooldown window.
           version: "0.13.6"
 
-      # The oxipng `format-images` provisions, keyed on the file carrying the
-      # repomatic pin that decides its version: a bump misses the cache once and
-      # repopulates it, and a stale hit is re-verified against the registry
-      # checksum rather than trusted.
-      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.cache/repomatic/bin
-          key: >-
-            repomatic-${{ runner.os }}-${{ runner.arch }}-oxipng-${{
-            hashFiles('.github/workflows/docs-screenshots.yaml') }}
-          restore-keys: |
-            repomatic-${{ runner.os }}-${{ runner.arch }}-oxipng-
-
       # Literally the command the autofix lane runs, rather than the binary it
       # drives: `run oxipng` is a passthrough, so reaching for it means restating
       # repomatic's optimization level, strip mode and savings thresholds here,
@@ -275,15 +262,6 @@ jobs:
           name: bar-diagnostics
           path: ${{ runner.temp }}/diagnostics
           if-no-files-found: warn
-
-      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.cache/repomatic/bin
-          key: >-
-            repomatic-${{ runner.os }}-${{ runner.arch }}-oxipng-${{
-            hashFiles('.github/workflows/docs-screenshots.yaml') }}
-          restore-keys: |
-            repomatic-${{ runner.os }}-${{ runner.arch }}-oxipng-
 
       # `-a` rather than `--append`, the one place this repository's long-form
       # preference cannot hold: BSD tee has no long options, and the GNU spelling

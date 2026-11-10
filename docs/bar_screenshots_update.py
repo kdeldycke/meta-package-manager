@@ -423,6 +423,9 @@ Also the title the window takes once that pane is selected, which is what the
 capture waits on.
 """
 
+FOCUS_ATTEMPTS = 3
+"""Times the preferences window is asked to take focus before its shot fails."""
+
 SCROLL_STEPS = (-400,) * 6
 """Scroll wheel deltas posted over the preferences pane to reach its foot.
 
@@ -558,22 +561,28 @@ Long enough to cover the minute boundary {func}`hold_clock` lands just short
 of, with the shot then taken well inside the minute that follows.
 """
 
-PLUGIN_AGE = 300
+PLUGIN_AGE = 330
 """Seconds the plugin's last run is made to look old, before each shot.
 
 SwiftBar's footer carries the age of that run, formatted by
 `RelativeDateTimeFormatter`, so a few seconds of it reads to the second and
 rewrites the image every run. Minutes are a coarser bucket: the clock is wound
 back this far before the host starts, and forward to the pinned reading before
-the click, which lands the footer mid-way through a minute where the twenty
-seconds of jitter in a launch cannot reach either boundary.
+the click.
+
+The formatter truncates: every age from 300 to 359 seconds reads
+`5 Minutes Ago`. The menu reads this value plus two seconds and the click's
+delay, minus the launch's, which runs up to twenty seconds. So 330 lands the
+age between 312 and 332 seconds, clear of both edges. At 300 the launch alone
+pushed it under the edge in most runs, and the footer read `4 Minutes Ago`
+there and `5 Minutes Ago` in the others (run 41623156440).
 
 Both ends land before the click, not before the shutter. The host works the age
 out as it assembles the menu, so a wind forward placed any later moves the menu
 bar's clock and leaves the footer reading the launch delay and nothing else,
 which is how it came to say `28 Seconds Ago` and then `27` (run 32777818530).
 
-Kept to five minutes rather than the hours that would be coarser still: the
+Kept to five and a half minutes rather than the hours that would be coarser still: the
 wind forward is the one jump this driver makes in the direction a job's timeout
 is measured in, so it stays far shorter than the timeout it could otherwise eat
 into.
@@ -2006,6 +2015,37 @@ def settled_window(host: Host, title: str) -> dict[str, float]:
         window = settled
 
 
+def focus_window(host: Host) -> None:
+    """Make the host frontmost and raise its front window, then check both took.
+
+    An inactive window draws its title and toolbar labels lighter, and nothing
+    else: the light pane photographed its title ten levels darker in some runs,
+    every other pixel equal, the host having kept the focus its *Preferences…*
+    click gave it there and lost it elsewhere (run 42453185502). Asked for here,
+    the active state is the one every frame carries, and the one a user sees on
+    opening the pane.
+    """
+    reply = ""
+    for _ in range(FOCUS_ATTEMPTS):
+        reply = osascript(
+            bounded(f"""
+tell application "System Events"
+    tell process "{host.name}"
+        set frontmost to true
+        perform action "AXRaise" of window 1
+        delay 1
+        return (frontmost as text) & " " & ((value of attribute "AXMain" of window 1) as text)
+    end tell
+end tell
+""")  # noqa: E501
+        )
+        if reply == "true true":
+            return
+        print(f"  {host.name} has not taken focus yet: {reply}")
+    msg = f"{host.name} would not take focus: {reply}"
+    raise RuntimeError(msg)
+
+
 def press_toolbar_item(host: Host, label: str) -> None:
     """Press a toolbar item of the host's front window, found by its label.
 
@@ -2192,6 +2232,7 @@ def capture_preferences(shot: Shot, plugins: Path) -> None:
     wait_for_window(shot.host, None)
     press_toolbar_item(shot.host, PREFERENCES_PANE)
     window = settled_window(shot.host, PREFERENCES_PANE)
+    focus_window(shot.host)
     park_pointer()
     time.sleep(2)
     width, height = DISPLAY_MODE

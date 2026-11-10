@@ -45,8 +45,9 @@ concurrency:
 # and `main` always carries the next `.devN` one: only the tagged commit shows a
 # version that users install. A change to a menu reaches the images at the next
 # release. The release workflow pushes the tag with `REPOMATIC_PAT`: a tag pushed
-# with `GITHUB_TOKEN` starts no workflow. Dispatch the workflow on a branch to
-# test a driver change, or on a tag to capture that release again.
+# with `GITHUB_TOKEN` starts no workflow. Dispatch the workflow on `main` to test
+# a driver change, or on a tag to capture that release again: `pr-sync` builds on
+# the branch it runs on, so a run on another branch targets that branch.
 #
 # A committed capture is byte-reproducible, and two runs prove it. Dispatch the
 # workflow twice on the same commit: the set has converged when the second pull

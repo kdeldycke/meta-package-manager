@@ -49,6 +49,10 @@ jobs:
           portindex /Users/Shared/mpm-ports
           { echo "file:///Users/Shared/mpm-ports"; cat /opt/local/etc/macports/sources.conf; } > sources.conf
           sudo cp sources.conf /opt/local/etc/macports/sources.conf
+      # MacPorts fetches the next archive in the background while it installs the
+      # current one, and that fetch races the main one over the same `.sig` file.
+      - name: Turn off the background archive fetch
+        run: echo "fetch_threads 0" | sudo tee -a /opt/local/etc/macports/macports.conf
       # A library port runs its test phase on its versioned subport, like
       # py314-cloup. Every port runs, even after one fails.
       - name: Run the test phases

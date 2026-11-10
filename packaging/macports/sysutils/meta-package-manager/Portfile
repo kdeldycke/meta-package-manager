@@ -43,9 +43,7 @@ depends_test-append port:py${python.version}-packageurl-python \
                     port:py${python.version}-yaml
 
 # Run the hermetic layer from the unpacked sdist, excluding the tests that drive
-# real package managers or need a login shell or a sudo policy. The two
-# deselected tests need an installed mpm, and this phase runs before install.
+# real package managers or need a login shell or a sudo policy.
 test.run            yes
-test.args-append    -o addopts="-m 'not integration and not host_environment'" \
-                    --deselect tests/test_bar_plugin.py::test_mpm_cli_ignores_the_spawn_directory \
-                    --deselect tests/test_sbom_base.py::test_writer_unavailable_reason_separates_absent_from_outdated
+test.args-append    -o addopts="-m 'not integration and not host_environment'"
+test.env-append     PYTHONPATH=${destroot}${python.pkgd}

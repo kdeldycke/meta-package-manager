@@ -45,7 +45,5 @@ if {${name} ne ${subport}} {
                     port:py${python.version}-typing_extensions
 
     test.run            yes
-    # Put the src layout on PYTHONPATH: the tests import cloup from it, which is
-    # not installed during the test phase.
-    test.env-append     PYTHONPATH=${worksrcpath}/src
+    test.env-append     PYTHONPATH=${destroot}${python.pkgd}
 }

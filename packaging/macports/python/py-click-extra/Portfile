@@ -56,4 +56,5 @@ if {${name} ne ${subport}} {
     # Exclude the network tests (marked "network") that reach external services.
     test.run            yes
     test.args-append    -o addopts="-m 'not network'"
+    test.env-append     PYTHONPATH=${destroot}${python.pkgd}
 }

@@ -18,6 +18,10 @@ The release PR must be merged via "Rebase and merge" (never squash). See the `re
 
 The `build-gnome-extension` job of `release.yaml` packs `gnome-shell/mpm@kdeldycke.github.io` with `gnome-extensions pack` and hands the zip to the release engine, which attaches it to the release and attests it like every other artifact. Publishing it on [extensions.gnome.org](https://extensions.gnome.org) stays manual, and is only needed when the extension actually changed: see the [extension's release process](gnome-shell.md#release-process).
 
+## Screenshots
+
+Each release tag starts [`docs-screenshots.yaml`](https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/docs-screenshots.yaml), which photographs the menus of the [bar plugin](bar-plugin.md#screenshots) and of the [GNOME Shell extension](gnome-shell.md#screenshots) at the released version. It opens or refreshes one pull request per frontend with the frames that changed.
+
 ## Chocolatey
 
 The Chocolatey package definition is maintained in-tree at `packaging/choco/meta-package-manager/`, but is no longer pushed to the [Chocolatey community repository](https://community.chocolatey.org/packages/meta-package-manager) (see [Impact on Chocolatey](binaries.md#impact-on-chocolatey) for the rejection rationale). The automated `chocolatey` job has been removed from `release.yaml`; only the in-tree nuspec remains, so users can [build and install locally](packaging.md#chocolatey) and the `choco-source` job in `tests-install.yaml` keeps the build instructions exercised.

@@ -46,9 +46,10 @@ def test_writer_unavailable_reason_separates_absent_from_outdated():
     assert "--upgrade" not in absent
 
     # Any installed distribution stands in for the outdated case: the branch
-    # turns on the distribution being present, not on which one it is.
+    # turns on the distribution being present, not on which one it is. pytest is
+    # installed wherever the suite runs, unlike mpm in a distribution's test phase.
     outdated = writer_unavailable_reason(
-        "meta-package-manager",
+        "pytest",
         ImportError("cannot import name 'PredefinedLifecycle'"),
     )
     assert "is installed but too old" in outdated

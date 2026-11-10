@@ -24,6 +24,7 @@ import sys
 import threading
 from collections import Counter
 from itertools import product
+from pathlib import Path
 from typing import ClassVar, cast
 
 import pytest
@@ -174,11 +175,18 @@ def test_mpm_cli_ignores_the_spawn_directory(tmp_path):
         encoding="UTF-8",
     )
 
+    # Point the child at the `mpm` this test imports: a distribution's test phase
+    # can run the suite from a source tree it has not installed yet.
+    source_root = str(Path(bar_plugin.__file__).parents[1])
+    pythonpath = os.pathsep.join(
+        filter(None, (source_root, os.environ.get("PYTHONPATH")))
+    )
     process = subprocess.run(
         (*BarPluginRenderer().mpm_cli, "--version"),
         capture_output=True,
         cwd=tmp_path,
         encoding="UTF-8",
+        env={**os.environ, "PYTHONPATH": pythonpath},
         check=False,
     )
 

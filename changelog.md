@@ -8,6 +8,7 @@
 - [zypper] Show the latest version of each `mpm search` result, which the version column left empty.
 - [mpm] Collect the test suite without `pytest-xdist`, which `8.3.0` needed to declare the `xdist_group` marker its tests set.
 - [mpm] Pass the privilege escalation tests when the test suite runs as root, like in a container build.
+- [mpm] Pass the test suite from a source tree where mpm is not installed yet, like in a MacPorts test phase.
 - [mpm] Bump the Alpine, Chocolatey, Guix, MacPorts and Nix recipes of the repository to `8.3.0`, staging the `click-extra` `10` dependencies their distributions lack.
 
 ## [`8.3.0` (2026-11-09)](https://github.com/kdeldycke/meta-package-manager/compare/v8.2.0...v8.3.0)

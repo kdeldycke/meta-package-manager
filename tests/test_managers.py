@@ -89,7 +89,7 @@ def test_unmaintained(manager):
         assert manager.unmaintained_message.strip()
         for url in re.findall(r"https?://[^\s)]+", manager.unmaintained_message):
             location = urlsplit(url)
-            assert location
+            assert location.hostname
             assert location.scheme.lower() in ("http", "https")
 
 
@@ -109,7 +109,7 @@ def test_maintenance_note(manager):
     )
     for url in re.findall(r"https?://[^\s)]+", manager.maintenance_note):
         location = urlsplit(url)
-        assert location
+        assert location.hostname
         assert location.scheme.lower() in ("http", "https")
 
 
@@ -249,7 +249,7 @@ def test_homepage_url(manager):
     if manager.homepage_url is None:
         return
     location = urlsplit(manager.homepage_url)
-    assert location
+    assert location.hostname
     assert location.scheme.lower() in ("http", "https")
 
 

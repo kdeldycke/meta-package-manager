@@ -2,6 +2,16 @@
 name: 🧪 Test MacPorts ports
 "on":
   workflow_dispatch:
+    inputs:
+      ports:
+        description: Ports whose test phase runs, in this order.
+        default: py314-cloup py314-extra-platforms py314-click-extra meta-package-manager
+      runners:
+        description: JSON list of the runners to test on.
+        default: '["macos-15-intel", "macos-26"]'
+      macports_conf:
+        description: Extra macports.conf lines, separated by semicolons.
+        default: ""
 
 permissions: {}
 
@@ -17,13 +27,11 @@ env:
 jobs:
 
   port-test:
-    name: "port test (${{ matrix.os }})"
+    name: "port test (${{ matrix.os }}) ${{ inputs.macports_conf }}"
     strategy:
       fail-fast: false
       matrix:
-        os:
-          - macos-15-intel
-          - macos-26
+        os: ${{ fromJSON(inputs.runners) }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 120
     steps:
@@ -53,12 +61,19 @@ jobs:
       # current one, and that fetch races the main one over the same `.sig` file.
       - name: Turn off the background archive fetch
         run: echo "fetch_threads 0" | sudo tee -a /opt/local/etc/macports/macports.conf
+      - name: Add the extra macports.conf lines
+        if: inputs.macports_conf != ''
+        env:
+          MACPORTS_CONF: ${{ inputs.macports_conf }}
+        run: echo "${MACPORTS_CONF}" | tr ';' '\n' | sudo tee -a /opt/local/etc/macports/macports.conf
       # A library port runs its test phase on its versioned subport, like
       # py314-cloup. Every port runs, even after one fails.
       - name: Run the test phases
+        env:
+          PORTS: ${{ inputs.ports }}
         run: |
           fail=0
-          for port in py314-cloup py314-extra-platforms py314-click-extra meta-package-manager; do
+          for port in ${PORTS}; do
             echo "::group::port test ${port}"
             sudo port -v test "${port}" || fail=1
             echo "::endgroup::"

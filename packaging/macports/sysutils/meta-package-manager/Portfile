@@ -36,18 +36,13 @@ depends_lib-append  port:py${python.version}-click-extra \
                     port:py${python.version}-extra-platforms \
                     port:py${python.version}-tomli-w
 
-# packageurl-python is no longer a runtime dependency, but the SBOM tests import
-# it once their optional writers or HTTP mocks are installed. pytest-xdist
-# declares the `xdist_group` marker the 8.3.0 tests set, which they need to
-# collect under strict markers.
+# pytest-xdist registers the `xdist_group` marker the tests set.
 depends_test-append port:py${python.version}-packageurl-python \
                     port:py${python.version}-pytest-xdist \
                     port:py${python.version}-tomlrt \
                     port:py${python.version}-yaml
 
-# Run the hermetic layer from the unpacked sdist. It excludes the integration
-# tests (marked "integration") that drive real package managers, and the tests
-# (marked "host_environment") that need a login shell or a sudo policy, which
-# the macports build user does not have.
+# Run the hermetic layer from the unpacked sdist, excluding the tests that drive
+# real package managers or need a login shell or a sudo policy.
 test.run            yes
 test.args-append    -o addopts="-m 'not integration and not host_environment'"

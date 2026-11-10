@@ -423,9 +423,6 @@ Also the title the window takes once that pane is selected, which is what the
 capture waits on.
 """
 
-FOCUS_ATTEMPTS = 3
-"""Times the preferences window is asked to take focus before its shot fails."""
-
 SCROLL_STEPS = (-400,) * 6
 """Scroll wheel deltas posted over the preferences pane to reach its foot.
 
@@ -2015,37 +2012,6 @@ def settled_window(host: Host, title: str) -> dict[str, float]:
         window = settled
 
 
-def focus_window(host: Host) -> None:
-    """Make the host frontmost and raise its front window, then check both took.
-
-    An inactive window draws its title and toolbar labels lighter, and nothing
-    else: the light pane photographed its title ten levels darker in some runs,
-    every other pixel equal, the host having kept the focus its *Preferences…*
-    click gave it there and lost it elsewhere (run 42453185502). Asked for here,
-    the active state is the one every frame carries, and the one a user sees on
-    opening the pane.
-    """
-    reply = ""
-    for _ in range(FOCUS_ATTEMPTS):
-        reply = osascript(
-            bounded(f"""
-tell application "System Events"
-    tell process "{host.name}"
-        set frontmost to true
-        perform action "AXRaise" of window 1
-        delay 1
-        return (frontmost as text) & " " & ((value of attribute "AXMain" of window 1) as text)
-    end tell
-end tell
-""")  # noqa: E501
-        )
-        if reply == "true true":
-            return
-        print(f"  {host.name} has not taken focus yet: {reply}")
-    msg = f"{host.name} would not take focus: {reply}"
-    raise RuntimeError(msg)
-
-
 def press_toolbar_item(host: Host, label: str) -> None:
     """Press a toolbar item of the host's front window, found by its label.
 
@@ -2226,13 +2192,19 @@ def capture_preferences(shot: Shot, plugins: Path) -> None:
     fixed 750 by 400 points and cannot be resized, which is why two frames are
     needed: nothing in the first says that the second exists
     ([swiftbar/SwiftBar#555](https://github.com/swiftbar/SwiftBar/issues/555)).
+
+    The light pane still lands in one of two renderings: in some runs its title
+    and selected toolbar item come out ten levels darker, and no other pixel
+    moves (run 42453185502). Both show an active window, its selected item in
+    blue, so focus is not the cause. The `capture_screens` input photographs the
+    whole screen beside the shot, which shows what sits around the window on a
+    run that lands the darker way.
     """
     open_menu(shot, plugins)
     open_preferences(shot.host)
     wait_for_window(shot.host, None)
     press_toolbar_item(shot.host, PREFERENCES_PANE)
     window = settled_window(shot.host, PREFERENCES_PANE)
-    focus_window(shot.host)
     park_pointer()
     time.sleep(2)
     width, height = DISPLAY_MODE

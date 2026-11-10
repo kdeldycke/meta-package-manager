@@ -54,7 +54,9 @@ concurrency:
 # request commit holds the same image blobs as the first. Compare the blobs and
 # not the commits, since `pr-sync` writes the branch again once `main` moved
 # between the runs. The drivers record each thing they pin against the run that
-# exposed it: read those comments before adding an element to a frame.
+# exposed it: read those comments before adding an element to a frame. The light
+# SwiftBar preferences pane is the one exception left: see `capture_preferences()`
+# in `docs/bar_screenshots_update.py`.
 #
 # Measure a capture that moved before explaining it. The changed rectangle and
 # its count of pixels past a threshold tell a moved element from a shifted tint.

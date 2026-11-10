@@ -6,6 +6,7 @@
 > This version is **not released yet** and is under active development.
 
 - [zypper] Show the latest version of each `mpm search` result, which the version column left empty.
+- [mpm] Collect the test suite without `pytest-xdist`, which `8.3.0` needed to declare the `xdist_group` marker its tests set.
 
 ## [`8.3.0` (2026-11-09)](https://github.com/kdeldycke/meta-package-manager/compare/v8.2.0...v8.3.0)
 

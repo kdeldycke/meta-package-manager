@@ -546,6 +546,36 @@ def test_collection_hook_runs_before_xdist_stamps_the_group():
     )
 
 
+def test_suite_collects_without_xdist():
+    """The suite collects without pytest-xdist, as a lean packager build runs it.
+
+    `strict_markers` fails collection on any marker nothing declares, and only
+    pytest-xdist declares the `xdist_group` marker this suite sets. So
+    `conftest.py` declares it as well whenever the plugin is not loaded.
+    """
+    # No variable of the outer session leaks in, and pytest-xdist stays out.
+    env = {key: value for key, value in os.environ.items() if "PYTEST" not in key}
+    result = subprocess.run(
+        (
+            sys.executable,
+            "-m",
+            "pytest",
+            "-p",
+            "no:xdist",
+            "--collect-only",
+            "--quiet",
+            "tests/test_cli_restore.py",
+        ),
+        cwd=conftest.PROJECT_ROOT,
+        env=env,
+        capture_output=True,
+        text=True,
+        encoding="UTF-8",
+        check=False,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
 def test_loadgroup_keeps_a_group_on_one_worker(tmp_path):
     """`--dist=loadgroup` must run every test of one `xdist_group` on one worker.
 

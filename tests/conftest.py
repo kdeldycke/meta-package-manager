@@ -114,6 +114,14 @@ def pytest_configure(config):
         "artifact against a regeneration from the installed tooling. Only "
         "meaningful in a git checkout of the repository, not a packager build.",
     )
+    # pytest-xdist declares the `xdist_group` marker the suite sets. A packager
+    # build without the plugin must still collect, which `strict_markers` blocks.
+    if not config.pluginmanager.hasplugin("xdist"):
+        config.addinivalue_line(
+            "markers",
+            "xdist_group(name): run the tests sharing a name on one pytest-xdist "
+            "worker. Inert without the plugin.",
+        )
 
 
 def solve_destructive_options(config: Config) -> tuple[bool, bool]:

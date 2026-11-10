@@ -37,10 +37,11 @@ if TYPE_CHECKING:
     from ..version import TokenizedString
 
     class SearchResult(TypedDict):
-        """One XML search match, reduced to the fields the dedup logic keys on."""
+        """One package of the XML search, merged across repositories and archs."""
 
         id: str
-        version: TokenizedString
+        installed_version: TokenizedString | None
+        latest_version: TokenizedString
 
 
 class Zypper(PackageManager):
@@ -129,10 +130,11 @@ class Zypper(PackageManager):
         This is reused by the `installed` and `search` operations.
 
         The query below stands in for the `*args` each caller appends, and its
-        result shows both shapes the note above describes: `libopenh264-8`
-        returned twice, once `installed` and once `other-version`, which `mpm`
-        drops; and `libopenh264-devel` returned once per repository at a
-        different edition, which `mpm` collapses to the highest.
+        result shows both shapes the note above describes. `libopenh264-8` comes
+        back twice, once `installed` and once `other-version`: the `installed` row
+        gives its installed version, and the highest edition of all its rows gives
+        its latest version. `libopenh264-devel` comes back once per repository at
+        a different edition, which `mpm` collapses to the highest.
 
         ```{code-block} shell-session
 
@@ -175,24 +177,30 @@ class Zypper(PackageManager):
         # Group packages by ID.
         key_func = itemgetter("name")
 
-        # Skip old packages reported in the results as 'other-version'.
-        fresh_packages = sorted(
+        solvables = sorted(
             (
                 solvable.attrib
                 for solvable in ElementTree.fromstring(output).iterfind(
                     "search-result/solvable-list/solvable",
                 )
-                if solvable.get("status") != "other-version"
             ),
             key=key_func,
         )
 
-        # Returns the highest version for a package ID among all repositories and
-        # arch variations.
-        for key, group in groupby(fresh_packages, key_func):
+        # An `other-version` row is another release of a package installed at a
+        # different version, so it counts toward the latest version only. Each
+        # version is the highest among all repositories and arch variations.
+        for key, group in groupby(solvables, key_func):
+            rows = tuple(group)
+            installed = [
+                parse_version(row["edition"])
+                for row in rows
+                if row.get("status") == "installed"
+            ]
             yield {
                 "id": key,
-                "version": max(parse_version(p["edition"]) for p in group),
+                "installed_version": max(installed, default=None),
+                "latest_version": max(parse_version(row["edition"]) for row in rows),
             }
 
     @property
@@ -206,7 +214,9 @@ class Zypper(PackageManager):
         ```
         """
         for package in self._search("--installed-only"):
-            yield self.package(id=package["id"], installed_version=package["version"])
+            yield self.package(
+                id=package["id"], installed_version=package["installed_version"]
+            )
 
     @property
     def outdated(self) -> Iterator[Package]:
@@ -315,7 +325,9 @@ class Zypper(PackageManager):
             search_param.append("--match-exact")
 
         for package in self._search(*search_param, query):
-            yield self.package(id=package["id"], installed_version=package["version"])
+            yield self.package(
+                id=package["id"], latest_version=package["latest_version"]
+            )
 
     @version_not_implemented
     def install(self, package_id: str, version: str | None = None) -> str:

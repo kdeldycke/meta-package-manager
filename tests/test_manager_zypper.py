@@ -86,6 +86,25 @@ MANY_SOLVABLES = """<?xml version='1.0'?>
 """  # noqa: E501
 """`zypper --xmlout search --details --type package gzip`."""
 
+LIBOPENH264_SOLVABLES = """<?xml version='1.0'?>
+<stream>
+<message type="info">Ignoring repository &apos;openSUSE-20260830-0&apos; because of &apos;no-cd&apos; option.</message>
+<message type="info">Loading repository data...</message>
+<message type="info">Reading installed packages...</message>
+
+<search-result version="0.0">
+<solvable-list>
+<solvable status="installed" name="libopenh264-8" kind="package" edition="2.6.0-2.suse1699.10" arch="aarch64" repository="Open H.264 Codec (openSUSE Tumbleweed)"/>
+<solvable status="other-version" name="libopenh264-8" kind="package" edition="2.6.0~noopenh264-1.5" arch="aarch64" repository="Main Repository (OSS)"/>
+<solvable status="not-installed" name="libopenh264-devel" kind="package" edition="2.6.0-2.suse1699.10" arch="aarch64" repository="Open H.264 Codec (openSUSE Tumbleweed)"/>
+<solvable status="not-installed" name="libopenh264-devel" kind="package" edition="2.6.0~noopenh264-1.5" arch="aarch64" repository="Main Repository (OSS)"/>
+</solvable-list>
+</search-result>
+</stream>
+"""  # noqa: E501
+"""`zypper --xmlout search --details --type package libopenh264`: one package
+installed beside an `other-version` row, one offered by two repositories."""
+
 NO_SOLVABLE = """<?xml version='1.0'?>
 <stream>
 <message type="info">Loading repository data...</message>
@@ -155,6 +174,20 @@ def test_search_reads_any_number_of_solvables(stub_run_cli, output, expected):
     stub_run_cli(manager, output)
     results = manager.search("gzip", extended=False, exact=False)
     assert sorted(package.id for package in results) == sorted(expected)
+
+
+def test_search_reads_the_latest_version(stub_run_cli):
+    """A search result carries the highest edition of its rows as latest version.
+
+    That is the version column `mpm search` prints.
+    """
+    manager = Zypper()
+    stub_run_cli(manager, LIBOPENH264_SOLVABLES)
+    results = manager.search("libopenh264", extended=False, exact=False)
+    assert {package.id: str(package.latest_version) for package in results} == {
+        "libopenh264-8": "2.6.0-2.suse1699.10",
+        "libopenh264-devel": "2.6.0-2.suse1699.10",
+    }
 
 
 @pytest.mark.parametrize(

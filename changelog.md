@@ -5,6 +5,8 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [zypper] Show the latest version of each `mpm search` result, which the version column left empty.
+
 ## [`8.3.0` (2026-11-09)](https://github.com/kdeldycke/meta-package-manager/compare/v8.2.0...v8.3.0)
 
 - **Breaking:** [mpm] Drop Python `3.10`, past its end of life: `mpm` needs Python `3.11`. The PPA stops building for Ubuntu `22.04`, whose Python is `3.10`.

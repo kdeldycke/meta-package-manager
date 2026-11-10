@@ -579,9 +579,9 @@ The [Python](#python-compatibility) and [click-extra](packaging.md#click-extra-c
 
 <!-- envelope python click-extra package=mpm -->
 
-- `mpm` releases before `7.6.0` (2026-08-10)
+- `mpm` releases before `8.1.0` (2026-10-04)
 - Python versions before `3.10` (2021-10-04)
-- `click-extra` versions before `8.8.1` (2026-08-02)
+- `click-extra` versions before `9.3.0` (2026-09-18)
 
 <!-- envelope-end -->
 
@@ -599,7 +599,8 @@ See [three states, two sources](https://kdeldycke.github.io/click-extra/python-d
 
 | `mpm` ↴ \\ Python → | `3.15` | `3.14` | `3.13` | `3.12` | `3.11` | `3.10` | `3.9` | `3.8` | `3.7` |
 | :------------------ | :----: | :----: | :----: | :----: | :----: | :----: | :---: | :---: | :---: |
-| `8.x`               |   ✅   |   ✅   |   ✅   |   ✅   |   ✅   |   ✅   |  ❌   |  ❌   |  ❌   |
+| `8.3.0`             |   ✅   |   ✅   |   ✅   |   ✅   |   ✅   |   ❌   |  ❌   |  ❌   |  ❌   |
+| `8.0.x` → `8.2.x`   |   ✅   |   ✅   |   ✅   |   ✅   |   ✅   |   ✅   |  ❌   |  ❌   |  ❌   |
 | `6.0.x` → `7.6.x`   |   –    |   ✅   |   ✅   |   ✅   |   ✅   |   ✅   |  ❌   |  ❌   |  ❌   |
 | `5.21.0`            |   –    |   –    |   ✅   |   ✅   |   ✅   |   ❌   |  ❌   |  ❌   |  ❌   |
 | `5.19.x` → `5.20.x` |   –    |   –    |   ✅   |   ✅   |   ✅   |   ✅   |  ❌   |  ❌   |  ❌   |

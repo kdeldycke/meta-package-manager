@@ -49,6 +49,14 @@ When a recipe in `packaging/` moves to the first release after `8.2.0`, drop `to
 When the Alpine recipe in `packaging/` moves past `8.3.0`, drop the `--deselect` options of its `check()`: the next release passes those tests as root.
 ```
 
+```{todo}
+When a recipe in `packaging/` moves past `8.3.0`, drop `pytest-xdist` from its test dependencies: the next release registers the `xdist_group` marker without it. The Nix recipe can keep it, since it spreads the suite over the build cores.
+```
+
+```{todo}
+When the MacPorts recipe of `py-click-extra` moves to a release whose process-tree tests skip themselves without a process table, drop the `--deselect` options of its test phase.
+```
+
 ## Dependencies
 
 This is a graph of the default, main dependencies of the Python package:

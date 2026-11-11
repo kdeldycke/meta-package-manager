@@ -442,7 +442,7 @@ jobs:
   # https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/macports
   # Build and install from the in-repo Portfile overlay: a local ports tree
   # providing meta-package-manager, the version bumps of its dependency ports
-  # (py-click-extra, py-cloup, py-extra-platforms) and py-tomlrt, a test
+  # (py-bracex, py-click-extra, py-cloup, py-extra-platforms) and py-tomlrt, a test
   # dependency the official tree lacks. meta-package-manager and its dependency
   # closure first landed in the official macports-ports tree via
   # https://github.com/macports/macports-ports/pull/33609; the overlay is kept
@@ -493,6 +493,7 @@ jobs:
         run: >
           port lint --nitpick
           meta-package-manager
+          py-bracex
           py-click-extra
           py-cloup
           py-extra-platforms

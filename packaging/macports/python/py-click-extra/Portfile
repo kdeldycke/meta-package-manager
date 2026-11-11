@@ -53,8 +53,16 @@ if {${name} ne ${subport}} {
                     port:py${python.version}-tomlrt \
                     port:py${python.version}-yaml
 
-    # Exclude the network tests (marked "network") that reach external services.
+    # Exclude the network tests (marked "network") that reach external services,
+    # and the tests that read the process table, which the build sandbox hides.
     test.run            yes
-    test.args-append    -o addopts="-m 'not network'"
+    test.args-append    -o addopts="-m 'not network'" \
+                        --deselect tests/test_execution.py::test_interrupted_run_kills_grandchildren_ignoring_sigterm \
+                        --deselect tests/test_execution.py::test_kill_signal_reaches_a_grandchild_holding_the_output \
+                        --deselect tests/test_execution.py::test_posix_process_table_lists_this_process \
+                        --deselect tests/test_execution.py::test_run_cli_timeout_kills_grandchildren_without_a_session \
+                        --deselect tests/test_execution.py::test_run_cli_timeout_new_session_kills_grandchildren \
+                        --deselect tests/test_execution.py::test_terminate_live_processes_signals_whole_group \
+                        --deselect tests/test_recording.py::test_record_command_kills_what_its_command_started
     test.env-append     PYTHONPATH=${destroot}${python.pkgd}
 }

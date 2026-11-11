@@ -1,4 +1,23 @@
 -------------------------------------------------------------------
+Tue Nov 10 12:00:00 UTC 2026 - Kevin Deldycke <kevin@deldycke.com>
+
+- Update to 8.3.0.
+- Drop the boltons and xmltodict requirements: 8.3.0 no longer
+  uses them.
+- Drop the packageurl-python requirement: only mpm sbom uses it
+  now, and openSUSE ships neither of the other two libraries it
+  needs.
+- Raise the click-extra floor to 10, and the extra-platforms floor
+  to 14, which click-extra 10 requires.
+- Drop the tomlkit test requirement: the documentation tests now
+  use tomlrt, and skip themselves without it.
+- Add pytest-xdist to the test requirements: the suite sets its
+  xdist_group marker and rejects a marker no plugin registers.
+- Stop deselecting test_extra_labels_in_pyproject: it now skips
+  itself outside a git checkout.
+- Drop the platformdirs suggestion: 8.3.0 no longer uses it.
+
+-------------------------------------------------------------------
 Sat Oct 31 12:00:00 UTC 2026 - Kevin Deldycke <kevin@deldycke.com>
 
 - Update to 8.2.0.

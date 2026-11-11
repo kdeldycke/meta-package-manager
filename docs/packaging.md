@@ -42,10 +42,6 @@ As of mpm > `7.3.0`, the PyPI sdist ships `tests/`, `docs/` and the `.github/` w
 ```
 
 ```{todo}
-When a recipe in `packaging/` moves to the first release after `8.2.0`, drop `tomlkit` from its test dependencies. The Nix recipe can name `tomlrt` in its place, since nixpkgs packages it.
-```
-
-```{todo}
 When the Alpine recipe in `packaging/` moves past `8.3.0`, drop the `--deselect` options of its `check()`: the next release passes those tests as root.
 ```
 

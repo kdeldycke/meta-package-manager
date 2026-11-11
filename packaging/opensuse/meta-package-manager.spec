@@ -23,7 +23,7 @@
 %define pythons %{primary_python}
 
 Name:           meta-package-manager
-Version:        8.2.0
+Version:        8.3.0
 Release:        0
 Summary:        Wraps all package managers with a unifying CLI
 License:        GPL-2.0-or-later
@@ -35,34 +35,30 @@ BuildRequires:  python3-uv-build >= 0.8
 BuildRequires:  fdupes
 BuildRequires:  python-rpm-macros
 # SECTION runtime requirements, also imported by the test suite
-# Each floor mirrors [project.dependencies] of pyproject.toml.
-BuildRequires:  python3-boltons >= 25
-BuildRequires:  python3-click-extra >= 9.3
-BuildRequires:  python3-extra-platforms >= 13.10
-BuildRequires:  python3-packageurl-python >= 0.17.6
+# Each floor mirrors [project.dependencies] of pyproject.toml, except
+# extra-platforms, which takes the higher floor click-extra 10 sets.
+BuildRequires:  python3-click-extra >= 10
+BuildRequires:  python3-extra-platforms >= 14
 BuildRequires:  python3-tomli-w >= 1
-BuildRequires:  python3-xmltodict >= 0.12
 # /SECTION
 # SECTION test requirements
 # extra-platforms reads /etc/os-release to identify the build platform, and
 # fails its detection tests when the build root carries none.
 BuildRequires:  openSUSE-release
-# PyYAML and tomlkit are parsers the documentation tests need; the SBOM tests
-# skip themselves when cyclonedx-python-lib and spdx-tools are absent, which
-# they are on openSUSE.
+# PyYAML is a parser the documentation tests need; the SBOM tests skip
+# themselves when cyclonedx-python-lib and spdx-tools are absent, which they
+# are on openSUSE.
 BuildRequires:  python3-PyYAML >= 6
 BuildRequires:  python3-pytest >= 9
-BuildRequires:  python3-tomlkit >= 0.13
+# pytest-xdist registers the xdist_group marker the test suite sets. The
+# suite sets strict_markers, so collection fails without the plugin.
+BuildRequires:  python3-pytest-xdist >= 3.7
 # /SECTION
-Requires:       python3-boltons >= 25
-Requires:       python3-click-extra >= 9.3
-Requires:       python3-extra-platforms >= 13.10
-Requires:       python3-packageurl-python >= 0.17.6
+Requires:       python3-click-extra >= 10
+Requires:       python3-extra-platforms >= 14
 Requires:       python3-tomli-w >= 1
-Requires:       python3-xmltodict >= 0.12
-# Unlock `mpm sbom --vulnerabilities`, which queries the OSV database.
+# Unlock `mpm --network sbom`, which queries the OSV database.
 Suggests:       python3-httpx >= 0.27
-Suggests:       python3-platformdirs >= 4
 BuildArch:      noarch
 
 %description
@@ -93,11 +89,7 @@ zypper is one of the ~150 managers it drives.
 %check
 # The integration layer drives the real package managers and the CLI
 # end-to-end, which no build root can satisfy. Everything else is hermetic.
-# test_extra_labels_in_pyproject compares the label list frozen in
-# pyproject.toml at release time with the one computed from the installed
-# extra-platforms, so it fails on any newer extra-platforms that adds a
-# platform to a group.
-%pytest -m "not integration" --deselect tests/test_docs.py::test_extra_labels_in_pyproject
+%pytest -m "not integration"
 
 %files
 %license license

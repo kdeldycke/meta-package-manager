@@ -500,26 +500,34 @@ jobs:
 
       # vim-pack
       # https://formulae.brew.sh/formula/neovim
-      # https://snapcraft.io/nvim
+      # https://github.com/neovim/neovim/releases
       # https://community.chocolatey.org/packages/neovim
       # vim.pack ships in Neovim's core since 0.12, so mpm requires >=0.12.0 and reports
       # the manager unavailable below that. Ubuntu still packages 0.11 in apt, hence the
-      # snap: it tracks Neovim's own stable tag and builds for both amd64 and arm64.
+      # release tarball, which Neovim builds for both amd64 and arm64.
       - name: Neovim - macOS install
         if: runner.os == 'macOS'
         run: brew install neovim
       - name: Neovim - Linux install
         if: runner.os == 'Linux'
-        # The snap store is intermittently flaky on the Ubuntu runners, so retry a few times before giving up.
+        # The release tarball keeps the Snap Store out of the run, and `sync-workflow-pins` bumps its tag. Neovim
+        # publishes no checksum file, so the download must match the digest GitHub records for one of its release
+        # assets: a check naming no tag, which a bump cannot leave behind.
+        env:
+          # gh refuses to run unauthenticated on the runners. The workflow token reads the public release.
+          GH_TOKEN: ${{ github.token }}
         run: |
-          for attempt in 1 2 3; do
-              if sudo snap install --classic nvim; then
-                  exit 0
-              fi
-              echo "snap install nvim failed (attempt ${attempt}/3), retrying in 10s..."
-              sleep 10
-          done
-          exit 1
+          case "${RUNNER_ARCH}" in X64) arch=x86_64 ;; ARM64) arch=arm64 ;; *) exit 1 ;; esac
+          cd "${RUNNER_TEMP}"
+          tarball="nvim-linux-${arch}.tar.gz"
+          gh release download v0.12.6 --repo neovim/neovim --pattern "${tarball}"
+          sha="$(sha256sum "${tarball}" | cut --delimiter=' ' --fields=1)"
+          digests="$(gh api --paginate repos/neovim/neovim/releases --jq '.[].assets[].digest')"
+          grep --quiet --line-regexp "sha256:${sha}" <<< "${digests}"
+          sudo mkdir --parents /opt/nvim
+          sudo tar --extract --gzip --directory /opt/nvim --strip-components=1 --file "${tarball}"
+          sudo ln --symbolic --force /opt/nvim/bin/nvim /usr/local/bin/nvim
+          nvim --version
       - name: Neovim - Windows install
         if: runner.os == 'Windows'
         run: choco install neovim --no-progress --yes --retry-count=3

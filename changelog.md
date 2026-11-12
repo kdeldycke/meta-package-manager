@@ -6,6 +6,8 @@
 > This version is **not released yet** and is under active development.
 
 - [zypper] Show the latest version of each `mpm search` result, which the version column left empty.
+- [macports] List the first installed port in `mpm installed`, which the parser dropped.
+- [fink] List the first installed package in `mpm installed`, which the parser dropped.
 - [mpm] Collect the test suite without `pytest-xdist`, which `8.3.0` needed to declare the `xdist_group` marker its tests set.
 - [mpm] Pass the privilege escalation tests when the test suite runs as root, like in a container build.
 - [mpm] Pass the test suite from a source tree where mpm is not installed yet, like in some distribution test phases.

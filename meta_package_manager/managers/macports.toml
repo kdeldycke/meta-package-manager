@@ -39,7 +39,9 @@ version_regexes = ['Version:\s+(?P<version>\S+)']
 
 [mpm.overrides.macports.operations.installed]
 args = ["-q", "installed"]
-regex = '^\s+(?P<package_id>\S+)\s+@(?P<installed_version>[^+\s]+)\S*\s+\(active\)'
+# Every line is indented, but `run_cli` strips the output: the first line
+# reaches the parser without its indent.
+regex = '^\s*(?P<package_id>\S+)\s+@(?P<installed_version>[^+\s]+)\S*\s+\(active\)'
 
 [mpm.overrides.macports.operations.outdated]
 args = ["-q", "outdated"]

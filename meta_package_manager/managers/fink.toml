@@ -36,7 +36,9 @@ version_regexes = ['Package manager version: (?P<version>\S+)']
 
 [mpm.overrides.fink.operations.installed]
 args = ["list", "--tab", "--installed"]
-regex = '^(?: i |\(i\)|\*i\*)\t(?P<package_id>[^\t]+)\t(?P<installed_version>[^\t]+)\t'
+# `run_cli` strips the output, so a first ` i ` status reaches the parser as
+# `i ` without its leading space.
+regex = '^(?: ?i |\(i\)|\*i\*)\t(?P<package_id>[^\t]+)\t(?P<installed_version>[^\t]+)\t'
 
 # `fink list <pattern>` matches package names only (the pattern is anchored and
 # glob-style); any status column is accepted, including not-installed spaces, and

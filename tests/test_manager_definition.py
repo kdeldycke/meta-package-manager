@@ -26,11 +26,12 @@ import sys
 import tomllib
 from operator import attrgetter
 from pathlib import Path
+from textwrap import dedent
 from types import SimpleNamespace
 
 import click
 import pytest
-from click_extra import ValidationError
+from click_extra import ValidationError, strip_ansi
 from click_extra.context import CONF_SOURCE
 
 import meta_package_manager
@@ -1986,7 +1987,9 @@ def test_bundled_parsing(manager_id, operation, output, expected):
     """
     manager = _fresh_bundled(manager_id)
     manager.which = lambda name: Path("/fake/bin") / name
-    manager.run_cli = lambda *args, **kwargs: output
+    # Hand the parser what `run_cli` returns for this output, not the raw bytes.
+    normalized = dedent(strip_ansi(output).strip())
+    manager.run_cli = lambda *args, **kwargs: normalized
     if operation == "search":
         packages = manager.search("query", False, False)
     else:

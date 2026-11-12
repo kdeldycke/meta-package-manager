@@ -1306,7 +1306,7 @@ def test_manager_logo_renders(manager):
 def test_manager_card_renders(manager):
     """Check each manager's infobox carries its facts, and its mark when it has one."""
     card = _docs.manager_card(manager.id)
-    assert card.startswith("```{card}\n:class-card: manager-card")  # noqa: RUF027
+    assert card.startswith("````{card}\n:class-card: manager-card")  # noqa: RUF027
     assert card.endswith("```")
     assert card in _docs.manager_intro(manager.id)
 
@@ -1418,8 +1418,9 @@ def test_manager_card_renders(manager):
         assert f": `{manager.requirement}`" not in card
     assert ("**Cooldown**\n: ✓" in card) is bool(manager.supports_cooldown)
 
-    # The mark rides in the card header, above the `^^^` separator.
-    header, _, body = card.partition("^^^")
+    # The mark rides in the `card-header` directive, above the facts.
+    before, marker, after = card.partition("```{card-header}\n")
+    header, _, body = after.partition("\n```\n") if marker else ("", "", before)
     assert ("manager-logo" in header) is bool(manager.logo)
     assert "manager-logo" not in body
 

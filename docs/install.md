@@ -89,7 +89,7 @@ Type "help", "copyright", "credits" or "license" for more information.
 `mpm` is available on several popular package managers:
 
 ``````{tab-set}
-:class: tabs-vertical
+:orientation: vertical
 `````{tab-item} uv
 Easiest way is to [install `uv`](https://docs.astral.sh/uv/getting-started/installation/), then install `meta-package-manager` system-wide with the [`uv tool`](https://docs.astral.sh/uv/guides/tools/#installing-tools) command:
 

@@ -470,9 +470,9 @@ docs = [
   # sphinx-datatables 1.0.0 is the first stable release; makes the binaries
   # catalog table searchable and sortable client-side (pulls sphinxcontrib-jquery).
   "sphinx-datatables>=1",
-  # sphinx-design 0.7.0 is the first release that accepts Sphinx 9 (`sphinx<10`):
-  # 0.6.1 caps it below 9.
-  "sphinx-design>=0.7",
+  # sphinx-design 0.8.0 added the `:orientation: vertical` option of `tab-set`,
+  # which the install page sets: an older release fails the build on it.
+  "sphinx-design>=0.8",
   # sphinx-sitemap 2.6.0 added `sitemap_excludes`, which docs/conf.py sets to keep
   # the index and search pages out of the sitemap.
   "sphinx-sitemap>=2.6",
@@ -538,7 +538,10 @@ exclude-newer = "1 week"
 # maintainer: the cooldown guards against a compromised upstream, which does not
 # apply here, and it otherwise holds each release back a week from the projects
 # that consume it.
-exclude-newer-package = { click-extra = "2026-11-08T00:00:00Z" }
+# XXX The `sphinx-design` entry lets the `sphinx-design>=0.8` floor of the docs
+# group resolve inside its cooldown: drop this comment once `sync-uv-lock`
+# prunes the entry.
+exclude-newer-package = { click-extra = "2026-11-08T00:00:00Z", sphinx-design = "0 days" }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
 # source-include does not honor .gitignore, so prune the build output and caches
@@ -907,6 +910,10 @@ docs/_linkcheck/
 # manifests. RPM recipes share the extension and are packaging sources, tracked
 # like every other spec under packaging/.
 !packaging/**/*.spec"""
+# XXX Drop once `lint-deps` reports that this entry exempts nothing.
+lint-deps.allow.sphinx-design = """\
+  sphinx-design 0.8.0 is on PyPI: only a docs install under a cooldown fails, until 2026-11-17.\
+  """
 # Entries of the bundled `pytest.toml` that `[tool.pytest]` leaves out, each with
 # the reason `lint-repo` prints in place of its warning. tests.yaml passes the
 # coverage and xdist flags itself, so a packager's plain `pytest` runs without

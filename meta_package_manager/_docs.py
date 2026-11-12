@@ -1615,9 +1615,11 @@ def manager_card(manager_id: str) -> str:
     # A definition list, so each fact reads as a labelled row of the box.
     rows = "\n\n".join(f"**{label}**\n: {value}" for label, value in facts)
 
+    # The mark goes in a nested `card-header` directive, so the card fence takes
+    # one backtick more than the header fence it holds.
     logo = manager_logo(manager_id)
-    header = f"{logo}\n^^^\n" if logo else ""
-    return f"```{{card}}\n:class-card: manager-card\n\n{header}{rows}\n```"
+    header = f"```{{card-header}}\n{logo}\n```\n\n" if logo else ""
+    return f"````{{card}}\n:class-card: manager-card\n\n{header}{rows}\n````"
 
 
 def manager_logo_credits() -> str:

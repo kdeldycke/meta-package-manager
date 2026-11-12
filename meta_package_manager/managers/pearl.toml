@@ -74,23 +74,23 @@ args = ["update", "{package_id}"]
 #
 # Pearl colors both listings unconditionally, and its escapes fall *between*
 # the repository prefix and the package name, so no pattern could recover the
-# identifier from the raw bytes as one token. These samples are therefore the
-# stripped form, which is exactly what the parser sees: mpm runs every capture
-# through `strip_ansi` before matching.
+# identifier from the raw bytes as one token. The samples keep those escapes,
+# as `\u001B` in TOML basic strings, since mpm runs every capture through
+# `strip_ansi` before matching.
 [samples.version]
 output = "pearl 2.3.12"
 expected = "2.3.12"
 
 [[samples.installed]]
 output = """
-pearl/airline [installed]
+\u001B[0;35mpearl/\u001B[0;36mairline [installed]\u001B[0m
     Status/tabline for vim"""
 packages = [{ id = "pearl/airline" }]
 
 [[samples.search]]
 output = """
-pearl/bufexplorer
+\u001B[0;35mpearl/\u001B[0;36mbufexplorer \u001B[0m
     BufExplorer Plugin for Vim
-pearl/dot-vim
+\u001B[0;35mpearl/\u001B[0;36mdot-vim \u001B[0m
     Awesome vim dotfiles"""
 packages = [{ id = "pearl/bufexplorer" }, { id = "pearl/dot-vim" }]

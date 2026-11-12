@@ -391,28 +391,32 @@ jobs:
         run: brew install --cask powershell || true
       - name: PowerShell Gallery - Linux install
         if: runner.os == 'Linux'
-        # See: https://learn.microsoft.com/en-us/powershell/scripting/install/install-ubuntu
-        # The snap store is intermittently flaky on the Ubuntu runners, and a failed download of the
-        # snapd prerequisite aborts the whole step, so retry a few times before giving up.
+        # The release tarball, checked against the hashes the release publishes, keeps the Snap Store out of the run.
+        # `sync-workflow-pins` bumps the tag, and the asset glob leaves the version to that tag alone.
+        env:
+          # gh refuses to run unauthenticated on the runners. The workflow token reads the public release.
+          GH_TOKEN: ${{ github.token }}
         run: |
-          for attempt in 1 2 3; do
-              if sudo snap install powershell --classic; then
-                  exit 0
-              fi
-              echo "snap install powershell failed (attempt ${attempt}/3), retrying in 10s..."
-              sleep 10
-          done
-          exit 1
+          arch="${RUNNER_ARCH,,}"
+          cd "${RUNNER_TEMP}"
+          patterns=(--pattern "powershell-*-linux-${arch}.tar.gz" --pattern hashes.sha256)
+          gh release download v7.6.9 --repo PowerShell/PowerShell "${patterns[@]}"
+          # The release writes its hashes in UTF-16, with CRLF line ends.
+          iconv --from-code=UTF-16 --to-code=UTF-8 hashes.sha256 | tr --delete '\r' > hashes.txt
+          grep --fixed-strings -- "-linux-${arch}.tar.gz" hashes.txt | sha256sum --check --strict
+          sudo mkdir --parents /opt/microsoft/powershell/7
+          sudo tar --extract --gzip --directory /opt/microsoft/powershell/7 --file powershell-*-linux-"${arch}".tar.gz
+          sudo chmod +x /opt/microsoft/powershell/7/pwsh
+          sudo ln --symbolic --force /opt/microsoft/powershell/7/pwsh /usr/bin/pwsh
+          pwsh --version
       - name: PowerShell Gallery - Refresh PSResourceGet
         shell: pwsh
         # Every runner carries pwsh here: Windows ships 7.4+, and the two steps above install it on macOS and Linux.
         # Refresh PSResourceGet to the latest published version, so the bundled copy does not lag behind the version
         # mpm exercises in tests.
         # The gallery serves CI runners an empty search result every now and then, which Install-Module reports as
-        # "No match was found" rather than as a network error, so retry. macOS and Windows already bundle the module,
-        # so an exhausted retry warns there instead of failing the whole cell over a refresh. Linux fails instead: its
-        # pwsh comes from the snap and bundles no PSResourceGet, so a persistent gallery failure is a real blocker for
-        # the `pwsh-gallery` manager, not a lag.
+        # "No match was found" rather than as a network error, so retry. Every runner's pwsh bundles the module, so an
+        # exhausted retry warns instead of failing the whole cell over a refresh.
         run: |
           $ErrorActionPreference = 'Stop'
           foreach ($attempt in 1..3) {
@@ -424,7 +428,6 @@ jobs:
               Start-Sleep -Seconds 10
             }
           }
-          if ($IsLinux) { exit 1 }
           Write-Output '::warning::Could not refresh PSResourceGet; keeping the bundled copy.'
 
       # Scoop

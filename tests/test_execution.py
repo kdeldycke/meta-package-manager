@@ -1395,7 +1395,8 @@ def test_run_names_each_run0_unit_at_spawn_time():
     assert None not in units
     assert units[0] != units[1]
     assert all(
-        unit.startswith(f"--unit=mpm-{os.getpid()}-{first.id}-") for unit in units
+        unit is not None and unit.startswith(f"--unit=mpm-{os.getpid()}-{first.id}-")
+        for unit in units
     )
 
 

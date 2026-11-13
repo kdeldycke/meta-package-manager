@@ -1,9 +1,11 @@
 # Changelog
 
-## [`8.3.1.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v8.3.0...main)
+## [`8.3.2.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v8.3.1...main)
 
 > [!WARNING]
 > This version is **not released yet** and is under active development.
+
+## [`8.3.1` (2026-11-13)](https://github.com/kdeldycke/meta-package-manager/compare/v8.3.0...v8.3.1)
 
 - [mpm] Name `mpm` in the polkit message of the `run0` password prompt, which reads `start transient unit 'mpm-<pid>.service'` from systemd `257` on.
 - [mpm] Name the unit of each `run0` call `mpm-<pid>-<manager>-<serial>`, so `systemctl list-units 'mpm-*'` finds a call that outlived its timeout.

@@ -1657,6 +1657,37 @@ def test_escalator_without_a_template_forwards_nothing(escalator):
     assert escalator.forward_env(argv, {"LC_ALL": "C"}) == argv
 
 
+def test_run0_names_each_unit_after_mpm_and_its_manager():
+    """Each escalated `run0` call runs in a unit of its own, named after mpm.
+
+    run0 names it after its own process, so a call outliving its timeout would
+    look like any other run0 unit. The serial keeps two calls of one run from
+    asking for one name.
+    """
+    run0 = next(e for e in ESCALATORS if e.id == "run0")
+    argv = (*run0.escalate_args, "/usr/bin/nala", "upgrade")
+    named = [run0.name_unit(argv, "nala") for _ in range(2)]
+    units = [arg for args in named for arg in args if arg.startswith("--unit=")]
+    assert len(units) == 2
+    assert units[0] != units[1]
+    for args, unit in zip(named, units, strict=True):
+        assert unit.startswith(f"--unit=mpm-{os.getpid()}-nala-")
+        # Ahead of the separator, the payload left as it was.
+        assert args.index(unit) < args.index("--")
+        assert args[args.index("--") :] == argv[argv.index("--") :]
+
+
+@pytest.mark.parametrize(
+    "escalator",
+    [e for e in ESCALATORS if e.unit_template is None],
+    ids=[e.id for e in ESCALATORS if e.unit_template is None],
+)
+def test_escalator_without_a_unit_template_names_nothing(escalator):
+    """An escalator running the command in mpm's own process tree names no unit."""
+    argv = (*escalator.escalate_args, "/usr/bin/apt", "upgrade")
+    assert escalator.name_unit(argv, "apt") == argv
+
+
 @pytest.mark.parametrize(
     "escalator",
     [e for e in ESCALATORS if e.probe_success_markers is None],

@@ -6,6 +6,7 @@
 > This version is **not released yet** and is under active development.
 
 - [mpm] Name `mpm` in the polkit message of the `run0` password prompt, which reads `start transient unit 'mpm-<pid>.service'` from systemd `257` on.
+- [mpm] Name the unit of each `run0` call `mpm-<pid>-<manager>-<serial>`, so `systemctl list-units 'mpm-*'` finds a call that outlived its timeout.
 - [mpm] Fix the `run0` password prompt, which polkit kept for no later command because the prompt left the terminal owned by root.
 - [mpm] Skip the `run0` password prompt under a polkit older than `127`, which keeps the authorization for the prompt call alone, warning with the fix instead.
 - [zypper] Show the latest version of each `mpm search` result, which the version column left empty.

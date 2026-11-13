@@ -1832,8 +1832,16 @@ class CLIExecutor:
             if cache is not None and mutating:
                 for stale_key in [key for key in cache if not key[-1]]:
                     del cache[stale_key]
+            # The unit name of an escalated call carries a serial, drawn here so
+            # it reaches neither a plan nor the cache key above.
+            # `id` is declared on the `PackageManager` subclass, not this mixin.
+            spawn_args = (
+                escalator.name_unit(clean_args, self.id)  # type: ignore[attr-defined]
+                if escalator is not None
+                else clean_args
+            )
             spawned = self._spawn(
-                clean_args,
+                spawn_args,
                 extra_env,
                 command_level=command_level,
                 is_escalation=is_escalation,

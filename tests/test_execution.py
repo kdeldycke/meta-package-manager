@@ -1367,6 +1367,38 @@ def test_run_forwards_a_forced_environment_across_run0():
     assert argv.index("--setenv=LC_ALL=C") < argv.index("--")
 
 
+def test_run_names_each_run0_unit_at_spawn_time():
+    """Each spawned `run0` call carries a unit name of its own.
+
+    The serial in that name stays out of the cache key: a peer of the lane
+    still replays the call, and a later spawn draws a new serial.
+    """
+    cache: dict = {}
+    first, second = FakeManager(), FakeManager()
+    first.sudo = second.sudo = True
+    first.run_cache = second.run_cache = cache
+    with (
+        only_escalator("run0"),
+        patch("meta_package_manager.execution.run_cli") as spawn,
+    ):
+        spawn.return_value = SimpleNamespace(returncode=0, stdout="", stderr="")
+        first.run(first.build_cli("-c", "true", sudo=True))
+        second.run(second.build_cli("-c", "true", sudo=True))
+        assert spawn.call_count == 1
+        first.run_cache = None
+        first.run(first.build_cli("-c", "true", sudo=True))
+    units = [
+        next((arg for arg in call.args[0] if arg.startswith("--unit=")), None)
+        for call in spawn.call_args_list
+    ]
+    assert len(units) == 2
+    assert None not in units
+    assert units[0] != units[1]
+    assert all(
+        unit.startswith(f"--unit=mpm-{os.getpid()}-{first.id}-") for unit in units
+    )
+
+
 @pytest.mark.skipif(is_any_windows(), reason="Windows forces no locale.")
 def test_run_forwards_the_forced_locale_across_run0():
     """The forced locale reaches the payload `run0` escalates, `LANGUAGE` unset.

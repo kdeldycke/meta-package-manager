@@ -100,6 +100,7 @@ and the tools it never reaches (`brew` honors the variable, `fink`'s plain
 
 from __future__ import annotations
 
+import itertools
 import logging
 import os
 import re
@@ -187,6 +188,16 @@ child `sudo` may not be able to spend that credential, and its mid-run prompt th
 goes unflagged. Priming still authenticates; only the watchdog is suppressed.
 ```
 """
+
+_UNIT_SERIALS: Final = itertools.count(1)
+"""Serial numbers for the units {meth}`Escalator.name_unit` names, one per call.
+
+A unit name must be free when its call starts, and the calls of one run start
+from several threads, so each serial is drawn under `_UNIT_SERIALS_LOCK`.
+"""
+
+_UNIT_SERIALS_LOCK: Final = threading.Lock()
+"""Guards each draw from `_UNIT_SERIALS`."""
 
 
 def _with_pid(args: tuple[str, ...]) -> tuple[str, ...]:
@@ -467,6 +478,20 @@ class Escalator:
     keeps `None` until a manager on a polkit-only host asks for one.
     """
 
+    unit_template: str | None = None
+    """Argument naming the transient unit of each escalated call, or `None` for
+    an escalator whose command runs in mpm's own process tree.
+
+    Only `run0` needs one. Its command runs in a systemd transient service, which
+    outlives a call mpm stops at its timeout or on Ctrl+C (see `docs/sudo.md`).
+    run0 names that unit `run-p<pid>-i<id>` after its own process, which points
+    at neither mpm nor the manager. A unit named
+    `mpm-<pid>-<manager>-<serial>` shows in `systemctl list-units 'mpm-*'`.
+    {meth}`CLIExecutor.run <meta_package_manager.execution.CLIExecutor.run>`
+    splices it at spawn time only, so the serial reaches neither a plan nor the
+    key of a replayed result.
+    """
+
     gated_options: tuple[tuple[str, str], ...] = ()
     """Options following {attr}`escalate_args` on the releases accepting them,
     each paired with the first such release.
@@ -514,10 +539,30 @@ class Escalator:
         )
         if not forwarded:
             return args
+        return self._splice(args, forwarded)
+
+    def name_unit(self, args: tuple[str, ...], manager_id: str) -> tuple[str, ...]:
+        """Splice {attr}`unit_template` into `args`, with a serial of its own.
+
+        Inserted ahead of the end-of-options separator, like
+        {meth}`forward_env`. Returns `args` untouched for an escalator declaring
+        no template.
+        """
+        if not self.unit_template:
+            return args
+        with _UNIT_SERIALS_LOCK:
+            serial = next(_UNIT_SERIALS)
+        unit = self.unit_template.format(
+            pid=os.getpid(), manager=manager_id, serial=serial
+        )
+        return self._splice(args, (unit,))
+
+    def _splice(self, args: tuple[str, ...], extra: tuple[str, ...]) -> tuple[str, ...]:
+        """`args`, with `extra` ahead of the `--` closing {attr}`escalate_args`."""
         cut = len(self.escalate_args)
         if self.escalate_args and self.escalate_args[-1] == "--":
             cut -= 1
-        return (*args[:cut], *forwarded, *args[cut:])
+        return (*args[:cut], *extra, *args[cut:])
 
     def probe_says_warm(self, probe: subprocess.CompletedProcess[bytes]) -> bool:
         """Whether the probe found escalation ready to run unprompted."""
@@ -659,6 +704,7 @@ ESCALATORS: Final[tuple[Escalator, ...]] = (
         # A bare `--setenv=NAME` would import the caller's value; the pair is
         # spelled out because mpm forces values the caller may not carry.
         env_forward_template="--setenv={name}={value}",
+        unit_template="--unit=mpm-{pid}-{manager}-{serial}",
         passwordless_probe_args=None,
         # `--pty` gives the service a terminal of its own. Under `--pipe` the
         # service gets the user's terminal as its input, and systemd gives that

@@ -327,19 +327,19 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get --quiet --yes install --no-install-recommends npm
-          sudo npm install --global npm@12.2.1
+          sudo npm install --global npm@12.2.2
       - name: NPM - macOS install
         if: runner.os == 'macOS'
         run: brew install npm
       - name: NPM - Windows upgrade
         if: runner.os == 'Windows'
-        run: npm install --global npm@12.2.1 # zizmor: ignore[adhoc-packages]
+        run: npm install --global npm@12.2.2 # zizmor: ignore[adhoc-packages]
 
       # pnpm
       # Installed through npm, which the steps above set up on every OS (Node itself is
       # pre-installed on all GitHub-hosted runners), so one cross-platform step suffices.
       - name: pnpm - install
-        run: npm install --global pnpm@12.17.0 # zizmor: ignore[adhoc-packages]
+        run: npm install --global pnpm@12.18.0 # zizmor: ignore[adhoc-packages]
 
       # Cargo
       - name: Cargo - macOS install

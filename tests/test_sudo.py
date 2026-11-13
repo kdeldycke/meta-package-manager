@@ -79,6 +79,7 @@ from meta_package_manager.sudo import (
     prime_sudo,
     resolve_escalator,
 )
+from meta_package_manager.version import parse_version
 
 from .fake_manager import FakeManager
 
@@ -274,11 +275,13 @@ def only_escalator(escalator_id: str | None, *, selected: str | None = None):
 
     The binary is also pinned as genuine, so `resolve_escalator` never spends a
     `subprocess.run` on {meth}`~meta_package_manager.sudo.Escalator.is_genuine`,
-    and as a current release accepting every
-    {attr}`~meta_package_manager.sudo.Escalator.gated_options`. That keeps the
-    call counts these tests assert on measuring credential probes alone, and
-    keeps a pretended host from probing the real one. A test about an impostor
-    or an old release patches those methods itself instead.
+    as a current release accepting every
+    {attr}`~meta_package_manager.sudo.Escalator.gated_options`, and under a
+    polkit sharing what it keeps
+    ({meth}`~meta_package_manager.sudo.Escalator.unshared_release`). That keeps
+    the call counts these tests assert on measuring credential probes alone,
+    and keeps a pretended host from probing the real one. A test about an
+    impostor or an old release patches those methods itself instead.
 
     A test that plants a stand-in escalator binary on `PATH` runs under this
     context. `write_fake_executable` answers every argv the same way, so the
@@ -300,6 +303,7 @@ def only_escalator(escalator_id: str | None, *, selected: str | None = None):
             "supported_options",
             lambda self: tuple(option for option, _ in self.gated_options),
         ),
+        patch.object(Escalator, "unshared_release", return_value=None),
     ):
         resolve_escalator.cache_clear()
         ESCALATION.select(selected)
@@ -2265,6 +2269,83 @@ def test_prime_sudo_asks_polkit_before_prompting_for_run0(
     assert any(call.args[0][0] == "pkcheck" for call in run.call_args_list)
 
 
+@pytest.mark.parametrize(
+    ("answer", "expected"),
+    (
+        pytest.param(
+            subprocess.CompletedProcess((), 0, stdout="pkcheck version 127\n"),
+            None,
+            id="127-shares",
+        ),
+        pytest.param(
+            subprocess.CompletedProcess((), 0, stdout="pkcheck version 126\n"),
+            "126",
+            id="126-keeps-per-process",
+        ),
+        pytest.param(
+            subprocess.CompletedProcess((), 0, stdout="pkcheck version 0.104\n"),
+            "0.104",
+            id="0.104-keeps-per-process",
+        ),
+        pytest.param(subprocess.CompletedProcess((), 1), None, id="unreadable"),
+        pytest.param(None, None, id="no-pkcheck"),
+    ),
+)
+def test_run0_reads_whether_polkit_shares_what_it_keeps(answer, expected):
+    """Before polkit 127, a kept authorization serves the one `run0` call that asked.
+
+    A release that cannot be read counts as recent: the probe after the prompt
+    still reports a drop. The banner of polkit 127 is the one measured on Fedora 44.
+    """
+    run0 = next(e for e in ESCALATORS if e.id == "run0")
+    with patch("meta_package_manager.sudo._run_probe", return_value=answer) as probe:
+        release = run0.unshared_release()
+    probe.assert_called_once_with(("pkcheck", "--version"))
+    assert (None if release is None else str(release)) == expected
+
+
+def test_prime_sudo_asks_no_run0_password_under_a_polkit_before_127(caplog):
+    """polkit 126 keeps what a password buys for the `run0` call that asked alone.
+
+    So no password is asked for, and one warning names the fix.
+    """
+    run0 = next(e for e in ESCALATORS if e.id == "run0")
+    ctx = click.Context(click.Command("upgrade"))
+
+    def answer(argv, **kwargs):
+        """A cold probe, and a `pkcheck` whose policy keeps the authorization."""
+        argv = tuple(argv)
+        if argv[0] == "pkcheck":
+            return subprocess.CompletedProcess(
+                argv,
+                2,
+                stdout="polkit\\56result=auth_admin_keep\n"
+                "polkit\\56retains_authorization_after_challenge=1\n",
+            )
+        return subprocess.CompletedProcess(argv, 1)
+
+    with (
+        prime_sudo_env(stdin_tty=True, stderr_tty=True) as run,
+        only_escalator("run0", selected="run0"),
+        patch.object(Escalator, "unshared_release", return_value=parse_version("126")),
+        caplog.at_level(logging.INFO),
+    ):
+        run.side_effect = answer
+        try:
+            prime_sudo(ctx, [_escalating_manager()], operations=INSTALL_RUN)
+            assert not _SUDO_CACHE_WARM.is_set()
+        finally:
+            ctx.close()
+    calls = [tuple(call.args[0]) for call in run.call_args_list]
+    assert run0.resolved_prompt_args() not in calls
+    messages = [record.getMessage() for record in caplog.records]
+    assert any("polkit 126 keeps what a password buys" in m for m in messages)
+    assert any(
+        "keeps no authorization past a password prompt" in m and run0.remedy in m
+        for m in messages
+    )
+
+
 @pytest.mark.parametrize("escalator", ESCALATORS, ids=[e.id for e in ESCALATORS])
 def test_every_escalator_names_a_remedy(escalator):
     """Warnings go on after the remedy, so it is a sentence of its own."""
@@ -2527,6 +2608,49 @@ def test_diagnose_escalation_when_polkit_keeps_the_authorization():
         ),
         "Prompt: the authorization would hold for the whole run.",
         f"Fix: {PKEXEC.remedy}",
+        "Escalated by mpm: fakemanager.",
+    ]
+
+
+def test_diagnose_run0_under_a_polkit_before_127():
+    """polkit 126 keeps what a password buys for the one `run0` call that asked.
+
+    The report then says a prompt would not hold, even under `auth_admin_keep`.
+    The `run0 --version` banner is the one measured on Fedora 44.
+    """
+    run0 = next(e for e in ESCALATORS if e.id == "run0")
+
+    def answer(argv, **kwargs):
+        """A genuine `run0` on a cold cache, and a `pkcheck` that keeps."""
+        argv = tuple(argv)
+        if argv == ("run0", "--version"):
+            return subprocess.CompletedProcess(
+                argv, 0, stdout="systemd 259 (259.8-1.fc44)\n"
+            )
+        if argv[0] == "pkcheck":
+            return subprocess.CompletedProcess(
+                argv,
+                2,
+                stdout="polkit\\56result=auth_admin_keep\n"
+                "polkit\\56retains_authorization_after_challenge=1\n",
+            )
+        return subprocess.CompletedProcess(argv, 1, stdout=b"", stderr=b"")
+
+    with (
+        only_escalator("run0"),
+        patch.object(Escalator, "unshared_release", return_value=parse_version("126")),
+        patch("meta_package_manager.sudo.subprocess.run", side_effect=answer),
+        patch("meta_package_manager.sudo.os.geteuid", return_value=1000, create=True),
+    ):
+        lines = diagnose_escalation([_escalating_manager()]).lines()
+    assert lines == [
+        "Escalator: run0 at /usr/bin/run0, detected.",
+        "Credentials: a password is needed.",
+        (
+            "Prompt: the authorization would not hold past it, so mpm asks for no "
+            "password."
+        ),
+        f"Fix: {run0.remedy}",
         "Escalated by mpm: fakemanager.",
     ]
 

@@ -404,6 +404,21 @@ class Escalator:
     one. Measured on Fedora 44, systemd `259`, polkit `127`.
     """
 
+    retention_since: tuple[tuple[str, ...], str] | None = None
+    """Argv printing the polkit release, paired with the first release whose
+    kept authorization reaches the calls after the prompt, or `None` where every
+    release does.
+
+    Only `run0` needs one. polkit keeps an authorization for the process that
+    asked, and each `run0` call is a process of its own. Before polkit `127`, a
+    kept authorization therefore serves the prompt call alone, and
+    {func}`prime_sudo` asks for no password. From `127`, polkit shares it with a
+    later process of the same user, parent, control group and terminal
+    ([polkit-org/polkit#533](https://github.com/polkit-org/polkit/pull/533)),
+    which every escalated call of a run is. `pkexec` needs no release: polkit
+    authorizes the parent of `pkexec`, which is mpm for every call.
+    """
+
     probe_command: str | None = None
     """The stand-in command {attr}`probe_args` runs, where the escalator's rules
     can match single commands, or `None`.
@@ -552,6 +567,22 @@ class Escalator:
             if release is None or release >= parse_version(since)
         )
 
+    def unshared_release(self) -> TokenizedString | None:
+        """The installed polkit release, when it shares no kept authorization.
+
+        `None` when the calls after the prompt reach what the prompt bought:
+        with no {attr}`retention_since`, from that release on, and when the
+        release cannot be read. In that last case, the probe after the prompt
+        still reports a drop.
+        """
+        if not self.retention_since:
+            return None
+        version_args, since = self.retention_since
+        release = _installed_release(version_args)
+        if release is None or release >= parse_version(since):
+            return None
+        return release
+
     def identity(self) -> str:
         """What the identity probe found: `genuine`, `stand-in` or `unrunnable`.
 
@@ -658,6 +689,8 @@ ESCALATORS: Final[tuple[Escalator, ...]] = (
             "--process",
             "{pid}",
         ),
+        # `pkcheck --version` prints `pkcheck version 127`.
+        retention_since=(("pkcheck", "--version"), "127"),
         identity_args=("run0", "--version"),
         # run0 reports the systemd version it ships with, not one of its own.
         identity_markers=("systemd",),
@@ -1272,6 +1305,8 @@ def _prompt_kept(
 
     `probe` is the cold answer of the credential probe, which carries the
     answer for `pkexec`. A `pkcheck` that cannot run leaves the question open.
+    A polkit too old to share what it keeps with the calls after the prompt
+    answers `False` too, see {attr}`Escalator.retention_since`.
     """
     if escalator.retention_markers is None:
         return None
@@ -1282,7 +1317,16 @@ def _prompt_kept(
         output = answer.stdout or ""
     else:
         output = (probe.stdout or b"").decode("UTF-8", errors="replace")
-    return any(marker in output for marker in escalator.retention_markers)
+    if not any(marker in output for marker in escalator.retention_markers):
+        return False
+    release = escalator.unshared_release()
+    if release is not None:
+        logging.info(
+            f"polkit {release} keeps what a password buys for the one "
+            f"{escalator.id} call that asked: every later call would ask again.",
+        )
+        return False
+    return True
 
 
 def _start_sudo_keepalive(ctx: Context, escalator: Escalator) -> None:

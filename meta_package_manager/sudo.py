@@ -296,7 +296,10 @@ class Escalator:
     """
 
     prompt_args: tuple[str, ...]
-    """Argv authenticating the user up front, interactively, once per run."""
+    """Argv authenticating the user up front, interactively, once per run.
+
+    May carry a `{pid}` token, which {meth}`resolved_prompt_args` fills.
+    """
 
     refreshable: bool
     """Whether {attr}`probe_args` can also serve as a keepalive tick.
@@ -312,7 +315,9 @@ class Escalator:
 
     `sudo --prompt` can; `doas` cannot. The notice {func}`prime_sudo` echoes
     before authenticating names the managers either way, so an unbranded prompt
-    loses the `[mpm]` marker, not the explanation.
+    loses the `[mpm]` marker, not the explanation. `run0` cannot either, but the
+    polkit message it raises names a unit, which {attr}`prompt_args` names
+    after mpm.
     """
 
     remedy: str
@@ -519,6 +524,18 @@ class Escalator:
         """
         return _with_pid(self.probe_args)
 
+    def resolved_prompt_args(self) -> tuple[str, ...]:
+        """{attr}`prompt_args`, with any `{pid}` token replaced by mpm's own id.
+
+        Only `run0` needs it. Since systemd `257`, the polkit message of its
+        prompt names the transient unit the command runs in: `Authentication is
+        required to start transient unit 'run-p1161-i4244.service'.` A unit
+        named `mpm-<pid>` puts mpm in that message, and the id keeps two runs
+        from asking for one name. run0 removes the unit once it stops, even
+        after a failure, so a reused id finds the name free.
+        """
+        return _with_pid(self.prompt_args)
+
     def supported_options(self) -> tuple[str, ...]:
         """The {attr}`gated_options` the installed release accepts.
 
@@ -612,14 +629,23 @@ ESCALATORS: Final[tuple[Escalator, ...]] = (
         # spelled out because mpm forces values the caller may not carry.
         env_forward_template="--setenv={name}={value}",
         passwordless_probe_args=None,
-        prompt_args=("run0", "--pipe", "true"),
+        # `--pty` gives the service a terminal of its own. Under `--pipe` the
+        # service gets the user's terminal as its input, and systemd gives that
+        # terminal to root, which also moves its change time past the prompt.
+        # polkit shares a kept authorization only with processes younger than
+        # their terminal, so every later call would prompt again. Explicit,
+        # because run0 falls back to `--pipe` when stdout is not a terminal, as
+        # under `mpm upgrade | tee log`. Measured on Fedora 44, systemd `259`,
+        # polkit `127`. See `resolved_prompt_args` for the unit name.
+        prompt_args=("run0", "--pty", "--unit=mpm-{pid}", "true"),
         # polkit owns the authorization and retains it per session, so there is
         # no timestamp for mpm to extend: `-v` creates one and `-k` revokes it,
         # and nothing refreshes one.
         refreshable=False,
         # The password prompt belongs to whichever polkit agent answers, built
-        # from the action's own message. run0 has no `--prompt`, and
-        # systemd/systemd#33902 asks for control over that text.
+        # from systemd's own message, which names the unit `prompt_args` sets.
+        # run0 has no `--prompt`, and systemd/systemd#33902 asks for the
+        # message to name the command.
         brands_prompt=False,
         # systemd's own policy keeps the authorization for an active local
         # session only (`auth_admin_keep`): an SSH session gets `auth_admin`.
@@ -1605,7 +1631,7 @@ def prime_sudo(
         return
 
     echo(f"{ids} {needs} administrator rights to {ctx.command.name}.", err=True)
-    prompt_cli = escalator.prompt_args
+    prompt_cli = escalator.resolved_prompt_args()
     if escalator.brands_prompt:
         # `sudo --prompt` expands %-escapes, and `%p` is the account whose password
         # is wanted. That is not always the invoking user: a `targetpw`, `rootpw` or

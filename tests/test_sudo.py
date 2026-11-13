@@ -1690,6 +1690,53 @@ def test_probe_args_resolve_for_every_escalator(escalator):
     assert not any("{pid}" in arg for arg in resolved)
 
 
+@pytest.mark.parametrize("escalator", ESCALATORS, ids=[e.id for e in ESCALATORS])
+def test_prompt_args_resolve_for_every_escalator(escalator):
+    """Resolving a prompt leaves no placeholder, whether it carried one or not."""
+    resolved = escalator.resolved_prompt_args()
+    assert len(resolved) == len(escalator.prompt_args)
+    assert not any("{pid}" in arg for arg in resolved)
+
+
+def test_run0_prompts_in_a_unit_named_after_mpm():
+    """The up-front `run0` call names its unit after mpm, on a terminal of its own.
+
+    polkit's message names the transient unit, so the name puts mpm in the
+    prompt. `--pty` keeps the user's terminal out of the service: under
+    `--pipe`, systemd gives it to root, and polkit then keeps nothing of the
+    password for the calls after the prompt.
+    """
+    ctx = click.Context(click.Command("upgrade"))
+    prompts = []
+
+    def answer(argv, **kwargs):
+        """polkit keeps the authorization, which the prompt then buys."""
+        argv = tuple(argv)
+        if argv[0] == "pkcheck":
+            # `pkcheck` under `auth_admin_keep`, measured on Fedora 44, polkit 127.
+            return subprocess.CompletedProcess(
+                argv,
+                2,
+                stdout="polkit\\56result=auth_admin_keep\n"
+                "polkit\\56retains_authorization_after_challenge=1\n",
+            )
+        if "--no-ask-password" not in argv:
+            prompts.append(argv)
+        return subprocess.CompletedProcess(argv, 0 if prompts else 1)
+
+    with (
+        prime_sudo_env(stdin_tty=True, stderr_tty=True) as run,
+        only_escalator("run0", selected="run0"),
+    ):
+        run.side_effect = answer
+        try:
+            prime_sudo(ctx, [_escalating_manager()], operations=INSTALL_RUN)
+            assert _SUDO_CACHE_WARM.is_set()
+        finally:
+            ctx.close()
+    assert prompts == [("run0", "--pty", f"--unit=mpm-{os.getpid()}", "true")]
+
+
 @pytest.mark.parametrize(
     ("installed", "expected"),
     (
@@ -2090,7 +2137,7 @@ def test_prime_sudo_warns_when_the_prompt_keeps_nothing(escalator, caplog):
     names the remedy, and no keepalive pretends otherwise.
     """
     ctx = click.Context(click.Command("mpm"))
-    prompt_args = escalator.prompt_args
+    prompt_args = escalator.resolved_prompt_args()
 
     def answer(argv, **kwargs):
         """Only the interactive prompt succeeds."""
@@ -2198,7 +2245,7 @@ def test_prime_sudo_asks_polkit_before_prompting_for_run0(
             if pkcheck_stdout is None:
                 raise FileNotFoundError(argv[0])
             return subprocess.CompletedProcess(argv, 2, stdout=pkcheck_stdout)
-        if argv == run0.prompt_args:
+        if argv == run0.resolved_prompt_args():
             authenticated.append(argv)
             return subprocess.CompletedProcess(argv, 0)
         return subprocess.CompletedProcess(argv, 0 if authenticated else 1)

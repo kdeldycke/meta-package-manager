@@ -5,6 +5,8 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [mpm] Name `mpm` in the polkit message of the `run0` password prompt, which reads `start transient unit 'mpm-<pid>.service'` from systemd `257` on.
+- [mpm] Fix the `run0` password prompt, which polkit kept for no later command because the prompt left the terminal owned by root.
 - [zypper] Show the latest version of each `mpm search` result, which the version column left empty.
 - [macports] List the first installed port in `mpm installed`, which the parser dropped.
 - [fink] List the first installed package in `mpm installed`, which the parser dropped.

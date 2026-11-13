@@ -712,8 +712,10 @@ ESCALATORS: Final[tuple[Escalator, ...]] = (
         # polkit shares a kept authorization only with processes younger than
         # their terminal, so every later call would prompt again. Explicit,
         # because run0 falls back to `--pipe` when stdout is not a terminal, as
-        # under `mpm upgrade | tee log`. Measured on Fedora 44, systemd `259`,
-        # polkit `127`. See `resolved_prompt_args` for the unit name.
+        # under `mpm upgrade | tee log`. Measured on Fedora 44, systemd `259.8`,
+        # polkit `127`. systemd/systemd#43344 stops the owner change from `262`,
+        # and from `259.9`, `260.5` and `261.3` on the stable branches.
+        # See `resolved_prompt_args` for the unit name.
         prompt_args=("run0", "--pty", "--unit=mpm-{pid}", "true"),
         # polkit owns the authorization and retains it per session, so there is
         # no timestamp for mpm to extend: `-v` creates one and `-k` revokes it,

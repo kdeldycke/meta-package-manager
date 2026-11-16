@@ -37,10 +37,7 @@ packages), so a page renders the same on any build host.
 A `:mirror:` region is a checked-in copy of a generator's output, kept for raw
 diffs and for GitHub. Never edit one by hand. `click-extra refresh-directives`
 regenerates them, from repomatic's `update-docs` job or from the repository root.
-Run it by hand under `env -u TERM_PROGRAM`, the environment
-`test_mirror_blocks_in_sync` pins: click-extra measures an emoji-presentation
-glyph by the advance of the running terminal, so some terminals pad those rows
-one space short. Sphinx renders the live output and never reads the mirror, so a
+Sphinx renders the live output and never reads the mirror, so a
 stale copy cannot reach the published site. Keep source-line anchors out of a
 mirror: they shift each time a manager class moves in its module, which stales
 the copy on commits that never touched the docs.

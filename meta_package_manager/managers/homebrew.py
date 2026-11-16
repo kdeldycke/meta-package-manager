@@ -1101,7 +1101,10 @@ class Cask(Homebrew):
 
     Casks self-escalate: their artifacts (`.pkg` installers, kernel
     extensions) invoke `sudo` from inside `brew`, so mpm never wraps a
-    cask command in its own `sudo`.
+    cask command in its own `sudo`. A `launchctl` service named in the
+    `uninstall` stanza, like the helper of `stats`, asks for the password on
+    every upgrade: `brew` looks the service up through `sudo` before it
+    replaces the app.
     ```
 
     ```{caution}
@@ -1144,8 +1147,8 @@ class Cask(Homebrew):
     """Casks are only available on macOS, not Linux or WSL."""
 
     internal_sudo = True
-    """Cask artifacts (`.pkg` installers, kernel extensions) run `sudo` from
-    inside `brew`."""
+    """Cask artifacts (`.pkg` installers, kernel extensions, `launchctl`
+    services) run `sudo` from inside `brew`."""
 
     internal_sudo_operations = frozenset({
         "install",

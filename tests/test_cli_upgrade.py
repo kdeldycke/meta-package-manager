@@ -385,6 +385,29 @@ def test_upgrade_outcomes_undated_hold():
 
 
 @pytest.mark.parametrize(
+    ("after", "unanswered", "held", "status"),
+    (
+        ("1.0", False, False, "still outdated"),
+        ("1.0", True, False, "no password"),
+        # The cooldown would hold the package back whatever the prompt.
+        ("1.0", True, True, "cooldown"),
+        # A package the run moved before it stopped on the prompt.
+        ("1.1", True, False, "upgraded"),
+    ),
+)
+def test_upgrade_outcomes_unanswered_prompt(after, unanswered, held, status):
+    """A package left outdated by an unanswered password prompt names it."""
+    rows = package_outcomes(
+        {"plum": _package("plum", "1.0")},
+        {"plum": _package("plum", after)},
+        {"plum": _package("plum", "1.0", "1.1")},
+        hold=lambda _: CooldownHold() if held else None,
+        unanswered=unanswered,
+    )
+    assert [row["status"] for row in rows] == [status]
+
+
+@pytest.mark.parametrize(
     ("before", "after", "announced", "status"),
     (
         ("1.0", "1.1", None, "upgraded"),
@@ -443,6 +466,7 @@ def test_upgrade_outcomes_without_an_outdated_listing():
             "nothing upgraded, 1 cooldown, 2 still outdated",
         ),
         (UPGRADE_RESULTS, ("upgraded", "cooldown"), "1 upgraded, 1 cooldown"),
+        (UPGRADE_RESULTS, ("upgraded", "no password"), "1 upgraded, 1 no password"),
         (UPGRADE_RESULTS, ("downgraded",), "nothing upgraded, 1 downgraded"),
         (
             UPGRADE_RESULTS,
@@ -483,35 +507,68 @@ def test_upgrade_all_reports_what_moved(invoke, changing_fake_pool):
     assert "Eligible" not in result.stdout
 
 
-@pytest.mark.parametrize(
-    ("detail", "expected"),
-    (
-        pytest.param(
-            UNANSWERED_PROMPT_DETAIL,
-            "nothing upgraded, 2 still outdated, no password",
-            id="known-cause",
-        ),
-        pytest.param(None, "nothing upgraded, 2 still outdated", id="plain-failure"),
-    ),
-)
-def test_failed_upgrade_all_names_its_cause_on_the_trail(
-    invoke, changing_fake_pool, monkeypatch, detail, expected
-):
-    """The `✘` line of a failed full upgrade closes on its cause.
+def failing_upgrade(detail):
+    """An upgrade that moves nothing and fails with `detail` as its cause."""
 
-    The cause comes from its error, after the count of what moved. A failure with no
-    known cause keeps the count alone.
-    """
-
-    def failing_upgrade(manager, package_id=None, version=None, outdated_ids=None):
+    def upgrade(manager, package_id=None, version=None, outdated_ids=None):
         # Recorded and not raised, as the failure gate of `run()` does for a
         # full upgrade.
         manager.cli_errors.append(CLIError(None, "", "Timed out after 500s.", detail))
 
-    monkeypatch.setattr(ChangingFakeManager, "upgrade", failing_upgrade)
+    return upgrade
+
+
+@pytest.mark.parametrize(
+    ("detail", "trail", "status"),
+    (
+        pytest.param(
+            UNANSWERED_PROMPT_DETAIL,
+            "nothing upgraded, 2 no password",
+            PackageOutcome.NO_PASSWORD,
+            id="known-cause",
+        ),
+        pytest.param(
+            None,
+            "nothing upgraded, 2 still outdated",
+            PackageOutcome.STILL_OUTDATED,
+            id="plain-failure",
+        ),
+    ),
+)
+def test_failed_upgrade_all_names_its_cause(
+    invoke, changing_fake_pool, monkeypatch, detail, trail, status
+):
+    """A failed full upgrade names its cause on each package it left outdated.
+
+    The cause comes from its error. The `✘` line counts it like any other outcome,
+    and does not repeat it after the count. A failure with no known cause leaves
+    its packages `still outdated`.
+    """
+    monkeypatch.setattr(ChangingFakeManager, "upgrade", failing_upgrade(detail))
     result = invoke("upgrade", "--all")
     mid = changing_fake_pool.id
-    assert f"✘ {mid}.upgrade_all ({expected}) " in strip_ansi(result.stderr)
+    assert f"✘ {mid}.upgrade_all ({trail}) " in strip_ansi(result.stderr)
+    check_report(
+        result.stdout,
+        {
+            "fake-pkg-alpha": ("1.0.0", "1.1.0", status.label),
+            "fake-pkg-beta": ("2.5.3", "2.6.0", status.label),
+        },
+    )
+
+
+def test_failed_upgrade_all_without_an_outdated_listing_names_its_cause(
+    invoke, changing_fake_pool, monkeypatch
+):
+    """With no package to count it on, the cause closes the `✘` line."""
+    monkeypatch.setattr(
+        ChangingFakeManager, "upgrade", failing_upgrade(UNANSWERED_PROMPT_DETAIL)
+    )
+    monkeypatch.setattr(ChangingFakeManager, "outdated_inventory", lambda _: None)
+    result = invoke("upgrade", "--all")
+    mid = changing_fake_pool.id
+    stderr = strip_ansi(result.stderr)
+    assert f"✘ {mid}.upgrade_all (nothing upgraded, no password) " in stderr
 
 
 def test_upgrade_all_selects_the_cooldown_columns(invoke, changing_fake_pool):

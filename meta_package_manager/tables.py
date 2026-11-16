@@ -54,6 +54,8 @@ from click_extra import (
 )
 from click_extra.context import COLUMNS, TABLE_FORMAT
 
+from .sudo import UNANSWERED_PROMPT_DETAIL
+
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Generator, Iterable, Sequence
@@ -103,6 +105,13 @@ class PackageOutcome(StrEnum):
     The word the trail already tags such a package with, so one word names the
     hold on the trail, in the table and in the serialized payload."""
 
+    NO_PASSWORD = UNANSWERED_PROMPT_DETAIL
+    """Still outdated because the command ended on a password prompt nobody
+    answered.
+
+    The word the `✘` trail line already names that cause with, as for
+    `cooldown`."""
+
     STILL_OUTDATED = "still outdated"
     """Still outdated for any other reason: a failed build, a pinned package, or
     one the native command leaves alone."""
@@ -122,15 +131,16 @@ PACKAGE_OUTCOME_GLYPHS: dict[PackageOutcome, str] = {
     PackageOutcome.INSTALLED: "🆕",
     PackageOutcome.REMOVED: "🗑️",
     PackageOutcome.COOLDOWN: "⏸️",
+    PackageOutcome.NO_PASSWORD: "🔑",
     PackageOutcome.STILL_OUTDATED: "⏳",
 }
 """The glyph leading each {class}`PackageOutcome` in the report table.
 
-All but one come from the legend repomatic's dependency reports use for the
+All but two come from the legend repomatic's dependency reports use for the
 same moves (🆙 updated, ⏪ stepped back, 🆕 new, 🗑️ removed, ⏸️ held back by
-cooldown), so a reader of both reads one legend. `still outdated` has no
-counterpart there: ⏳ marks a package whose upgrade is still pending, whatever
-the cause.
+cooldown), so a reader of both reads one legend. The other two have no
+counterpart there: 🔑 marks the password the upgrade waited for, and ⏳ a
+package whose upgrade is still pending for another cause.
 
 Only the table carries them. The serialized report and the trail line keep the
 bare word, which is what a script matches.

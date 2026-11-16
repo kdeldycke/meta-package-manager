@@ -83,7 +83,7 @@ from .tables import CHANGE_REPORT_COLUMNS, PackageOutcome, column_specs
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Collection
 
     from click_extra import Context
 
@@ -94,6 +94,7 @@ UPGRADE_RESULTS = (
     PackageOutcome.UPGRADED,
     PackageOutcome.DOWNGRADED,
     PackageOutcome.COOLDOWN,
+    PackageOutcome.NO_PASSWORD,
     PackageOutcome.STILL_OUTDATED,
 )
 """The outcomes a full upgrade counts on each manager's trail line, the upgrades
@@ -176,18 +177,22 @@ def _maintenance_work(
     return work
 
 
-def _trail_data(errors: list[CLIError], *details: str) -> dict:
+def _trail_data(
+    errors: list[CLIError], *details: str, counted: Collection[str] = ()
+) -> dict:
     """Build the `data` a maintenance fan-out hands back for one manager.
 
     {func}`~meta_package_manager.dispatch.collect_from_managers` reads it: the
     `errors` mark the trail line of the manager `✘`, and the detail suffixes it
     in parentheses. The `details` of the command come first, then what the
     operation died of when {func}`~meta_package_manager.cli.failure_detail`
-    knows it. A line with nothing to say gets no detail.
+    knows it, unless that cause is one of the `counted` outcomes: a line
+    counting `1 no password` does not repeat `no password`. A line with nothing
+    to say gets no detail.
     """
     data: dict = {"errors": errors}
     cause = failure_detail(errors)
-    parts = [*details, cause] if cause else details
+    parts = [*details, cause] if cause and cause not in counted else details
     if parts:
         data["detail"] = ", ".join(parts)
     return data
@@ -756,9 +761,14 @@ def upgrade(ctx, all, packages_specs):
             if output:
                 logging.info(output, extra={"label": manager.subject})
             rows = report.close(manager)
+            if rows is None:
+                return manager.id, _trail_data(errors)
             # What moved, then what the upgrade died of when mpm knows it.
-            moved = () if rows is None else (outcome_detail(rows, UPGRADE_RESULTS),)
-            return manager.id, _trail_data(errors, *moved)
+            return manager.id, _trail_data(
+                errors,
+                outcome_detail(rows, UPGRADE_RESULTS),
+                counted={str(row["status"]) for row in rows} & set(UPGRADE_RESULTS),
+            )
 
         # Full upgrade is independent per manager, so fan out concurrently with a
         # ✓/✘ trail and a success-count finisher (see collect_from_managers).

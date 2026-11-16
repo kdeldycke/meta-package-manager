@@ -227,6 +227,8 @@ warning:cask.install: Timed out after 500s on an unanswered password prompt. Run
 
 On macOS, whose `sudo` has no prompt timeout, an unanswered prompt ends this way. A `sudo` built with the upstream default gives up after 5 minutes. The manager then fails with its own message, and `mpm` adds the same advice and the same `no password` detail.
 
+Either way, the [report of what an upgrade changed](augmentations.md#a-report-of-what-each-command-changed) lists each package the call left outdated as `no password`.
+
 To authenticate up front instead, opt the manager in with a scoped `sudo = true` override:
 
 ```toml

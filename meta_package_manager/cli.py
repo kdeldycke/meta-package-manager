@@ -150,7 +150,7 @@ from .manager import INVOCATION_CACHES, PackageManager
 from .pool import pool
 from .shell_env import import_shell_env
 from .specifier import VERSION_SEP, Specifier
-from .sudo import ESCALATION, ESCALATORS
+from .sudo import ESCALATION, ESCALATORS, UNANSWERED_PROMPT_DETAIL
 from .tables import (
     CHANGE_REPORT_COLUMNS,
     COOLDOWN_COLUMNS,
@@ -1448,6 +1448,8 @@ def package_outcomes(
     after: Mapping[str, Package],
     expected: Mapping[str, Package] | None,
     hold: Callable[[str], CooldownHold | None],
+    *,
+    unanswered: bool = False,
 ) -> list[dict[str, object]]:
     """Classify every package a command moved, or should have.
 
@@ -1458,6 +1460,8 @@ def package_outcomes(
     upgrade takes before it runs, and `None` for a command that expects no
     package to move in particular. `hold` is the manager's
     {meth}`~meta_package_manager.manager.PackageManager.cooldown_hold`.
+    `unanswered` says a call between the two readings ended on a password
+    prompt nobody answered.
     Each row names the package and its versions and carries one
     {class}`~meta_package_manager.tables.PackageOutcome` as `status`:
 
@@ -1468,15 +1472,25 @@ def package_outcomes(
       installed, or a dependency it pulled in. One only the first lists is
       `removed`;
     - an expected package whose version did not move is `cooldown` when the
-      cooldown still holds it back, `still outdated` otherwise: a failed build,
-      a pinned package, or one the native command leaves alone. Its
-      `to_version` is the one still available. A `cooldown` row also dates
-      that version when the hold could: `released` is its publication,
-      `eligible` the instant it clears the cooldown window.
+      cooldown still holds it back, `no password` when `unanswered`, and
+      `still outdated` otherwise: a failed build, a pinned package, or one the
+      native command leaves alone. Its `to_version` is the one still
+      available. A `cooldown` row also dates that version when the hold could:
+      `released` is its publication, `eligible` the instant it clears the
+      cooldown window.
 
     An expected package neither reading lists cannot be told moved from
     unmoved, so it gets no row rather than a guess. Rows come sorted by package
     ID.
+
+    ```{note}
+
+    `unanswered` covers the manager's whole part of the command, because the
+    error of a call names no package. A native full upgrade is one call: when
+    `mpm` kills it at the prompt, the packages it did not reach stay outdated
+    for the same cause. A part made of several calls, like an upgrade of named
+    packages, also labels `no password` a package another call left outdated.
+    ```
     """
     rows = []
     for package_id in sorted(before.keys() | after.keys()):
@@ -1503,12 +1517,19 @@ def package_outcomes(
             )
         elif expected is not None and package_id in expected:
             held = hold(package_id)
+            # The cooldown would hold the package back whatever the prompt.
+            if held:
+                status = PackageOutcome.COOLDOWN
+            elif unanswered:
+                status = PackageOutcome.NO_PASSWORD
+            else:
+                status = PackageOutcome.STILL_OUTDATED
             rows.append(
                 _outcome_row(
                     new,
                     new.installed_version,
                     expected[package_id].latest_version,
-                    PackageOutcome.COOLDOWN if held else PackageOutcome.STILL_OUTDATED,
+                    status,
                     held,
                 )
             )
@@ -1595,10 +1616,12 @@ class ChangeReport:
     Frames each manager's part of the command with two
     {meth}`~meta_package_manager.manager.PackageManager.installed_inventory`
     readings, {meth}`open` before and {meth}`close` after, and classifies their
-    difference through {func}`package_outcomes`. A native command reports what it
-    changed in its own words, or not at all: the diff gives every manager the
-    same report, whatever it printed. Shared by `install`, `remove`, `upgrade`,
-    `restore` and `cleanup --orphans`, each closing on {meth}`show`.
+    difference through {func}`package_outcomes`. The errors the manager collects
+    between the two readings also say whether a call ended on an unanswered
+    password prompt. A native command reports what it changed in its own words,
+    or not at all: the diff gives every manager the same report, whatever it
+    printed. Shared by `install`, `remove`, `upgrade`, `restore` and
+    `cleanup --orphans`, each closing on {meth}`show`.
 
     No reading is taken under `--dry-run`, whose simulated reads list nothing,
     nor under `--plan`, whose captured mutations move nothing: the diff would
@@ -1617,7 +1640,8 @@ class ChangeReport:
         self._lock = threading.Lock()
         self._order: list[str] = [manager.id for manager in managers]
         self._opened: dict[
-            str, tuple[PackageManager, dict[str, Package], dict[str, Package] | None]
+            str,
+            tuple[PackageManager, dict[str, Package], dict[str, Package] | None, int],
         ] = {}
         self._payloads: dict[str, dict] = {}
 
@@ -1655,8 +1679,10 @@ class ChangeReport:
                     for package_id, package in expected.items()
                     if package_id in among
                 }
+        # Where the errors of the command start, past those of the readings.
+        start = len(manager.cli_errors)
         with self._lock:
-            self._opened[manager.id] = (manager, before, expected)
+            self._opened[manager.id] = (manager, before, expected, start)
             if manager.id not in self._order:
                 self._order.append(manager.id)
         return expected
@@ -1674,11 +1700,18 @@ class ChangeReport:
             opened = self._opened.pop(manager.id, None)
         if opened is None:
             return None
-        _manager, before, expected = opened
+        _manager, before, expected, start = opened
+        # Checked before the second reading, which can add errors of its own.
+        unanswered = any(
+            error.detail == UNANSWERED_PROMPT_DETAIL
+            for error in manager.cli_errors[start:]
+        )
         after = manager.installed_inventory()
         if after is None or not _versioned(before) or not _versioned(after):
             return None
-        rows = package_outcomes(before, after, expected, manager.cooldown_hold)
+        rows = package_outcomes(
+            before, after, expected, manager.cooldown_hold, unanswered=unanswered
+        )
         with self._lock:
             self._payloads[manager.id] = {
                 "id": manager.id,
@@ -1696,7 +1729,7 @@ class ChangeReport:
         """
         with self._lock:
             managers = [
-                manager for manager, _before, _expected in self._opened.values()
+                manager for manager, _before, _expected, _start in self._opened.values()
             ]
         for manager in managers:
             self.close(manager)

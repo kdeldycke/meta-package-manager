@@ -19,8 +19,10 @@ name: 🦎 Validate openSUSE spec
 # build (rpmbuild, whose %check phase runs mpm's own hermetic test suite), and
 # the installed package driving the container's real zypper.
 #
-# Every runtime dependency is already in Tumbleweed, so unlike the Alpine, Nix
-# and Void channels there is no dependency cascade to build first.
+# Unlike the Alpine, Nix and Void channels, there is no dependency cascade to
+# build first: Tumbleweed carries every runtime dependency.
+# XXX Except click-extra 10, which the spec requires: Tumbleweed has 9.5.1, so
+# rpmbuild fails until https://build.opensuse.org/request/show/1397019 lands there.
 #
 # Fold into tests-install.yaml as an `opensuse-source` job and delete this file
 # once it goes green, per docs/add-packaging-channel.md.

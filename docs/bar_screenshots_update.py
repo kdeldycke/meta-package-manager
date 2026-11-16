@@ -1069,12 +1069,17 @@ def raise_display() -> None:
 
 
 def quit_hosts() -> None:
-    """Ask both hosts to quit, and ignore any failure: one may not be running."""
+    """Ask each running host to quit, and ignore any failure.
+
+    `tell application ... to quit` launches a host that is not running before it
+    quits it, so the script asks only a host that `is running`.
+    """
     for host in (SWIFTBAR, XBAR):
-        run(
-            ("osascript", "-e", f'tell application "{host.name}" to quit'),
-            check=False,
+        script = (
+            f'if application "{host.name}" is running then '
+            f'tell application "{host.name}" to quit'
         )
+        run(("osascript", "-e", script), check=False)
 
 
 def set_appearance(*, dark: bool) -> None:

@@ -296,11 +296,15 @@ $ sudo xbps-install --repository=./hostdir/binpkgs/mpm mpm
 
 `./xbps-src pkg mpm` cascades through and builds the five new Python packages the pull request introduces, plus an in-place bump of `python3-boltons` from `20.2.1` to `25.0.0`. The four templates I did not author are proposed to Void on their own in [void-linux/void-packages#62477](https://github.com/void-linux/void-packages/pull/62477).
 
+```{warning}
+The templates stop at `mpm` `7.6.1`. That release reads the `XBPS:` banner as the version of [`xbps`](managers/xbps.md), so the `mpm` they build leaves `xbps` out of its pool: `8.0.0` fixed it.
+```
+
 ````{admonition} Void Linux needs a contributor
 :class: important
 Void does not accept a package submitted by the author of the software, so I cannot land `mpm` in `void-packages` myself. [void-linux/void-packages#60532](https://github.com/void-linux/void-packages/pull/60532) was closed for that reason.
 
-The templates above are complete: they build on a current Void host, and every dependency passes its test suite there. If you run Void and use `mpm`, you are welcome to take them and submit them under your own name. They are then yours: put yourself in the `maintainer` field. Void [asks that submitters have a history of contributions](https://github.com/void-linux/void-packages/blob/master/CONTRIBUTING.md#package-requirements) to `void-packages`, so working on orphaned packages first is the recommended route.
+The templates above build `7.6.1` on a current Void host, and every dependency passes its test suite there. A submitter would bump them to the current release first. If you run Void and use `mpm`, you are welcome to take them and submit them under your own name. They are then yours: put yourself in the `maintainer` field. Void [asks that submitters have a history of contributions](https://github.com/void-linux/void-packages/blob/master/CONTRIBUTING.md#package-requirements) to `void-packages`, so working on orphaned packages first is the recommended route.
 
 Once a package lands, installation becomes a one-liner:
 

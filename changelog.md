@@ -18,6 +18,7 @@
 - [mpm] Pass the test suite from a source tree where mpm is not installed yet, like in some distribution test phases.
 - [mpm] Bump the Alpine, Chocolatey, Guix, MacPorts, Nix and openSUSE recipes of the repository to `8.3.0`, staging the `click-extra` `10` dependencies their distributions lack.
 - [mpm] Document that `mpm` drives `run0` from systemd `257`, which added the `--pipe` and `--pty` options it passes.
+- [mpm] Warn on the Void install pages that the templates build `mpm` `7.6.1`, which leaves `xbps` out of its pool.
 
 ## [`8.3.0` (2026-11-09)](https://github.com/kdeldycke/meta-package-manager/compare/v8.2.0...v8.3.0)
 

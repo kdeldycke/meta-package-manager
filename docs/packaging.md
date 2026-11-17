@@ -82,7 +82,7 @@ Building the sdist needs [`uv-build`](https://pypi.org/project/uv-build/), which
 
 <!-- Keep in sync with .github/workflows/tests-install.yaml -->
 
-Where `mpm` stands on each distribution channel whose packaging is maintained from this repository, plus the community-maintained AUR entry and the [`deb-get`](managers/deb-get.md) definition. Channels needing no in-repo spec (PyPI, Homebrew, Scoop, GitHub Releases, Stew, ZeroBrew) are covered by the [installation methods](install.md) directly.
+Where `mpm` stands on each distribution channel whose packaging is maintained from this repository, plus the community-maintained AUR entry, the [`deb-get`](managers/deb-get.md) definition and the abandoned Void Linux templates. Channels needing no in-repo spec (PyPI, Homebrew, Scoop, GitHub Releases, Stew, ZeroBrew) are covered by the [installation methods](install.md) directly.
 
 | Channel          | Spec                                                                                                                   | Upstream status                                                                        | CI check                                                                             | Release bump |
 | :--------------- | :--------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------- | :----------- |
@@ -95,9 +95,9 @@ Where `mpm` stands on each distribution channel whose packaging is maintained fr
 | openSUSE         | [`packaging/opensuse/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/opensuse)                | [pending review](https://build.opensuse.org/request/show/1394245)                      | `check-opensuse-spec`                                                                | manual       |
 | Ubuntu (PPA)     | [`packaging/ppa/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/ppa)                          | [published](https://launchpad.net/~kdeldycke/+archive/ubuntu/mpm)                      | `ppa-source`                                                                         | manual       |
 | Ubuntu (deb-get) | [definition](https://github.com/kdeldycke/deb-get/blob/add-meta-package-manager/01-main/packages/meta-package-manager) | [pending review](https://github.com/wimpysworld/deb-get/pull/2036)                     | —                                                                                    | n/a          |
-| Void Linux       | [void-linux/void-packages#60532](https://github.com/void-linux/void-packages/pull/60532/files)                         | [closed: needs a contributor](#void-linux)                                             | `check-void-deps`                                                                    | manual       |
+| Void Linux       | [void-linux/void-packages#60532](https://github.com/void-linux/void-packages/pull/60532/files)                         | [abandoned](#void-linux)                                                               | —                                                                                    | n/a          |
 
-The `*-source` jobs of [`tests-install.yaml`](https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/tests-install.yaml) build and install each in-repo spec on every change to it and on a weekly schedule. Automated bumps are performed by `release.yaml` jobs right after each release (see [releasing](releasing.md)). The channels marked manual are refreshed by hand at each release. An in-repo spec of that kind pins the released version, the PPA is uploaded once per series, and the Void templates sit in a pull request outside this repository.
+The `*-source` jobs of [`tests-install.yaml`](https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/tests-install.yaml) build and install each in-repo spec on every change to it and on a weekly schedule. Automated bumps are performed by `release.yaml` jobs right after each release (see [releasing](releasing.md)). The channels marked manual are refreshed by hand at each release. An in-repo spec of that kind pins the released version, and the PPA is uploaded once per series.
 
 ### Alpine Linux
 
@@ -282,33 +282,12 @@ Each release is uploaded by hand, once per series, so the PPA can trail the newe
 
 ### Void Linux
 
-Void ships no `mpm` package, so build and install it from the templates of [void-linux/void-packages#60532](https://github.com/void-linux/void-packages/pull/60532/files). GitHub serves them under the ref of that pull request, and `xbps-src` names its repository after the local branch, here `mpm`:
+Void ships no `mpm` package, and this repository no longer maintains templates for one. Void does not accept a package submitted by the author of the software, so [void-linux/void-packages#60532](https://github.com/void-linux/void-packages/pull/60532) was closed.
 
-```{code-block} shell-session
-$ git init ./void-packages
-$ cd ./void-packages
-$ git fetch --depth 1 https://github.com/void-linux/void-packages.git pull/60532/head:mpm
-$ git checkout mpm
-$ ./xbps-src binary-bootstrap
-$ ./xbps-src pkg mpm
-$ sudo xbps-install --repository=./hostdir/binpkgs/mpm mpm
-```
+The work stays available to revive:
 
-`./xbps-src pkg mpm` cascades through and builds the five new Python packages the pull request introduces, plus an in-place bump of `python3-boltons` from `20.2.1` to `25.0.0`. The four templates I did not author are proposed to Void on their own in [void-linux/void-packages#62477](https://github.com/void-linux/void-packages/pull/62477).
+- [The templates of that pull request](https://github.com/void-linux/void-packages/pull/60532/files), which GitHub still serves under its `pull/60532/head` ref. They package `mpm` `7.6.1`, the five Python packages Void lacked then, and a bump of `python3-boltons`.
+- [The workflow that built them](https://github.com/kdeldycke/meta-package-manager/blob/344f012b6ce796c66f024892bb7a912b1f61f52f/.github/workflows/check-void-deps.yaml) with `xbps-src` in the official Void container, running the check phase of each package.
+- [void-linux/void-packages#62477](https://github.com/void-linux/void-packages/pull/62477), which submits on their own the four templates for software I did not write.
 
-```{warning}
-The templates stop at `mpm` `7.6.1`. That release reads the `XBPS:` banner as the version of [`xbps`](managers/xbps.md), so the `mpm` they build leaves `xbps` out of its pool: `8.0.0` fixed it.
-```
-
-````{admonition} Void Linux needs a contributor
-:class: important
-Void does not accept a package submitted by the author of the software, so I cannot land `mpm` in `void-packages` myself. [void-linux/void-packages#60532](https://github.com/void-linux/void-packages/pull/60532) was closed for that reason.
-
-The templates above build `7.6.1` on a current Void host, and every dependency passes its test suite there. A submitter would bump them to the current release first. If you run Void and use `mpm`, you are welcome to take them and submit them under your own name. They are then yours: put yourself in the `maintainer` field. Void [asks that submitters have a history of contributions](https://github.com/void-linux/void-packages/blob/master/CONTRIBUTING.md#package-requirements) to `void-packages`, so working on orphaned packages first is the recommended route.
-
-Once a package lands, installation becomes a one-liner:
-
-```{code-block} shell-session
-$ xbps-install --sync mpm
-```
-````
+The templates need a bump before any submission: `7.6.1` reads the `XBPS:` banner as the version of [`xbps`](managers/xbps.md), so the `mpm` they build leaves `xbps` out of its pool, which `8.0.0` fixed. The [dependencies](#dependencies) of the current release differ too. If you run Void and use `mpm`, you are welcome to submit the templates under your own name, with yourself in the `maintainer` field. Void [asks that submitters have a history of contributions](https://github.com/void-linux/void-packages/blob/master/CONTRIBUTING.md#package-requirements) to `void-packages`, so working on orphaned packages first is the recommended route.

@@ -46,7 +46,6 @@ Only the Guix and Nix definitions have a bump job in `release.yaml`. The channel
 - The Chocolatey nuspec (`packaging/choco/`) pins the released version and the checksums of the Windows binaries.
 - The openSUSE spec (`packaging/opensuse/`) pins the released version, and its `.changes` file logs it.
 - The Ubuntu PPA has no pin: `packaging/ppa/build-source.py` packages the newest tag, and each series is uploaded by hand.
-- Void Linux has no spec in this repository: its templates live in a pull request outside it.
 
 ## Antivirus false positives on Windows binaries
 

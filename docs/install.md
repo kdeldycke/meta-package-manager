@@ -315,39 +315,6 @@ You can help move it forward by showing your support on [the pull request](https
 ````
 `````
 
-`````{tab-item} Void Linux
-Build and install from the templates of [void-linux/void-packages#60532](https://github.com/void-linux/void-packages/pull/60532/files), which GitHub serves under the ref of that pull request:
-
-```{code-block} shell-session
-$ git init ./void-packages
-$ cd ./void-packages
-$ git fetch --depth 1 https://github.com/void-linux/void-packages.git pull/60532/head:mpm
-$ git checkout mpm
-$ ./xbps-src binary-bootstrap
-$ ./xbps-src pkg mpm
-$ sudo xbps-install --repository=./hostdir/binpkgs/mpm mpm
-```
-
-The `pkg` step cascades through the five new Python packages the pull request introduces, plus an in-place bump of `python3-boltons` from `20.2.1` to `25.0.0`, as detailed on [the packaging page](packaging.md#void-linux).
-
-```{warning}
-The templates stop at `mpm` `7.6.1`. That release reads the `XBPS:` banner as the version of [`xbps`](managers/xbps.md), so the `mpm` they build leaves `xbps` out of its pool: `8.0.0` fixed it.
-```
-
-````{admonition} Void Linux needs a contributor
-:class: important
-Void does not accept a package submitted by the author of the software, so I cannot land `mpm` in `void-packages` myself. [void-linux/void-packages#60532](https://github.com/void-linux/void-packages/pull/60532) was closed for that reason.
-
-The templates above build `7.6.1` on a current Void host, and every dependency passes its test suite there. A submitter would bump them to the current release first. If you run Void and use `mpm`, you are welcome to take them and submit them under your own name. They are then yours: put yourself in the `maintainer` field. Void [asks that submitters have a history of contributions](https://github.com/void-linux/void-packages/blob/master/CONTRIBUTING.md#package-requirements) to `void-packages`, so working on orphaned packages first is the recommended route.
-
-Once a package lands, installation becomes a one-liner:
-
-```{code-block} shell-session
-$ xbps-install --sync mpm
-```
-````
-`````
-
 `````{tab-item} Arch Linux
 An `mpm` package is [available on AUR](https://aur.archlinux.org/packages/meta-package-manager) and can be installed with any AUR helper:
 

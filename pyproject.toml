@@ -939,11 +939,6 @@ site.deploy = "cloudflare-pages"
 # `docs/infrastructure.md` carries the edge side of the move.
 sphinx.builder = "dirhtml"
 sphinx.fail-on-warning = true
-# `check-void-deps.yaml` stays on `ubuntu-22.04` on purpose, for the reason its
-# job comment gives: later images restrict unprivileged user namespaces, which
-# blocks the chroot helper of `xbps-src`. Without this entry the scheduled
-# `sync-runner-images` job proposes `ubuntu-26.04` for it on every run.
-sync-runner-images.ignore = [ "ubuntu-22.04" ]
 # Source paths for workflow trigger filters.
 workflow.source-paths = [ "meta_package_manager" ]
 # Wholesale replacement of tests.yaml's `paths:` filter (this override is
@@ -1016,8 +1011,7 @@ test-matrix.remove.os = [ "macos-26-intel" ]
 # which `lint-repo` enforces. This file declares no `[tool.actionlint]` section
 # on purpose: one would replace repomatic's bundled `actionlint.yaml` instead
 # of extending it, so a local label means restating every label repomatic
-# ships. The one exception is `check-void-deps.yaml` on `ubuntu-22.04`, pinned
-# by its apparmor comment.
+# ships.
 # See repomatic's test-matrix guide.
 test-matrix.exclude = [
   { os = "ubuntu-26.04", python-version = "3.11" },

@@ -41,6 +41,12 @@ Wikipedia: [APT-RPM](https://en.wikipedia.org/wiki/APT-RPM).
 
 Declined in {mpm-release}`8.0.0`.
 
+## [`ares-install`](https://github.com/webos-tools/cli) ❌
+
+The app installer of LG's webOS command line, `@webos-tools/cli`, also shipped by [webosbrew/ares-cli-rs](https://github.com/webosbrew/ares-cli-rs), a Rust rewrite of `@webosose/ares-cli`. It lists, installs and removes apps, but on a webOS device rather than on the machine: each call opens an SSH session to a device from its list, picked with `--device`. That is the [`fdroidcl`](#fdroidcl) verdict, with a TV in place of a phone. It reaches no registry either, as it installs an `.ipk` file the user already has. The store that runs on the TV itself is declined as [`webos-homebrew-channel`](#webos-homebrew-channel).
+
+Declined in {mpm-release}`8.3.1`.
+
 ## [`auto-cpufreq`](https://github.com/AdnanHodzic/auto-cpufreq) ❌ 🛟
 
 A CPU speed and power optimizer for Linux, running as a daemon that switches governors and turbo boost according to load and battery state. `topgrade` updates it in place, which is what puts it in the benchmark, but it installs nothing and owns nothing installable: what it manages is a kernel tuning policy, which has no name, no version and no catalog to draw from.
@@ -682,6 +688,14 @@ Vim plugin manager reporting no version through anything a probe can read, which
 It clears more of the bar than most of this page, which is worth recording. Driven under `vim -es -u <vimrc>`, `PluginInstall tpope/vim-surround` really did install a plugin the configuration never declared, so it reaches packages one at a time, unlike [`tmux`](#tmux) or [`fish-plug`](#fish-plug). What it has no shape for is an inventory: the only listing is the `g:vundle#bundles` list built from the `Plugin` lines of the user's `vimrc`, so it echoes the configuration rather than the machine. After that ad-hoc install it still reported two plugins while three sat on disk. Checked against Vundle `0.10.2` and Vim `9.2`.
 
 Declined in {mpm-release}`8.0.0`.
+
+## [`webos-homebrew-channel`](https://github.com/webosbrew/webos-homebrew-channel) ❌
+
+The unofficial app store of LG's webOS TVs, with a registry of its own at `repo.webosbrew.org`. It has no command line. It is an app on the TV, backed by a luna service, `org.webosbrew.hbchannel.service`. That service installs from the URL of an `.ipk` file, which it checks against a SHA-256 hash, and an app ID alone installs nothing ([`services/service.ts`](https://github.com/webosbrew/webos-homebrew-channel/blob/v0.7.3/services/service.ts#L425-L460)). The app's front-end does the rest: it fetches the manifest of an app ID, compares its version to the installed one, and builds that request ([`frontend/views/DetailsPanel.js`](https://github.com/webosbrew/webos-homebrew-channel/blob/v0.7.3/frontend/views/DetailsPanel.js#L281-L344)). To wrap it, `mpm` would have to port that client and call the service through `luna-send`. It would also have to run on the TV's 32-bit userland, for which `mpm` ships no build. The request for a command line, [webosbrew/apps-repo#31](https://github.com/webosbrew/apps-repo/issues/31), has been open since 2022-01-02, and only its author has commented.
+
+Reassess once a command line installs an app by its ID. Checked against Homebrew Channel `0.7.3`.
+
+Declined in {mpm-release}`8.3.1`.
 
 ## Windows Subsystem for Linux ❌ 🛟
 

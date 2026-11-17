@@ -108,7 +108,7 @@ Parallel conda transactions corrupt packages and caches rather than block on a l
 
 ### Privilege escalation
 
-Microsoft's Windows `sudo` caches no credentials, so each escalation raises its own UAC dialog: the cache request is open at [microsoft/sudo#7](https://github.com/microsoft/sudo/issues/7), and `gsudo` has the same gap at [gerardog/gsudo#378](https://github.com/gerardog/gsudo/issues/378) for its password path. `mpm` ranks `gsudo` first and warms whichever escalator can be primed: see [the privilege elevation page](sudo.md).
+Microsoft's Windows `sudo` caches no credentials, so each escalation raises its own UAC dialog: the cache request is open at [microsoft/sudo#1](https://github.com/microsoft/sudo/issues/1). `mpm` ranks `gsudo` first and warms whichever escalator can be primed: see [the privilege elevation page](sudo.md).
 
 ### Bar plugin
 

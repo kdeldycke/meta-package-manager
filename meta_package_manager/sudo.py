@@ -57,14 +57,11 @@ scripted or remote Windows run escalates through `gsudo` or not at all.
 Prime Microsoft's `sudo.exe` once there is anything to prime. It caches
 nothing, so every escalation of a run raises a UAC dialog of its own, which is
 why {data}`ESCALATORS` ranks it behind `gsudo` rather than beside it.
-[microsoft/sudo#7](https://github.com/microsoft/sudo/issues/7) is the request
-that would give it a cache for {func}`prime_sudo` to warm; `gsudo` has the same
-gap open at
-[gerardog/gsudo#378](https://github.com/gerardog/gsudo/issues/378) for its own
-password path. Nothing else blocks the backend: the command line, the
-`--preserve-env` environment and the child's exit code all survive the
-elevation, measured on build `26100.1742` from a Medium-integrity shell, the
-one path that really brokers it, so
+[microsoft/sudo#1](https://github.com/microsoft/sudo/issues/1) is the request
+that would give it a cache for {func}`prime_sudo` to warm. Nothing else blocks
+the backend: the command line, the `--preserve-env` environment and the
+child's exit code all survive the elevation, measured on build `26100.1742`
+from a Medium-integrity shell, the one path that really brokers it, so
 [microsoft/sudo#117](https://github.com/microsoft/sudo/issues/117) never
 reaches the shapes this project builds.
 

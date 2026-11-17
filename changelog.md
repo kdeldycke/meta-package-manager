@@ -16,9 +16,11 @@
 - [mpm] Collect the test suite without `pytest-xdist`, which `8.3.0` needed to declare the `xdist_group` marker its tests set.
 - [mpm] Pass the privilege escalation tests when the test suite runs as root, like in a container build.
 - [mpm] Pass the test suite from a source tree where mpm is not installed yet, like in some distribution test phases.
-- [mpm] Bump the Alpine, Chocolatey, Guix, MacPorts, Nix and openSUSE recipes of the repository to `8.3.0`, staging the `click-extra` `10` dependencies their distributions lack.
+- [mpm] Bump the Alpine, Chocolatey, Guix, Nix and openSUSE recipes of the repository to `8.3.0`, staging the `click-extra` `10` dependencies their distributions lack.
 - [mpm] Document that `mpm` drives `run0` from systemd `257`, which added the `--pipe` and `--pty` options it passes.
 - [mpm] Drop the Void Linux installation steps: the packaging page now points to the archived templates and the context to revive them.
+- [mpm] Drop the in-repo MacPorts Portfiles: the packaging page now documents how a bump reaches each distribution that ships `mpm`.
+- [mpm] Warn on the Guix install tab that Guix ships `mpm` `7.6.1`, which fails at startup.
 - [mpm] Record two webOS tools as unsupported: `ares-install` manages apps on another device over SSH, and `webos-homebrew-channel` has no command line.
 
 ## [`8.3.0` (2026-11-09)](https://github.com/kdeldycke/meta-package-manager/compare/v8.2.0...v8.3.0)

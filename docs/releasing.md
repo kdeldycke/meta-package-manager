@@ -42,10 +42,11 @@ Two dependencies (`click-extra` and `extra-platforms`) are also bundled in `pack
 
 Only the Guix and Nix definitions have a bump job in `release.yaml`. The channels below are refreshed by hand as part of each release. The [packaging page](packaging.md#channels) catalogs their build instructions and upstream submission statuses.
 
-- The Alpine APKBUILD overlay (`packaging/alpine/`) pins the released version and the checksums of its source archives. So does the MacPorts Portfile overlay (`packaging/macports/`).
+- The Alpine APKBUILD overlay (`packaging/alpine/`) pins the released version and the checksums of its source archives.
 - The Chocolatey nuspec (`packaging/choco/`) pins the released version and the checksums of the Windows binaries.
 - The openSUSE spec (`packaging/opensuse/`) pins the released version, and its `.changes` file logs it.
 - The Ubuntu PPA has no pin: `packaging/ppa/build-source.py` packages the newest tag, and each series is uploaded by hand.
+- The MacPorts ports, the AUR package and the Guix package are bumped in their distributions, by pull request: the [packaging page](packaging.md#packaged-downstream) gives each process. Homebrew and Scoop bump theirs on their own.
 
 ## Antivirus false positives on Windows binaries
 

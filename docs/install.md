@@ -165,8 +165,6 @@ $ sudo port install meta-package-manager
 ```{tip}
 The port [landed in MacPorts on 2026-07-22](https://github.com/macports/macports-ports/pull/33609). If `port install` cannot find it yet, refresh your ports tree first with `sudo port sync`.
 ```
-
-You can also install it from [the Portfile overlay maintained in the repository](packaging.md#macports).
 `````
 
 `````{tab-item} Scoop
@@ -232,7 +230,9 @@ $ guix install meta-package-manager
 The package [landed in Guix on 2026-06-28](https://codeberg.org/guix/guix/pulls/8047). If `guix install` cannot find it yet, refresh your channels first with `guix pull`.
 ```
 
-To build the bleeding-edge version instead, install from [the definition maintained in the repository](packaging.md#guix).
+```{warning}
+Guix ships `mpm` `7.6.1`, which fails at startup on a missing data file. Until Guix ships `8.x`, install from [the definition maintained in the repository](packaging.md#guix).
+```
 `````
 
 `````{tab-item} Alpine Linux

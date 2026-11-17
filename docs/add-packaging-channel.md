@@ -4,7 +4,7 @@ A *channel* is a route by which users install `mpm`: a Linux distribution's pack
 
 Channels come in two shapes:
 
-- **Spec-based**: a build recipe lives in the repository under `packaging/{channel}/`, CI builds and installs from it, and it is usually submitted upstream to the distribution. This is the full procedure below.
+- **Spec-based**: a build recipe lives in the repository under `packaging/{channel}/`, CI builds and installs from it, and it is usually submitted upstream to the distribution. This is the full procedure below. The spec leaves the repository once the distribution ships `mpm` (step 8).
 - **Released-artifact only** (PyPI, Homebrew, Scoop, GitHub Releases, Stew, ZeroBrew): no in-repo recipe, just an install method plus a scheduled job that tests the published artifact. For these, only steps 4 and 5 apply, and the test job runs on a schedule rather than every push: it tests the published version, not the code being pushed (see the `schedule` trigger and the header comment of `tests-install.yaml`).
 
 ## 1. Learn the target's conventions
@@ -36,7 +36,7 @@ Where a spec or an upstream submission must cite the packaging guidance, it cite
 
 ## 4. Add an advisory CI job
 
-Add a `{channel}-source` job to [`tests-install.yaml`](https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/tests-install.yaml) that builds and installs from the in-repo recipe, then runs `mpm --version`. Start it advisory: name it `⁉️ {channel}-source` with `continue-on-error: true`, and promote it to ✅ (dropping `continue-on-error`) only once it has gone green end-to-end, the way `macports-source` and `apk-source` did. Update the workflow's `paths:` filters and its header comment. Add a comment above the job with the precise URLs that show the status of the package on that platform: the public package page first, then the source definition. Containerized distributions pin `runs-on: ubuntu-26.04`, as the existing container jobs do.
+Add a `{channel}-source` job to [`tests-install.yaml`](https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/tests-install.yaml) that builds and installs from the in-repo recipe, then runs `mpm --version`. Start it advisory: name it `⁉️ {channel}-source` with `continue-on-error: true`, and promote it to ✅ (dropping `continue-on-error`) only once it has gone green end-to-end, the way `apk-source` did. Update the workflow's `paths:` filters and its header comment. Add a comment above the job with the precise URLs that show the status of the package on that platform: the public package page first, then the source definition. Containerized distributions pin `runs-on: ubuntu-26.04`, as the existing container jobs do.
 
 ## 5. Wire the docs
 
@@ -56,6 +56,15 @@ The target's pipeline is the real cross-architecture build-and-test validation y
 
 Rebase when the tree asks for it: `aports` and many others fast-forward-merge, so a `need_rebase` status is routine and not a conflict. Rebase onto the latest default branch and force-push with lease.
 
+## 8. Retire the spec once it lands
+
+Once the distribution ships `mpm`, its recipe lives downstream, and a copy in this repository drifts from it. In one change:
+
+- Delete `packaging/{channel}/`, its `{channel}-source` job, and any `release.yaml` job that bumps it.
+- Keep or add a job that installs the published package. Like the other jobs of that kind, it waits on `newest-release` and reports its version lag.
+- Move the channel to the *packaged downstream* table of the [packaging page](packaging.md#channels), with a section on how a fix or a bump reaches the distribution.
+- Reduce its tab in [`docs/install.md`](install.md) to the published package.
+
 ## Maintenance
 
-A spec that pins a released version (Alpine, Chocolatey, MacPorts, openSUSE) is bumped by hand at each release, and so is the upload of the Ubuntu PPA. The Nix and Guix definitions are bumped automatically by dedicated `release.yaml` jobs. See the [releasing page](releasing.md) for which is which.
+A spec that pins a released version (Alpine, Chocolatey, openSUSE) is bumped by hand at each release, and so is the upload of the Ubuntu PPA. The Nix and Guix definitions are bumped automatically by dedicated `release.yaml` jobs. A channel packaged downstream is bumped there, by the process its [packaging section](packaging.md#packaged-downstream) gives. See the [releasing page](releasing.md) for which is which.

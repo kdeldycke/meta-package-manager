@@ -50,7 +50,7 @@ When a recipe in `packaging/` moves past `8.3.0`, drop `pytest-xdist` from its t
 ```
 
 ```{todo}
-When the MacPorts recipe of `py-click-extra` moves to a release whose process-tree tests skip themselves without a process table, drop the `--deselect` options of its test phase.
+When the MacPorts port `py-click-extra` moves to a release whose process-tree tests skip themselves without a process table, drop the `--deselect` options of its test phase.
 ```
 
 ## Dependencies
@@ -82,22 +82,77 @@ Building the sdist needs [`uv-build`](https://pypi.org/project/uv-build/), which
 
 <!-- Keep in sync with .github/workflows/tests-install.yaml -->
 
-Where `mpm` stands on each distribution channel whose packaging is maintained from this repository, plus the community-maintained AUR entry, the [`deb-get`](managers/deb-get.md) definition and the abandoned Void Linux templates. Channels needing no in-repo spec (PyPI, Homebrew, Scoop, GitHub Releases, Stew, ZeroBrew) are covered by the [installation methods](install.md) directly.
+A channel keeps its spec in this repository only until `mpm` lands in the distribution. From then on, its recipe lives downstream, and a fix or a bump follows the [contribution process](#packaged-downstream) of that distribution. Channels with no recipe of their own (PyPI, GitHub Releases, Stew, ZeroBrew) are covered by the [installation methods](install.md) directly.
 
-| Channel          | Spec                                                                                                                   | Upstream status                                                                        | CI check                                                                             | Release bump |
-| :--------------- | :--------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------- | :----------- |
-| Alpine Linux     | [`packaging/alpine/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/alpine)                    | [pending review](https://gitlab.alpinelinux.org/alpine/aports/-/merge_requests/105566) | `apk-source`                                                                         | manual       |
-| Arch Linux (AUR) | [community-maintained](https://aur.archlinux.org/packages/meta-package-manager)                                        | released                                                                               | [`pacaur`](managers/pacaur.md), [`paru`](managers/paru.md), [`yay`](managers/yay.md) | n/a          |
-| Chocolatey       | [`packaging/choco/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/choco/meta-package-manager) | [community repository rejected the submission](binaries.md#impact-on-chocolatey)       | `choco-source`                                                                       | manual       |
-| Guix             | [`packaging/guix/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/guix)                        | [landed upstream on 2026-06-28](https://codeberg.org/guix/guix/pulls/8047)             | `guix-source`                                                                        | automated    |
-| MacPorts         | [`packaging/macports/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/macports)                | [landed upstream on 2026-07-22](https://github.com/macports/macports-ports/pull/33609) | `macports-source`                                                                    | manual       |
-| Nix              | [`packaging/nix/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/nix)                          | [pending review](https://github.com/NixOS/nixpkgs/pull/506145)                         | `nix-source`                                                                         | automated    |
-| openSUSE         | [`packaging/opensuse/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/opensuse)                | [pending review](https://build.opensuse.org/request/show/1394245)                      | `check-opensuse-spec`                                                                | manual       |
-| Ubuntu (PPA)     | [`packaging/ppa/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/ppa)                          | [published](https://launchpad.net/~kdeldycke/+archive/ubuntu/mpm)                      | `ppa-source`                                                                         | manual       |
-| Ubuntu (deb-get) | [definition](https://github.com/kdeldycke/deb-get/blob/add-meta-package-manager/01-main/packages/meta-package-manager) | [pending review](https://github.com/wimpysworld/deb-get/pull/2036)                     | —                                                                                    | n/a          |
-| Void Linux       | [void-linux/void-packages#60532](https://github.com/void-linux/void-packages/pull/60532/files)                         | [abandoned](#void-linux)                                                               | —                                                                                    | n/a          |
+The channels packaged downstream:
 
-The `*-source` jobs of [`tests-install.yaml`](https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/tests-install.yaml) build and install each in-repo spec on every change to it and on a weekly schedule. Automated bumps are performed by `release.yaml` jobs right after each release (see [releasing](releasing.md)). The channels marked manual are refreshed by hand at each release. An in-repo spec of that kind pins the released version, and the PPA is uploaded once per series.
+| Channel          | Recipe                                                                                                                                                                       | Status                                                                           | CI check                                                                             | How a release reaches it        |
+| :--------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------- | :------------------------------ |
+| Arch Linux (AUR) | [`meta-package-manager`](https://aur.archlinux.org/packages/meta-package-manager), [`meta-package-manager-bin`](https://aur.archlinux.org/packages/meta-package-manager-bin) | released                                                                         | [`pacaur`](managers/pacaur.md), [`paru`](managers/paru.md), [`yay`](managers/yay.md) | [pull request](#arch-linux-aur) |
+| Guix             | [`package-management.scm`](https://codeberg.org/guix/guix/src/branch/master/gnu/packages/package-management.scm)                                                             | [landed on 2026-06-28](https://codeberg.org/guix/guix/pulls/8047), ships `7.6.1` | [`guix`](managers/guix.md), `guix-source`                                            | [pull request](#guix)           |
+| Homebrew         | [`meta-package-manager.rb`](https://github.com/Homebrew/homebrew-core/blob/main/Formula/m/meta-package-manager.rb)                                                           | released                                                                         | [`brew`](managers/brew.md)                                                           | [automated](#homebrew)          |
+| MacPorts         | [`Portfile`](https://github.com/macports/macports-ports/blob/master/sysutils/meta-package-manager/Portfile)                                                                  | [landed on 2026-07-22](https://github.com/macports/macports-ports/pull/33609)    | [`macports`](managers/macports.md)                                                   | [pull request](#macports)       |
+| Scoop            | [`meta-package-manager.json`](https://github.com/ScoopInstaller/Main/blob/master/bucket/meta-package-manager.json)                                                           | released                                                                         | [`scoop`](managers/scoop.md)                                                         | [automated](#scoop)             |
+| Ubuntu (deb-get) | [definition](https://github.com/kdeldycke/deb-get/blob/add-meta-package-manager/01-main/packages/meta-package-manager)                                                       | [pending review](https://github.com/wimpysworld/deb-get/pull/2036)               | —                                                                                    | n/a                             |
+
+The channels built from this repository:
+
+| Channel      | Spec                                                                                                                   | Upstream status                                                                        | CI check              | Release bump |
+| :----------- | :--------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------- | :-------------------- | :----------- |
+| Alpine Linux | [`packaging/alpine/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/alpine)                    | [pending review](https://gitlab.alpinelinux.org/alpine/aports/-/merge_requests/105566) | `apk-source`          | manual       |
+| Chocolatey   | [`packaging/choco/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/choco/meta-package-manager) | [community repository rejected the submission](binaries.md#impact-on-chocolatey)       | `choco-source`        | manual       |
+| Nix          | [`packaging/nix/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/nix)                          | [pending review](https://github.com/NixOS/nixpkgs/pull/506145)                         | `nix-source`          | automated    |
+| openSUSE     | [`packaging/opensuse/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/opensuse)                | [pending review](https://build.opensuse.org/request/show/1394245)                      | `check-opensuse-spec` | manual       |
+| Ubuntu (PPA) | [`packaging/ppa/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/ppa)                          | [published](https://launchpad.net/~kdeldycke/+archive/ubuntu/mpm)                      | `ppa-source`, `ppa`   | manual       |
+
+The jobs of [`tests-install.yaml`](https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/tests-install.yaml) run on a weekly schedule. The `*-source` jobs build and install each in-repo spec, also on every change to it. The other jobs install each published package, and their step summary reports a version that trails the newest release. Automated bumps are performed by `release.yaml` jobs right after each release (see [releasing](releasing.md)). The channels marked manual are refreshed by hand at each release. An in-repo spec of that kind pins the released version, and the PPA is uploaded once per series.
+
+## Packaged downstream
+
+Each recipe below lives in the repository of its distribution. A fix or a version bump goes there, under the rules of that distribution.
+
+### Arch Linux (AUR)
+
+[`meta-package-manager`](https://aur.archlinux.org/packages/meta-package-manager) builds from the PyPI sdist and runs the hermetic test layer in its `check()`. Its maintainer publishes it from [stiermid/aur-pkgbuilds](https://github.com/stiermid/aur-pkgbuilds): send a fix or a version bump there as a pull request. [`meta-package-manager-bin`](https://aur.archlinux.org/packages/meta-package-manager-bin) packages the [Linux binaries](binaries.md) of each GitHub release, under another maintainer.
+
+### Guix
+
+`meta-package-manager` is in [`gnu/packages/package-management.scm`](https://codeberg.org/guix/guix/src/branch/master/gnu/packages/package-management.scm), and `python-click-extra` and `python-extra-platforms` are in `gnu/packages/python-xyz.scm`. A bump is a pull request to [guix/guix](https://codeberg.org/guix/guix) on Codeberg:
+
+- One signed commit per package, dependencies first. The subject reads `gnu: <package>: Update to <version>.`, and the body `* gnu/packages/<module>.scm (<package>): Update to <version>.`
+- `guix lint <package>` passes, including its 80-column limit.
+- [`packaging/guix/update.py`](https://github.com/kdeldycke/meta-package-manager/blob/main/packaging/guix/update.py) computes the `git-fetch` hash of a release tag.
+
+Guix ships `mpm` `7.6.1`, which fails at startup on a missing data file. Until Guix ships `8.x`, the definition maintained in this repository is the route to a working `mpm`:
+
+```{code-block} shell-session
+$ git clone https://github.com/kdeldycke/meta-package-manager.git
+$ guix install --load-path=./meta-package-manager/packaging/guix meta-package-manager
+```
+
+```{todo}
+Once Guix ships `mpm` `8.x`, delete `packaging/guix/`, the `guix-source` job of `tests-install.yaml` and the `guix` job of `release.yaml`.
+```
+
+### Homebrew
+
+The [formula](https://github.com/Homebrew/homebrew-core/blob/main/Formula/m/meta-package-manager.rb) lives in `homebrew-core`, where BrewTestBot bumps it after each release, bottles included. A fix to the formula goes to [Homebrew/homebrew-core](https://github.com/Homebrew/homebrew-core) as a pull request.
+
+### MacPorts
+
+`mpm` and its Python dependencies are ports of [macports/macports-ports](https://github.com/macports/macports-ports): [`sysutils/meta-package-manager`](https://github.com/macports/macports-ports/tree/master/sysutils/meta-package-manager), plus `py-click-extra`, `py-cloup`, `py-extra-platforms` and `py-tomlrt` under `python/`. I maintain the `meta-package-manager` port. A bump is a pull request to that repository:
+
+- One branch per bump, and one signed commit per port: dependencies first, `meta-package-manager` last. Each commit reads `<port>: update to <version>`.
+- Each port pins the `rmd160`, `sha256` and `size` of its PyPI sdist.
+- `port lint --nitpick <port>` and `port test <port>` pass before review. The CI of `macports-ports` installs the ports but never runs their test phase, and reviewers expect a passing `port test`.
+
+To test a bump before you submit it, add your clone of `macports-ports` to `/opt/local/etc/macports/sources.conf`, above the default source, as [local Portfile repositories](https://guide.macports.org/chunked/development.local-repositories.html) explains.
+
+### Scoop
+
+The [manifest](https://github.com/ScoopInstaller/Main/blob/master/bucket/meta-package-manager.json) lives in the `main` bucket, whose `autoupdate` bot bumps it to each GitHub release. A fix to the manifest goes to [ScoopInstaller/Main](https://github.com/ScoopInstaller/Main) as a pull request.
+
+## Built from this repository
 
 ### Alpine Linux
 
@@ -136,38 +191,6 @@ Build and install from [the nuspec maintained in the repository](https://github.
 ```
 
 This is the only supported install route: the [Chocolatey community repository rejected the package](binaries.md#impact-on-chocolatey) over antivirus false positives on the bundled Windows binary.
-
-### Guix
-
-`mpm` [landed in GNU Guix](https://packages.guix.gnu.org/packages/meta-package-manager/) on 2026-06-28, so the in-repo definition is only needed to build the bleeding-edge version:
-
-```{code-block} shell-session
-$ git clone https://github.com/kdeldycke/meta-package-manager.git
-$ guix install --load-path=./meta-package-manager/packaging/guix meta-package-manager
-```
-
-### MacPorts
-
-`mpm` [landed in MacPorts](https://ports.macports.org/port/meta-package-manager/) on 2026-07-22, along with [its full dependency closure](https://github.com/macports/macports-ports/pull/33609): 5 new dependency ports (`py-click-extra`, `py-cloup`, `py-deepmerge`, `py-extra-platforms`, `py-packageurl-python`) and a `py-boltons` version bump. The in-repo overlay is now only needed to stage version bumps and new dependency ports ahead of their upstream submission.
-
-Build and install from [the Portfile overlay maintained in the repository](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/macports):
-
-```{code-block} shell-session
-$ git clone https://github.com/kdeldycke/meta-package-manager.git
-$ portindex ./meta-package-manager/packaging/macports
-```
-
-Then register the overlay as your first ports tree, by adding its absolute path at the top of `/opt/local/etc/macports/sources.conf`:
-
-```{code-block} text
-file:///path/to/meta-package-manager/packaging/macports
-```
-
-Finally:
-
-```{code-block} shell-session
-$ sudo port install meta-package-manager
-```
 
 ### Nix
 
@@ -279,6 +302,8 @@ The `~{series}` suffixes sort in release order, the Ubuntu codenames happening t
 ```{note}
 Each release is uploaded by hand, once per series, so the PPA can trail the newest version by a few days: `mpm`'s own supply-chain cooldown refuses a release younger than a week, which is what the assembly step resolves against. [`apt`](managers/apt.md) is itself one of the managers `mpm` drives.
 ```
+
+## Abandoned channels
 
 ### Void Linux
 

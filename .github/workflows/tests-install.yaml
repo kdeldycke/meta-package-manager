@@ -9,7 +9,6 @@ name: 🏪 Test distributors
       - packaging/alpine/**
       - packaging/choco/**
       - packaging/guix/**
-      - packaging/macports/**
       - packaging/nix/**
       - packaging/ppa/**
   pull_request:
@@ -18,7 +17,6 @@ name: 🏪 Test distributors
       - packaging/alpine/**
       - packaging/choco/**
       - packaging/guix/**
-      - packaging/macports/**
       - packaging/nix/**
       - packaging/ppa/**
   workflow_dispatch:
@@ -36,8 +34,13 @@ concurrency:
 # install the released artifact from external feeds (PyPI, Homebrew, Scoop,
 # GitHub Releases, etc.). The `*-source` jobs install from the in-repo
 # packaging specs (packaging/alpine/, packaging/choco/, packaging/guix/,
-# packaging/macports/, packaging/nix/, packaging/ppa/) and validate the build
-# instructions documented in docs/packaging.md.
+# packaging/nix/, packaging/ppa/) and validate the build instructions
+# documented in docs/packaging.md. A channel keeps an in-repo spec only until
+# mpm lands in its distribution, per docs/add-packaging-channel.md.
+#
+# Each job installing from a distribution's own repository waits on
+# `newest-release`, and writes a line to its step summary when the version it
+# installed trails that release. The line is advisory: the job stays green.
 #
 # Keep in sync with the "Installation methods" tabs in docs/install.md and
 # the per-channel catalog and build instructions in docs/packaging.md.
@@ -74,6 +77,22 @@ env:
   UV_EXCLUDE_NEWER: P0D
 
 jobs:
+  # The newest release on PyPI, which the jobs installing a published package
+  # compare their version against. A failed lookup leaves the output empty, which
+  # skips every comparison and never an install.
+  newest-release:
+    name: "✅ newest release"
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.pypi.outputs.version }}
+    steps:
+      - id: pypi
+        run: >
+          echo "version=$(curl --fail --silent --show-error --retry 3
+          https://pypi.org/pypi/meta-package-manager/json | jq --raw-output .info.version)"
+          >> "$GITHUB_OUTPUT"
+
 
   # https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/alpine
   # https://gitlab.alpinelinux.org/alpine/aports/-/merge_requests/105566
@@ -169,6 +188,7 @@ jobs:
   #   announced upcoming Intel deprecation; drop this row when brew flips.
   brew:
     name: "✅ brew (${{ matrix.os }})"
+    needs: newest-release
     strategy:
       fail-fast: false
       matrix:
@@ -186,6 +206,16 @@ jobs:
           echo "/home/linuxbrew/.linuxbrew/bin/" >> "$GITHUB_PATH"
       - run: brew install meta-package-manager
       - run: mpm --version
+      - name: Report version lag
+        if: needs.newest-release.outputs.version
+        continue-on-error: true
+        shell: bash
+        env:
+          NEWEST: ${{ needs.newest-release.outputs.version }}
+        run: >
+          mpm --version | grep --quiet --fixed-strings "mpm, version ${NEWEST}"
+          || echo "⚠️ Installed \`$(mpm --version | head -1)\`, behind the newest release \`${NEWEST}\`."
+          >> "$GITHUB_STEP_SUMMARY"
 
   # https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/choco/meta-package-manager
   # Build and install from the in-repo nuspec, mirroring the documented
@@ -277,6 +307,7 @@ jobs:
   # updated in Guix together. Promote this job the day they are.
   guix:
     name: ⁉️ guix
+    needs: newest-release
     continue-on-error: true
     runs-on: ubuntu-26.04
     timeout-minutes: 60
@@ -319,6 +350,16 @@ jobs:
           guix install meta-package-manager
           echo "${HOME}/.guix-profile/bin" >> "${GITHUB_PATH}"
       - run: mpm --version
+      - name: Report version lag
+        if: needs.newest-release.outputs.version
+        continue-on-error: true
+        shell: bash
+        env:
+          NEWEST: ${{ needs.newest-release.outputs.version }}
+        run: >
+          mpm --version | grep --quiet --fixed-strings "mpm, version ${NEWEST}"
+          || echo "⚠️ Installed \`$(mpm --version | head -1)\`, behind the newest release \`${NEWEST}\`."
+          >> "$GITHUB_STEP_SUMMARY"
 
   # https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/guix
   # The Guix package definition is also maintained locally (it landed upstream
@@ -409,9 +450,11 @@ jobs:
   # port resolves. The port and its whole Python dependency closure are noarch
   # (darwin_any), so the buildbot publishes a single archive that serves every
   # runner and `port install` fetches it in seconds instead of compiling from
-  # source.
+  # source. MacPorts installer pkgs are built per macOS version, so the asset
+  # is resolved from the runner's major version (15 -> Sequoia, 26 -> Tahoe).
   macports:
     name: "✅ macports (${{ matrix.os }})"
+    needs: newest-release
     strategy:
       fail-fast: false
       matrix:
@@ -438,69 +481,16 @@ jobs:
       - name: Install mpm
         run: sudo port -v install meta-package-manager
       - run: mpm --version
-
-  # https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/macports
-  # Build and install from the in-repo Portfile overlay: a local ports tree
-  # providing meta-package-manager, the version bumps of its dependency ports
-  # (py-bracex, py-click-extra, py-cloup, py-extra-platforms) and py-tomlrt, a test
-  # dependency the official tree lacks. meta-package-manager and its dependency
-  # closure first landed in the official macports-ports tree via
-  # https://github.com/macports/macports-ports/pull/33609; the overlay is kept
-  # to validate the documented build instructions and to stage version bumps
-  # ahead of their upstream submission. Listed first in sources.conf, it
-  # shadows the official tree for the ports it carries.
-  # MacPorts installer pkgs are built per macOS version, so the asset is
-  # resolved from the runner's major version (15 -> Sequoia, 26 -> Tahoe).
-  # The overlay is served from /Users/Shared because the unprivileged macports
-  # build user cannot read the runner workspace under /Users/runner.
-  # The macos-26 leg can run ~2 hours while MacPorts' darwin_25/arm64 binary
-  # archives lag behind: without a rust/cargo/uv archive, the py-uv-build
-  # dependency chain compiles the Rust toolchain from source.
-  macports-source:
-    name: "✅ macports-source (${{ matrix.os }})"
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - macos-15-intel
-          - macos-26
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 45
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Install MacPorts
-        run: |
-          MACOS_MAJOR="$(sw_vers -productVersion | cut -d . -f 1)"
-          gh release download \
-            --repo macports/macports-base \
-            --pattern "MacPorts-*-${MACOS_MAJOR}-*.pkg" \
-            --output macports.pkg
-          sudo installer -pkg macports.pkg -target /
-          echo "/opt/local/bin" >> "$GITHUB_PATH"
-          echo "/opt/local/sbin" >> "$GITHUB_PATH"
+      - name: Report version lag
+        if: needs.newest-release.outputs.version
+        continue-on-error: true
+        shell: bash
         env:
-          GH_TOKEN: ${{ github.token }}
-      - name: Sync official ports tree
-        run: sudo port -v sync
-      - name: Register overlay ports tree
-        run: |
-          cp -R ./packaging/macports /Users/Shared/mpm-ports
-          chmod -R a+rX /Users/Shared/mpm-ports
-          portindex /Users/Shared/mpm-ports
-          { echo "file:///Users/Shared/mpm-ports"; cat /opt/local/etc/macports/sources.conf; } > sources.conf
-          sudo cp sources.conf /opt/local/etc/macports/sources.conf
-      - name: Lint ports
+          NEWEST: ${{ needs.newest-release.outputs.version }}
         run: >
-          port lint --nitpick
-          meta-package-manager
-          py-bracex
-          py-click-extra
-          py-cloup
-          py-extra-platforms
-          py-tomlrt
-      - name: Install mpm
-        run: sudo port -v install meta-package-manager
-      - run: mpm --version
+          mpm --version | grep --quiet --fixed-strings "mpm, version ${NEWEST}"
+          || echo "⚠️ Installed \`$(mpm --version | head -1)\`, behind the newest release \`${NEWEST}\`."
+          >> "$GITHUB_STEP_SUMMARY"
 
   # https://search.nixos.org/packages?query=meta-package-manager
   # https://github.com/NixOS/nixpkgs/blob/master/pkgs/by-name/me/meta-package-manager/package.nix
@@ -578,16 +568,16 @@ jobs:
   # https://aur.archlinux.org/packages/python-boltons#comment-1065664
   # https://aur.archlinux.org/packages/python-beartype#comment-1065661
   #
-  # Does not gate while pacaur cannot build python-click-extra: pacaur 4.8.6
-  # does not queue `python-tomlrt`, an AUR package in its `checkdepends`, so
-  # makepkg stops on "target not found: python-tomlrt". The paru and yay cells
-  # build every recipe: promote them after their first green run.
+  # The pacaur cell does not gate: pacaur 4.8.6 does not queue `python-tomlrt`,
+  # an AUR package in the `checkdepends` of python-click-extra, so makepkg stops
+  # on "target not found: python-tomlrt".
 
   # https://aur.archlinux.org/packages/meta-package-manager
   # https://aur.archlinux.org/packages/meta-package-manager-bin
   aur:
-    name: "⁉️ ${{ matrix.helper }}"
-    continue-on-error: true
+    name: "${{ matrix.mark }} ${{ matrix.helper }}"
+    needs: newest-release
+    continue-on-error: ${{ matrix.unstable }}
     runs-on: ubuntu-26.04
     timeout-minutes: 30
     strategy:
@@ -596,10 +586,16 @@ jobs:
         include:
           - helper: pacaur
             image_tag: yay
+            mark: "⁉️"
+            unstable: true
           - helper: paru
             image_tag: paru
+            mark: "✅"
+            unstable: false
           - helper: yay
             image_tag: yay
+            mark: "✅"
+            unstable: false
     container:
       image: greyltc/archlinux-aur:${{ matrix.image_tag }}
     env:
@@ -628,11 +624,31 @@ jobs:
         run: aur-install pacaur
       - run: runuser -u ab -- ${{ matrix.helper }} --noconfirm -S meta-package-manager
       - run: mpm --version
+      - name: Report version lag
+        if: needs.newest-release.outputs.version
+        continue-on-error: true
+        shell: bash
+        env:
+          NEWEST: ${{ needs.newest-release.outputs.version }}
+        run: >
+          mpm --version | grep --quiet --fixed-strings "mpm, version ${NEWEST}"
+          || echo "⚠️ Installed \`$(mpm --version | head -1)\`, behind the newest release \`${NEWEST}\`."
+          >> "$GITHUB_STEP_SUMMARY"
       # meta-package-manager-bin conflicts with meta-package-manager, and
       # `--noconfirm` declines to replace an installed package that conflicts.
       - run: pacman --noconfirm --remove meta-package-manager
       - run: runuser -u ab -- ${{ matrix.helper }} --noconfirm -S meta-package-manager-bin
       - run: mpm --version
+      - name: Report version lag
+        if: needs.newest-release.outputs.version
+        continue-on-error: true
+        shell: bash
+        env:
+          NEWEST: ${{ needs.newest-release.outputs.version }}
+        run: >
+          mpm --version | grep --quiet --fixed-strings "mpm, version ${NEWEST}"
+          || echo "⚠️ Installed \`$(mpm --version | head -1)\`, behind the newest release \`${NEWEST}\`."
+          >> "$GITHUB_STEP_SUMMARY"
 
   # https://pip.pypa.io/en/stable/
   pip:
@@ -700,6 +716,48 @@ jobs:
           uv --no-progress tool install pipx
           pipx run --spec git+https://github.com/kdeldycke/meta-package-manager mpm                  --version
           pipx run --spec git+https://github.com/kdeldycke/meta-package-manager meta-package-manager --version
+
+  # https://launchpad.net/~kdeldycke/+archive/ubuntu/mpm
+  # Install the package the PPA publishes, on every series it serves.
+  # `add-apt-repository` comes from `software-properties-common`.
+  ppa:
+    name: "⁉️ ppa (${{ matrix.series }})"
+    needs: newest-release
+    continue-on-error: true
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    container:
+      image: ${{ matrix.image }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - series: noble
+            image: ubuntu:24.04
+          - series: resolute
+            image: ubuntu:26.04
+          - series: stonking
+            image: ubuntu:devel
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    steps:
+      - name: Add the PPA
+        run: |
+          apt-get update --quiet
+          apt-get install --quiet --yes --no-install-recommends ca-certificates gpg software-properties-common
+          add-apt-repository --yes ppa:kdeldycke/mpm
+      - run: apt-get install --quiet --yes --no-install-recommends meta-package-manager
+      - run: mpm --version
+      - name: Report version lag
+        if: needs.newest-release.outputs.version
+        continue-on-error: true
+        shell: bash
+        env:
+          NEWEST: ${{ needs.newest-release.outputs.version }}
+        run: >
+          mpm --version | grep --quiet --fixed-strings "mpm, version ${NEWEST}"
+          || echo "⚠️ Installed \`$(mpm --version | head -1)\`, behind the newest release \`${NEWEST}\`."
+          >> "$GITHUB_STEP_SUMMARY"
 
   # https://launchpad.net/~kdeldycke/+archive/ubuntu/mpm
   # https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/ppa
@@ -805,6 +863,7 @@ jobs:
   # https://github.com/ScoopInstaller/Main/blob/master/bucket/meta-package-manager.json
   scoop:
     name: "✅ scoop (${{ matrix.os }})"
+    needs: newest-release
     strategy:
       fail-fast: false
       matrix:
@@ -824,6 +883,16 @@ jobs:
         run: scoop install main/meta-package-manager
       - shell: pwsh
         run: mpm --version
+      - name: Report version lag
+        if: needs.newest-release.outputs.version
+        continue-on-error: true
+        shell: bash
+        env:
+          NEWEST: ${{ needs.newest-release.outputs.version }}
+        run: >
+          mpm --version | grep --quiet --fixed-strings "mpm, version ${NEWEST}"
+          || echo "⚠️ Installed \`$(mpm --version | head -1)\`, behind the newest release \`${NEWEST}\`."
+          >> "$GITHUB_STEP_SUMMARY"
 
   # https://docs.astral.sh/uv/
   uv:
@@ -896,6 +965,7 @@ jobs:
   # that cell pass, so it does not gate: promote it once issue 339 closes.
   zerobrew:
     name: "${{ matrix.mark }} zerobrew (${{ matrix.os }}, ${{ matrix.asset }})"
+    needs: newest-release
     continue-on-error: ${{ matrix.unstable }}
     strategy:
       fail-fast: false
@@ -946,3 +1016,13 @@ jobs:
           } >> "$GITHUB_PATH"
       - run: zb install meta-package-manager
       - run: mpm --version
+      - name: Report version lag
+        if: needs.newest-release.outputs.version
+        continue-on-error: true
+        shell: bash
+        env:
+          NEWEST: ${{ needs.newest-release.outputs.version }}
+        run: >
+          mpm --version | grep --quiet --fixed-strings "mpm, version ${NEWEST}"
+          || echo "⚠️ Installed \`$(mpm --version | head -1)\`, behind the newest release \`${NEWEST}\`."
+          >> "$GITHUB_STEP_SUMMARY"

@@ -578,17 +578,10 @@ jobs:
   # https://aur.archlinux.org/packages/python-boltons#comment-1065664
   # https://aur.archlinux.org/packages/python-beartype#comment-1065661
   #
-  # Does not gate while two recipes this repository does not own are broken:
-  #
-  # - python-click-extra 9.4.1 fails its check(). The recipe deselects the
-  #   `network` tests, and the docs render tests of click-extra download their
-  #   environment without that marker. That environment also lacks `tomlkit`, so
-  #   a TOML example of docs/config.md asserts and the build stops. A click-extra
-  #   release after 9.4.1 has to fix both.
-  # - meta-package-manager 8.1.0-1 names the 8.0.0 source archive in `source`,
-  #   with its checksum, so build() looks for a directory that is not there.
-  #
-  # Promote the three cells once both recipes build.
+  # Does not gate while pacaur cannot build python-click-extra: pacaur 4.8.6
+  # does not queue `python-tomlrt`, an AUR package in its `checkdepends`, so
+  # makepkg stops on "target not found: python-tomlrt". The paru and yay cells
+  # build every recipe: promote them after their first green run.
 
   # https://aur.archlinux.org/packages/meta-package-manager
   # https://aur.archlinux.org/packages/meta-package-manager-bin
@@ -634,6 +627,10 @@ jobs:
         if: matrix.helper == 'pacaur'
         run: aur-install pacaur
       - run: runuser -u ab -- ${{ matrix.helper }} --noconfirm -S meta-package-manager
+      - run: mpm --version
+      # meta-package-manager-bin conflicts with meta-package-manager, and
+      # `--noconfirm` declines to replace an installed package that conflicts.
+      - run: pacman --noconfirm --remove meta-package-manager
       - run: runuser -u ab -- ${{ matrix.helper }} --noconfirm -S meta-package-manager-bin
       - run: mpm --version
 

@@ -339,7 +339,7 @@ jobs:
       # Installed through npm, which the steps above set up on every OS (Node itself is
       # pre-installed on all GitHub-hosted runners), so one cross-platform step suffices.
       - name: pnpm - install
-        run: npm install --global pnpm@12.18.0 # zizmor: ignore[adhoc-packages]
+        run: npm install --global pnpm@12.19.0 # zizmor: ignore[adhoc-packages]
 
       # Cargo
       - name: Cargo - macOS install
@@ -400,7 +400,7 @@ jobs:
           arch="${RUNNER_ARCH,,}"
           cd "${RUNNER_TEMP}"
           patterns=(--pattern "powershell-*-linux-${arch}.tar.gz" --pattern hashes.sha256)
-          gh release download v7.6.9 --repo PowerShell/PowerShell "${patterns[@]}"
+          gh release download v7.7.0 --repo PowerShell/PowerShell "${patterns[@]}"
           # The release writes its hashes in UTF-16, with CRLF line ends.
           iconv --from-code=UTF-16 --to-code=UTF-8 hashes.sha256 | tr --delete '\r' > hashes.txt
           grep --fixed-strings -- "-linux-${arch}.tar.gz" hashes.txt | sha256sum --check --strict

@@ -534,14 +534,6 @@ required-version = ">=0.12.22"
 dependency-groups.docs = { requires-python = ">= 3.14" }
 # Cooldown period.
 exclude-newer = "1 week"
-# click-extra and extra-platforms are published by this repository's own
-# maintainer: the cooldown guards against a compromised upstream, which does not
-# apply here, and it otherwise holds each release back a week from the projects
-# that consume it.
-# XXX The `sphinx-design` entry lets the `sphinx-design>=0.8` floor of the docs
-# group resolve inside its cooldown: drop this comment once `sync-uv-lock`
-# prunes the entry.
-exclude-newer-package = { click-extra = "2026-11-08T00:00:00Z", sphinx-design = "0 days" }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
 # source-include does not honor .gitignore, so prune the build output and caches

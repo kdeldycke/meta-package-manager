@@ -23,6 +23,7 @@
 - [mpm] Drop the in-repo MacPorts Portfiles: the packaging page now documents how a bump reaches each distribution that ships `mpm`.
 - [mpm] Warn on the Guix install tab that Guix ships `mpm` `7.6.1`, which fails at startup.
 - [mpm] Record two webOS tools as unsupported: `ares-install` manages apps on another device over SSH, and `webos-homebrew-channel` has no command line.
+- [dotnet] Record that NuGet's minimum publish age shipped in .NET SDK `11.0.100` for `dotnet package` alone, so `dotnet tool` stays ungated.
 
 ## [`8.3.0` (2026-11-09)](https://github.com/kdeldycke/meta-package-manager/compare/v8.2.0...v8.3.0)
 

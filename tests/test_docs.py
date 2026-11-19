@@ -1758,6 +1758,18 @@ def test_configuration_section_names_no_build_host():
         assert home not in _docs.manager_configuration(manager_id), manager_id
 
 
+@pytest.mark.parametrize("field", sorted(definitions.OVERRIDABLE_FIELDS))
+def test_overridable_fields_are_documented(field):
+    """Check each overridable field has a row in the table of `docs/overrides.md`.
+
+    The table is written by hand, so a field added to
+    {data}`~meta_package_manager.definitions.OVERRIDABLE_FIELDS` never reaches it
+    on its own.
+    """
+    page = PROJECT_ROOT.joinpath("docs", "overrides.md").read_text(encoding="UTF-8")
+    assert f"| `{field}` " in page
+
+
 DEFINITION_ONLY_FIELDS = sorted(
     set(definitions.DEFINITION_CLI_FIELDS) - set(definitions.OVERRIDABLE_FIELDS)
 )

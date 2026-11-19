@@ -21,6 +21,7 @@ from __future__ import annotations
 import tomllib
 import urllib.parse
 from dataclasses import fields
+from datetime import timedelta
 from pathlib import Path
 from textwrap import dedent
 
@@ -173,6 +174,19 @@ def test_non_dict_manager_section_raises():
             id="table-given-a-list",
         ),
         pytest.param(
+            "cooldown", 7, r"expected a duration string", id="window-given-a-number"
+        ),
+        pytest.param(
+            "cooldown", "soon", r"not a valid duration", id="window-given-a-word"
+        ),
+        # A zero window sets no cutoff: the `off` policy exempts a manager instead.
+        pytest.param(
+            "cooldown",
+            "0",
+            r"sets no window\. .*set cooldown_policy = \"off\"",
+            id="window-given-zero",
+        ),
+        pytest.param(
             "cooldown_policy",
             "strict",
             r"expected one of enforce, best-effort, off",
@@ -219,6 +233,8 @@ def test_str_tuple_override_coerces_list_to_tuple(reset_overrides):
         pytest.param("timeout", 42, 42, id="integer"),
         pytest.param("requirement", ">=20.0", ">=20.0", id="string"),
         pytest.param("sudo", True, True, id="sudo"),
+        # The window is read like the `period` of the `[mpm.cooldown]` table.
+        pytest.param("cooldown", "36 hours", timedelta(hours=36), id="window"),
         # The policy keyword is read like the `--cooldown` option reads it,
         # whatever its case.
         pytest.param(
@@ -334,6 +350,34 @@ def test_per_manager_override_beats_global_default(
     kept = getattr(selected[0], field)
     assert kept == override
     assert type(kept) is type(override)
+
+
+@pytest.mark.parametrize(
+    ("run_window", "run_policy", "injects"),
+    (
+        pytest.param(timedelta(days=7), CooldownPolicy.enforce, True, id="duration"),
+        # `--cooldown off` lifts the pinned window through the policy axis.
+        pytest.param(None, CooldownPolicy.off, False, id="off"),
+    ),
+)
+def test_cooldown_override_beats_run_window(
+    reset_overrides, run_window, run_policy, injects
+):
+    """A per-manager `cooldown` survives the window of the run.
+
+    `_select_managers` sets the window that `--cooldown` and `[mpm.cooldown]`
+    resolve on each manager it selects, except on a manager whose override pins
+    its own.
+    """
+    apply_manager_overrides(pool, {OVERRIDE_TARGET: {"cooldown": "3 days"}})
+    (manager,) = pool._select_managers(
+        keep=(OVERRIDE_TARGET,),
+        drop_not_found=False,
+        cooldown=run_window,
+        cooldown_policy=run_policy,
+    )
+    assert manager.cooldown == timedelta(days=3)
+    assert bool(manager.cooldown_env()) is injects
 
 
 @pytest.mark.parametrize(
@@ -558,6 +602,31 @@ def test_cli_loads_manager_overrides(invoke, create_config, reset_overrides):
     result = invoke("--config", str(conf_path), "managers")
     assert result.exit_code == 0
     assert pool[OVERRIDE_TARGET].cli_search_path == ("/integration/test/path",)
+
+
+def test_cli_cooldown_override_gives_keyword_an_effect(
+    invoke, create_config, reset_overrides
+):
+    """A posture keyword has an effect while one manager pins its own window.
+
+    With no window anywhere, `test_cli_cooldown_keyword_without_window_is_a_noop`
+    gets the `no effect` note instead.
+    """
+    conf_path = create_config(
+        "conf.toml", f'[mpm.overrides.{OVERRIDE_TARGET}]\ncooldown = "3 days"\n'
+    )
+    result = invoke(
+        "--config",
+        str(conf_path),
+        "--verbosity",
+        "INFO",
+        "--cooldown",
+        "best-effort",
+        "managers",
+    )
+    assert result.exit_code == 0
+    assert "has no effect" not in result.stderr
+    assert pool[OVERRIDE_TARGET].cooldown == timedelta(days=3)
 
 
 @skip_windows
@@ -1097,6 +1166,14 @@ def test_dump_manager_overrides_lists_buildable_operations(reset_overrides):
     assert list(operations) == list(buildable_operations(manager))
     assert operations["install"] == {"extra_args": ["--user"]}
     assert operations["remove"] == {"extra_args": []}
+
+
+def test_dump_manager_overrides_spells_cooldown_window(reset_overrides):
+    """The template spells a pinned window as a duration string, which TOML holds."""
+    apply_manager_overrides(pool, {OVERRIDE_TARGET: {"cooldown": "36 hours"}})
+    dumped = dump_manager_overrides(pool[OVERRIDE_TARGET])
+    assert dumped["cooldown"] == "36 hours"
+    assert tomllib.loads(tomli_w.dumps(dumped))["cooldown"] == "36 hours"
 
 
 @all_manager_ids

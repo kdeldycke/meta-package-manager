@@ -40,6 +40,7 @@ import stat
 import sys
 import urllib.parse
 from dataclasses import dataclass, field
+from datetime import timedelta
 from pathlib import Path
 from types import MappingProxyType
 from typing import Any
@@ -57,7 +58,7 @@ from click_extra import (
 from click_extra.context import CONF_FULL, CONF_SOURCE
 from extra_platforms import is_any_agent
 
-from .cooldown import parse_cooldown_section
+from .cooldown import format_period, parse_cooldown_section
 from .definitions import (
     OVERRIDABLE_FIELDS,
     OVERRIDE_OPERATION_KEYS,
@@ -817,8 +818,10 @@ def dump_manager_overrides(manager: PackageManager) -> dict[str, Any]:
     """Return the current overridable attributes of `manager` as a TOML-ready dict.
 
     Walks {data}`~meta_package_manager.definitions.OVERRIDABLE_FIELDS` in alphabetical
-    order, reads each attribute from the manager instance, and converts tuples to lists
-    so `tomli_w` can serialize the result without translation. Attributes whose value is
+    order, reads each attribute from the manager instance, converts tuples to lists and
+    spells the cooldown window as a duration string
+    ({func}`~meta_package_manager.cooldown.format_period`), so `tomli_w` can serialize
+    the result and the converters read it back unchanged. Attributes whose value is
     `None` are skipped: TOML cannot express `None` and the user cannot override a field
     *to* `None` either, so emitting the key would be misleading.
 
@@ -847,6 +850,8 @@ def dump_manager_overrides(manager: PackageManager) -> dict[str, Any]:
             continue
         if isinstance(value, tuple):
             value = list(value)
+        elif isinstance(value, timedelta):
+            value = format_period(value)
         result[field_name] = value
     return result
 

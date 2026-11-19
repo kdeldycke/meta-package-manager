@@ -950,10 +950,12 @@ def mpm(
             'Deprecated configuration: `[mpm] cooldown = "..."` moved to '
             '`[mpm.cooldown] period = "..."`. Update your configuration file.',
         )
+    # A window pinned on one manager gives the posture keyword an effect.
     if (
         isinstance(cooldown, CooldownPolicy)
         and cooldown is not CooldownPolicy.off
         and cooldown_window is None
+        and not any("cooldown" in fields for fields in pool.overridden_fields.values())
     ):
         logging.info(
             f"--cooldown {cooldown} has no effect: no cooldown window is configured."

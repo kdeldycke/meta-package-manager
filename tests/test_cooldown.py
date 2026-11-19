@@ -33,7 +33,9 @@ from meta_package_manager.cooldown import (
     Cooldown,
     CooldownPolicy,
     CooldownSettings,
+    format_period,
     parse_cooldown_section,
+    parse_period,
     resolve_cooldown,
 )
 from meta_package_manager.execution import CLIError
@@ -908,6 +910,23 @@ def test_parse_cooldown_section_rejects_wrong_shape():
     """A section that is neither a table nor a string is a type error."""
     with pytest.raises(TypeError, match="expected a table"):
         parse_cooldown_section(["1 week"])
+
+
+@pytest.mark.parametrize(
+    ("window", "spelling"),
+    (
+        (timedelta(days=1), "1 day"),
+        (timedelta(weeks=2), "14 days"),
+        (timedelta(hours=36), "36 hours"),
+        (timedelta(minutes=90), "90 minutes"),
+        (timedelta(seconds=45), "45 seconds"),
+        (timedelta(seconds=1.5), "PT1.500000S"),
+    ),
+)
+def test_format_period_round_trips(window, spelling):
+    """A window takes its largest whole unit, and parses back unchanged."""
+    assert format_period(window) == spelling
+    assert parse_period(spelling) == window
 
 
 @pytest.mark.parametrize(

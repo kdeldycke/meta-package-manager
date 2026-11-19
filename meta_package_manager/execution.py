@@ -880,6 +880,13 @@ class CLIExecutor:
     publication, so a waiting period keeps freshly-published (and potentially
     compromised) versions out of the system. `None` disables the gate.
 
+    The pool's selection sets it on every manager per run, from `--cooldown` and the
+    `[mpm.cooldown]` configuration. A `cooldown` key in a `[mpm.overrides.<id>]`
+    section pins it for one manager and keeps precedence over that resolution.
+    `--cooldown off` still lifts a pinned window through
+    {attr}`~meta_package_manager.execution.CLIExecutor.cooldown_policy`, unless an
+    override pins the policy too.
+
     Only managers able to enforce a release-age limit honor this, natively
     through {attr}`cooldown_env_var` or through the per-package release-date
     probe of

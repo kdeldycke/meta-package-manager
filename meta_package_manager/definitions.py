@@ -57,12 +57,13 @@ from click_extra import ValidationError
 from extra_platforms import ALL_GROUP_IDS, ALL_PLATFORMS, traits_from_ids
 
 from .capabilities import METHOD_OPERATIONS, Operations, implements_method
-from .cooldown import CooldownPolicy, parse_policy_token
+from .cooldown import CooldownPolicy, parse_period, parse_policy_token
 from .manager import JSON_FIELD_SELECTOR_REGEX, MetaPackageManager, PackageManager
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator, Mapping
+    from datetime import timedelta
     from pathlib import Path
     from typing import Any, Final
 
@@ -109,6 +110,30 @@ def _to_cooldown_policy(value: Any) -> CooldownPolicy:
             f"expected one of {accepted}; got {type(value).__name__}: {value!r}"
         )
     return policy
+
+
+def _to_cooldown_window(value: Any) -> timedelta:
+    """Coerce a `cooldown` override to the window it spells.
+
+    Accepts the duration grammar of the `period` key of the `[mpm.cooldown]`
+    table. Rejects a value that sets no window, like `0`: the
+    `cooldown_policy = "off"` override is the one that exempts a manager from
+    the gate.
+    """
+    if not isinstance(value, str):
+        raise TypeError(
+            f"expected a duration string, got {type(value).__name__}: {value!r}"
+        )
+    try:
+        window = parse_period(value)
+    except ValueError as ex:
+        raise TypeError(str(ex)) from ex
+    if window is None:
+        raise TypeError(
+            f"{value!r} sets no window. To exempt this manager from the cooldown, "
+            'set cooldown_policy = "off" instead.'
+        )
+    return window
 
 
 def _to_int(value: Any) -> int:
@@ -206,6 +231,7 @@ def _convert(path: str, converter: Callable[[Any], Any], value: Any) -> Any:
 OVERRIDABLE_FIELDS: Final[Mapping[str, Callable[[Any], Any]]] = {
     "cli_names": _to_str_tuple,
     "cli_search_path": _to_str_tuple,
+    "cooldown": _to_cooldown_window,
     "cooldown_policy": _to_cooldown_policy,
     "dry_run": _to_bool,
     "extra_env": _to_str_dict,

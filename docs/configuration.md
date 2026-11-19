@@ -81,7 +81,7 @@ Click-extra's built-in options ride the same configuration pipeline. The most us
 
 See {doc}`cooldown` for the full support matrix and the rationale.
 
-The table carries the two axes of the gate: `period` is the window, a duration like `7 days`, `1 week`, `12h` or `30m` (a bare number is read as a count of days, and `0` disables the gate); `policy` is the posture for managers that cannot enforce it, `enforce` (skip them, the default) or `best-effort` (run them without the safeguard). A `policy` without a `period` is rejected: a posture without a window is a no-op gate. The one-run spellings of both axes are the `--cooldown` keywords, which merge over this table axis by axis.
+The table carries the two axes of the gate: `period` is the window, a duration like `7 days`, `1 week`, `12h` or `30m` (a bare number is read as a count of days, and `0` disables the gate); `policy` is the posture for managers that cannot enforce it, `enforce` (skip them, the default) or `best-effort` (run them without the safeguard). A `policy` without a `period` is rejected: a posture without a window is a no-op gate. The one-run spellings of both axes are the `--cooldown` keywords, which merge over this table axis by axis. A `[mpm.overrides.<id>]` section pins either axis for one manager, with a `cooldown` or a `cooldown_policy` key (see {doc}`overrides`).
 
 ```toml
 [mpm.cooldown]

@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [mpm] Override the cooldown window per manager with a `cooldown` key under `[mpm.overrides.<id>]`, which wins over `--cooldown` and `[mpm.cooldown] period` for that manager. Closes [#2237](https://github.com/kdeldycke/meta-package-manager/issues/2237).
 - [mpm] Name `mpm` in the polkit message of the `run0` password prompt, which reads `start transient unit 'mpm-<pid>.service'` from systemd `257` on.
 - [mpm] Name the unit of each `run0` call `mpm-<pid>-<manager>-<serial>`, so `systemctl list-units 'mpm-*'` finds a call that outlived its timeout.
 - [mpm] Report a package left outdated by an unanswered password prompt as `no password`, not `still outdated`, in the table, the trail line and the serialized `status`.

@@ -35,7 +35,9 @@ two keys of the `[mpm.cooldown]` table (`period` and `policy`). Resolution
 ({func}`resolve_cooldown`) merges the two sources axis by axis: a value set
 on one side only leaves the other axis to the configuration, so `--cooldown
 best-effort` reuses the configured window, and `--cooldown 7d` reuses the
-configured policy.
+configured policy. A `[mpm.overrides.<id>]` section pins either axis for one
+manager, with its `cooldown` and `cooldown_policy` keys: the pinned value wins
+over both sources for that manager.
 
 The gate itself (per-manager environment injection, the fail-closed skips)
 lives in {mod}`meta_package_manager.execution` and
@@ -52,6 +54,10 @@ from typing import Any
 
 import click
 from click_extra import Duration
+
+PERIOD_UNITS = (("day", 86400), ("hour", 3600), ("minute", 60), ("second", 1))
+"""Units {func}`format_period` spells a window in, largest first, each with its
+length in seconds."""
 
 POLICY_CONFIG_KEYS = ("period", "policy")
 """Recognized keys of the `[mpm.cooldown]` configuration table.
@@ -163,12 +169,14 @@ def parse_policy_token(token: Any) -> CooldownPolicy | None:
     return None
 
 
-def _parse_period(raw: Any) -> timedelta | None:
-    """Parse the `period` configuration value into a window.
+def parse_period(raw: Any) -> timedelta | None:
+    """Parse a window from the configuration into a duration.
 
-    Accepts the same duration grammar as the `--cooldown` flag; a zero
-    duration reads as "no window". Raises `ValueError` on anything the
-    grammar rejects, with click-extra's own diagnostic in the message.
+    Reads the `period` key of the `[mpm.cooldown]` table and the `cooldown`
+    key of a `[mpm.overrides.<id>]` section. Accepts the same duration grammar
+    as the `--cooldown` flag; a zero duration reads as "no window". Raises
+    `ValueError` on anything the grammar rejects, with click-extra's own
+    diagnostic in the message.
     """
     text = str(raw).strip()
     if not text:
@@ -177,6 +185,23 @@ def _parse_period(raw: Any) -> timedelta | None:
         return Duration().convert(text, None, None)
     except click.BadParameter as exc:
         raise ValueError(str(exc)) from exc
+
+
+def format_period(window: timedelta) -> str:
+    """Spell a window as a duration that {func}`parse_period` reads back unchanged.
+
+    `window` is positive, like every window {func}`parse_period` returns. A
+    whole number of days, hours, minutes or seconds takes the largest such unit
+    of {data}`PERIOD_UNITS`, like `3 days` or `90 minutes`. A window with a
+    fraction of a second takes the ISO 8601 form, like `PT1.500000S`.
+    """
+    if not window.microseconds:
+        total = window.days * 86400 + window.seconds
+        for unit, length in PERIOD_UNITS:
+            count, remainder = divmod(total, length)
+            if not remainder:
+                return f"{count} {unit}" + ("" if count == 1 else "s")
+    return f"PT{window.total_seconds():f}S"
 
 
 def parse_cooldown_section(section: Any) -> CooldownSettings:
@@ -197,7 +222,7 @@ def parse_cooldown_section(section: Any) -> CooldownSettings:
         return CooldownSettings(duration=None, policy=None)
     if isinstance(section, str):
         return CooldownSettings(
-            duration=_parse_period(section), policy=None, legacy=True
+            duration=parse_period(section), policy=None, legacy=True
         )
     if not isinstance(section, dict):
         raise TypeError(
@@ -209,7 +234,7 @@ def parse_cooldown_section(section: Any) -> CooldownSettings:
             f"unknown key(s) {', '.join(unknown)}; "
             f"accepted: {', '.join(POLICY_CONFIG_KEYS)}"
         )
-    duration = _parse_period(section.get("period", ""))
+    duration = parse_period(section.get("period", ""))
     policy: CooldownPolicy | None = None
     raw_policy = section.get("policy")
     if raw_policy is not None and str(raw_policy).strip():

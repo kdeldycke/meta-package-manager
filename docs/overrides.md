@@ -10,6 +10,7 @@ Each built-in manager exposes a small set of attributes that can be overridden f
 | :-------------------- | :--------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `cli_names`           | list of strings  | CLI binary names to look for, in order of priority.                                                                                                                                                                                                                                       |
 | `cli_search_path`     | list of strings  | Extra directories searched **before** `$PATH` for the binary.                                                                                                                                                                                                                             |
+| `cooldown`            | string           | Per-manager cooldown window, a duration like `14 days`, overriding `--cooldown` and the `period` of `[mpm.cooldown]`. `--cooldown off` still lifts it, unless `cooldown_policy` is also set. See [cooldown](cooldown.md).                                                                 |
 | `cooldown_policy`     | string           | Per-manager cooldown posture: `enforce`, `best-effort` or `off`, overriding the globally resolved policy. See [cooldown](cooldown.md).                                                                                                                                                    |
 | `dry_run`             | boolean          | Simulate CLI calls without performing any action, only for this manager.                                                                                                                                                                                                                  |
 | `extra_env`           | table of strings | Environment variables added to those the manager sets, on every CLI call. A variable the manager sets takes the value given here. Every call also runs in the `C.UTF-8` locale (`C` where it is missing) with `LANGUAGE` unset, so tools print English: an `LC_ALL` set here replaces it. |
@@ -75,6 +76,20 @@ timeout = 900
 pre_args = ["--quiet", "--color", "never"]
 ```
 
+## Example: a longer cooldown for one manager
+
+One manager can wait longer, or less, than the [cooldown](cooldown.md) window of the others:
+
+```toml
+[mpm.cooldown]
+period = "7 days"
+
+[mpm.overrides.npm]
+cooldown = "14 days"
+```
+
+`mpm` then holds back each [`npm`](managers/npm.md) release younger than 14 days, and each release of the other managers younger than 7 days. The `npm` window also wins over a `--cooldown` duration on the command line. A zero window is rejected: to exempt a manager from the cooldown, set `cooldown_policy = "off"`.
+
 ## Per-operation arguments
 
 `pre_args` and `post_args` reach every command of a manager. To add arguments to the commands of one operation alone, use the `operations` table of the override section:
@@ -114,7 +129,7 @@ A manager definition makes `mpm` run the commands you declare. Definitions are o
 | `platforms`  | list of strings | Platform or group IDs the manager runs on (like `linux`, `macos`, `all_platforms`, or a specific `ubuntu`). |
 | `operations` | table           | At least one operation (see below). A manager with no operations does nothing.                              |
 
-These [overridable fields](#overridable-fields) may also be set: `cli_names`, `cli_search_path`, `extra_env`, `post_args`, `pre_args`, `pre_cmds`, `requirement`, `timeout`, `unmaintained`, `version_cli_options` and `version_regexes`. A definition rejects the other overridable fields: `cooldown_policy`, `dry_run`, `plan`, `stop_on_error` and `sudo`. Its `operations` table is the one described below, not the `extra_args` table of an override. A definition may also set `name`, `homepage_url`, `documentation_url` (the entry point of the tool's own documentation: its manual, its docs site, or the man page of the CLI `mpm` drives), `repository_url` (the repository holding the tool's code), `wikipedia_url` (the English Wikipedia article about the tool) and `logo` (the slug of a brand mark vendored under `docs/assets/managers/`, inlined at the top of that page). When `cli_names` is omitted it defaults to the manager ID.
+These [overridable fields](#overridable-fields) may also be set: `cli_names`, `cli_search_path`, `extra_env`, `post_args`, `pre_args`, `pre_cmds`, `requirement`, `timeout`, `unmaintained`, `version_cli_options` and `version_regexes`. A definition rejects the other overridable fields: `cooldown`, `cooldown_policy`, `dry_run`, `plan`, `stop_on_error` and `sudo`. Its `operations` table is the one described below, not the `extra_args` table of an override. A definition may also set `name`, `homepage_url`, `documentation_url` (the entry point of the tool's own documentation: its manual, its docs site, or the man page of the CLI `mpm` drives), `repository_url` (the repository holding the tool's code), `wikipedia_url` (the English Wikipedia article about the tool) and `logo` (the slug of a brand mark vendored under `docs/assets/managers/`, inlined at the top of that page). When `cli_names` is omitted it defaults to the manager ID.
 
 Twelve definition-only fields have no override counterpart:
 

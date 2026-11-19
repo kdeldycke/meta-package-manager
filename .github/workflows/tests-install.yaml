@@ -10,6 +10,7 @@ name: 🏪 Test distributors
       - packaging/choco/**
       - packaging/guix/**
       - packaging/nix/**
+      - packaging/opensuse/**
       - packaging/ppa/**
   pull_request:
     paths:
@@ -18,6 +19,7 @@ name: 🏪 Test distributors
       - packaging/choco/**
       - packaging/guix/**
       - packaging/nix/**
+      - packaging/opensuse/**
       - packaging/ppa/**
   workflow_dispatch:
   schedule:
@@ -34,9 +36,9 @@ concurrency:
 # install the released artifact from external feeds (PyPI, Homebrew, Scoop,
 # GitHub Releases, etc.). The `*-source` jobs install from the in-repo
 # packaging specs (packaging/alpine/, packaging/choco/, packaging/guix/,
-# packaging/nix/, packaging/ppa/) and validate the build instructions
-# documented in docs/packaging.md. A channel keeps an in-repo spec only until
-# mpm lands in its distribution, per docs/add-packaging-channel.md.
+# packaging/nix/, packaging/opensuse/, packaging/ppa/) and validate the build
+# instructions documented in docs/packaging.md. A channel keeps an in-repo spec
+# only until mpm lands in its distribution, per docs/add-packaging-channel.md.
 #
 # Each job installing from a distribution's own repository waits on
 # `newest-release`, and writes a line to its step summary when the version it
@@ -559,6 +561,171 @@ jobs:
       # broken for three weeks. Costs nothing whenever the flake's nixpkgs
       # input resolves to the revision the channel above already built.
       - run: nix build --no-link --print-build-logs ./packaging/nix
+
+  # https://build.opensuse.org/package/show/home:kdeldycke/meta-package-manager
+  # https://build.opensuse.org/request/show/1394245
+  # https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/opensuse
+  # Build and install from the in-repo spec while the request above is pending
+  # review. The steps check the form of the spec (rpmlint, spec-cleaner), its
+  # build (rpmbuild, whose %check phase runs mpm's hermetic test suite), and the
+  # installed package driving the container's real zypper. Tumbleweed ships
+  # every runtime dependency, so the job builds no dependency first.
+  opensuse-source:
+    name: "✅ opensuse-source"
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    container:
+      # Tumbleweed is a rolling release and publishes no immutable tag, so
+      # `latest` is what OBS builds against and what this job must validate.
+      image: opensuse/tumbleweed:latest # zizmor: ignore[unpinned-images]
+    steps:
+      - name: Refresh repositories
+        # The opensuse/tumbleweed image ships a metadata cache that can name a
+        # snapshot the mirrors have already rotated past, so a first refresh
+        # fails with "Failed to retrieve new repository metadata" on a tree that
+        # is otherwise fine. Dropping the cache and retrying absorbs that; a
+        # real outage still exhausts the attempts and fails the job.
+        run: |
+          set -eux
+          zypper --non-interactive clean --all
+          for attempt in 1 2 3; do
+            zypper --non-interactive --gpg-auto-import-keys refresh && exit 0
+            echo "refresh attempt ${attempt} failed, retrying" >&2
+            sleep 15
+          done
+          exit 1
+      - name: Install build tooling
+        run: |
+          set -eux
+          zypper --non-interactive install --no-recommends \
+            curl \
+            git \
+            python-rpm-macros \
+            rpm-build \
+            rpmlint \
+            shadow \
+            spec-cleaner \
+            tar \
+            util-linux
+      - name: Create the unprivileged build user
+        # OBS builds as the unprivileged abuild user, and so must this job: mpm
+        # escalates nothing as root, so the tests asserting a `sudo` prefix fail
+        # under a root build.
+        run: |
+          set -eux
+          useradd --create-home --user-group abuild
+          install --directory --owner=abuild --group=abuild /home/abuild/rpmbuild \
+            /home/abuild/rpmbuild/SOURCES /home/abuild/rpmbuild/SPECS
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Lint the spec
+        run: |
+          set -uo pipefail
+          report="$(rpmlint packaging/opensuse/meta-package-manager.spec 2>&1 || true)"
+          echo "${report}"
+          {
+            echo "## rpmlint (spec)"
+            echo ""
+            echo '```'
+            echo "${report}"
+            echo '```'
+          } >> "${GITHUB_STEP_SUMMARY}"
+          if echo "${report}" | grep --quiet " E: "; then
+            echo "rpmlint reported errors, see above." >&2
+            exit 1
+          fi
+      - name: Diff against openSUSE's canonical spec form
+        # spec-cleaner rewrites a spec the way the distribution formats it, so
+        # this diff is what a reviewer would otherwise ask for by hand. Never
+        # gated: it also reflows cosmetics that carry no review weight, and it
+        # would strip the comments this spec deliberately keeps.
+        run: |
+          set -uo pipefail
+          report="$(spec-cleaner --diff packaging/opensuse/meta-package-manager.spec 2>&1 || true)"
+          echo "${report}"
+          {
+            echo "## spec-cleaner --diff"
+            echo ""
+            echo '```diff'
+            echo "${report}"
+            echo '```'
+          } >> "${GITHUB_STEP_SUMMARY}"
+      - name: Install the spec's own build dependencies
+        # Read off the spec rather than restated here, so the two cannot drift.
+        # Version constraints are stripped because zypper cannot take a
+        # `name >= version` capability as a single argument; rpmbuild checks
+        # them again at build time anyway, which is where a floor must hold.
+        run: |
+          set -eux
+          rpmspec --query --buildrequires \
+            packaging/opensuse/meta-package-manager.spec \
+            | cut --delimiter=' ' --fields=1 \
+            | xargs zypper --non-interactive install --no-recommends
+      - name: Fetch the pinned source tarball
+        run: |
+          set -eux
+          source_url="$(rpmspec --parse \
+            packaging/opensuse/meta-package-manager.spec \
+            | sed --quiet 's/^Source:[[:space:]]*//p')"
+          curl --location --fail --silent --show-error \
+            --output "/home/abuild/rpmbuild/SOURCES/${source_url##*/}" \
+            "${source_url}"
+          install --owner=abuild --group=abuild --mode=644 \
+            packaging/opensuse/meta-package-manager.spec /home/abuild/rpmbuild/SPECS/
+      - name: Build the binary and source RPMs
+        # rpmbuild has no long-form equivalent for -ba. The %check phase runs
+        # `pytest -m "not integration"`, so a green build is also a green suite.
+        run: >
+          runuser --login
+          --command "rpmbuild --define '_topdir /home/abuild/rpmbuild'
+          -ba /home/abuild/rpmbuild/SPECS/meta-package-manager.spec"
+          abuild
+      - name: Lint the built RPM
+        # Warnings are reported rather than gated; errors fail the job, minus
+        # three checks a plain rpmbuild container structurally cannot satisfy.
+        # An OBS build root clamps file timestamps to the source date, so the
+        # byte-code it compiles never post-dates the sources, and it converts
+        # the .changes file into the %changelog tag this spec leaves empty on
+        # purpose. It also carries a wider rpmlint filter set than a bare
+        # container (85 checks against 81), which is what spares the spelling
+        # check from reporting `zypper` as a misspelt `zipper`. The same
+        # package lints at zero errors and zero warnings on the Build Service,
+        # which stays the authority for the built RPM.
+        working-directory: /home/abuild/rpmbuild/RPMS/noarch
+        run: |
+          set -uo pipefail
+          outside_obs='python-bytecode-inconsistent-mtime|no-changelogname-tag|spelling-error'
+          report="$(rpmlint ./*.rpm 2>&1 || true)"
+          echo "${report}"
+          {
+            echo "## rpmlint (binary RPM)"
+            echo ""
+            echo '```'
+            echo "${report}"
+            echo '```'
+          } >> "${GITHUB_STEP_SUMMARY}"
+          if echo "${report}" | grep " E: " \
+              | grep --invert-match --extended-regexp "${outside_obs}" \
+              | grep --quiet .; then
+            echo "rpmlint reported errors, see above." >&2
+            exit 1
+          fi
+      - name: Install the built RPM
+        # --allow-unsigned-rpm: the build step above made this RPM, and no
+        # repository signed it.
+        working-directory: /home/abuild/rpmbuild/RPMS/noarch
+        run: |
+          set -eux
+          zypper --non-interactive install --no-recommends --allow-unsigned-rpm ./*.rpm
+      - name: Smoke-test the installed CLI
+        run: |
+          set -eux
+          mpm --version
+          meta-package-manager --version
+          mpm --table-format=json managers
+      # The check no other channel's CI can make: mpm reading real zypper state,
+      # on the distribution whose manager it is.
+      - name: Drive mpm against zypper
+        run: mpm --zypper --verbosity INFO installed
 
   # AUR builds from source with full test suites, so a failure in any transitive
   # dependency cascades to mpm. It gates whenever every recipe builds: it reports

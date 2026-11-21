@@ -1,5 +1,10 @@
 # Changelog
 
+## [`8.3.2.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v8.3.1...main)
+
+> [!WARNING]
+> This version is **not released yet** and is under active development.
+
 ## [`8.3.1` (2026-11-21)](https://github.com/kdeldycke/meta-package-manager/compare/v8.3.0...v8.3.1)
 
 - [mpm] Override the cooldown window per manager with a `cooldown` key under `[mpm.overrides.<id>]`, which wins over a `--cooldown` duration and the `[mpm.cooldown] period` for that manager. Closes [#2237](https://github.com/kdeldycke/meta-package-manager/issues/2237).

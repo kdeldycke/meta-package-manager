@@ -6,6 +6,7 @@ from pathlib import Path
 
 from click_extra.sphinx.announcement import years_since
 from docutils import nodes
+from extra_platforms import is_github_ci
 
 from meta_package_manager._docs import changelog_releases
 
@@ -76,16 +77,15 @@ myst_enable_extensions = [
     # defers to from that version on; uv resolves 5.1 on Python 3.11+ and the
     # docs build runs on >= 3.12.
     "alert",
-    "attrs_block",
     "attrs_inline",
     # Lets admonitions nest inside backtick-fenced directives (like `{tab-item}`
     # in `install.md`) without escalating fence backtick counts.
     "colon_fence",
+    # No source file holds a definition list: `manager_card()` in
+    # meta_package_manager/_docs.py writes one per manager page at build time.
     "deflist",
     "replacements",
     "smartquotes",
-    "strikethrough",
-    "tasklist",
 ]
 # Allow ```mermaid``` directive to be used without curly braces (```{mermaid}```), see:
 # https://github.com/mgaitan/sphinxcontrib-mermaid/issues/99#issuecomment-2339587001
@@ -510,24 +510,28 @@ def prune_build_artifacts(app, exception):
     against, and `.buildinfo.bak` is the copy Sphinx keeps when that comparison
     fails. Neither is content, and no setting suppresses them: the HTML builder
     writes `.buildinfo` from a finish task unconditionally, so the only way to
-    keep them out of a published tree is to remove them once it has.
+    keep them out of a published tree is to remove them once it has. The
+    Cloudflare deploy of this site would carry them: `wrangler pages deploy`
+    uploads dot files, and skips only `.DS_Store`, `.git` and `.wrangler`.
 
     `_sources/` is created unconditionally too, before `html_copy_source` is
     ever consulted, so switching that off empties the directory without
     removing it. It is deleted here only while empty, which keeps this from
     quietly discarding the sources of a build that does want to publish them.
 
-    The cost of dropping the markers is local and small: a subsequent
-    incremental build finds none and re-reads every document, as it already has
-    to whenever a generator changes (see the module docstring of
-    `meta_package_manager/_docs.py` on the Sphinx cache). CI builds are always
-    fresh, so they lose nothing at all.
+    The markers go in a GitHub Actions build alone. That build starts from an
+    empty output directory, and its tree is the one that gets published. A
+    local incremental build needs `.buildinfo`: when the file is missing,
+    Sphinx `9.2.0` skips the configuration comparison and compares file times
+    only, so a changed html-only setting like `html_title` leaves every page as
+    it was.
     """
     if exception:
         return
     outdir = Path(app.outdir)
-    for marker in (".buildinfo", ".buildinfo.bak"):
-        (outdir / marker).unlink(missing_ok=True)
+    if is_github_ci():
+        for marker in (".buildinfo", ".buildinfo.bak"):
+            (outdir / marker).unlink(missing_ok=True)
     sources = outdir / "_sources"
     if sources.is_dir() and not any(sources.iterdir()):
         sources.rmdir()

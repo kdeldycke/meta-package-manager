@@ -95,7 +95,7 @@ Three things Sphinx writes into its output directory are not content, and none o
 
 - **`.doctrees/`**, the pickled parse cache, was 118 MB of a 182 MB artifact. Repomatic's `docs.yaml` passes `-d` to send it to the runner's temp directory instead.
 - **`_sources/`**, a copy of every document, is off via `html_copy_source`: no page this theme renders carries a source link, and the sources are the repository.
-- **`.buildinfo`**, the incremental-build marker, has no setting to suppress it, so `docs/conf.py` deletes it once the build is over.
+- **`.buildinfo`**, the incremental-build marker, has no setting to suppress it, so `docs/conf.py` deletes it once a CI build is over. A local build keeps it, because the next incremental build reads it to detect a configuration change.
 
 That matters more here than it did on GitHub Pages, which simply refused to serve dot-prefixed paths: Pages Direct Upload rejects any file over 25 MiB, and the parse cache held a 20 MB pickle.
 

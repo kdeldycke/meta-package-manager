@@ -326,8 +326,9 @@ Twelve fields are definition-only:
   {attr}`~meta_package_manager.manager.PackageManager.brewfile_skip_warning`).
 - `default_sudo` is the manager's built-in escalation policy (see
   {attr}`~meta_package_manager.execution.CLIExecutor.default_sudo`). Operations
-  marked `sudo = true` escalate by default, while the user's global `--no-sudo`
-  flag or a `sudo` override still win.
+  marked `sudo = true` escalate by default. The global `--sudo`/`--no-sudo` flag
+  wins over it, and so does a `sudo` override of a bundled definition. A
+  definition from the user's configuration rejects a `sudo` key.
 - `internal_sudo` marks a manager whose CLI invokes `sudo` itself mid-run (see
   {attr}`~meta_package_manager.execution.CLIExecutor.internal_sudo`). mpm never
   wraps its commands in `sudo`; priming instead reuses a warm credential cache

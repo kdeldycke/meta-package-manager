@@ -143,7 +143,7 @@ Every manager the table does not name shares its backend with nothing else `mpm`
 
 ## Managers that escalate on their own
 
-A few managers run `sudo` from inside their own commands: [`cask`](managers/cask.md) escalates for a privileged payload, [`fink`](managers/fink.md) re-execs its root commands through it, and the AUR helpers call `sudo pacman`. On a state-changing run that can reach a password prompt, `mpm` holds such a manager back and runs it once every other manager is done.
+A few managers run `sudo` from inside their own commands: [`cask`](managers/cask.md) escalates for a privileged payload, [`fink`](managers/fink.md) re-execs its root commands through it, and the AUR helpers call `sudo pacman`. [`am`](managers/am.md), [`pacstall`](managers/pacstall.md), [`shelly`](managers/shelly.md) and [`topgrade`](managers/topgrade.md) do the same for their own privileged steps. On a state-changing run that can reach a password prompt, `mpm` holds such a manager back and runs it once every other manager is done.
 
 The prompt is the reason. A tool writes it straight to the terminal, wherever the cursor sits, and gives it no line of its own. Raised in the middle of a concurrent batch, it lands mid-line between two other managers' outputs, or behind the progress bar. Nobody can read it there, so nobody answers it, and the run waits until the operation times out. Held to the end, the prompt gets a terminal no other manager is writing to.
 

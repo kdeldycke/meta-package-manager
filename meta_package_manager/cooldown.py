@@ -196,7 +196,7 @@ def format_period(window: timedelta) -> str:
     fraction of a second takes the ISO 8601 form, like `PT1.500000S`.
     """
     if not window.microseconds:
-        total = window.days * 86400 + window.seconds
+        total = window // timedelta(seconds=1)
         for unit, length in PERIOD_UNITS:
             count, remainder = divmod(total, length)
             if not remainder:

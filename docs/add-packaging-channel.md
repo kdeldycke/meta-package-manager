@@ -42,7 +42,7 @@ Add a `{channel}-source` job to [`tests-install.yaml`](https://github.com/kdeldy
 
 Three files plus the workflow move together. `docs/install.md`, `docs/packaging.md` and `tests-install.yaml` each carry a `Keep in sync` comment that names the others:
 
-- [`docs/packaging.md`](packaging.md): add a row to the channels table and a build-from-spec section.
+- [`docs/packaging.md`](packaging.md): add a row to the table of channels built from this repository, and a build-from-spec section under *Built from this repository*.
 - [`docs/install.md`](install.md): add a tab opening with commands that work today. A released channel gets its one-liner; a channel still pending upstream review gets the condensed build recipe from its `packaging.md` section, followed by an admonition naming the upstream pull request and inviting the reader to +1 it.
 - `changelog.md`: one entry naming the channel and its `{channel}-source` job.
 

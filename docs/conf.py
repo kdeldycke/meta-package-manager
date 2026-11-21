@@ -518,7 +518,7 @@ def prune_build_artifacts(app, exception):
     removing it. It is deleted here only while empty, which keeps this from
     quietly discarding the sources of a build that does want to publish them.
 
-    The markers go in a GitHub Actions build alone. That build starts from an
+    Only a GitHub Actions build removes the markers. That build starts from an
     empty output directory, and its tree is the one that gets published. A
     local incremental build needs `.buildinfo`: when the file is missing,
     Sphinx `9.2.0` skips the configuration comparison and compares file times

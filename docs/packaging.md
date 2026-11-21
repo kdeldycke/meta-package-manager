@@ -71,7 +71,7 @@ Building the sdist needs [`uv-build`](https://pypi.org/project/uv-build/), which
 
 <!-- matrix click-extra package=mpm show-spec -->
 
-| `mpm` ↴ \\ `click-extra` → | Spec    | `10.3.0` | `10.2.x` ← `10.0.x` | `9.5.x` ← `9.3.x` |
+| `mpm` ↴ \\ `click-extra` → | Spec    | `10.3.x` | `10.2.x` ← `10.0.x` | `9.5.x` ← `9.3.x` |
 | :------------------------- | :------ | :------: | :-----------------: | :---------------: |
 | `8.3.0`                    | `>=10`  |    ✅    |         ✅          |        ❌         |
 | `8.1.x` → `8.2.x`          | `>=9.3` |    –     |         ✅          |        ✅         |
@@ -105,7 +105,7 @@ The channels built from this repository:
 | openSUSE     | [`packaging/opensuse/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/opensuse)                | [pending review](https://build.opensuse.org/request/show/1399593)                      | `opensuse-source`   | manual       |
 | Ubuntu (PPA) | [`packaging/ppa/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/ppa)                          | [published](https://launchpad.net/~kdeldycke/+archive/ubuntu/mpm)                      | `ppa-source`, `ppa` | manual       |
 
-The jobs of [`tests-install.yaml`](https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/tests-install.yaml) run on a weekly schedule. The `*-source` jobs build and install each in-repo spec, also on every change to it. The other jobs install each published package, and their step summary reports a version that trails the newest release. Automated bumps are performed by `release.yaml` jobs right after each release (see [releasing](releasing.md)). The channels marked manual are refreshed by hand at each release. An in-repo spec of that kind pins the released version, and the PPA is uploaded once per series.
+The jobs of [`tests-install.yaml`](https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/tests-install.yaml) run on a weekly schedule. The `*-source` jobs build and install each in-repo spec, also on every change to it. The other jobs install each published package. Each one that installs from a distribution's own repository adds a line to its step summary when the version it installed trails the newest release. Automated bumps are performed by `release.yaml` jobs right after each release (see [releasing](releasing.md)). The channels marked manual are refreshed by hand at each release. An in-repo spec of that kind pins the released version, and the PPA is uploaded once per series.
 
 ## Packaged downstream
 
@@ -123,7 +123,7 @@ Each recipe below lives in the repository of its distribution. A fix or a versio
 - `guix lint <package>` passes, including its 80-column limit.
 - [`packaging/guix/update.py`](https://github.com/kdeldycke/meta-package-manager/blob/main/packaging/guix/update.py) computes the `git-fetch` hash of a release tag.
 
-Guix ships `mpm` `7.6.1`, which fails at startup on a missing data file. Until Guix ships `8.x`, the definition maintained in this repository is the route to a working `mpm`:
+Guix ships `mpm` `7.6.1`, which fails at startup on a missing data file. Until Guix ships `8.0.2` or later, the definition maintained in this repository is the route to a working `mpm`:
 
 ```{code-block} shell-session
 $ git clone https://github.com/kdeldycke/meta-package-manager.git
@@ -131,7 +131,7 @@ $ guix install --load-path=./meta-package-manager/packaging/guix meta-package-ma
 ```
 
 ```{todo}
-Once Guix ships `mpm` `8.x`, delete `packaging/guix/`, the `guix-source` job of `tests-install.yaml` and the `guix` job of `release.yaml`.
+Once Guix ships `mpm` `8.0.2` or later, delete `packaging/guix/`, the `guix-source` job of `tests-install.yaml` and the `guix` job of `release.yaml`.
 ```
 
 ### Homebrew
@@ -253,7 +253,11 @@ $ rpmbuild -ba meta-package-manager.spec
 $ sudo zypper install --allow-unsigned-rpm ~/rpmbuild/RPMS/noarch/meta-package-manager-*.rpm
 ```
 
-Run the `rpmbuild` step as an unprivileged user, as the Open Build Service does. Under root, `mpm` escalates nothing, so the tests that assert a `sudo` prefix fail in the `%check` phase.
+Run the `rpmbuild` step as an unprivileged user, as the Open Build Service does. Under root, `mpm` escalates nothing, so the tests of `8.3.0` that assert a `sudo` prefix fail in the `%check` phase.
+
+```{todo}
+When the openSUSE recipe in `packaging/` moves past `8.3.0`, drop the sentence of the openSUSE section that says the `%check` phase fails under root: the next release passes the escalation tests as root.
+```
 
 Every runtime dependency is already packaged in Tumbleweed, so this is the one channel whose spec introduces no dependency of its own. The package is built for the primary Python flavor alone and keeps an unsuffixed `/usr/bin/mpm`, the shape openSUSE gives an application rather than a library, and its `%check` phase runs the hermetic layer with `pytest -m "not integration"`.
 
@@ -307,12 +311,12 @@ Each release is uploaded by hand, once per series, so the PPA can trail the newe
 
 ### Void Linux
 
-Void ships no `mpm` package, and this repository no longer maintains templates for one. Void does not accept a package submitted by the author of the software, so [void-linux/void-packages#60532](https://github.com/void-linux/void-packages/pull/60532) was closed.
+Void ships no `mpm` package, and this repository carries no templates for one. Void does not accept a package submitted by the author of the software, so [void-linux/void-packages#60532](https://github.com/void-linux/void-packages/pull/60532) was closed.
 
 The work stays available to revive:
 
 - [The templates of that pull request](https://github.com/void-linux/void-packages/pull/60532/files), which GitHub still serves under its `pull/60532/head` ref. They package `mpm` `7.6.1`, the five Python packages Void lacked then, and a bump of `python3-boltons`.
 - [The workflow that built them](https://github.com/kdeldycke/meta-package-manager/blob/344f012b6ce796c66f024892bb7a912b1f61f52f/.github/workflows/check-void-deps.yaml) with `xbps-src` in the official Void container, running the check phase of each package.
-- [void-linux/void-packages#62477](https://github.com/void-linux/void-packages/pull/62477), which submits on their own the four templates for software I did not write.
+- [void-linux/void-packages#62477](https://github.com/void-linux/void-packages/pull/62477): the four templates for software I did not write, submitted on their own. This pull request is closed too.
 
 The templates need a bump before any submission: `7.6.1` reads the `XBPS:` banner as the version of [`xbps`](managers/xbps.md), so the `mpm` they build leaves `xbps` out of its pool, which `8.0.0` fixed. The [dependencies](#dependencies) of the current release differ too. If you run Void and use `mpm`, you are welcome to submit the templates under your own name, with yourself in the `maintainer` field. Void [asks that submitters have a history of contributions](https://github.com/void-linux/void-packages/blob/master/CONTRIBUTING.md#package-requirements) to `void-packages`, so working on orphaned packages first is the recommended route.

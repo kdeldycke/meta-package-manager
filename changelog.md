@@ -5,20 +5,21 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
-- [mpm] Override the cooldown window per manager with a `cooldown` key under `[mpm.overrides.<id>]`, which wins over `--cooldown` and `[mpm.cooldown] period` for that manager. Closes [#2237](https://github.com/kdeldycke/meta-package-manager/issues/2237).
-- [mpm] Name `mpm` in the polkit message of the `run0` password prompt, which reads `start transient unit 'mpm-<pid>.service'` from systemd `257` on.
+- [mpm] Override the cooldown window per manager with a `cooldown` key under `[mpm.overrides.<id>]`, which wins over a `--cooldown` duration and the `[mpm.cooldown] period` for that manager. Closes [#2237](https://github.com/kdeldycke/meta-package-manager/issues/2237).
+- [mpm] Name `mpm` in the polkit message of the `run0` password prompt, which reads `start transient unit 'mpm-<pid>.service'`.
 - [mpm] Name the unit of each `run0` call `mpm-<pid>-<manager>-<serial>`, so `systemctl list-units 'mpm-*'` finds a call that outlived its timeout.
 - [mpm] Report a package left outdated by an unanswered password prompt as `no password`, not `still outdated`, in the table, the trail line and the serialized `status`.
-- [mpm] Fix the `run0` password prompt, which polkit kept for no later command because the prompt left the terminal owned by root.
-- [mpm] Skip the `run0` password prompt under a polkit older than `127`, which keeps the authorization for the prompt call alone, warning with the fix instead.
+- [mpm] Fix the `run0` password prompt, whose authorization reached no later command because the prompt left the terminal owned by root.
+- [mpm] Skip the `run0` password prompt under a polkit older than `127`, which keeps the authorization for the prompt call alone, and warn with the fix instead.
 - [zypper] Show the latest version of each `mpm search` result, which the version column left empty.
-- [macports] List the first installed port in `mpm installed`, which the parser dropped.
-- [fink] List the first installed package in `mpm installed`, which the parser dropped.
+- [fink,macports] List the first installed package in `mpm installed`, which the parser dropped.
 - [mpm] Collect the test suite without `pytest-xdist`, which `8.3.0` needed to declare the `xdist_group` marker its tests set.
 - [mpm] Pass the privilege escalation tests when the test suite runs as root, like in a container build.
-- [mpm] Pass the test suite from a source tree where mpm is not installed yet, like in some distribution test phases.
-- [mpm] Bump the Alpine, Chocolatey, Guix, Nix and openSUSE recipes of the repository to `8.3.0`, staging the `click-extra` `10` dependencies their distributions lack.
+- [mpm] Pass the test suite from a source tree where `mpm` is not installed yet, like in some distribution test phases.
+- [mpm] Bump the in-repo Alpine, Chocolatey, Guix, Nix and openSUSE recipes to `8.3.0`, and stage the `click-extra` `10` dependencies that Alpine, Guix and Nix lack.
+- [mpm] Raise the docs floor of `sphinx-design` to `0.8`, below which the docs build fails.
 - [mpm] Document that `mpm` drives `run0` from systemd `257`, which added the `--pipe` and `--pty` options it passes.
+- [cask] Document that a cask whose `uninstall` stanza names a `launchctl` service asks for a password on every upgrade.
 - [mpm] Drop the Void Linux installation steps: the packaging page now points to the archived templates and the context to revive them.
 - [mpm] Drop the in-repo MacPorts Portfiles: the packaging page now documents how a bump reaches each distribution that ships `mpm`.
 - [mpm] Warn on the Guix install tab that Guix ships `mpm` `7.6.1`, which fails at startup.

@@ -1606,8 +1606,7 @@ def test_manager_page_headings_survive_a_build(tmp_path):
         'project = "test"\n'
         'extensions = ["myst_parser", "sphinx_design", "click_extra.sphinx"]\n'
         "click_extra_enable_exec_directives = True\n"
-        'myst_enable_extensions = ["attrs_block", "attrs_inline", '
-        '"colon_fence", "deflist"]\n',
+        'myst_enable_extensions = ["attrs_inline", "colon_fence", "deflist"]\n',
         encoding="UTF-8",
     )
     (source / "index.md").write_text(

@@ -570,19 +570,20 @@ the click.
 The formatter truncates: every age from 300 to 359 seconds reads
 `5 Minutes Ago`. The menu reads this value plus two seconds and the click's
 delay, minus the launch's, which runs up to twenty seconds. So 330 lands the
-age between 312 and 332 seconds, clear of both edges. At 300 the launch alone
-pushed it under the edge in most runs, and the footer read `4 Minutes Ago`
-there and `5 Minutes Ago` in the others (run 41623156440).
+age between 312 and 332 seconds, clear of both edges. A value on an edge, like
+300, lets the launch alone push the age under it: the footer then reads
+`4 Minutes Ago` in most runs and `5 Minutes Ago` in the others
+(run 41623156440).
 
 Both ends land before the click, not before the shutter. The host works the age
 out as it assembles the menu, so a wind forward placed any later moves the menu
 bar's clock and leaves the footer reading the launch delay and nothing else,
 which is how it came to say `28 Seconds Ago` and then `27` (run 32777818530).
 
-Kept to five and a half minutes rather than the hours that would be coarser still: the
-wind forward is the one jump this driver makes in the direction a job's timeout
-is measured in, so it stays far shorter than the timeout it could otherwise eat
-into.
+Kept to five and a half minutes rather than the hours that would be coarser
+still: the wind forward is the one jump this driver makes in the direction a
+job's timeout is measured in, so it stays far shorter than the timeout it could
+otherwise eat into.
 """
 
 CLOCK_TIME = (10, 30)

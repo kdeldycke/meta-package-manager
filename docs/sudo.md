@@ -22,7 +22,7 @@ Password:
 
 ## Escalation policy
 
-Which managers escalate is decided per manager. System package managers ([`apt`](managers/apt.md), [`dnf`](managers/dnf.md), [`pacman`](managers/pacman.md), [`zypper`](managers/zypper.md), [`xbps`](managers/xbps.md), [`macports`](managers/macports.md), [`snap`](managers/snap.md), and the like) run their state-changing operations through `sudo` by default; user-level managers ([`brew`](managers/brew.md), [`npm`](managers/npm.md), [`pip`](managers/pip.md), ...) do not, and daemon-backed managers authorizing through polkit ([`flatpak`](managers/flatpak.md), [`fwupd`](managers/fwupd.md), [`pkcon`](managers/pkcon.md)) need no wrap at all. A password prompt raised by those last ones comes from polkit, not `sudo`, so a `NOPASSWD` rule does not silence it: grant a polkit rule instead.
+Which managers escalate is decided per manager. System package managers ([`apt`](managers/apt.md), [`dnf`](managers/dnf.md), [`pacman`](managers/pacman.md), [`zypper`](managers/zypper.md), [`xbps`](managers/xbps.md), [`macports`](managers/macports.md), [`snap`](managers/snap.md), and the like) run their state-changing operations through `sudo` by default; user-level managers ([`brew`](managers/brew.md), [`npm`](managers/npm.md), [`pip`](managers/pip.md), ...) do not, and daemon-backed managers authorizing through polkit ([`flatpak`](managers/flatpak.md), [`fwupd`](managers/fwupd.md), [`pamac`](managers/pamac.md), [`pkcon`](managers/pkcon.md)) need no wrap at all. A password prompt raised by those last ones comes from polkit, not `sudo`, so a `NOPASSWD` rule does not silence it: grant a polkit rule instead.
 
 ## Choosing the escalator
 

@@ -232,7 +232,7 @@ The package [landed in Guix on 2026-06-28](https://codeberg.org/guix/guix/pulls/
 ```
 
 ```{warning}
-Guix ships `mpm` `7.6.1`, which fails at startup on a missing data file. Until Guix ships `8.x`, install from [the definition maintained in the repository](packaging.md#guix).
+Guix ships `mpm` `7.6.1`, which fails at startup on a missing data file. Until Guix ships `8.0.2` or later, install from [the definition maintained in the repository](packaging.md#guix).
 ```
 `````
 
@@ -358,7 +358,7 @@ All links above points to the latest released version of `mpm`.
 
 ```{seealso}
 - To test previous versions for regression, compatibility or general troubleshooting, the old binaries are attached as assets to [past releases on GitHub](https://github.com/kdeldycke/meta-package-manager/releases).
-- To test the bleeding-edge version, fresh binaries are compiled from every push to the `main` branch: grab them from the [development builds](binaries.md#development-builds).
+- To test the bleeding-edge version, grab a [development build](binaries.md#development-builds): a push to the `main` branch compiles the `linux-arm64` binary, and a weekly build compiles every platform.
 - The exact executable format each binary targets is listed in the [ABI targets](binaries.md#abi-targets) section of the catalog.
 ```
 
@@ -380,8 +380,8 @@ The more independent reports a vendor receives, the more likely a detection gets
 All release artifacts (Python packages and compiled binaries) are signed with [GitHub Artifact Attestations](https://docs.github.com/en/actions/security-guides/using-artifact-attestations-to-establish-provenance-for-builds) providing [SLSA v1 provenance](https://slsa.dev/spec/v1.0/). You can verify any downloaded artifact with the [GitHub CLI](https://cli.github.com):
 
 ```{code-block} shell-session
-$ gh attestation verify ./meta-package-manager-8.2.0-macos-arm64.bin --repo kdeldycke/meta-package-manager --signer-repo kdeldycke/repomatic
-Loaded digest sha256:... for file://meta-package-manager-8.2.0-macos-arm64.bin
+$ gh attestation verify ./meta-package-manager-8.3.0-macos-arm64.bin --repo kdeldycke/meta-package-manager --signer-repo kdeldycke/repomatic
+Loaded digest sha256:... for file://meta-package-manager-8.3.0-macos-arm64.bin
 Loaded 1 attestation from GitHub API
 ✓ Verification succeeded!
 ```
@@ -393,7 +393,7 @@ The `--signer-repo kdeldycke/repomatic` flag is required because the release wor
 For Python packages from PyPI:
 
 ```{code-block} shell-session
-$ gh attestation verify ./meta_package_manager-8.2.0-py3-none-any.whl --repo kdeldycke/meta-package-manager --signer-repo kdeldycke/repomatic
+$ gh attestation verify ./meta_package_manager-8.3.0-py3-none-any.whl --repo kdeldycke/meta-package-manager --signer-repo kdeldycke/repomatic
 ```
 
 Attestation bundles are also attached to each [GitHub release](https://github.com/kdeldycke/meta-package-manager/releases) for offline verification.
@@ -422,7 +422,7 @@ $ chmod +x ./meta-package-manager-macos-x64.bin
 
 ```{code-block} shell-session
 $ ./meta-package-manager-macos-x64.bin --version
-mpm, version 8.2.0
+mpm, version 8.3.0
 (...)
 ```
 
@@ -443,11 +443,11 @@ warning: pip does not implement search operation.
 meta-package-manager existence unconfirmed, try to directly install it...
 Install meta-package-manager package with pip...
 Collecting meta-package-manager
-  Downloading meta_package_manager-8.2.0-py3-none-any.whl (887 kB)
-     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 887.0/887.0 kB 494.7 kB/s eta 0:00:00
+  Downloading meta_package_manager-8.3.0-py3-none-any.whl (905 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 905.6/905.6 kB 494.7 kB/s eta 0:00:00
 (...)
 Installing collected packages: (...) meta-package-manager
-Successfully installed (...) meta-package-manager-8.2.0
+Successfully installed (...) meta-package-manager-8.3.0
 ```
 
 And now you can remove the local binary and enjoy the system-wide `mpm` that was installed by itself:
@@ -463,7 +463,7 @@ $ which mpm
 
 ```{code-block} shell-session
 $ mpm --version
-mpm, version 8.2.0
+mpm, version 8.3.0
 (...)
 ```
 
@@ -537,7 +537,7 @@ Anywhere else, and in a pipe, it prints the same facts as two plain lines:
 
 ```{code-block} shell-session
 $ mpm --version
-mpm, version 8.2.0
+mpm, version 8.3.0
 Python 3.14.7, macOS ARM64 (AArch64)
 ```
 

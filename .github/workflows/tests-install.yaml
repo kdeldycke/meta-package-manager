@@ -57,9 +57,9 @@ concurrency:
 # public package page first (like `formulae.brew.sh`), then the source
 # definition (the formula `.rb`, the manifest `.json`).
 #
-# The file is long: each channel needs its own install commands. It holds no
-# other logic. An invariant of the project is a test, never a `grep` in a
-# `run:` block.
+# The file is long: each channel needs its own install commands. Apart from the
+# advisory version-lag lines, it holds no other logic. An invariant of the
+# project is a test, never a `grep` in a `run:` block.
 #
 # Every matrix opts out of fail-fast: one broken cell must not cancel its
 # siblings, and a cancelled cell hides whether its own channel is broken too.
@@ -94,7 +94,6 @@ jobs:
           echo "version=$(curl --fail --silent --show-error --retry 3
           https://pypi.org/pypi/meta-package-manager/json | jq --raw-output .info.version)"
           >> "$GITHUB_OUTPUT"
-
 
   # https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/alpine
   # https://gitlab.alpinelinux.org/alpine/aports/-/merge_requests/105566
@@ -298,8 +297,6 @@ jobs:
   # installing. Heavyweight (the pull can build for a while) and Linux-only,
   # but it gates: it reports what a Guix user can install today, so a red run
   # is the cue to fix the package upstream rather than something to wave past.
-  # https://packages.guix.gnu.org/packages/meta-package-manager/
-  # https://codeberg.org/guix/guix/src/branch/master/gnu/packages/package-management.scm
   #
   # Does not gate while Guix ships mpm 7.6.1: that build leaves out the
   # `yay_cooldown.lua` data file, so every `mpm` call dies on import with a
@@ -326,20 +323,16 @@ jobs:
       # `yes ''` feeds the newlines the script reads with `read -r`, which is the
       # only automation upstream supports: plain `yes` answers `y`, which it
       # rejects with "that (y) was not a return!" and warns is "likely to break
-      # in future". Retried because the tarball comes from ftpmirror.gnu.org, a
-      # redirector that answered 502 here, and whose URL the script hardcodes.
+      # in future". The script downloads the release tarball from its `GNU_URL`
+      # host and checks its GPG signature, so each attempt points it at another
+      # host of the GNU mirror list.
       - name: Run Guix installer
         run: |
           chmod +x guix-install.sh
-          # `ftpmirror.gnu.org` is a redirector, and it answered 502 to this
-          # runner and to a home connection alike while `ftp.gnu.org` served the
-          # same tarballs. The script hardcodes the redirector with no override,
-          # so rewrite it to the canonical host it redirects to. A no-op if
-          # upstream ever drops the redirector, which is today's behaviour.
-          sed -i 's|https://ftpmirror\.gnu\.org/gnu/guix/|https://ftp.gnu.org/gnu/guix/|g' guix-install.sh
-          for attempt in 1 2 3; do
+          for host in https://ftp.gnu.org https://mirrors.kernel.org https://mirror.csclub.uwaterloo.ca; do
+            sed --in-place "s|^GNU_URL=.*|GNU_URL=\"${host}/gnu/guix/\"|" guix-install.sh
             yes '' | sudo ./guix-install.sh && exit 0
-            echo "Guix installer attempt ${attempt} failed, retrying in 20s."
+            echo "Guix installer failed with ${host}, retrying in 20s."
             sleep 20
           done
           exit 1
@@ -392,20 +385,16 @@ jobs:
       # `yes ''` feeds the newlines the script reads with `read -r`, which is the
       # only automation upstream supports: plain `yes` answers `y`, which it
       # rejects with "that (y) was not a return!" and warns is "likely to break
-      # in future". Retried because the tarball comes from ftpmirror.gnu.org, a
-      # redirector that answered 502 here, and whose URL the script hardcodes.
+      # in future". The script downloads the release tarball from its `GNU_URL`
+      # host and checks its GPG signature, so each attempt points it at another
+      # host of the GNU mirror list.
       - name: Run Guix installer
         run: |
           chmod +x guix-install.sh
-          # `ftpmirror.gnu.org` is a redirector, and it answered 502 to this
-          # runner and to a home connection alike while `ftp.gnu.org` served the
-          # same tarballs. The script hardcodes the redirector with no override,
-          # so rewrite it to the canonical host it redirects to. A no-op if
-          # upstream ever drops the redirector, which is today's behaviour.
-          sed -i 's|https://ftpmirror\.gnu\.org/gnu/guix/|https://ftp.gnu.org/gnu/guix/|g' guix-install.sh
-          for attempt in 1 2 3; do
+          for host in https://ftp.gnu.org https://mirrors.kernel.org https://mirror.csclub.uwaterloo.ca; do
+            sed --in-place "s|^GNU_URL=.*|GNU_URL=\"${host}/gnu/guix/\"|" guix-install.sh
             yes '' | sudo ./guix-install.sh && exit 0
-            echo "Guix installer attempt ${attempt} failed, retrying in 20s."
+            echo "Guix installer failed with ${host}, retrying in 20s."
             sleep 20
           done
           exit 1

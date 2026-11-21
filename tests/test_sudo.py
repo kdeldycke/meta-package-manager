@@ -1733,6 +1733,14 @@ def test_prompt_args_resolve_for_every_escalator(escalator):
     assert not any("{pid}" in arg for arg in resolved)
 
 
+# `pkcheck` on `org.freedesktop.systemd1.manage-units` from a local session, which
+# systemd's policy grants `auth_admin_keep`. Measured on Fedora 44, polkit 127.
+MANAGE_UNITS_KEEP = (
+    "polkit\\56result=auth_admin_keep\n"
+    "polkit\\56retains_authorization_after_challenge=1\n"
+)
+
+
 def test_run0_prompts_in_a_unit_named_after_mpm():
     """The up-front `run0` call names its unit after mpm, on a terminal of its own.
 
@@ -1748,13 +1756,7 @@ def test_run0_prompts_in_a_unit_named_after_mpm():
         """polkit keeps the authorization, which the prompt then buys."""
         argv = tuple(argv)
         if argv[0] == "pkcheck":
-            # `pkcheck` under `auth_admin_keep`, measured on Fedora 44, polkit 127.
-            return subprocess.CompletedProcess(
-                argv,
-                2,
-                stdout="polkit\\56result=auth_admin_keep\n"
-                "polkit\\56retains_authorization_after_challenge=1\n",
-            )
+            return subprocess.CompletedProcess(argv, 2, stdout=MANAGE_UNITS_KEEP)
         if "--no-ask-password" not in argv:
             prompts.append(argv)
         return subprocess.CompletedProcess(argv, 0 if prompts else 1)
@@ -2251,12 +2253,7 @@ def test_prime_sudo_prompts_only_when_polkit_keeps_it(caplog, probe_stdout, prom
     (
         # `pkcheck` on `org.freedesktop.systemd1.manage-units`, measured on
         # Fedora 44 with polkit 127, under each policy systemd ships.
-        pytest.param(
-            "polkit\\56result=auth_admin_keep\n"
-            "polkit\\56retains_authorization_after_challenge=1\n",
-            True,
-            id="local-session",
-        ),
+        pytest.param(MANAGE_UNITS_KEEP, True, id="local-session"),
         pytest.param("polkit\\56result=auth_admin\n", False, id="ssh-session"),
         # No `pkcheck` to ask: the prompt goes ahead, as before.
         pytest.param(None, True, id="no-pkcheck"),
@@ -2347,12 +2344,7 @@ def test_prime_sudo_asks_no_run0_password_under_a_polkit_before_127(caplog):
         """A cold probe, and a `pkcheck` whose policy keeps the authorization."""
         argv = tuple(argv)
         if argv[0] == "pkcheck":
-            return subprocess.CompletedProcess(
-                argv,
-                2,
-                stdout="polkit\\56result=auth_admin_keep\n"
-                "polkit\\56retains_authorization_after_challenge=1\n",
-            )
+            return subprocess.CompletedProcess(argv, 2, stdout=MANAGE_UNITS_KEEP)
         return subprocess.CompletedProcess(argv, 1)
 
     with (
@@ -2659,12 +2651,7 @@ def test_diagnose_run0_under_a_polkit_before_127():
                 argv, 0, stdout="systemd 259 (259.8-1.fc44)\n"
             )
         if argv[0] == "pkcheck":
-            return subprocess.CompletedProcess(
-                argv,
-                2,
-                stdout="polkit\\56result=auth_admin_keep\n"
-                "polkit\\56retains_authorization_after_challenge=1\n",
-            )
+            return subprocess.CompletedProcess(argv, 2, stdout=MANAGE_UNITS_KEEP)
         return subprocess.CompletedProcess(argv, 1, stdout=b"", stderr=b"")
 
     with (

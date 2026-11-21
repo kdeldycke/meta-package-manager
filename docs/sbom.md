@@ -33,9 +33,9 @@ SPDXID: SPDXRef-DOCUMENT
 creationInfo:
   created: '2026-11-09T08:09:25Z'
   creators:
-  - 'Tool: meta-package-manager-8.2.0'
+  - 'Tool: meta-package-manager-8.3.0'
 dataLicense: CC0-1.0
-documentNamespace: https://github.com/kdeldycke/meta-package-manager/releases/tag/v8.2.0/fb9774113469b3dc18067c28c672cff
+documentNamespace: https://github.com/kdeldycke/meta-package-manager/releases/tag/v8.3.0/fb9774113469b3dc18067c28c672cff
 externalDocumentRefs:
 (...)
 - checksum:

@@ -563,7 +563,7 @@ jobs:
       - run: nix build --no-link --print-build-logs ./packaging/nix
 
   # https://build.opensuse.org/package/show/home:kdeldycke/meta-package-manager
-  # https://build.opensuse.org/request/show/1394245
+  # https://build.opensuse.org/request/show/1399593
   # https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/opensuse
   # Build and install from the in-repo spec while the request above is pending
   # review. The steps check the form of the spec (rpmlint, spec-cleaner), its

@@ -102,7 +102,7 @@ The channels built from this repository:
 | Alpine Linux | [`packaging/alpine/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/alpine)                    | [pending review](https://gitlab.alpinelinux.org/alpine/aports/-/merge_requests/105566) | `apk-source`        | manual       |
 | Chocolatey   | [`packaging/choco/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/choco/meta-package-manager) | [community repository rejected the submission](binaries.md#impact-on-chocolatey)       | `choco-source`      | manual       |
 | Nix          | [`packaging/nix/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/nix)                          | [pending review](https://github.com/NixOS/nixpkgs/pull/506145)                         | `nix-source`        | automated    |
-| openSUSE     | [`packaging/opensuse/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/opensuse)                | [pending review](https://build.opensuse.org/request/show/1394245)                      | `opensuse-source`   | manual       |
+| openSUSE     | [`packaging/opensuse/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/opensuse)                | [pending review](https://build.opensuse.org/request/show/1399593)                      | `opensuse-source`   | manual       |
 | Ubuntu (PPA) | [`packaging/ppa/`](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/ppa)                          | [published](https://launchpad.net/~kdeldycke/+archive/ubuntu/mpm)                      | `ppa-source`, `ppa` | manual       |
 
 The jobs of [`tests-install.yaml`](https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/tests-install.yaml) run on a weekly schedule. The `*-source` jobs build and install each in-repo spec, also on every change to it. The other jobs install each published package, and their step summary reports a version that trails the newest release. Automated bumps are performed by `release.yaml` jobs right after each release (see [releasing](releasing.md)). The channels marked manual are refreshed by hand at each release. An in-repo spec of that kind pins the released version, and the PPA is uploaded once per series.
@@ -258,7 +258,7 @@ Run the `rpmbuild` step as an unprivileged user, as the Open Build Service does.
 Every runtime dependency is already packaged in Tumbleweed, so this is the one channel whose spec introduces no dependency of its own. The package is built for the primary Python flavor alone and keeps an unsuffixed `/usr/bin/mpm`, the shape openSUSE gives an application rather than a library, and its `%check` phase runs the hermetic layer with `pytest -m "not integration"`.
 
 ```{note}
-The package is not in openSUSE proper yet: it awaits review in [request 1394245](https://build.opensuse.org/request/show/1394245), which submits it to the `system:packagemanager` development project, the route to Tumbleweed and then Leap. The home-project repository above is the supported install in the meantime. [`zypper`](managers/zypper.md) is itself one of the managers `mpm` drives.
+The package is not in openSUSE proper yet: it awaits review in [request 1399593](https://build.opensuse.org/request/show/1399593), which submits it to the `system:packagemanager` development project, the route to Tumbleweed and then Leap. The home-project repository above is the supported install in the meantime. [`zypper`](managers/zypper.md) is itself one of the managers `mpm` drives.
 ```
 
 ### Ubuntu (PPA)

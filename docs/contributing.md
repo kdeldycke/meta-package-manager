@@ -92,6 +92,10 @@ Add `--fresh-env` after an edit to a generator of `meta_package_manager/_docs.py
 
 The generation of API documentation is [covered by a dedicated workflow](https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/docs.yaml).
 
+## Commit messages
+
+The repomatic automation reads and writes the commit subjects of this repository, so a subject follows [its commit message conventions](https://repomatic.net/commit-messages).
+
 ## Stability policy
 
 This project more or less follows [Semantic Versioning](https://semver.org/).

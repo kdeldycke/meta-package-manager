@@ -872,6 +872,9 @@ exclude = [
 ]
 
 [tool.repomatic]
+# Releases tagged on GitHub but never uploaded to PyPI, as the changelog warns
+# under each of them.
+abandoned-versions = [ "4.7.0", "4.9.5", "4.9.6", "4.9.7", "6.4.2", "6.4.3" ]
 # Give every module its own reference page (`/meta_package_manager.managers.apk`)
 # instead of stacking a package's modules onto one. The managers package is what
 # forces it: 64 modules landed on a single page, which no reader scrolls and no
@@ -908,10 +911,6 @@ docs/_linkcheck/
 # manifests. RPM recipes share the extension and are packaging sources, tracked
 # like every other spec under packaging/.
 !packaging/**/*.spec"""
-# XXX Drop once `lint-deps` reports that this entry exempts nothing.
-lint-deps.allow.sphinx-design = """\
-  sphinx-design 0.8.0 is on PyPI: only a docs install under a cooldown fails, until 2026-11-17.\
-  """
 # Entries of the bundled `pytest.toml` that `[tool.pytest]` leaves out, each with
 # the reason `lint-repo` prints in place of its warning. tests.yaml passes the
 # coverage and xdist flags itself, so a packager's plain `pytest` runs without

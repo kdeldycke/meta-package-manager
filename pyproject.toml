@@ -887,13 +887,19 @@ docs.apidoc-extra-args = [ "--separate" ]
 exclude = [ "workflows/debug.yaml" ]
 # `sync-gitignore` rebuilds the file from gitignore.io and this key, so a rule
 # added straight to `.gitignore` survives exactly one edit. Setting the key
-# replaces repomatic's default wholesale, hence the first two blocks below being
-# a verbatim copy of it: only the last one is this repository's own.
+# replaces repomatic's default wholesale, hence every block below but the last
+# being a verbatim copy of it: only the last one is this repository's own.
 gitignore.extra-content = """
 # Claude Code local files.
 .claude/scheduled_tasks.lock
 .claude/settings.local.json
 **/.claude/.cc-writes/
+
+# Agent skill scripts, which the virtualenv `[Ss]cripts` rule ignores.
+!**/skills/*/scripts/
+
+# Cloudflare wrangler local state.
+.wrangler/
 
 # Sphinx linkcheck output.
 docs/_linkcheck/

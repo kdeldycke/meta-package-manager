@@ -248,7 +248,7 @@ $ git clone https://github.com/kdeldycke/meta-package-manager.git
 $ cd ./meta-package-manager/packaging/opensuse
 $ sudo zypper install --no-recommends $(rpmspec --query --buildrequires meta-package-manager.spec | cut --delimiter=' ' --fields=1)
 $ mkdir --parents ~/rpmbuild/SOURCES
-$ curl --location --output ~/rpmbuild/SOURCES/meta_package_manager-8.2.0.tar.gz https://files.pythonhosted.org/packages/source/m/meta-package-manager/meta_package_manager-8.2.0.tar.gz
+$ curl --location --output ~/rpmbuild/SOURCES/meta_package_manager-8.3.0.tar.gz https://files.pythonhosted.org/packages/source/m/meta-package-manager/meta_package_manager-8.3.0.tar.gz
 $ rpmbuild -ba meta-package-manager.spec
 $ sudo zypper install --allow-unsigned-rpm ~/rpmbuild/RPMS/noarch/meta-package-manager-*.rpm
 ```

@@ -441,6 +441,12 @@ Pardus' package manager, left behind by the distribution that created it: "Pardu
 
 Declined in {mpm-release}`8.0.0`.
 
+## [`pkgbase`](https://github.com/vermaden/pkgbase) ❌
+
+FreeBSD release upgrader, which its [readme](https://github.com/vermaden/pkgbase/blob/bed38cafae12fb2241e350d3baec4f207890eee5/README.md) calls an "*upgrade tool in PKGBASE world similar to `freebsd-update(8)` command*". It moves a host running pkgbase, the packaged base system, to another release. That is the [`macos`](#macos) verdict: an operating system updater is outside the domain of `mpm`. No verb of its [command dispatch](https://github.com/vermaden/pkgbase/blob/bed38cafae12fb2241e350d3baec4f207890eee5/pkgbase#L276-L444) lists installed packages either. `upgrade -r VERSION` creates a boot environment on a ZFS root, then runs one `pkg upgrade` of the `FreeBSD-base` repository against that release. It then upgrades the `FreeBSD-ports-kmods` kernel modules and updates the boot code. `pkgnew` lists the configuration files an upgrade left as `.pkgnew`, and `modules` asks `pkg which` for the owners of the loaded kernel modules. The base packages it moves are ordinary [`pkg`](managers/pkg.md) packages, registered in its database like any other, so `mpm` already lists them.
+
+Declined in {mpm-release}`8.3.2`.
+
 ## [`pkgfile`](https://github.com/falconindy/pkgfile) ❌ 🛟
 
 Answers which package owns a given file by searching the `.files` metadata `repo-add` publishes on [`pacman`](managers/pacman.md) mirrors, scoped to the repositories enabled in `/etc/pacman.conf`. Its [man page](https://man.archlinux.org/man/extra/pkgfile/pkgfile.1.en) documents exactly three operations, `--search`, `--list` and `--update`, none of which installs, removes or reports locally-installed packages. `--update` only refreshes the cached index, and that index is pacman's own repository metadata rather than a registry of its own. The bundled `command-not-found` hook can offer to install a match, but delegates to `sudo pacman -S`.

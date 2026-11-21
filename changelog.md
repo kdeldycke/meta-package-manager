@@ -6,6 +6,7 @@
 > This version is **not released yet** and is under active development.
 
 - [mpm] Raise the docs floor of `myst-parser` to `5.2`, below which the docs build fails.
+- [mpm] Record `pkgbase` as unsupported: it upgrades a FreeBSD host to another release and manages no packages.
 
 ## [`8.3.1` (2026-11-21)](https://github.com/kdeldycke/meta-package-manager/compare/v8.3.0...v8.3.1)
 

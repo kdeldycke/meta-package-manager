@@ -26,6 +26,7 @@ from __future__ import annotations
 import json
 import logging
 from datetime import UTC, datetime
+from types import SimpleNamespace
 
 import pytest
 
@@ -223,7 +224,9 @@ def test_network_client_skips_a_body_it_cannot_cache(client, caplog):
 def test_network_client_retries_a_dropped_connection(client, monkeypatch):
     """A connection error is retried after the first backoff delay."""
     sleeps: list[float] = []
-    monkeypatch.setattr(_network.time, "sleep", sleeps.append)
+    # Swap the module's `time` binding: patching `time.sleep` itself would also
+    # reach every other thread of the test session.
+    monkeypatch.setattr(_network, "time", SimpleNamespace(sleep=sleeps.append))
     with respx.mock(base_url="https://api.osv.dev") as mock:
         mock.get("/v1/vulns/GHSA-x").mock(
             side_effect=[
@@ -249,7 +252,7 @@ def test_sleep_backoff_honors_a_retry_after_in_seconds(
     monkeypatch, attempt, retry_after, expected
 ):
     sleeps: list[float] = []
-    monkeypatch.setattr(_network.time, "sleep", sleeps.append)
+    monkeypatch.setattr(_network, "time", SimpleNamespace(sleep=sleeps.append))
     NetworkClient._sleep_backoff(attempt, retry_after)
     assert sleeps == [expected]
 

@@ -6,7 +6,7 @@ Compiled Python binaries are regularly flagged by heuristic antivirus engines, s
 
 ## Development builds
 
-Fresh binaries are compiled from every push to the default branch by the [release workflow](https://github.com/kdeldycke/meta-package-manager/actions/workflows/release.yaml). To try the latest development build: open the most recent successful run and download the artifact matching your platform (a GitHub account is required, and the binary comes wrapped in a zip). The same builds are also attached to a rolling dev pre-release, a draft only visible to repository maintainers.
+Fresh binaries are compiled by the [release workflow](https://github.com/kdeldycke/meta-package-manager/actions/workflows/release.yaml). A push to the default branch only rebuilds the `linux-arm64` binary, as a canary. Every target is compiled on release commits, on the weekly Monday schedule, and on manual dispatch, so a given platform is at most a week behind. See the [repomatic Nuitka page](https://repomatic.net/nuitka#build-cadence) for the full cadence. To try the latest development build: open the most recent successful run covering your platform and download its artifact (a GitHub account is required, and the binary comes wrapped in a zip). The same builds are also attached to a rolling dev pre-release, a draft only visible to repository maintainers.
 
 <!-- binaries-chart -->
 

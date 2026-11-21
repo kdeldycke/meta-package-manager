@@ -69,6 +69,12 @@ It reports no version by any route, which is what settles it. None of the eleven
 
 Declined in {mpm-release}`8.0.0`.
 
+## [`bootc`](https://bootc.dev) ❌ 🛟
+
+Updates an operating system that boots from a container image, which its repository sums up as "*Boot and upgrade via container images*". That is the [`macos`](#macos) verdict: an operating system updater is outside the domain of `mpm`. Its verbs act on the whole image, like `upgrade`, `switch`, `rollback` and `status`, and no verb manages a package inside it. `topgrade` runs `bootc upgrade` on any Linux host where the binary is present and `bootc = true` is set under `[linux]` ([`linux.rs`](https://github.com/topgrade-rs/topgrade/blob/v17.17.0/src/steps/os/linux.rs#L29-L39)).
+
+Declined in {mpm-release}`8.3.2`.
+
 ## [`bpm`](https://github.com/bpm-rocks/bpm) ☠️
 
 Bash package manager, abandoned: 28 commits in all and nothing since 2021-07-25. Little would have been left to wrap in any case, its whole verb surface being `install` and `run`, with no listing, no removal and no upgrade, and its readme conceding it carries no versioning at all, which it blames on Bash having no namespacing.
@@ -210,6 +216,12 @@ Declined in {mpm-release}`8.0.0`.
 Builds packages instead of managing them, which leaves nothing for `mpm` to address. It converts a directory, a gem or a Python distribution into a `.deb`, an `.rpm` or a `.pkg` for some other manager to install, so it owns no inventory, installs nothing on its own and removes nothing. The managers that consume what it produces are wrapped already. Alive and busy, pushed 2026-08-26.
 
 Declined in {mpm-release}`8.0.0`.
+
+## [`freebsd-update`](https://man.freebsd.org/cgi/man.cgi?query=freebsd-update&sektion=8) ❌ 🛟
+
+FreeBSD's binary updater for the base system of a host installed from distribution sets: it fetches, installs and rolls back updates, and upgrades the host to a new release. That is the [`macos`](#macos) verdict: an operating system updater is outside the domain of `mpm`. `topgrade` runs `freebsd-update fetch install` in its system step ([`freebsd.rs`](https://github.com/topgrade-rs/topgrade/blob/v17.17.0/src/steps/os/freebsd.rs#L8-L15)), and `pkg upgrade` for the packages, which [`pkg`](managers/pkg.md) wraps. A host on pkgbase updates its base system as packages instead, which `pkg` already lists: [`pkgbase`](#pkgbase) is the release upgrader for those hosts.
+
+Declined in {mpm-release}`8.3.2`.
 
 ## [`fresh`](https://freshshell.com) ❌
 
@@ -552,16 +564,16 @@ Declined in {mpm-release}`8.0.0`.
 
 ## Self-updating applications ❌ 🛟
 
-[`antigravity-cli`](https://antigravity.google/product/antigravity-cli), [`atuin`](https://atuin.sh), [`claude-code`](https://claude.com/product/claude-code), [`codex`](https://github.com/openai/codex), [`cursor-agent`](https://cursor.com/cli), [`deno`](https://deno.com), [`flutter`](https://flutter.dev), [`fossil`](https://fossil-scm.org), [`helix-db`](https://helix-db.com), [`hermes-agent`](https://hermes-agent.nousresearch.com), [`opencode`](https://github.com/sst/opencode), [`spicetify`](https://spicetify.app), [`typst`](https://typst.app) and [`zed`](https://zed.dev).
+[`antigravity-cli`](https://antigravity.google/product/antigravity-cli), [`atuin`](https://atuin.sh), [`claude-code`](https://claude.com/product/claude-code), [`codex`](https://github.com/openai/codex), [`cursor-agent`](https://cursor.com/cli), [`deno`](https://deno.com), [`flutter`](https://flutter.dev), [`fossil`](https://fossil-scm.org), [`helix-db`](https://helix-db.com), [`hermes-agent`](https://hermes-agent.nousresearch.com), [`lucidlink`](https://www.lucidlink.com), [`opencode`](https://github.com/sst/opencode), [`spicetify`](https://spicetify.app), [`tailscale`](https://tailscale.com), [`typst`](https://typst.app) and [`zed`](https://zed.dev).
 
 Update only themselves. There is no catalog, no inventory and no per-package operation to map: the whole surface is one command that replaces the binary in place.
 
 Two carry evidence of their own:
 
-- `antigravity-cli` is `agy`, whose `agy update` replaces the binary and nothing else ([`generic.rs`](https://github.com/topgrade-rs/topgrade/blob/v17.12.2/src/steps/generic.rs#L2919-L2925)). The same binary also manages plugins, wrapped on their own as [`antigravity-cli-plugins`](managers/antigravity-cli-plugins.md).
-- `zed` does have a catalog of extensions, but nothing outside the editor reaches it: its command line declares no flag to list, install, remove or update one ([`crates/cli/src/main.rs`](https://github.com/zed-industries/zed/blob/v1.21.0/crates/cli/src/main.rs#L67-L156)), and `topgrade` reinstalls the editor alone ([`linux.rs`](https://github.com/topgrade-rs/topgrade/blob/v17.12.2/src/steps/os/linux.rs#L1203-L1288)). The request for such a command line is an open discussion, [zed-industries/zed#49790](https://github.com/zed-industries/zed/discussions/49790), where a `topgrade` maintainer says of that step: "*Only Zed itself though, not the extensions*" ([comment](https://github.com/zed-industries/zed/discussions/49790#discussioncomment-18518653)). Two earlier requests, [zed-industries/zed#12324](https://github.com/zed-industries/zed/issues/12324) and [zed-industries/zed#19906](https://github.com/zed-industries/zed/issues/19906), were closed as not planned in a cleanup of old feature requests, not on their merits. Reassess once the command line can list extensions. Checked against Zed `1.21.0`.
+- `antigravity-cli` is `agy`, whose `agy update` replaces the binary and nothing else ([`generic.rs`](https://github.com/topgrade-rs/topgrade/blob/v17.17.0/src/steps/generic.rs#L3290-L3296)). The same binary also manages plugins, wrapped on their own as [`antigravity-cli-plugins`](managers/antigravity-cli-plugins.md).
+- `zed` does have a catalog of extensions, but nothing outside the editor reaches it: its command line declares no flag to list, install, remove or update one ([`crates/cli/src/main.rs`](https://github.com/zed-industries/zed/blob/v1.21.0/crates/cli/src/main.rs#L67-L156)), and `topgrade` reinstalls the editor alone ([`linux.rs`](https://github.com/topgrade-rs/topgrade/blob/v17.17.0/src/steps/os/linux.rs#L1282-L1357)). The request for such a command line is an open discussion, [zed-industries/zed#49790](https://github.com/zed-industries/zed/discussions/49790), where a `topgrade` maintainer says of that step: "*Only Zed itself though, not the extensions*" ([comment](https://github.com/zed-industries/zed/discussions/49790#discussioncomment-18518653)). Two earlier requests, [zed-industries/zed#12324](https://github.com/zed-industries/zed/issues/12324) and [zed-industries/zed#19906](https://github.com/zed-industries/zed/issues/19906), were closed as not planned in a cleanup of old feature requests, not on their merits. Reassess once the command line can list extensions. Checked against Zed `1.21.0`.
 
-Wikipedia: [Claude Code](https://en.wikipedia.org/wiki/Claude_Code), [Codex CLI](https://en.wikipedia.org/wiki/Codex_CLI), [Deno (software)](https://en.wikipedia.org/wiki/Deno_(software)), [Flutter (software)](https://en.wikipedia.org/wiki/Flutter_(software)), [Fossil (software)](https://en.wikipedia.org/wiki/Fossil_(software)), [Hermes Agent](https://en.wikipedia.org/wiki/Hermes_Agent), [OpenCode](https://en.wikipedia.org/wiki/OpenCode), [Typst](https://en.wikipedia.org/wiki/Typst) and [Zed (text editor)](https://en.wikipedia.org/wiki/Zed_(text_editor)).
+Wikipedia: [Claude Code](https://en.wikipedia.org/wiki/Claude_Code), [Codex CLI](https://en.wikipedia.org/wiki/Codex_CLI), [Deno (software)](https://en.wikipedia.org/wiki/Deno_(software)), [Flutter (software)](https://en.wikipedia.org/wiki/Flutter_(software)), [Fossil (software)](https://en.wikipedia.org/wiki/Fossil_(software)), [Hermes Agent](https://en.wikipedia.org/wiki/Hermes_Agent), [OpenCode](https://en.wikipedia.org/wiki/OpenCode), [Tailscale](https://en.wikipedia.org/wiki/Tailscale), [Typst](https://en.wikipedia.org/wiki/Typst) and [Zed (text editor)](https://en.wikipedia.org/wiki/Zed_(text_editor)).
 
 Declined in {mpm-release}`8.0.0`.
 
@@ -605,6 +617,12 @@ Wikipedia: [Sparkle (software)](https://en.wikipedia.org/wiki/Sparkle_(software)
 
 Declined in {mpm-release}`8.0.0`.
 
+## [`syspatch`](https://man.openbsd.org/syspatch) ❌ 🛟
+
+OpenBSD's "*utility to fetch, verify, install and revert OpenBSD binary patches*" to the base system. That is the [`macos`](#macos) verdict: an operating system updater is outside the domain of `mpm`. Its `-l` and `-c` options list the installed and the available patches, but none can be installed alone: "*Patches are cumulative and as such it is not possible to install only a subset of them*". `topgrade` runs it on a release host, and `pkg_add -u` for the packages, which [`pkg-tools`](managers/pkg-tools.md) wraps ([`openbsd.rs`](https://github.com/topgrade-rs/topgrade/blob/v17.17.0/src/steps/os/openbsd.rs#L19-L52)).
+
+Declined in {mpm-release}`8.3.2`.
+
 ## System database refreshers ❌ 🛟
 
 [`clam-av-db`](https://www.clamav.net), [`lensfun`](https://lensfun.github.io) and [`mandb`](https://man-db.gitlab.io/man-db).
@@ -614,6 +632,12 @@ Rebuild a local database from files already on disk. Nothing is fetched, install
 Wikipedia: [ClamAV](https://en.wikipedia.org/wiki/ClamAV) and [man-db](https://en.wikipedia.org/wiki/Man-db).
 
 Declined in {mpm-release}`8.0.0`.
+
+## [`sysupgrade`](https://man.openbsd.org/sysupgrade) ❌ 🛟
+
+OpenBSD's "*utility to upgrade OpenBSD to a new release or snapshot if available*": it stages the new files, then reboots into a one-shot upgrade. That is the [`macos`](#macos) verdict: an operating system updater is outside the domain of `mpm`. `topgrade` runs `sysupgrade -sn` on a `-current` or `-beta` host, which fetches the next snapshot without a reboot, and [`syspatch`](#syspatch) on a release ([`openbsd.rs`](https://github.com/topgrade-rs/topgrade/blob/v17.17.0/src/steps/os/openbsd.rs#L19-L31)).
+
+Declined in {mpm-release}`8.3.2`.
 
 ## [`tmux`](https://github.com/tmux-plugins/tpm) ❌ 🛟
 

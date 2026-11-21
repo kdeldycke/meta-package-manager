@@ -131,7 +131,7 @@ mermaid_d3_zoom = True
 # ascending sort; the page length accommodates one release's worth of
 # binaries per page with room to spare. The render callback appends a
 # relative hint ("9 days ago") to the Released column (index 2 in
-# repomatic.binaries_page.CSV_HEADERS) at display time only, so sorting and
+# repomatic.release.binaries_page.CSV_HEADERS) at display time only, so sorting and
 # searching keep operating on the raw ISO dates and the generated CSV stays
 # free of hints that would go stale between releases. Passed as a raw JS
 # string because a JSON dict cannot carry the function. Raw string: the JS
@@ -230,7 +230,6 @@ nitpick_ignore = [
 autoclass_content = "both"
 # Keep the same ordering as in original source code.
 autodoc_member_order = "bysource"
-always_use_bars_union = True
 
 autodoc_default_options = {
     "members": True,

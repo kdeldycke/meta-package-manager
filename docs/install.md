@@ -34,7 +34,8 @@ $ uvx meta-package-manager --help
 
 ```{click:run}
 from meta_package_manager.cli import mpm
-invoke(mpm, args=["--help"])
+result = invoke(mpm, args=["--help"])
+assert result.exit_code == 0
 ```
 `````
 

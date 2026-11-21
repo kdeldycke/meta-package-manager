@@ -307,7 +307,8 @@ This validates option names against the CLI parameters and reports unknown keys.
 
 ```{click:run}
 from meta_package_manager.cli import mpm
-invoke(mpm, args=["--export-config", "toml"])
+result = invoke(mpm, args=["--export-config", "toml"])
+assert result.exit_code == 0
 ```
 
 For instance, `mpm --export-config toml > ~/.config/mpm/config.toml` seeds a config file from your live setup.
@@ -318,5 +319,6 @@ You can easily debug the way `mpm` sources its configuration with `--params`. Th
 
 ```{click:run}
 from meta_package_manager.cli import mpm
-invoke(mpm, args=["--table-format", "vertical", "--params"])
+result = invoke(mpm, args=["--table-format", "vertical", "--params"])
+assert result.exit_code == 0
 ```

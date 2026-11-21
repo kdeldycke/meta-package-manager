@@ -256,6 +256,30 @@ def test_verbatim_card_links_are_rooted():
                 )
 
 
+CLICK_RUN_BLOCK = re.compile(
+    r"^(?P<fence>`{3,}|~{3,})\{click:run\}[^\n]*\n(?P<body>.*?)^(?P=fence)[ \t]*$",
+    re.DOTALL | re.MULTILINE,
+)
+"""A `{click:run}` fence of a docs page, its body in the `body` group."""
+
+
+def test_click_run_blocks_assert_their_exit_code():
+    """Every `{click:run}` block asserts the exit code of the run it shows.
+
+    `invoke()` returns a failed run without raising, so the build only fails on
+    a block that raises. A renamed option exits with code `2` instead: without
+    the assertion, the build stays green and the page publishes the usage error.
+    """
+    unchecked = [
+        f"docs/{page.name}:{content.count(chr(10), 0, block.start()) + 1}"
+        for page in sorted(PROJECT_ROOT.joinpath("docs").glob("*.md"))
+        for content in (page.read_text(encoding="UTF-8"),)
+        for block in CLICK_RUN_BLOCK.finditer(content)
+        if "assert result.exit_code" not in block["body"]
+    ]
+    assert not unchecked, f"No `result.exit_code` assertion in: {unchecked}"
+
+
 def test_changelog():
     """Check every changelog bullet opens with a known `[scope]` tag.
 

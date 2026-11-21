@@ -455,9 +455,9 @@ docs = [
   # furo 2025.12.19 is the first release that accepts Sphinx 9 (`sphinx<10`):
   # 2025.9.25 caps it below 9.
   "furo>=2025.12.19",
-  # attrs_inline and colon_fence (enabled in docs/conf.py) ship in myst-parser
-  # 4.0+; the `alert` extension needs 5.1.
-  "myst-parser>=5.1",
+  # myst-parser 5.2 added the `docutils` heading slug preset that docs/conf.py
+  # sets: 5.1 reads it as an import path and fails the build.
+  "myst-parser>=5.2",
   # Sphinx 9.1.0 is the oldest release that sphinx-autodoc-typehints 3.14, below,
   # accepts.
   "sphinx>=9.1",

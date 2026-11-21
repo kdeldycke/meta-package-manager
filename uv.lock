@@ -1136,7 +1136,7 @@ docs = [
     { name = "extra-platforms", marker = "python_full_version >= '3.14'" },
     { name = "furo", marker = "python_full_version >= '3.14'", specifier = ">=2025.12.19" },
     { name = "httpx", marker = "python_full_version >= '3.14'", specifier = ">=0.27" },
-    { name = "myst-parser", marker = "python_full_version >= '3.14'", specifier = ">=5.1" },
+    { name = "myst-parser", marker = "python_full_version >= '3.14'", specifier = ">=5.2" },
     { name = "packageurl-python", marker = "python_full_version >= '3.14'" },
     { name = "pyproject-fmt", marker = "python_full_version >= '3.14'", specifier = ">=2.25.1" },
     { name = "pytest", marker = "python_full_version >= '3.14'", specifier = ">=9,<9.2" },

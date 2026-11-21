@@ -93,14 +93,14 @@ myst_fence_as_directive = ["mermaid"]
 
 # Register every heading as a resolvable cross-reference target so in-page
 # `[text](#anchor)` links resolve (and broken ones warn) at build time, making
-# Sphinx the authority for internal anchors. The slug function is pinned to
-# docutils' `make_id` so MyST anchors match the section IDs docutils already
-# emits, keeping existing anchor URLs stable. Mirrors the upstream repomatic
-# docs configuration. `make_id` leaves nothing of a changelog release heading:
-# `click_extra_release_anchors` below gives each one an anchor made from its
-# version.
+# Sphinx the authority for internal anchors. The slug function is myst-parser's
+# `docutils` preset, which returns the IDs of docutils' `make_id`, so MyST
+# anchors match the section IDs docutils already emits, keeping existing anchor
+# URLs stable. Mirrors the upstream repomatic docs configuration. `make_id`
+# leaves nothing of a changelog release heading: `click_extra_release_anchors`
+# below gives each one an anchor made from its version.
 myst_heading_anchors = 6
-myst_heading_slug_func = "docutils.nodes.make_id"
+myst_heading_slug_func = "docutils"
 
 # Fail the build on three warnings even when `sphinx-build` runs without
 # `--fail-on-warning`, as a local build does. The Docs workflow passes that flag

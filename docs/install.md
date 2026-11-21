@@ -430,24 +430,22 @@ Then let `mpm` discovers which package managers are available on your machine an
 
 ```{code-block} shell-session
 $ ./meta-package-manager-macos-x64.bin install meta-package-manager
-warning: Skip unavailable cargo manager.
-warning: Skip unavailable steamcmd manager.
-Installation priority: brew > cask > composer > gem > mas > npm > pip > pipx > vscode > yarn
-warning: No meta-package-manager package found on brew.
-warning: No meta-package-manager package found on cask.
-warning: No meta-package-manager package found on composer.
-warning: No meta-package-manager package found on gem.
-warning: No meta-package-manager package found on mas.
-warning: No meta-package-manager package found on npm.
-warning: pip does not implement search operation.
-meta-package-manager existence unconfirmed, try to directly install it...
-Install meta-package-manager package with pip...
-Collecting meta-package-manager
-  Downloading meta_package_manager-8.3.0-py3-none-any.whl (905 kB)
-     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 905.6/905.6 kB 494.7 kB/s eta 0:00:00
-(...)
-Installing collected packages: (...) meta-package-manager
-Successfully installed (...) meta-package-manager-8.3.0
+✓ pip.install: meta-package-manager (12.0s)
+✓ Installed 1/1 packages
+╭──────────────────────┬──────┬─────────┬──────┬────────┬──────────────╮
+│ Package ID           │ Name │ Manager │ From │ To     │ Status       │
+├──────────────────────┼──────┼─────────┼──────┼────────┼──────────────┤
+│ bracex               │      │ pip     │      │ 3.2.2  │ 🆕 installed │
+│ click                │      │ pip     │      │ 8.5.1  │ 🆕 installed │
+│ click-extra          │      │ pip     │      │ 10.2.0 │ 🆕 installed │
+│ cloup                │      │ pip     │      │ 4.0.0  │ 🆕 installed │
+│ extra-platforms      │      │ pip     │      │ 14.0.1 │ 🆕 installed │
+│ meta-package-manager │      │ pip     │      │ 8.3.0  │ 🆕 installed │
+│ tabulate             │      │ pip     │      │ 0.10.0 │ 🆕 installed │
+│ tomli_w              │      │ pip     │      │ 1.2.0  │ 🆕 installed │
+│ wcmatch              │      │ pip     │      │ 12.0.1 │ 🆕 installed │
+│ wcwidth              │      │ pip     │      │ 0.9.4  │ 🆕 installed │
+╰──────────────────────┴──────┴─────────┴──────┴────────┴──────────────╯
 ```
 
 And now you can remove the local binary and enjoy the system-wide `mpm` that was installed by itself:

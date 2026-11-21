@@ -42,11 +42,13 @@ Rather than searching and picking a source by hand, let `mpm` install a package 
 
 ```shell-session
 $ mpm --xkcd install markdown
-Installation priority: pip > brew > npm > dnf > apt > steamcmd
-warning: pip does not implement search operation.
-markdown existence unconfirmed, try to directly install it...
-Install markdown package with pip...
-(...)
+✓ pip.install: markdown (4.9s)
+✓ Installed 1/1 packages
+╭────────────┬──────┬─────────┬──────┬────────┬──────────────╮
+│ Package ID │ Name │ Manager │ From │ To     │ Status       │
+├────────────┼──────┼─────────┼──────┼────────┼──────────────┤
+│ Markdown   │      │ pip     │      │ 3.11.3 │ 🆕 installed │
+╰────────────┴──────┴─────────┴──────┴────────┴──────────────╯
 ```
 
 ## Audit existing installations

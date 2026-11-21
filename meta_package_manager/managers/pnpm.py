@@ -83,7 +83,7 @@ class PNPM(PackageManager):
     `minimumReleaseAge` is expressed in minutes, so {meth}`cooldown_env_value`
     is overridden to emit a minute count.
 
-    See pnpm's [`minimumReleaseAge` setting](https://pnpm.io/settings#minimumreleaseage).
+    See pnpm's [`minimumReleaseAge` setting](https://pnpm.io/settings/dependency-resolution#minimumreleaseage).
     """
 
     def cooldown_env_value(self) -> str:

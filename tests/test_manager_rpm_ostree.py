@@ -261,9 +261,9 @@ check of `45.20261118.0`."""
 SEARCH_RENDERED = """
 ===== Name Matched =====
 rust-ratatui+unstable-rendered-line-info-devel : Library that's all about cooking up terminal user interfaces
-rust-ratatui-widgets+unstable-rendered-line-info-devel : Collection of widgets for building terminal user interfaces using Ratatui
-rust-ratatui0.26+unstable-rendered-line-info-devel : Library that's all about cooking up terminal user interfaces
-rust-ratatui0.29+unstable-rendered-line-info-devel : Library that's all about cooking up terminal user interfaces
+rust-ratatouille-widgets+unstable-rendered-line-info-devel : Collection of widgets for building terminal user interfaces using Ratatouille
+rust-ratatouille0.26+unstable-rendered-line-info-devel : Library that's all about cooking up terminal user interfaces
+rust-ratatouille0.29+unstable-rendered-line-info-devel : Library that's all about cooking up terminal user interfaces
 
 ===== Summary Matched =====
 nyancat : Nyancat rendered in your terminal
@@ -442,18 +442,18 @@ def test_outdated_skips_cached_update_after_failed_check(manager, monkeypatch):
             False,
             [
                 "rust-ratatui+unstable-rendered-line-info-devel",
-                "rust-ratatui-widgets+unstable-rendered-line-info-devel",
-                "rust-ratatui0.26+unstable-rendered-line-info-devel",
-                "rust-ratatui0.29+unstable-rendered-line-info-devel",
+                "rust-ratatouille-widgets+unstable-rendered-line-info-devel",
+                "rust-ratatouille0.26+unstable-rendered-line-info-devel",
+                "rust-ratatouille0.29+unstable-rendered-line-info-devel",
             ],
         ),
         (
             True,
             [
                 "rust-ratatui+unstable-rendered-line-info-devel",
-                "rust-ratatui-widgets+unstable-rendered-line-info-devel",
-                "rust-ratatui0.26+unstable-rendered-line-info-devel",
-                "rust-ratatui0.29+unstable-rendered-line-info-devel",
+                "rust-ratatouille-widgets+unstable-rendered-line-info-devel",
+                "rust-ratatouille0.26+unstable-rendered-line-info-devel",
+                "rust-ratatouille0.29+unstable-rendered-line-info-devel",
                 "nyancat",
             ],
         ),

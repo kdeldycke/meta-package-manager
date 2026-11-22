@@ -103,6 +103,7 @@ icons:
     - dnf
     - dnf5
     - microdnf
+    - rpm-ostree
     - yum
     source: https://docs.fedoraproject.org/en-US/project/brand/
     title: Fedora

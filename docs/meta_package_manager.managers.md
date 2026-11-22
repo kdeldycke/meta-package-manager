@@ -69,6 +69,7 @@
    meta_package_manager.managers.prt_get
    meta_package_manager.managers.pwsh_gallery
    meta_package_manager.managers.roswell
+   meta_package_manager.managers.rpm_ostree
    meta_package_manager.managers.scoop
    meta_package_manager.managers.sdkman
    meta_package_manager.managers.sfsu

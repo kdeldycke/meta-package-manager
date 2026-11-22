@@ -261,6 +261,7 @@ PACKAGE_IDS = {
     # A Lisp implementation: roswell lists and installs those, never Quicklisp
     # systems (see the Roswell class docstring).
     "roswell": "sbcl-bin",
+    "rpm-ostree": "nyancat",
     # A toolchain, which is what rustup calls a package, named by release so it
     # resolves to whatever target triple the host runs. Pinned to an old release
     # nobody builds against today, since removing `stable` or `nightly` would

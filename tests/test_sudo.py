@@ -109,7 +109,10 @@ def test_default_sudo_matches_system_managers():
     That holds for classes, their subclasses and bundled definitions alike. User-level
     managers do not escalate, the dual-scope language managers (npm, pip, gem, cpan)
     keep their privileged markers dormant, and the polkit-native daemon clients
-    (flatpak, fwupd, pkcon) never mark an operation at all.
+    (flatpak, fwupd, pkcon) never mark an operation at all. `rpm-ostree` talks to
+    a polkit-checked daemon too, but its policy asks for administrator
+    authentication on each change and on the update check, so it escalates like
+    the system managers.
 
     `choco` is the lone Windows entry, and belongs on the same grounds as the
     rest: Chocolatey installs into a `ProgramData` tree it locks to
@@ -141,6 +144,7 @@ def test_default_sudo_matches_system_managers():
         "pmerge",
         "ports",
         "prt-get",
+        "rpm-ostree",
         "slapt-get",
         "snap",
         "sorcery",

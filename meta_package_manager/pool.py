@@ -91,6 +91,7 @@ from .managers.protonplus import ProtonPlus
 from .managers.prt_get import PrtGet
 from .managers.pwsh_gallery import PWSH_Gallery
 from .managers.roswell import Roswell
+from .managers.rpm_ostree import RPM_OSTree
 from .managers.scoop import Scoop
 from .managers.sdkman import SDKMAN
 from .managers.sfsu import SFSU
@@ -193,6 +194,7 @@ manager_classes = (
     PrtGet,
     PWSH_Gallery,
     Roswell,
+    RPM_OSTree,
     Scoop,
     SDKMAN,
     SFSU,

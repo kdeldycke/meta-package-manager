@@ -56,6 +56,7 @@ keywords = [
   "composer",
   "conda",
   "conda-forge",
+  "coreos",
   "cpan",
   "cran",
   "crate",
@@ -206,6 +207,7 @@ keywords = [
   "rhel",
   "roswell",
   "rpm",
+  "rpm-ostree",
   "ruby",
   "ruby-gem",
   "rust",
@@ -217,6 +219,7 @@ keywords = [
   "sfsu",
   "sheldon",
   "shelly",
+  "silverblue",
   "skills",
   "slackware",
   "slapt-get",
@@ -1195,6 +1198,7 @@ metrics.subjects.pwsh-gallery = "https://github.com/PowerShell/PSResourceGet"
 metrics.subjects.pyenv = "https://github.com/pyenv/pyenv"
 metrics.subjects.raco = "https://github.com/racket/racket"
 metrics.subjects.roswell = "https://github.com/roswell/roswell"
+metrics.subjects.rpm-ostree = "https://github.com/coreos/rpm-ostree"
 metrics.subjects.rustup = "https://github.com/rust-lang/rustup"
 metrics.subjects.scoop = "https://github.com/ScoopInstaller/Scoop"
 metrics.subjects.sdkman = "https://github.com/sdkman/sdkman-cli"
@@ -1272,7 +1276,17 @@ labels.content-rules."📦 manager: prt-get" = [ "crux" ]
 labels.content-rules."📦 manager: pwsh-gallery" = [ "powershell", "powershell gallery", "psgallery", "psresourceget" ]
 labels.content-rules."📦 manager: pypi-based" = [ "pypi" ]
 labels.content-rules."📦 manager: roswell" = [ "common lisp", "quicklisp" ]
-labels.content-rules."📦 manager: rpm-based" = [ "fedora", "mageia", "opensuse", "redhat", "rhel", "rpm", "suse" ]
+labels.content-rules."📦 manager: rpm-based" = [
+  "coreos",
+  "fedora",
+  "mageia",
+  "opensuse",
+  "redhat",
+  "rhel",
+  "rpm",
+  "silverblue",
+  "suse",
+]
 labels.content-rules."📦 manager: rust-based" = [ "crate", "rust" ]
 labels.content-rules."📦 manager: sdkman" = [ "sdk man" ]
 labels.content-rules."📦 manager: slapt-get" = [ "slackware" ]
@@ -1516,11 +1530,13 @@ labels.file-rules."📦 manager: roswell" = [ "meta_package_manager/managers/ros
 labels.file-rules."📦 manager: rpm-based" = [
   "meta_package_manager/managers/dnf.*",
   "meta_package_manager/managers/microdnf.*",
+  "meta_package_manager/managers/rpm_ostree.*",
   "meta_package_manager/managers/urpmi.*",
   "meta_package_manager/managers/zypper.*",
   "tests/test_manager_dnf.py",
   "tests/test_manager_dnf5.py",
   "tests/test_manager_microdnf.py",
+  "tests/test_manager_rpm_ostree.py",
   "tests/test_manager_urpmi.py",
   "tests/test_manager_yum.py",
   "tests/test_manager_zypper.py",
@@ -1982,7 +1998,7 @@ description = "roswell"
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: rpm-based"
 color = "bfdadc"
-description = "dnf, dnf5, microdnf, urpmi, yum, zypper"
+description = "dnf, dnf5, microdnf, rpm-ostree, urpmi, yum, zypper"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: rust-based"

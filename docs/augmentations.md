@@ -83,6 +83,7 @@ print(augmentations_table())
 | [`prt-get`](managers/prt-get.md)           |                      |              |                  |      ✅      |       ✅        |               |
 | [`pwsh-gallery`](managers/pwsh-gallery.md) |                      |              |                  |              |       ✅        |               |
 | [`pyenv`](managers/pyenv.md)               |                      |              |                  |      ✅      |       ✅        |               |
+| [`rpm-ostree`](managers/rpm-ostree.md)     |                      |              |                  |      ✅      |                 |               |
 | [`scoop`](managers/scoop.md)               |                      |              |                  |      ✅      |       ✅        |               |
 | [`sfsu`](managers/sfsu.md)                 |                      |              |                  |      ✅      |       ✅        |               |
 | [`shelly`](managers/shelly.md)             |                      |              |        ✅        |      ✅      |       ✅        |               |

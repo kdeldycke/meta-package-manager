@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [rpm-ostree] Add `rpm-ostree` for Fedora's image-based variants, with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync` and `cleanup` support.
 - [mpm] Raise the docs floor of `myst-parser` to `5.2`, below which the docs build fails.
 - [mpm] Refresh the benchmark against `topgrade` `17.17.0`: 13 tools it drives get a row, and `pkg-tools` gets its `topgrade` support.
 - [mpm] Record `bootc`, `freebsd-update`, `pkgbase`, `syspatch` and `sysupgrade` as unsupported operating system updaters, and `lucidlink` and `tailscale` as self-updating applications.

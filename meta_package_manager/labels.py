@@ -131,7 +131,15 @@ MANAGER_LABEL_GROUPS: TLabelGroup = {
     "asdf-based": frozenset({"asdf", "mise"}),
     "bash-based": frozenset({"basalt", "bpkg"}),
     "conda-based": frozenset({"conda", "mamba", "micromamba", "pixi"}),
-    "rpm-based": frozenset({"dnf", "dnf5", "microdnf", "urpmi", "yum", "zypper"}),
+    "rpm-based": frozenset({
+        "dnf",
+        "dnf5",
+        "microdnf",
+        "rpm-ostree",
+        "urpmi",
+        "yum",
+        "zypper",
+    }),
     "dpkg-based": frozenset({
         "apt",
         "apt-mint",

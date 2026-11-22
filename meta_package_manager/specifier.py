@@ -131,7 +131,7 @@ PURL_MAP: dict[str, set[str] | None] = {
     "puppet": None,
     "pypi": {"pip", "pipx", "pipxu", "uv", "uvx"},
     "qpkg": None,
-    "rpm": {"dnf", "dnf5", "microdnf", "urpmi", "yum", "zypper"},
+    "rpm": {"dnf", "dnf5", "microdnf", "rpm-ostree", "urpmi", "yum", "zypper"},
     "rubygems": {"gem"},
     "sourceforge": None,
     "sublime": None,

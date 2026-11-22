@@ -647,6 +647,13 @@ default.extend-ignore-re = [
   # as a misspelling of `In`. Anchored on the whole sentence, which keeps a
   # standalone `Ein` checked.
   "Ein Passwort ist notwendig",
+  # `ratatui` is a Rust crate, which Fedora packages as `rust-ratatui*`, in the
+  # `rpm-ostree search rendered` capture of tests/test_manager_rpm_ostree.py.
+  # typos reads it as a misspelling of `ratatouille` and rewrites the capture.
+  # Anchored on the package prefix and on the summary phrase, which keeps a
+  # standalone `ratatui` checked.
+  "\\brust-ratatui[\\w.+-]*",
+  "using Ratatui\\b",
 ]
 default.extend-ignore-identifiers-re = [
   # error: `ba` should be `by`, `be`

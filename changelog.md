@@ -12,6 +12,9 @@
 
 ## [`8.3.1` (2026-11-21)](https://github.com/kdeldycke/meta-package-manager/compare/v8.3.0...v8.3.1)
 
+> [!NOTE]
+> `8.3.1` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/8.3.1/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v8.3.1).
+
 - [mpm] Override the cooldown window per manager with a `cooldown` key under `[mpm.overrides.<id>]`, which wins over a `--cooldown` duration and the `[mpm.cooldown] period` for that manager. Closes [#2237](https://github.com/kdeldycke/meta-package-manager/issues/2237).
 - [mpm] Name `mpm` in the polkit message of the `run0` password prompt, which reads `start transient unit 'mpm-<pid>.service'`.
 - [mpm] Name the unit of each `run0` call `mpm-<pid>-<manager>-<serial>`, so `systemctl list-units 'mpm-*'` finds a call that outlived its timeout.

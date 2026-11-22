@@ -65,6 +65,7 @@
    tests.test_manager_pmerge
    tests.test_manager_protonplus
    tests.test_manager_pwsh_gallery
+   tests.test_manager_rpm_ostree
    tests.test_manager_scoop
    tests.test_manager_sdkman
    tests.test_manager_sfsu

@@ -73,7 +73,7 @@ Declined in {mpm-release}`8.0.0`.
 
 Updates an operating system that boots from a container image, which its repository sums up as "*Boot and upgrade via container images*". That is the [`macos`](#macos) verdict: an operating system updater is outside the domain of `mpm`. Its verbs act on the whole image, like `upgrade`, `switch`, `rollback` and `status`, and no verb manages a package inside it. `topgrade` runs `bootc upgrade` on any Linux host where the binary is present and `bootc = true` is set under `[linux]` ([`linux.rs`](https://github.com/topgrade-rs/topgrade/blob/v17.17.0/src/steps/os/linux.rs#L29-L39)).
 
-Declined in {mpm-release}`8.3.2`.
+Declined in {mpm-release}`8.4.0`.
 
 ## [`bpm`](https://github.com/bpm-rocks/bpm) ☠️
 
@@ -221,7 +221,7 @@ Declined in {mpm-release}`8.0.0`.
 
 FreeBSD's binary updater for the base system of a host installed from distribution sets: it fetches, installs and rolls back updates, and upgrades the host to a new release. That is the [`macos`](#macos) verdict: an operating system updater is outside the domain of `mpm`. `topgrade` runs `freebsd-update fetch install` in its system step ([`freebsd.rs`](https://github.com/topgrade-rs/topgrade/blob/v17.17.0/src/steps/os/freebsd.rs#L8-L15)), and `pkg upgrade` for the packages, which [`pkg`](managers/pkg.md) wraps. A host on pkgbase updates its base system as packages instead, which `pkg` already lists: [`pkgbase`](#pkgbase) is the release upgrader for those hosts.
 
-Declined in {mpm-release}`8.3.2`.
+Declined in {mpm-release}`8.4.0`.
 
 ## [`fresh`](https://freshshell.com) ❌
 
@@ -457,7 +457,7 @@ Declined in {mpm-release}`8.0.0`.
 
 FreeBSD release upgrader, which its [readme](https://github.com/vermaden/pkgbase/blob/bed38cafae12fb2241e350d3baec4f207890eee5/README.md) calls an "*upgrade tool in PKGBASE world similar to `freebsd-update(8)` command*". It moves a host running pkgbase, the packaged base system, to another release. That is the [`macos`](#macos) verdict: an operating system updater is outside the domain of `mpm`. No verb of its [command dispatch](https://github.com/vermaden/pkgbase/blob/bed38cafae12fb2241e350d3baec4f207890eee5/pkgbase#L276-L444) lists installed packages either. `upgrade -r VERSION` creates a boot environment on a ZFS root, then runs one `pkg upgrade` of the `FreeBSD-base` repository against that release. It then upgrades the `FreeBSD-ports-kmods` kernel modules and updates the boot code. `pkgnew` lists the configuration files an upgrade left as `.pkgnew`, and `modules` asks `pkg which` for the owners of the loaded kernel modules. The base packages it moves are ordinary [`pkg`](managers/pkg.md) packages, registered in its database like any other, so `mpm` already lists them.
 
-Declined in {mpm-release}`8.3.2`.
+Declined in {mpm-release}`8.4.0`.
 
 ## [`pkgfile`](https://github.com/falconindy/pkgfile) ❌ 🛟
 
@@ -621,7 +621,7 @@ Declined in {mpm-release}`8.0.0`.
 
 OpenBSD's "*utility to fetch, verify, install and revert OpenBSD binary patches*" to the base system. That is the [`macos`](#macos) verdict: an operating system updater is outside the domain of `mpm`. Its `-l` and `-c` options list the installed and the available patches, but none can be installed alone: "*Patches are cumulative and as such it is not possible to install only a subset of them*". `topgrade` runs it on a release host, and `pkg_add -u` for the packages, which [`pkg-tools`](managers/pkg-tools.md) wraps ([`openbsd.rs`](https://github.com/topgrade-rs/topgrade/blob/v17.17.0/src/steps/os/openbsd.rs#L19-L52)).
 
-Declined in {mpm-release}`8.3.2`.
+Declined in {mpm-release}`8.4.0`.
 
 ## System database refreshers ❌ 🛟
 
@@ -637,7 +637,7 @@ Declined in {mpm-release}`8.0.0`.
 
 OpenBSD's "*utility to upgrade OpenBSD to a new release or snapshot if available*": it stages the new files, then reboots into a one-shot upgrade. That is the [`macos`](#macos) verdict: an operating system updater is outside the domain of `mpm`. `topgrade` runs `sysupgrade -sn` on a `-current` or `-beta` host, which fetches the next snapshot without a reboot, and [`syspatch`](#syspatch) on a release ([`openbsd.rs`](https://github.com/topgrade-rs/topgrade/blob/v17.17.0/src/steps/os/openbsd.rs#L19-L31)).
 
-Declined in {mpm-release}`8.3.2`.
+Declined in {mpm-release}`8.4.0`.
 
 ## [`tmux`](https://github.com/tmux-plugins/tpm) ❌ 🛟
 

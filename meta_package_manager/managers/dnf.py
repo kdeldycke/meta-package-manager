@@ -24,6 +24,7 @@ from extra_platforms import UNIX_WITHOUT_MACOS
 from ..capabilities import search_capabilities, version_not_implemented
 from ..manager import PackageManager
 from ..version import VersionRange
+from .rpm_ostree import OSTREE_BOOTED
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
@@ -37,6 +38,10 @@ class DNF(PackageManager):
 
     The `DNF5` and `YUM` subclasses reuse everything here, differing only in
     the binary and forced arguments.
+
+    On a host that booted from ostree, like Fedora IoT or Silverblue, `mpm`
+    considers `dnf`, `dnf5` and `yum` unavailable: `rpm-ostree` manages the
+    packages there.
 
     Command equivalences with other managers are listed in
     [Pacman/Rosetta](https://wiki.archlinux.org/title/Pacman/Rosetta).
@@ -167,6 +172,29 @@ class DNF(PackageManager):
     """
 
     DELIMITER = "___MPM___"
+
+    @property
+    def unavailable_reason(self) -> str | None:
+        """Add a refusal of hosts booted from ostree to the base conditions.
+
+        Such a host keeps `/usr` read-only. On Fedora IoT 44, each dnf5 query
+        failed there on its lock file. On Fedora IoT 45, dnf5 `5.4.8.0` lists the
+        whole base image and reports updates from the repositories, which only a
+        new deployment of the image brings, and it refuses every change.
+        {class}`~meta_package_manager.managers.rpm_ostree.RPM_OSTree` manages the
+        packages of such a host.
+
+        A container, like a Toolbx one, has no
+        {data}`~meta_package_manager.managers.rpm_ostree.OSTREE_BOOTED` marker,
+        so the manager stays available inside it.
+        """
+        reason = super().unavailable_reason
+        if reason is None and OSTREE_BOOTED.exists():
+            return (
+                f"{OSTREE_BOOTED} exists: the host booted from ostree, where "
+                "rpm-ostree manages packages"
+            )
+        return reason
 
     @property
     def installed(self) -> Iterator[Package]:

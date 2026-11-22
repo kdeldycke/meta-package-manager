@@ -28,6 +28,8 @@ import shlex
 
 import pytest
 
+from meta_package_manager.manager import PackageManager
+from meta_package_manager.managers import dnf
 from meta_package_manager.managers.dnf import DNF, DNF5, YUM
 from meta_package_manager.version import VersionRange, parse_version
 
@@ -152,6 +154,40 @@ def test_version_probe_reads_dnf5_in_a_german_locale(
     version = manager._parse_version(manager._probe_version())
     assert str(version) == "5.4.3.0"
     assert (version in VersionRange(manager_class.requirement)) is expected_fresh
+
+
+@pytest.mark.parametrize("manager_class", (DNF, DNF5, YUM))
+def test_unavailable_on_ostree_boot(manager_class, monkeypatch, tmp_path):
+    """The base conditions met, the ostree marker alone decides."""
+    marker = tmp_path / "ostree-booted"
+    monkeypatch.setattr(dnf, "OSTREE_BOOTED", marker)
+    monkeypatch.setattr(
+        PackageManager, "unavailable_reason", property(lambda self: None)
+    )
+    manager = manager_class()
+
+    assert manager.unavailable_reason is None
+
+    marker.touch()
+    assert manager.unavailable_reason == (
+        f"{marker} exists: the host booted from ostree, where rpm-ostree manages "
+        "packages"
+    )
+
+
+@pytest.mark.parametrize("manager_class", (DNF, DNF5, YUM))
+def test_base_reason_wins_over_ostree_marker(manager_class, monkeypatch, tmp_path):
+    """A host failing a base condition reports that condition first."""
+    marker = tmp_path / "ostree-booted"
+    marker.touch()
+    monkeypatch.setattr(dnf, "OSTREE_BOOTED", marker)
+    monkeypatch.setattr(
+        PackageManager,
+        "unavailable_reason",
+        property(lambda self: "not supported on macOS"),
+    )
+
+    assert manager_class().unavailable_reason == "not supported on macOS"
 
 
 @pytest.mark.parametrize(

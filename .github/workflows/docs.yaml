@@ -6,6 +6,7 @@ name: 📚 Docs
     branches:
       - main
     paths:
+      - .claude/skills/add-manager/SKILL.md
       - .github/code-of-conduct.md
       - .github/workflows/docs.yaml
       - AGENTS.md

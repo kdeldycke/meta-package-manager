@@ -975,6 +975,24 @@ workflow.paths."tests.yaml" = [
   "tests/**",
   "uv.lock",
 ]
+# Wholesale replacement of docs.yaml's `paths:` filter: the canonical list plus
+# the add-manager skill, which docs/add-new-manager.md includes. Without it, an
+# edit to the skill alone never redeploys the page that renders it.
+workflow.paths."docs.yaml" = [
+  ".claude/skills/add-manager/SKILL.md",
+  ".github/code-of-conduct.md",
+  ".github/workflows/docs.yaml",
+  "AGENTS.md",
+  "changelog.md",
+  "citation.cff",
+  "docs/**",
+  "license",
+  "pyproject.toml",
+  "readme.*.md",
+  "readme.md",
+  "uv.lock",
+  "**/*.py",
+]
 # Intel macOS is left out for cost, not capability. macOS 26 is Apple's last
 # Intel release, so Homebrew scheduled Intel Tahoe 26 into Tier 3 from
 # September 2026, where "bottles will rarely be built or published". The cell's

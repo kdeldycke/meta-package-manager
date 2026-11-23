@@ -75,6 +75,14 @@ buildPythonPackage (finalAttrs: {
   # system TLS CA bundle.
   disabledTestMarks = [ "network" ];
 
+  # nixpkgs ships myst-parser 5.1.0, below the 5.2 floor of the `sphinx` extra.
+  # These cases test the `content_offset` fix of 5.2.0, and fail one line off
+  # on 5.1.0. Drop them once nixpkgs ships myst-parser 5.2.0 or newer.
+  disabledTests = [
+    "test_directive_variable_conflict and MYST"
+    "test_generated_block_is_attributed_to_the_directive_body and body-ending-on-blank-lines-MYST"
+  ];
+
   # The configuration tests are served over HTTP by a local pytest-httpserver.
   # It bound to ``localhost`` until 8.9.0 moved it to ``127.0.0.1``, which drops
   # the name lookup the Darwin build sandbox refuses (a ``gaierror``). Only that

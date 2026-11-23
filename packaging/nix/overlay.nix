@@ -7,23 +7,24 @@
 self: super: {
   click-extra = self.callPackage ./click-extra.nix { };
 
-  # click-extra 10 and cloup 4 declare `click>=8.5`, above the 8.4.x nixpkgs
-  # ships, so their runtime dependency check rejects them before mpm is reached.
+  # click-extra 10.3 declares `click>=8.5.1` and cloup 4 `click>=8.5`, above the
+  # 8.4.x nixpkgs ships, so their runtime dependency check rejects them before
+  # mpm is reached.
   #
-  # Pinned to that floor, the smallest step from what nixpkgs ships: an override
-  # here reaches every package in this set, not just click-extra, and runs the
-  # test suites of those it rebuilds, some of which turn the deprecation
-  # warnings of a newer click into errors.
+  # Pinned to the higher of those floors, the smallest step from what nixpkgs
+  # ships: an override here reaches every package in this set, not just
+  # click-extra, and runs the test suites of those it rebuilds, some of which
+  # turn the deprecation warnings of a newer click into errors.
   #
-  # Drop this once nixpkgs ships click 8.5.0 or newer. NixOS/nixpkgs#506145
+  # Drop this once nixpkgs ships click 8.5.1 or newer. NixOS/nixpkgs#506145
   # needs it there too, with cloup 4, before it can package mpm 8.3.0.
   click = super.click.overridePythonAttrs (_: rec {
-    version = "8.5.0";
+    version = "8.5.1";
     src = pkgs.fetchFromGitHub {
       owner = "pallets";
       repo = "click";
       tag = version;
-      hash = "sha256-VYdaEN9l2MRVz42I8t8IDOpG5XeDM8bf34dLZy3yf10=";
+      hash = "sha256-dG59ZMxp+jV0CT10mZaX4p8lWR7WmIn5WyrBkEnIj4I=";
     };
   });
 

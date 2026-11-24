@@ -820,6 +820,22 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
             )
         return None
 
+    @property
+    def upgrade_all_skip_reason(self) -> str | None:
+        """Why `upgrade --all` must leave this manager alone here, or `None`.
+
+        For a host that blocks the full upgrade of an available manager and
+        accepts its other operations, like Omarchy with
+        {class}`~meta_package_manager.managers.pacman.Pacman`. `mpm` then logs
+        the returned sentences after `Skipped:`, marks the manager `✘` on the
+        trail, and runs none of its commands.
+
+        A host-probing property, like {attr}`cli_path
+        <meta_package_manager.execution.CLIExecutor.cli_path>`: the
+        documentation generators must never read it.
+        """
+        return None
+
     @cached_property
     def install_root(self) -> Path | None:
         """Root of the tree this manager's global installs write into.

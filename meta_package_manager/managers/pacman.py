@@ -43,6 +43,15 @@ if TYPE_CHECKING:
     from ..package import Package
 
 
+OMARCHY_UPDATE_GUARD = Path("/usr/share/libalpm/hooks/00-omarchy-update-guard.hook")
+"""The pacman hook with which Omarchy `4.0.0` and later abort each full upgrade
+that `omarchy update` did not start."""
+
+OMARCHY_UPDATE_GUARD_OVERRIDE = Path("/etc/pacman.d/hooks") / OMARCHY_UPDATE_GUARD.name
+"""Where a file overrides
+{data}`~meta_package_manager.managers.pacman.OMARCHY_UPDATE_GUARD`, and where a
+symlink to `/dev/null` disables it."""
+
 _YAY_COOLDOWN_INIT_LUA = (
     resources
     .files("meta_package_manager.managers")
@@ -78,6 +87,22 @@ class Pacman(PackageManager):
 
     Command equivalences with other managers are listed in
     [Pacman/Rosetta](https://wiki.archlinux.org/title/Pacman/Rosetta).
+
+    ```{caution}
+    Omarchy aborts each full system upgrade from its `4.0.0` release on, so
+    `mpm` skips `upgrade --all` for `pacman` and its AUR helpers there. Run
+    `omarchy update` instead: it also takes the snapshot and runs the
+    migrations that a bare `pacman` upgrade skips.
+
+    The `omarchy` package installs a
+    [guard](https://github.com/omacom/omarchy/blob/9ec99e7cf242257cd198cac4bc0f0a96118ecec4/bin/omarchy-update-pacman-guard)
+    as a pacman hook, which `pacman` runs after it downloads the packages of an
+    upgrade and before it installs them. The hook fails the transaction when
+    the `pacman` command line holds both `--sync` and `--sysupgrade`. Omarchy's
+    [manual](https://github.com/omacom/omarchy/blob/9ec99e7cf242257cd198cac4bc0f0a96118ecec4/manual/30-updates.md)
+    names `yay -Syu` as blocked too: the second `pacman` call of `yay` holds
+    both flags. Upgrading, installing or removing one package passes.
+    ```
     """
 
     # `--query --upgrades` only reports updates for packages tracked in a
@@ -152,6 +177,33 @@ class Pacman(PackageManager):
                         the terms of the GNU General Public License.
     ```
     """
+
+    @property
+    def upgrade_all_skip_reason(self) -> str | None:
+        """Skip the full upgrade on a host that Omarchy's update guard protects.
+
+        The guard aborts the transaction only once `pacman` has downloaded every
+        package, and it prints its explanation on the standard output. Without
+        the skip, `upgrade --all` on Omarchy `4.5.0` waited for that download,
+        then showed only `error: command failed to execute correctly` and
+        `error: failed to commit transaction (failed to run transaction hooks)`.
+        Each AUR helper here hands its repository upgrade to `pacman` with both
+        flags the guard reads, as `yay` `13.0.1` did on that host.
+
+        A file of the same name in `/etc/pacman.d/hooks/` overrides the hook,
+        and a symlink from there to `/dev/null` disables it, per
+        [alpm-hooks(5)](https://man.archlinux.org/man/alpm-hooks.5.en). `mpm`
+        then leaves the decision to `pacman`.
+        """
+        if OMARCHY_UPDATE_GUARD.exists() and not os.path.lexists(
+            OMARCHY_UPDATE_GUARD_OVERRIDE
+        ):
+            return (
+                f"Omarchy's update guard ({OMARCHY_UPDATE_GUARD}) aborts each full "
+                "upgrade that `omarchy update` did not start. Run `omarchy update` "
+                "instead."
+            )
+        return None
 
     @property
     def installed(self) -> Iterator[Package]:
@@ -542,6 +594,15 @@ class DkpPacman(Pacman):
     distribution's own `pacman`; the class name would otherwise resolve to
     `dkppacman`.
     """
+
+    @property
+    def upgrade_all_skip_reason(self) -> str | None:
+        """Never skip: devkitPro's `pacman` reads its hooks from its own tree.
+
+        Omarchy's update guard sits in the hook directory of the system
+        `pacman`, so it never runs for this one.
+        """
+        return None
 
 
 class Pacaur(Pacman):

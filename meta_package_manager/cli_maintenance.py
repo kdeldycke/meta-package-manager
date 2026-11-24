@@ -729,10 +729,11 @@ def upgrade(ctx, all, packages_specs):
             ctx.obj.selected_managers(implements_operation=Operations.upgrade_all),
         )
         # A full upgrade can fall back to upgrading the packages one by one, and
-        # reads the inventory and the outdated listing for its report.
+        # reads the inventory and the outdated listing for its report. A manager
+        # that its host blocks runs no command, so it asks for no password.
         prime_sudo(
             ctx,
-            managers,
+            [manager for manager in managers if not manager.upgrade_all_skip_reason],
             operations=(
                 Operations.upgrade_all,
                 Operations.upgrade,
@@ -743,6 +744,14 @@ def upgrade(ctx, all, packages_specs):
         report = ChangeReport(managers)
 
         def upgrade_all_work(manager: PackageManager) -> tuple[str, dict]:
+            # A host that blocks the full upgrade, like Omarchy for pacman: mark
+            # the manager ✘ without running its CLI.
+            skip_reason = manager.upgrade_all_skip_reason
+            if skip_reason:
+                logging.warning(
+                    f"Skipped: {skip_reason}", extra={"label": manager.subject}
+                )
+                return manager.id, {"failed": True, "detail": "skipped"}
             # cooldown_permits() already logs the reason at WARNING when it blocks;
             # mark the manager ✘ without running its CLI.
             if not cooldown_permits(manager):

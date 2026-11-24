@@ -368,6 +368,16 @@ Every package either one reaches comes from nixpkgs, the registry [`nix`](manage
 
 Declined in {mpm-release}`8.0.0`.
 
+## [`omarchy`](https://omarchy.org) ❌ 🛟
+
+An Arch Linux-based distribution whose package commands reach nothing that [`pacman`](managers/pacman.md) and [`yay`](managers/yay.md) do not reach already: `omarchy pkg add` runs `pacman -S`, `omarchy pkg aur add` runs `yay -S` and `omarchy pkg remove` runs `pacman -Rns` ([`bin/`](https://github.com/omacom/omarchy/tree/9ec99e7cf242257cd198cac4bc0f0a96118ecec4/bin)).
+
+Its `omarchy update` is the entry point for a system upgrade, and [`topgrade`](managers/topgrade.md) runs it as its [system step](https://github.com/topgrade-rs/topgrade/blob/c26ade9af3e66db699af09a3c479c3b4387d6722/src/steps/os/linux.rs#L329-L336) from `17.16.0`. From Omarchy `4.0.0`, a pacman hook aborts any other system upgrade, so `mpm` skips `upgrade --all` there for [`pacman`](managers/pacman.md) and its AUR helpers.
+
+Wikipedia: [Omarchy](https://en.wikipedia.org/wiki/Omarchy).
+
+Declined in {mpm-release}`8.4.0`.
+
 ## [`opencsw`](https://www.opencsw.org) ☠️
 
 Community collection of Solaris packages in SysV format. Its own front page has announced nothing since 2022-02-15, "Unbound version 1.15.0 has been pushed to unstable", which is four years of silence on a catalogue whose whole value is how current it is.

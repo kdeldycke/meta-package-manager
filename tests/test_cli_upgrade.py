@@ -571,6 +571,27 @@ def test_failed_upgrade_all_without_an_outdated_listing_names_its_cause(
     assert f"✘ {mid}.upgrade_all (nothing upgraded, no password) " in stderr
 
 
+def test_upgrade_all_skips_a_manager_its_host_blocks(
+    invoke, changing_fake_pool, monkeypatch
+):
+    """A manager with a skip reason is `✘`, runs no upgrade, and the exit stays `0`."""
+    reason = "The orchard is closed for the harvest. Come back in spring."
+    monkeypatch.setattr(
+        ChangingFakeManager, "upgrade_all_skip_reason", property(lambda _: reason)
+    )
+    calls: list[tuple] = []
+    monkeypatch.setattr(
+        ChangingFakeManager, "upgrade", lambda _, *args, **kwargs: calls.append(args)
+    )
+    result = invoke("upgrade", "--all")
+    assert result.exit_code == 0
+    mid = changing_fake_pool.id
+    stderr = strip_ansi(result.stderr)
+    assert f": Skipped: {reason}\n" in stderr
+    assert f"✘ {mid}.upgrade_all (skipped) " in stderr
+    assert not calls
+
+
 def test_upgrade_all_selects_the_cooldown_columns(invoke, changing_fake_pool):
     """`--columns` reaches the cooldown columns of a report carrying no date."""
     result = invoke("upgrade", "--all", "--columns", "package_id,eligible")

@@ -10,6 +10,8 @@
 - [mpm] Raise the docs floor of `myst-parser` to `5.2`, below which the docs build fails.
 - [mpm] Refresh the benchmark against `topgrade` `17.17.0`: 13 tools it drives get a row, and `pkg-tools` gets its `topgrade` support.
 - [mpm] Record `bootc`, `freebsd-update`, `pkgbase`, `syspatch` and `sysupgrade` as unsupported operating system updaters, and `lucidlink` and `tailscale` as self-updating applications.
+- [mpm] Record `omarchy` as unsupported: its package commands wrap `pacman` and `yay`, and `topgrade` drives its update.
+- [aura,pacaur,pacman,paru,pikaur,trizen,yay] Skip `upgrade --all` on Omarchy `4.0.0` and later, where a pacman hook aborts each full upgrade that `omarchy update` did not start.
 
 ## [`8.3.1` (2026-11-21)](https://github.com/kdeldycke/meta-package-manager/compare/v8.3.0...v8.3.1)
 

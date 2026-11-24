@@ -3,6 +3,7 @@
   buildPythonPackage,
   fetchFromGitHub,
   gitMinimal,
+  pythonOlder,
   pytestCheckHook,
   hjson,
   jsonschema,
@@ -81,6 +82,13 @@ buildPythonPackage (finalAttrs: {
   disabledTests = [
     "test_directive_variable_conflict and MYST"
     "test_generated_block_is_attributed_to_the_directive_body and body-ending-on-blank-lines-MYST"
+  ]
+  ++ lib.optionals (pythonOlder "3.14") [
+    # cloup 4.0.0 imports `importlib.metadata` at module scope. Below Python
+    # 3.14, that import also loads `tempfile` through `importlib.abc`, and this
+    # test forbids `tempfile` at startup. Drop it once nixpkgs ships a cloup
+    # above 4.0.0, which no longer makes that import.
+    "test_no_heavy_dependency_ballast_on_startup"
   ];
 
   # The configuration tests are served over HTTP by a local pytest-httpserver.

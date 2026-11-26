@@ -19,10 +19,15 @@ from __future__ import annotations
 import logging
 import os
 import re
+import subprocess
+from functools import cached_property
+from pathlib import Path
 
 from extra_platforms import ALL_PLATFORMS
 
+from ..execution import READ_ONLY_TIMEOUT
 from ..manager import PackageManager
+from .pip import _EXTERNALLY_MANAGED_PROBE
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
@@ -114,6 +119,12 @@ class UV(UVBase):
     `--exclude-newer` resolver option, which every resolving subcommand
     honors, so one cutoff covers install, upgrade and outdated together.
 
+    Outside a virtual environment, `uv pip` reads the packages of a system
+    Python. When that Python is externally managed ({pep}`668`), like the
+    system Python of Arch Linux or Debian, `mpm` considers `uv` unavailable:
+    the distribution's package manager owns those packages, and `uv pip install`
+    does not install into that Python.
+
     ```{hint}
     Package specs are passed unquoted, working around [uv parse failures on quoted specs](https://github.com/kdeldycke/meta-package-manager/issues/1653).
     ```
@@ -122,6 +133,80 @@ class UV(UVBase):
     name = "Python uv"
     documentation_url = "https://docs.astral.sh/uv/"
     repository_url = "https://github.com/astral-sh/uv"
+
+    @property
+    def unavailable_reason(self) -> str | None:
+        """Add a refusal of an externally managed Python to the base conditions.
+
+        Outside a virtual environment, `uv pip list` reads a system Python, while
+        `uv pip install` asks for a virtual environment. On Omarchy `4.5.0`, uv
+        `0.13.9` listed 13 outdated packages of `/usr` that pacman owns, and each
+        upgrade failed with `No virtual environment found`. `mpm` skips such a
+        Python, as {class}`~meta_package_manager.managers.pip.Pip` does.
+
+        A Python that is not externally managed stays a target, like the one of
+        a container where `UV_SYSTEM_PYTHON` lets `uv pip install` write to it.
+        """
+        reason = super().unavailable_reason
+        if reason is None and (python := self._externally_managed_python):
+            return (
+                f"uv pip targets {python}, an externally managed Python: the system "
+                "package manager owns its packages"
+            )
+        return reason
+
+    @cached_property
+    def _externally_managed_python(self) -> Path | None:
+        """The Python that `uv pip` reads, if {pep}`668` locks it, else `None`.
+
+        `uv python find` with the `default` request names the interpreter of a
+        bare `uv pip` call: the active virtual environment, a `.venv` in the
+        current directory or a parent, then a system Python. The explicit request
+        and `--no-project` keep a `.python-version` pin and a `requires-python`
+        out of the lookup, as `uv pip list` ignores both. That interpreter then
+        runs the externally managed probe of the `pip` manager.
+
+        Errs on the side of keeping the manager: a call that fails, times out or
+        prints an unexpected answer returns `None`.
+        """
+        timeout = self.timeout if self.timeout is not None else READ_ONLY_TIMEOUT
+        try:
+            found = subprocess.run(
+                (
+                    str(self.cli_path),
+                    *self.pre_args,
+                    "python",
+                    "find",
+                    "--no-project",
+                    "default",
+                ),
+                capture_output=True,
+                encoding="UTF-8",
+                errors="replace",
+                stdin=subprocess.DEVNULL,
+                timeout=timeout,
+                check=False,
+            )
+            lines = found.stdout.splitlines()
+            if found.returncode != 0 or len(lines) != 1:
+                return None
+            python = Path(lines[0])
+            probe = subprocess.run(
+                (str(python), "-c", _EXTERNALLY_MANAGED_PROBE),
+                capture_output=True,
+                encoding="UTF-8",
+                errors="replace",
+                stdin=subprocess.DEVNULL,
+                timeout=timeout,
+                check=False,
+            )
+        except (OSError, subprocess.SubprocessError) as error:
+            logging.debug(
+                f"Cannot tell which Python uv pip targets: {error}",
+                extra={"label": self.id},
+            )
+            return None
+        return python if probe.stdout.strip() == "1" else None
 
     @property
     def installed(self) -> Iterator[Package]:

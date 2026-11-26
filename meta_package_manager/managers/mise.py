@@ -16,8 +16,12 @@
 
 from __future__ import annotations
 
+import logging
+import os
 import re
-from typing import ClassVar
+import subprocess
+from pathlib import Path
+from typing import ClassVar, Final
 
 from extra_platforms import ALL_PLATFORMS
 
@@ -29,6 +33,13 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
     from ..package import Package
+
+
+SHIM_PROBE_TIMEOUT: Final = 10
+"""Seconds granted to the `mise which` call of {meth}`Mise.owns_missing_shim`.
+
+The call reads local state alone: it answered within 20 ms on mise `2026.11.0`.
+"""
 
 
 class Mise(PackageManager):
@@ -100,6 +111,44 @@ class Mise(PackageManager):
         r"^(?P<package_id>\S+)\s{2,}(?P<description>.+)$",
         re.MULTILINE,
     )
+
+    @classmethod
+    def owns_missing_shim(cls, file: Path) -> bool:
+        """Tell a mise shim whose tool is not installed from a usable binary.
+
+        mise serves each tool through a shim: a symlink named after the command,
+        which points at the `mise` binary. The shim of a
+        [lazy tool](https://mise.jdx.dev/dev-tools/shims.html#lazy-tools) exists
+        before the tool does, and running it installs the tool. A version probe
+        is such a run: on Omarchy `4.5.0`, which declares about 30 lazy tools, the
+        probe of `gh` downloaded and installed it.
+
+        `mise which` answers without that side effect. It prints the real path of
+        an installed tool, and exits non-zero for a tool that is not installed,
+        which it leaves that way (mise `2026.11.0`).
+
+        A symlink named `mise` is the binary under another path, not a shim. A
+        shim that mise writes as a copy or as a hard link, as it can on Windows,
+        is not recognized here. A probe that cannot run counts as a usable binary,
+        which is how every shim counted before this check.
+        """
+        if not os.path.islink(file):
+            return False
+        target = Path(os.path.realpath(file))
+        if target.name != "mise" or file.name == "mise":
+            return False
+        try:
+            probe = subprocess.run(
+                (str(target), "which", file.name),
+                capture_output=True,
+                stdin=subprocess.DEVNULL,
+                timeout=SHIM_PROBE_TIMEOUT,
+                check=False,
+            )
+        except (OSError, subprocess.SubprocessError) as error:
+            logging.debug(f"Cannot ask mise about {file}: {error}")
+            return False
+        return probe.returncode != 0
 
     @property
     def installed(self) -> Iterator[Package]:

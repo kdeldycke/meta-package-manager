@@ -111,6 +111,7 @@ TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Generator, Iterable, Mapping
     from datetime import timedelta
+    from typing import Any
 
     from click_extra.envvar import TEnvVars
     from click_extra.execution import TArg, TNestedArgs
@@ -393,49 +394,13 @@ def highlight_cli_name(path: Path | None, match_names: Iterable[str]) -> str | N
     return str(path)
 
 
-MISE_SHIM_PROBE_TIMEOUT: Final = 10
-"""Seconds granted to the `mise which` call of `_is_missing_mise_shim`.
+_SHIM_OWNERS: list[type[CLIExecutor]] = []
+"""The classes that {meth}`CLIExecutor.search_all_cli` asks about each candidate.
 
-The call reads local state alone: it answered within 20 ms on mise `2026.11.0`.
+Each one defines {meth}`~CLIExecutor.owns_missing_shim`, and
+`CLIExecutor.__init_subclass__` adds it when the class is created, so this module
+names no manager.
 """
-
-
-def _is_missing_mise_shim(file: Path) -> bool:
-    """Tell a mise shim whose tool is not installed from a usable binary.
-
-    [mise](https://mise.jdx.dev) serves each tool through a shim: a symlink named
-    after the command, which points at the `mise` binary. The shim of a
-    [lazy tool](https://mise.jdx.dev/dev-tools/shims.html#lazy-tools) exists
-    before the tool does, and running it installs the tool. A version probe is
-    such a run: on Omarchy `4.5.0`, which declares about 30 lazy tools, the probe
-    of `gh` downloaded and installed it.
-
-    `mise which` answers without that side effect. It prints the real path of an
-    installed tool, and exits non-zero for a tool that is not installed, which it
-    leaves that way (mise `2026.11.0`).
-
-    A symlink named `mise` is the binary under another path, not a shim. A shim
-    that mise writes as a copy or as a hard link, as it can on Windows, is not
-    recognized here. A probe that cannot run counts as a usable binary, which is
-    how every shim counted before this check.
-    """
-    if not os.path.islink(file):
-        return False
-    target = Path(os.path.realpath(file))
-    if target.name != "mise" or file.name == "mise":
-        return False
-    try:
-        probe = subprocess.run(
-            (str(target), "which", file.name),
-            capture_output=True,
-            stdin=subprocess.DEVNULL,
-            timeout=MISE_SHIM_PROBE_TIMEOUT,
-            check=False,
-        )
-    except (OSError, subprocess.SubprocessError) as error:
-        logging.debug(f"Cannot ask mise about {file}: {error}")
-        return False
-    return probe.returncode != 0
 
 
 READ_ONLY_TIMEOUT: Final = 120
@@ -1259,6 +1224,29 @@ class CLIExecutor:
             return {}
         return {self.cooldown_env_var: self.cooldown_env_value()}
 
+    def __init_subclass__(cls, **kwargs: Any) -> None:
+        """Register a subclass that defines `owns_missing_shim`.
+
+        See `_SHIM_OWNERS`.
+        """
+        super().__init_subclass__(**kwargs)
+        if "owns_missing_shim" in vars(cls):
+            _SHIM_OWNERS.append(cls)
+
+    @classmethod
+    def owns_missing_shim(cls, file: Path) -> bool:
+        """Whether `file` is a shim of this manager for a tool it has not installed.
+
+        Running such a shim installs the tool, and a version probe is such a run,
+        so {meth}`~meta_package_manager.execution.CLIExecutor.search_all_cli` skips
+        `file` when any manager claims it. `False` on the base. A manager that
+        serves its tools through shims overrides it, like
+        {class}`~meta_package_manager.managers.mise.Mise`.
+
+        A host-probing method: the documentation generators must never call it.
+        """
+        return False
+
     def search_all_cli(
         self,
         cli_names: Iterable[str],
@@ -1281,8 +1269,9 @@ class CLIExecutor:
           `os.getenv("PATH")`).
 
         Only returns files that exist and are not empty. Inaccessible search paths
-        and candidates are skipped. So is a mise shim whose tool is not installed,
-        as running it would install the tool: see `_is_missing_mise_shim`.
+        and candidates are skipped. So is a shim that a manager serves for a tool it
+        has not installed, as running it would install the tool: see
+        {meth}`~meta_package_manager.execution.CLIExecutor.owns_missing_shim`.
 
         ```{caution}
 
@@ -1387,9 +1376,14 @@ class CLIExecutor:
                     continue
                 if not stat.S_ISREG(file_stat.st_mode) or not file_stat.st_size:
                     continue
-                if _is_missing_mise_shim(file):
+                owner = next(
+                    (owner for owner in _SHIM_OWNERS if owner.owns_missing_shim(file)),
+                    None,
+                )
+                if owner is not None:
                     logging.debug(
-                        f"Skip CLI candidate {file}: mise has not installed its tool."
+                        f"Skip CLI candidate {file}: a shim of {owner.__name__} for a "
+                        "tool it has not installed."
                     )
                     continue
                 logging.debug(f"CLI found at {highlight_cli_name(file, cli_names)}")

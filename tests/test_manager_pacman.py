@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 
 import pytest
 from extra_platforms.pytest import skip_windows
@@ -37,6 +38,9 @@ from meta_package_manager.managers.pacman import (
 GUARDED_MANAGERS = (Aura, Pacaur, Pacman, Paru, Pikaur, Trizen, Yay)
 """The system `pacman` and the AUR helpers that hand their upgrades to it."""
 
+SKIPPED_MANAGERS = tuple(m for m in GUARDED_MANAGERS if m is not Yay)
+"""The guarded managers that skip `upgrade --all`: `Yay` upgrades the AUR alone."""
+
 
 @pytest.fixture
 def guard(monkeypatch, tmp_path):
@@ -53,7 +57,7 @@ def guard(monkeypatch, tmp_path):
     return hook, override
 
 
-@pytest.mark.parametrize("manager_class", GUARDED_MANAGERS)
+@pytest.mark.parametrize("manager_class", SKIPPED_MANAGERS)
 def test_omarchy_guard_skips_upgrade_all(manager_class, guard):
     """The hook file alone decides."""
     hook, _ = guard
@@ -95,3 +99,47 @@ def test_dkp_pacman_ignores_omarchy_guard(guard):
     hook.touch()
 
     assert DkpPacman().upgrade_all_skip_reason is None
+
+
+@pytest.fixture
+def yay(monkeypatch):
+    """A `Yay` whose binary resolves on any host."""
+    manager = Yay()
+    monkeypatch.setattr(manager, "cli_path", Path("/usr/bin/yay"), raising=False)
+    return manager
+
+
+def test_yay_upgrades_the_aur_alone_under_the_guard(yay, guard):
+    """The guard narrows the full upgrade and never skips it."""
+    hook, override = guard
+    full_upgrade = ("--sync", "--refresh", "--sysupgrade")
+    aur_upgrade = ("--sync", "--sysupgrade", "--aur")
+
+    assert yay.upgrade_all_cli()[-3:] == full_upgrade
+
+    hook.touch()
+    assert yay.upgrade_all_skip_reason is None
+    assert yay.upgrade_all_cli()[-3:] == aur_upgrade
+
+    override.write_text("[Trigger]\n", encoding="UTF-8")
+    assert yay.upgrade_all_cli()[-3:] == full_upgrade
+
+
+def test_yay_lists_the_aur_alone_under_the_guard(yay, guard, capture_run_cli):
+    """The listing follows the upgrade, and reads the release age yay appends.
+
+    The output is a capture of yay `13.0.1` on Omarchy `4.5.0`.
+    """
+    hook, _ = guard
+    calls = capture_run_cli(yay, "pfetch 1.10.0-1 -> 1.11.0-1 [167d18h]\n")
+
+    list(yay.outdated)
+    assert calls == [("--query", "--upgrades")]
+
+    calls.clear()
+    hook.touch()
+    packages = list(yay.outdated)
+    assert calls == [("--query", "--upgrades", "--aur")]
+    assert [package.id for package in packages] == ["pfetch"]
+    assert str(packages[0].installed_version) == "1.10.0-1"
+    assert str(packages[0].latest_version) == "1.11.0-1"

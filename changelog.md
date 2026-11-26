@@ -12,7 +12,8 @@
 - [mpm] Refresh the benchmark against `topgrade` `17.17.0`: 13 tools it drives get a row, and `pkg-tools` gets its `topgrade` support.
 - [mpm] Record `bootc`, `freebsd-update`, `pkgbase`, `syspatch` and `sysupgrade` as unsupported operating system updaters, and `lucidlink` and `tailscale` as self-updating applications.
 - [mpm] Record `omarchy` as unsupported: its package commands wrap `pacman` and `yay`, and `topgrade` drives its update.
-- [aura,pacaur,pacman,paru,pikaur,trizen,yay] Skip `upgrade --all` on Omarchy `4.0.0` and later, where a pacman hook aborts each full upgrade that `omarchy update` did not start.
+- [aura,pacaur,pacman,paru,pikaur,trizen] Skip `upgrade --all` on Omarchy `4.0.0` and later, where a pacman hook aborts each full upgrade that `omarchy update` did not start.
+- [yay] Limit `upgrade --all` and `outdated` to the AUR packages on Omarchy `4.0.0` and later, where `omarchy update` runs the repository upgrade.
 - [mise] Stop listing a lazy tool that is not installed yet as outdated.
 - [mise,mpm] Stop running the mise shim of a tool that is not installed yet, which installed that tool during manager detection.
 

@@ -71,6 +71,18 @@ delivered.
 """
 
 
+def _omarchy_guard_in_force() -> bool:
+    """Whether Omarchy's update guard is installed and nothing overrides it.
+
+    A file of the same name in `/etc/pacman.d/hooks/` overrides the hook, and a
+    symlink from there to `/dev/null` disables it, per
+    [alpm-hooks(5)](https://man.archlinux.org/man/alpm-hooks.5.en).
+    """
+    return OMARCHY_UPDATE_GUARD.exists() and not os.path.lexists(
+        OMARCHY_UPDATE_GUARD_OVERRIDE
+    )
+
+
 class Pacman(PackageManager):
     """Arch Linux's native package manager, covering the official repositories.
 
@@ -90,9 +102,10 @@ class Pacman(PackageManager):
 
     ```{caution}
     Omarchy aborts each full system upgrade from its `4.0.0` release on, so
-    `mpm` skips `upgrade --all` for `pacman` and its AUR helpers there. Run
-    `omarchy update` instead: it also takes the snapshot and runs the
-    migrations that a bare `pacman` upgrade skips.
+    `mpm` skips `upgrade --all` for `pacman` and its AUR helpers there. `yay` is
+    the exception: it upgrades the AUR packages alone. Run `omarchy update` for
+    the repository packages: it also takes the snapshot and runs the migrations
+    that a bare `pacman` upgrade skips.
 
     The `omarchy` package installs a
     [guard](https://github.com/omacom/omarchy/blob/9ec99e7cf242257cd198cac4bc0f0a96118ecec4/bin/omarchy-update-pacman-guard)
@@ -188,16 +201,16 @@ class Pacman(PackageManager):
         then showed only `error: command failed to execute correctly` and
         `error: failed to commit transaction (failed to run transaction hooks)`.
         Each AUR helper here hands its repository upgrade to `pacman` with both
-        flags the guard reads, as `yay` `13.0.1` did on that host.
+        flags the guard reads, as `yay` `13.0.1` did on that host. `Yay` does
+        not skip: it upgrades the AUR packages alone there, see
+        {meth}`Yay.upgrade_all_cli`.
 
         A file of the same name in `/etc/pacman.d/hooks/` overrides the hook,
         and a symlink from there to `/dev/null` disables it, per
         [alpm-hooks(5)](https://man.archlinux.org/man/alpm-hooks.5.en). `mpm`
         then leaves the decision to `pacman`.
         """
-        if OMARCHY_UPDATE_GUARD.exists() and not os.path.lexists(
-            OMARCHY_UPDATE_GUARD_OVERRIDE
-        ):
+        if _omarchy_guard_in_force():
             return (
                 f"Omarchy's update guard ({OMARCHY_UPDATE_GUARD}) aborts each full "
                 "upgrade that `omarchy update` did not start. Run `omarchy update` "
@@ -941,6 +954,13 @@ class Yay(Pacman):
     manager but cannot honor a cooldown. The upstream request for a less invasive
     injection point is [Jguer/yay#2883](https://github.com/Jguer/yay/issues/2883).
     ```
+
+    ```{note}
+    On a host that Omarchy's update guard protects, `outdated` and
+    `upgrade --all` cover the AUR packages alone. The guard aborts the
+    repository half of a full upgrade: `omarchy update` runs that half there,
+    with its snapshot and its migrations. See {meth}`Yay.upgrade_all_cli`.
+    ```
     """
 
     name = "Arch Linux yay"
@@ -1128,3 +1148,62 @@ class Yay(Pacman):
             if user_config.is_file():
                 (config_dir / "config.json").symlink_to(user_config)
         return root
+
+    @property
+    def upgrade_all_skip_reason(self) -> str | None:
+        """Never skip: under Omarchy's update guard, yay upgrades the AUR alone.
+
+        See {meth}`upgrade_all_cli`.
+        """
+        return None
+
+    @property
+    def outdated(self) -> Iterator[Package]:
+        """Fetch outdated packages, the AUR ones alone under Omarchy's update guard.
+
+        Without the guard, this is {attr}`Pacman.outdated` through the `yay`
+        binary, which reports the repositories and the AUR in one listing.
+
+        Under the guard, {meth}`upgrade_all_cli` leaves the repository packages
+        alone, so the listing leaves them to `pacman` too. yay `13.0.1` adds the
+        age of each AUR release after its version.
+
+        The command depends on the host, so the corpus tests cannot replay this
+        capture from Omarchy `4.5.0`:
+
+        ```{code-block} console
+
+        $ yay --noconfirm --color never --query --upgrades --aur
+        pfetch 1.10.0-1 -> 1.11.0-1 [167d18h]
+        ```
+        """
+        if _omarchy_guard_in_force():
+            output = self.run_cli("--query", "--upgrades", "--aur")
+            yield from self.parse_regex_lines(self._OUTDATED_REGEXP, output)
+        else:
+            yield from super().outdated
+
+    def upgrade_all_cli(self) -> tuple[str, ...]:
+        """Generates the CLI of a full upgrade, AUR-only under Omarchy's update guard.
+
+        Without the guard, this is {meth}`Pacman.upgrade_all_cli`.
+
+        Under the guard, `--aur` keeps the upgrade to the AUR packages. yay
+        builds each one, then installs the built files through `pacman`. The
+        guard runs on that transaction and lets it through: it aborts only a
+        call that holds both `--sync` and `--sysupgrade`. Omarchy's own update
+        does the same with `yay -Sua`. Verified on Omarchy `4.5.0` with yay
+        `13.0.1`: the command upgraded a staged AUR package and no repository
+        package. `--refresh` is left out: with no repository upgrade after it,
+        it leaves the sync databases ahead of the installed packages.
+
+        The command depends on the host, so the corpus tests cannot rebuild it:
+
+        ```{code-block} console
+
+        $ yay --noconfirm --color never --sync --sysupgrade --aur
+        ```
+        """
+        if _omarchy_guard_in_force():
+            return self.build_cli("--sync", "--sysupgrade", "--aur", sudo=True)
+        return super().upgrade_all_cli()

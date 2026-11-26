@@ -372,7 +372,7 @@ Declined in {mpm-release}`8.0.0`.
 
 An Arch Linux-based distribution whose package commands reach nothing that [`pacman`](managers/pacman.md) and [`yay`](managers/yay.md) do not reach already: `omarchy pkg add` runs `pacman -S`, `omarchy pkg aur add` runs `yay -S` and `omarchy pkg remove` runs `pacman -Rns` ([`bin/`](https://github.com/omacom/omarchy/tree/9ec99e7cf242257cd198cac4bc0f0a96118ecec4/bin)).
 
-Its `omarchy update` is the entry point for a system upgrade, and [`topgrade`](managers/topgrade.md) runs it as its [system step](https://github.com/topgrade-rs/topgrade/blob/c26ade9af3e66db699af09a3c479c3b4387d6722/src/steps/os/linux.rs#L329-L336) from `17.16.0`. From Omarchy `4.0.0`, a pacman hook aborts any other system upgrade, so `mpm` skips `upgrade --all` there for [`pacman`](managers/pacman.md) and its AUR helpers.
+Its `omarchy update` is the entry point for a system upgrade, and [`topgrade`](managers/topgrade.md) runs it as its [system step](https://github.com/topgrade-rs/topgrade/blob/c26ade9af3e66db699af09a3c479c3b4387d6722/src/steps/os/linux.rs#L329-L336) from `17.16.0`. From Omarchy `4.0.0`, a pacman hook aborts any other system upgrade, so `mpm` skips `upgrade --all` there for [`pacman`](managers/pacman.md) and its AUR helpers. [`yay`](managers/yay.md) is the exception: it upgrades the AUR packages alone.
 
 Wikipedia: [Omarchy](https://en.wikipedia.org/wiki/Omarchy).
 

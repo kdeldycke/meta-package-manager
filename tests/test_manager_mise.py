@@ -90,6 +90,36 @@ def test_outdated_handles_empty(manager, stub_run_cli, output):
     assert list(manager.outdated) == []
 
 
+def test_outdated_skips_a_lazy_tool_that_is_not_installed(manager, stub_run_cli):
+    """A `null` current version marks a tool mise has not installed.
+
+    The `amp` entry is verbatim from the `mise outdated --json` of mise
+    `2026.11.0` on Omarchy `4.5.0`, where `amp` is a lazy tool nobody ran yet.
+    The `node` entry is the installed tool of `test_outdated_yields_upgrades`.
+    """
+    output = """
+        {
+          "amp": {
+            "name": "amp",
+            "requested": "latest",
+            "current": null,
+            "bump": null,
+            "latest": "0.0.1795536036-g7f1841",
+            "source": {
+              "type": "mise.toml",
+              "path": "/etc/mise/conf.d/omarchy-tools.toml"
+            }
+          },
+          "node": {"requested": "20", "current": "20.0.0", "latest": "20.10.0"}
+        }
+    """
+    stub_run_cli(manager, output)
+    packages = list(manager.outdated)
+    assert [package.id for package in packages] == ["node"]
+    assert str(packages[0].installed_version) == "20.0.0"
+    assert str(packages[0].latest_version) == "20.10.0"
+
+
 def test_search_parses_table(manager, stub_run_cli):
     output = (
         "node                Node.js JavaScript runtime\n"

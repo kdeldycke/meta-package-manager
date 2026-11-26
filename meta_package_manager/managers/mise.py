@@ -156,12 +156,24 @@ class Mise(PackageManager):
           }
         }
         ```
+
+        ```{note}
+        mise also lists each
+        [lazy tool](https://mise.jdx.dev/dev-tools/shims.html#lazy-tools) that
+        is not installed yet, with a `null` in place of its `current` version:
+        the plain listing marks it `[MISSING] (lazy)`. Such a tool is not
+        installed, so it is not outdated, and `mise upgrade` leaves it alone
+        (mise `2026.11.0`). Omarchy `4.5.0` declares about 30 of them.
+        ```
         """
         output = self.run_cli("outdated", "--json", must_succeed=True)
         data = self.parse_json(output)
         if not data:
             return
         for tool_id, info in data.items():
+            # A tool with no current version is not installed: see the note above.
+            if info["current"] is None:
+                continue
             yield self.package(
                 id=tool_id,
                 installed_version=info["current"],

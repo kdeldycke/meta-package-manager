@@ -474,14 +474,18 @@ def warm_availability(managers: Iterable[PackageManager]) -> None:
             manager.run_cache = previous_cache
 
 
-def _state_failed(data: dict) -> bool:
-    """Whether a manager's result fails its `✓`/`✘` trail line.
+def _state_outcome(data: dict) -> bool | None:
+    """The outcome a manager's result draws on its trail line.
 
-    A non-empty `data["errors"]` (CLI errors, or a read query's error list) or an
-    explicit `data["failed"]` flag (`upgrade --all`'s cooldown skips, which run
-    no CLI of their own) both mark the line `✘`.
+    An explicit `data["skipped"]` flag marks the line `⊘`: `upgrade --all` sets
+    it on a manager that its host blocks or that the cooldown holds back, which
+    runs no command. A non-empty `data["errors"]` (CLI errors, or a read query's
+    error list) or an explicit `data["failed"]` flag (an unhealthy `doctor`
+    diagnosis) marks the line `✘`. Any other result marks it `✓`.
     """
-    return bool(data.get("errors") or data.get("failed"))
+    if data.get("skipped"):
+        return None
+    return not (data.get("errors") or data.get("failed"))
 
 
 class OperationTrail(_OperationTrail):
@@ -517,7 +521,9 @@ class OperationTrail(_OperationTrail):
     both composed by {func}`trail_label`: package-keyed for `install`, `remove`,
     `upgrade <packages>` and `restore`, manager-keyed for `sync`, `cleanup` and
     `upgrade --all`. The finisher counts each (package, manager) attempt, as the
-    lines do: a package that two managers acted on counts `2/2`.
+    lines do: a package that two managers acted on counts `2/2`. A skipped
+    attempt draws a `⊘` line, and the finisher leaves it out of the count and
+    gives the number of skips after it (see {func}`finisher`).
 
     `--no-progress`, a serialized `--table-format` and `DEBUG` verbosity remove
     the `✘` lines. So a failure also logs a `critical: Could not ...` line, which
@@ -582,7 +588,7 @@ class OperationTrail(_OperationTrail):
 def trail_label(
     subject: str, item: str | None = None, detail: str | None = None
 ) -> str:
-    """Compose the text of one `✓`/`✘` trail line.
+    """Compose the text of one `✓`/`✘`/`⊘` trail line.
 
     Reads ``{subject}: {item} ({detail})``: the `manager.operation` subject its
     per-call spinner showed, painted the same way, then the package it acted on
@@ -598,7 +604,7 @@ def trail_label(
     return f"{text} ({detail})" if detail else text
 
 
-def timed_task(task: Callable[[], tuple[bool, str]]) -> tuple[bool, str]:
+def timed_task(task: Callable[[], tuple[bool | None, str]]) -> tuple[bool | None, str]:
     """Run one trail task and close its line on how long it took.
 
     Every task a {func}`dispatch` batch runs goes through here, and so does a
@@ -610,19 +616,40 @@ def timed_task(task: Callable[[], tuple[bool, str]]) -> tuple[bool, str]:
     return ok, f"{text}{elapsed_clock(time.monotonic() - start)}"
 
 
+def finisher(
+    done_label: str, unit: str, ok: int, total: int, skipped: int
+) -> tuple[bool | None, str]:
+    """The outcome and the summary of the finisher that closes a state changer.
+
+    The count leaves out the skipped attempts, and the summary gives their
+    number after it: `Upgraded 1/1 managers, 6 skipped`. The finisher is `✓`
+    when every attempt left succeeded, `✘` when one failed, and `⊘` when the
+    batch skipped every attempt.
+
+    :param ok: how many attempts succeeded.
+    :param total: how many attempts the batch counted, the skipped ones included.
+    :param skipped: how many of them were skipped.
+    """
+    tried = total - skipped
+    summary = f"{done_label} {ok}/{tried} {unit}"
+    if skipped:
+        summary += f", {skipped} skipped"
+    return (ok == tried if tried else None), summary
+
+
 def dispatch(
     label: str,
     done_label: str,
     unit: str,
     lanes: list[
-        tuple[tuple[PackageManager, ...], list[Callable[[], tuple[bool, str]]]]
+        tuple[tuple[PackageManager, ...], list[Callable[[], tuple[bool | None, str]]]]
     ],
     *,
     coverage: bool = False,
     operation: str | None = None,
     ctx: Context | None = None,
 ) -> None:
-    """Fan a set of work *lanes* out across managers, narrating a `✓`/`✘` trail.
+    """Fan a set of work *lanes* out across managers, narrating a `✓`/`✘`/`⊘` trail.
 
     The single scheduling primitive behind both {func}`collect_from_managers` and
     {func}`collect_per_package`. A *lane* is one or more managers paired with a list of
@@ -636,9 +663,10 @@ def dispatch(
     collapse identical invocations.
 
     Each callable does its work, records its own outcome (output to `INFO`, failures
-    into a caller-owned list) and returns `(ok, message)` for the trail: a per-outcome
-    `✓`/`✘` line plus one finisher, behind a single aggregate progress bar when
-    concurrent (a slow batch on a terminal) and silent otherwise.
+    into a caller-owned list) and returns `(ok, message)` for the trail, with `ok`
+    `None` for an attempt it skipped: a per-outcome `✓`/`✘`/`⊘` line plus one
+    finisher, behind a single aggregate progress bar when concurrent (a slow batch on
+    a terminal) and silent otherwise.
 
     The batch runs in up to two phases, each through its own
     {class}`OperationTrail`. Every lane runs in the concurrent phase, except a lane
@@ -660,7 +688,7 @@ def dispatch(
         reports coverage, ``{done_label} N {unit}``, always `✓`). Maintenance and
         state-changing commands leave it `False` (the trail *is* their output, so the
         finisher reports the success count, ``{done_label} N/M {unit}``, `✘` on any
-        failure).
+        failure, see {func}`finisher`).
     :param operation: the operation these lanes perform, matched by
         `_hidden_prompt_risk` to decide which lanes
         are held back to the sequential tail. Left `None` by the read commands, whose
@@ -712,10 +740,13 @@ def dispatch(
     # Both phases tally into one count, so the single finisher covers the whole batch
     # whichever phase closes it.
     ok = 0
+    skipped = 0
 
     def run_phase(
         phase_lanes: list[
-            tuple[tuple[PackageManager, ...], list[Callable[[], tuple[bool, str]]]]
+            tuple[
+                tuple[PackageManager, ...], list[Callable[[], tuple[bool | None, str]]]
+            ]
         ],
         phase_jobs: int,
         *,
@@ -727,7 +758,7 @@ def dispatch(
         leaves the trail with no aggregate indicator: its outcomes echo as plain lines
         and the terminal stays still for a prompt.
         """
-        nonlocal ok
+        nonlocal ok, skipped
         with OperationTrail(
             [manager for lane_managers, _ in phase_lanes for manager in lane_managers],
             label=label,
@@ -746,6 +777,7 @@ def dispatch(
                 )
             )
             ok += trail.ok_count
+            skipped += trail.skip_count
             if not last:
                 # Leaving the trail without a finisher erases the indicator and keeps
                 # every outcome line: the batch is reported once, by the phase below.
@@ -753,7 +785,7 @@ def dispatch(
             if coverage:
                 trail.finish(True, f"{done_label} {total} {unit}")
             else:
-                trail.finish(ok == total, f"{done_label} {ok}/{total} {unit}")
+                trail.finish(*finisher(done_label, unit, ok, total, skipped))
 
     try:
         if main_lanes:
@@ -767,8 +799,10 @@ def dispatch(
 
 
 def merge_into_lock_lanes(
-    pairs: list[tuple[PackageManager, Callable[[], tuple[bool, str]]]],
-) -> list[tuple[tuple[PackageManager, ...], list[Callable[[], tuple[bool, str]]]]]:
+    pairs: list[tuple[PackageManager, Callable[[], tuple[bool | None, str]]]],
+) -> list[
+    tuple[tuple[PackageManager, ...], list[Callable[[], tuple[bool | None, str]]]]
+]:
     """Group `(manager, task)` pairs into {func}`dispatch` lanes, one per lock family.
 
     Managers sharing a {data}`~meta_package_manager.dispatch.SHARED_LOCK_FAMILIES`
@@ -785,7 +819,7 @@ def merge_into_lock_lanes(
     keeping one lane per manager.
     """
     lanes: dict[
-        object, tuple[list[PackageManager], list[Callable[[], tuple[bool, str]]]]
+        object, tuple[list[PackageManager], list[Callable[[], tuple[bool | None, str]]]]
     ]
     lanes = {}
     for manager, task in pairs:
@@ -820,10 +854,12 @@ def collect_from_managers(
     `work` returns this manager's `(id, data)`; it must handle its own
     {class}`meta_package_manager.execution.CLIError` (each manager owns its
     subprocess and error list, so the call is thread-safe per manager). A truthy
-    `data["errors"]` (or `data["failed"]`) marks that manager's trail line `✘`;
+    `data["errors"]` (or `data["failed"]`) marks that manager's trail line `✘`,
+    and a truthy `data["skipped"]` marks it `⊘` (see {func}`_state_outcome`);
     an optional `data["detail"]` suffixes its subject in parentheses (`cleanup`
-    passes its categories, `upgrade --all` the cooldown that held a manager or
-    what moved, and each maintenance command closes on what it died of).
+    passes its categories, `upgrade --all` the host or cooldown that held a
+    manager back or what moved, and each maintenance command closes on what it
+    died of).
 
     :param report_state: maintenance commands set it (the trail is their output,
         which `upgrade --all` and `cleanup --orphans` follow with a change report on
@@ -838,8 +874,8 @@ def collect_from_managers(
 
     def make_unit(
         index: int, manager: PackageManager
-    ) -> Callable[[], tuple[bool, str]]:
-        def unit() -> tuple[bool, str]:
+    ) -> Callable[[], tuple[bool | None, str]]:
+        def unit() -> tuple[bool | None, str]:
             manager_id, data = work(manager)
             results[index] = (manager_id, data)
             # The trail names the same subject the per-call spinner does, so a
@@ -847,14 +883,16 @@ def collect_from_managers(
             # survives the `acting_as` the work ran under, that context restoring
             # what `_select_managers` set for this subcommand.
             text = trail_label(manager.subject, detail=data.get("detail"))
-            return not _state_failed(data), text
+            return _state_outcome(data), text
 
         return unit
 
     pairs = [(manager, make_unit(i, manager)) for i, manager in enumerate(managers)]
     # Mutating fan-outs (report_state) serialize lock families into shared lanes; the
     # read commands take no backend lock and keep one lane per manager.
-    lanes: list[tuple[tuple[PackageManager, ...], list[Callable[[], tuple[bool, str]]]]]
+    lanes: list[
+        tuple[tuple[PackageManager, ...], list[Callable[[], tuple[bool | None, str]]]]
+    ]
     if report_state:
         lanes = merge_into_lock_lanes(pairs)
     else:
@@ -874,7 +912,7 @@ def collect_from_managers(
 def collect_per_package(
     label: str,
     done_label: str,
-    tasks: list[tuple[PackageManager, Callable[[], tuple[bool, str]]]],
+    tasks: list[tuple[PackageManager, Callable[[], tuple[bool | None, str]]]],
     *,
     operation: str | None = None,
     ctx: Context | None = None,

@@ -827,8 +827,9 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         For a host that blocks the full upgrade of an available manager and
         accepts its other operations, like Omarchy with
         {class}`~meta_package_manager.managers.pacman.Pacman`. `mpm` then logs
-        the returned sentences after `Skipped:`, marks the manager `✘` on the
-        trail, and runs none of its commands.
+        the returned sentences after `Skipped:` and runs none of the manager's
+        commands. Its trail line is `⊘ … (blocked by host)`, which the finisher
+        leaves out of its count.
 
         A host-probing property, like {attr}`cli_path
         <meta_package_manager.execution.CLIExecutor.cli_path>`: the

@@ -348,7 +348,8 @@ def test_install_stops_at_a_cooldown_hold(invoke, patch_pool_with):
     assert (
         "Hold fake-pkg-theta: its latest release cannot be dated (fail-closed)."
     ) in stderr
-    assert "✘ heldfakemanager.install: fake-pkg-theta (cooldown)" in stderr
+    assert "⊘ heldfakemanager.install: fake-pkg-theta (cooldown)" in stderr
+    assert "⊘ Installed 0/0 packages, 1 skipped" in stderr
     assert "changingfakemanager.install" not in stderr
 
 

@@ -1282,15 +1282,16 @@ def package_task(
     verb: str,
     operation: str,
     record_failure: Callable[[Specifier], None],
-) -> Callable[[], tuple[bool, str]]:
+) -> Callable[[], tuple[bool | None, str]]:
     """Build one per-package task.
 
     {func}`~meta_package_manager.dispatch.collect_per_package` runs the task.
 
     Runs the attempt through {func}`run_manager_action` and returns
-    `(ok, message)` for the `✓`/`✘` trail. On failure it appends the spec to a
-    caller-owned list through `record_failure` (under `lock`, since the list is
-    shared across the concurrent lanes) and reports `✘`. Shared by `install`,
+    `(ok, message)` for the `✓`/`✘`/`⊘` trail. On failure it appends the spec to
+    a caller-owned list through `record_failure` (under `lock`, since the list is
+    shared across the concurrent lanes) and reports `✘`. A package the cooldown
+    holds reports `None`, which the trail draws `⊘`. Shared by `install`,
     `remove`, `upgrade <packages>` and `restore`, whose tasks differ only in
     the action, the verb, and which failure list they feed. Each outcome reads
     `brew.install: jq` on the trail (see
@@ -1305,10 +1306,10 @@ def package_task(
     subject = operation_subject(manager.id, operation)
     item = package_label(spec)
 
-    def task() -> tuple[bool, str]:
+    def task() -> tuple[bool | None, str]:
         # A release-introducing attempt first passes the per-package cooldown
         # hold (a no-op unless the manager runs an active probe-backed gate).
-        # A held package is ✘ but never recorded as a failure, matching the
+        # A held package is ⊘ and never recorded as a failure, matching the
         # manager-level cooldown skip: it must not force a non-zero exit.
         if operation in RELEASE_INTRODUCING_OPERATIONS:
             hold = manager.cooldown_hold(spec.package_id)
@@ -1316,7 +1317,7 @@ def package_task(
                 logging.warning(
                     f"Hold {item}: {hold.reason}.", extra={"label": subject}
                 )
-                return False, trail_label(subject, item, "cooldown")
+                return None, trail_label(subject, item, "cooldown")
         with manager.new_errors() as errors:
             succeeded = run_manager_action(
                 manager, spec, action=action, verb=verb, operation=operation
@@ -1738,10 +1739,10 @@ class ChangeReport:
 
     def bracket(
         self,
-        tasks: Iterable[tuple[PackageManager, Callable[[], tuple[bool, str]]]],
+        tasks: Iterable[tuple[PackageManager, Callable[[], tuple[bool | None, str]]]],
         *,
         outdated: Mapping[str, Collection[str]] | None = None,
-    ) -> list[tuple[PackageManager, Callable[[], tuple[bool, str]]]]:
+    ) -> list[tuple[PackageManager, Callable[[], tuple[bool | None, str]]]]:
         """Wrap per-package tasks so each manager's run is read on both sides.
 
         The tasks come back grouped by manager, each manager's in their original
@@ -1754,7 +1755,7 @@ class ChangeReport:
         manager ID to the package IDs its tasks are expected to move (see
         {meth}`open`).
         """
-        grouped: dict[PackageManager, list[Callable[[], tuple[bool, str]]]] = {}
+        grouped: dict[PackageManager, list[Callable[[], tuple[bool | None, str]]]] = {}
         for manager, task in tasks:
             grouped.setdefault(manager, []).append(task)
         with self._lock:
@@ -1777,18 +1778,18 @@ class ChangeReport:
     def _framed(
         self,
         manager: PackageManager,
-        task: Callable[[], tuple[bool, str]],
+        task: Callable[[], tuple[bool | None, str]],
         *,
         first: bool,
         last: bool,
         among: Collection[str] | None,
-    ) -> Callable[[], tuple[bool, str]]:
+    ) -> Callable[[], tuple[bool | None, str]]:
         """Run `task`, opening and closing `manager` around it as needed.
 
         The manager opens before the task when `first`, and closes after it when `last`.
         """
 
-        def framed() -> tuple[bool, str]:
+        def framed() -> tuple[bool | None, str]:
             if first:
                 self.open(manager, outdated=among is not None, among=among)
             outcome = task()

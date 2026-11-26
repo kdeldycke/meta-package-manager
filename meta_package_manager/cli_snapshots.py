@@ -432,7 +432,7 @@ def restore(ctx, toml_files):
     failures_lock = threading.Lock()
 
     # Gather one task per referenced (package, manager) across all the input files.
-    tasks: list[tuple[PackageManager, Callable[[], tuple[bool, str]]]] = []
+    tasks: list[tuple[PackageManager, Callable[[], tuple[bool | None, str]]]] = []
     for toml_input in toml_files:
         # `File` hands over a text stream for a path and for `-` alike. Nothing has
         # read it yet, so its encoding can still change to the one TOML mandates.

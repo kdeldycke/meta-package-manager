@@ -329,10 +329,11 @@ classifiers = [
 # - aligns minimal Python requirements to ours,
 # - adds new explicit support Python version.
 dependencies = [
-  # click-extra 10.0 added strip_ansi(), which execution.py applies to every
-  # manager output, and reads JSONC and XML configuration files with no extra.
-  # Below it the import fails and no mpm command runs.
-  "click-extra>=10",
+  # click-extra 10.4 added the skipped outcome of OperationTrail, which
+  # dispatch.py marks a cooldown or host skip with. Below it, every batch fails
+  # on the missing skip_count. Until 10.4 ships, [tool.uv] sources track the
+  # click-extra main branch.
+  "click-extra>=10.4.0.dev0",
   # extra-platforms 13.10 added shell_from_path(), which shell_argv() in
   # shell_env.py resolves the login shell's family with. Below it the import
   # fails and no mpm command runs.
@@ -535,6 +536,9 @@ required-version = ">=0.12.22"
 # marker split holding a second, older resolution alive for an interpreter that
 # never renders a page.
 dependency-groups.docs = { requires-python = ">= 3.14" }
+# The click-extra main branch, until the release the `.dev` floor of the
+# dependencies awaits: `sync-dep-sources` drops the entry once it ships.
+sources.click-extra = { git = "https://github.com/kdeldycke/click-extra", branch = "main" }
 # Cooldown period.
 exclude-newer = "1 week"
 # Package is at root level, not in "./src/".

@@ -778,7 +778,7 @@ def test_package_task_holds_fresh_release(monkeypatch):
         ),
     )
     ok, label = task()
-    assert ok is False
+    assert ok is None
     assert "(cooldown)" in label
 
 

@@ -40,6 +40,7 @@ from meta_package_manager.dispatch import (
     OperationTrail,
     collect_from_managers,
     collect_per_package,
+    finisher,
     trail_label,
 )
 from meta_package_manager.execution import CLIExecutor, operation_subject
@@ -234,6 +235,25 @@ def test_empty_manager_list_returns_empty():
         )
         == []
     )
+
+
+@pytest.mark.parametrize(
+    ("ok", "total", "skipped", "outcome", "summary"),
+    (
+        pytest.param(3, 3, 0, True, "Picked 3/3 fruits", id="all-succeeded"),
+        pytest.param(1, 2, 0, False, "Picked 1/2 fruits", id="one-failed"),
+        pytest.param(
+            1, 7, 6, True, "Picked 1/1 fruits, 6 skipped", id="skips-left-out"
+        ),
+        pytest.param(
+            0, 3, 2, False, "Picked 0/1 fruits, 2 skipped", id="skips-and-failure"
+        ),
+        pytest.param(0, 2, 2, None, "Picked 0/0 fruits, 2 skipped", id="all-skipped"),
+    ),
+)
+def test_finisher(ok, total, skipped, outcome, summary):
+    """The count leaves the skips out, and a batch of skips alone closes on `⊘`."""
+    assert finisher("Picked", "fruits", ok, total, skipped) == (outcome, summary)
 
 
 def test_no_finisher_line_off_terminal(capsys):

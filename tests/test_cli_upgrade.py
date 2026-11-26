@@ -571,24 +571,42 @@ def test_failed_upgrade_all_without_an_outdated_listing_names_its_cause(
     assert f"✘ {mid}.upgrade_all (nothing upgraded, no password) " in stderr
 
 
+class BlockedFakeManager(ChangingFakeManager):
+    """A manager whose host blocks its full upgrade, like Omarchy blocks pacman's."""
+
+    @property
+    def upgrade_all_skip_reason(self):
+        return "The orchard is closed for the harvest. Come back in spring."
+
+
 def test_upgrade_all_skips_a_manager_its_host_blocks(
-    invoke, changing_fake_pool, monkeypatch
+    invoke, patch_pool_with, monkeypatch
 ):
-    """A manager with a skip reason is `✘`, runs no upgrade, and the exit stays `0`."""
-    reason = "The orchard is closed for the harvest. Come back in spring."
+    """A manager with a skip reason runs no upgrade, and its trail line is `⊘`.
+
+    The finisher counts the other managers alone and gives the number of skips
+    after the count. The exit stays `0`.
+    """
+    blocked = BlockedFakeManager()
+    peer = ChangingFakeManager()
+    patch_pool_with(blocked, peer)
+    calls: list[str] = []
     monkeypatch.setattr(
-        ChangingFakeManager, "upgrade_all_skip_reason", property(lambda _: reason)
-    )
-    calls: list[tuple] = []
-    monkeypatch.setattr(
-        ChangingFakeManager, "upgrade", lambda _, *args, **kwargs: calls.append(args)
+        BlockedFakeManager,
+        "upgrade",
+        lambda manager, *args, **kwargs: calls.append(manager.id),
     )
     result = invoke("upgrade", "--all")
     assert result.exit_code == 0
-    mid = changing_fake_pool.id
     stderr = strip_ansi(result.stderr)
-    assert f": Skipped: {reason}\n" in stderr
-    assert f"✘ {mid}.upgrade_all (skipped) " in stderr
+    assert (
+        f"{blocked.id}.upgrade_all: Skipped: {blocked.upgrade_all_skip_reason}\n"
+        in stderr
+    )
+    assert f"⊘ {blocked.id}.upgrade_all (blocked by host)" in stderr
+    assert "✘" not in stderr
+    assert f"✓ {peer.id}.upgrade_all (" in stderr
+    assert "✓ Upgraded 1/1 managers, 1 skipped" in stderr
     assert not calls
 
 
@@ -799,6 +817,38 @@ def test_cooldown_verdicts_last_one_invocation(invoke, probed_fake_pool):
         result = invoke("--cooldown", "7 days", "upgrade", "fake-pkg-beta")
         assert result.exit_code == 0
     assert probed_fake_pool.probed == ["fake-pkg-beta", "fake-pkg-beta"]
+
+
+def test_upgrade_all_skips_a_manager_the_cooldown_cannot_gate(invoke, patch_pool_with):
+    """A manager that cannot enforce an active cooldown runs no upgrade.
+
+    Its trail line is `⊘`, and the finisher leaves it out of the count. A skip is
+    no failure, so the exit stays `0`.
+    """
+    ungated = ChangingFakeManager()
+    probed = ProbedFakeManager()
+    patch_pool_with(ungated, probed)
+    result = invoke("--cooldown", "7 days", "upgrade", "--all")
+    assert result.exit_code == 0
+    stderr = strip_ansi(result.stderr)
+    assert f"⊘ {ungated.id}.upgrade_all (cooldown)" in stderr
+    assert f"✓ {probed.id}.upgrade_all (" in stderr
+    assert "✓ Upgraded 1/1 managers, 1 skipped" in stderr
+
+
+def test_upgrade_skips_a_package_the_cooldown_cannot_gate(invoke, changing_fake_pool):
+    """A manager that cannot enforce an active cooldown upgrades no package.
+
+    The package gets a `⊘` line, and a batch that skipped every package closes on
+    `⊘` too. The exit stays `0`.
+    """
+    result = invoke("--cooldown", "7 days", "upgrade", "fake-pkg-alpha")
+    assert result.exit_code == 0
+    mid = changing_fake_pool.id
+    stderr = strip_ansi(result.stderr)
+    assert f"⊘ {mid}.upgrade: fake-pkg-alpha (cooldown)" in stderr
+    assert "⊘ Upgraded 0/0 packages, 1 skipped" in stderr
+    assert "fake-pkg-alpha" not in result.stdout
 
 
 class ListedFakeManager(ChangingFakeManager):

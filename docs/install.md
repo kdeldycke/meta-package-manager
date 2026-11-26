@@ -551,9 +551,9 @@ The [Python](#python-compatibility) and [click-extra](packaging.md#click-extra-c
 
 <!-- envelope python click-extra package=mpm -->
 
-- `mpm` releases before `8.1.0` (2026-10-04)
-- Python versions before `3.10` (2021-10-04)
-- `click-extra` versions before `9.3.0` (2026-09-18)
+- `mpm` releases before `8.3.0` (2026-11-09)
+- Python versions before `3.11` (2022-10-24)
+- `click-extra` versions before `10.0.0` (2026-11-01)
 
 <!-- envelope-end -->
 

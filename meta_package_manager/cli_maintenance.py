@@ -71,6 +71,7 @@ from .dispatch import (
     OperationTrail,
     collect_from_managers,
     collect_per_package,
+    finisher,
     timed_task,
     trail_label,
     warn_jobs_ignored,
@@ -269,7 +270,12 @@ def _dispatch_sourced_operation(
     # each manager's own packages are processed one at a time (see
     # collect_per_package).
     failures_lock = threading.Lock()
-    tasks: list[tuple[PackageManager, Callable[[], tuple[bool, str]]]] = []
+    tasks: list[tuple[PackageManager, Callable[[], tuple[bool | None, str]]]] = []
+    # The `⊘` tasks of the managers the cooldown skips. They run no command, so no
+    # inventory reading frames them.
+    skipped_tasks: list[
+        tuple[PackageManager, Callable[[], tuple[bool | None, str]]]
+    ] = []
     # The package IDs each manager acts on, the ones an upgrade expects to move.
     requested: dict[str, set[str]] = {}
     unresolved_in_simulation = False
@@ -321,10 +327,15 @@ def _dispatch_sourced_operation(
             + ", ".join(map(theme().invoked_command, sorted(source_manager_ids))),
         )
         # One task per (package, manager); a package acted on by two managers tallies as
-        # two. For upgrade, skip a manager that cannot honor an active cooldown.
+        # two. For upgrade, a manager that cannot honor an active cooldown gets a `⊘`
+        # task instead.
         for manager_id in sorted(source_manager_ids):
             manager = pool.get(manager_id)
             if apply_cooldown and not cooldown_permits(manager):
+                skipped_tasks.append((
+                    manager,
+                    _cooldown_skip_task(manager.id, spec, operation.name),
+                ))
                 continue
             requested.setdefault(manager.id, set()).add(package_id)
             tasks.append((
@@ -348,7 +359,8 @@ def _dispatch_sourced_operation(
     collect_per_package(
         label,
         done_label,
-        report.bracket(tasks, outdated=requested if report_outdated else None),
+        report.bracket(tasks, outdated=requested if report_outdated else None)
+        + skipped_tasks,
         operation=operation.name,
     )
     report.show(ctx)
@@ -363,11 +375,11 @@ def _attempt_install(manager: PackageManager, spec: Specifier) -> str:
 
     Thin adapter of {func}`run_manager_action` for the sequential install
     paths, whose callers map the returned status (`installed`, `failed` or
-    `cooldown`) onto their `✓`/`✘` ledger and decide the retry/stop semantics
-    (the tied loop records every miss; the untied priority search falls
-    through to the next manager). The `cooldown` status reports a package held
-    back by the per-package release-age probe: `✘` on the trail, but never a
-    recorded failure, so it cannot force a non-zero exit on its own.
+    `cooldown`) onto their `✓`/`✘`/`⊘` ledger and decide the retry/stop
+    semantics (the tied loop records every miss; the untied priority search
+    falls through to the next manager). The `cooldown` status reports a package
+    held back by the per-package release-age probe: `⊘` on the trail, and never
+    a recorded failure, so it cannot force a non-zero exit on its own.
     """
     hold = manager.cooldown_hold(spec.package_id)
     if hold:
@@ -387,17 +399,21 @@ def _attempt_install(manager: PackageManager, spec: Specifier) -> str:
 
 
 def _cooldown_skip_task(
-    manager_id: str, spec: Specifier
-) -> Callable[[], tuple[bool, str]]:
-    """Build the task marking a tied package `✘` on a manager the cooldown skips.
+    manager_id: str, spec: Specifier, operation: str
+) -> Callable[[], tuple[bool | None, str]]:
+    """Build the task marking a package `⊘` on a manager the cooldown skips.
 
-    {func}`cooldown_permits` already logged why. The skip is `✘` on the trail
-    but never a recorded failure, so it cannot force a non-zero exit on its own.
+    {func}`cooldown_permits` already logged why. The task runs no command, and
+    the skip is never a recorded failure, so it cannot force a non-zero exit on
+    its own.
+
+    :param operation: the name of the operation the skip stands for, which the
+        trail line names: `install` or `upgrade`.
     """
 
-    def task() -> tuple[bool, str]:
-        subject = operation_subject(manager_id, Operations.install.name)
-        return False, trail_label(subject, package_label(spec), "cooldown")
+    def task() -> tuple[bool | None, str]:
+        subject = operation_subject(manager_id, operation)
+        return None, trail_label(subject, package_label(spec), "cooldown")
 
     return task
 
@@ -406,16 +422,16 @@ def _tied_install_tasks(
     packages_per_managers: dict[str | None, set[Specifier]],
     failures_lock: threading.Lock,
     unresolved_labels: list[str],
-) -> list[tuple[PackageManager, Callable[[], tuple[bool, str]]]]:
+) -> list[tuple[PackageManager, Callable[[], tuple[bool | None, str]]]]:
     """Build one install task per package the solver tied to a manager.
 
     A tied package has exactly one candidate manager, so a miss is final: the
     task records it in `unresolved_labels` (forcing a non-zero exit) and marks
-    the `✘` trail. A package held by the cooldown is `✘` too, but never
+    the `✘` trail. A package held by the cooldown is `⊘`, and never
     unresolved. A manager that cannot honor an active cooldown gets its tied
     packages dropped once, through {func}`_cooldown_skip_task`.
     """
-    tasks: list[tuple[PackageManager, Callable[[], tuple[bool, str]]]] = []
+    tasks: list[tuple[PackageManager, Callable[[], tuple[bool | None, str]]]] = []
     for manager_id, package_specs in packages_per_managers.items():
         if not manager_id:
             continue
@@ -433,7 +449,7 @@ def _tied_install_tasks(
                     record_failure=lambda s: unresolved_labels.append(package_label(s)),
                 )
             else:
-                task = _cooldown_skip_task(manager_id, spec)
+                task = _cooldown_skip_task(manager_id, spec, Operations.install.name)
             tasks.append((manager, task))
     return tasks
 
@@ -541,7 +557,7 @@ def install(ctx, packages_specs):
     for manager, task in tasks:
         report.open(manager)
         ok, text = timed_task(task)
-        installed_count += ok
+        installed_count += ok is True
         op.mark(ok, text)
 
     def trail(
@@ -551,13 +567,13 @@ def install(ctx, packages_specs):
         seconds: float,
         cause: str | None = None,
     ) -> None:
-        """Map an install attempt to a `✓`/`✘` ledger line through `op`.
+        """Map an install attempt to a `✓`/`✘`/`⊘` ledger line through `op`.
 
-        `status` is `installed` (✓), or `not_found` / `simulated` / `failed` /
-        `cooldown` (✘). `seconds` is how long the attempt took, closing the line
-        the way every other trail line closes. `cause` is what a `failed`
-        attempt died of, when {func}`~meta_package_manager.cli.failure_detail`
-        knows it.
+        `status` is `installed` (✓), `cooldown` (⊘), or `not_found` /
+        `simulated` / `failed` (✘). `seconds` is how long the attempt took,
+        closing the line the way every other trail line closes. `cause` is what a
+        `failed` attempt died of, when
+        {func}`~meta_package_manager.cli.failure_detail` knows it.
         """
         detail = {
             "not_found": "not found",
@@ -566,7 +582,8 @@ def install(ctx, packages_specs):
         }.get(status, cause)
         subject = operation_subject(manager_id, Operations.install.name)
         text = trail_label(subject, package_label(spec), detail)
-        op.mark(status == "installed", f"{text}{elapsed_clock(seconds)}")
+        ok = None if status == "cooldown" else status == "installed"
+        op.mark(ok, f"{text}{elapsed_clock(seconds)}")
 
     # Drop managers that cannot honor an active cooldown (once, not per package).
     eligible_managers = tuple(m for m in selected_managers if cooldown_permits(m))
@@ -659,7 +676,7 @@ def install(ctx, packages_specs):
         if not installed and not held:
             unresolved_labels.append(package_label(spec))
 
-    op.finish(installed_count == total, f"Installed {installed_count}/{total} packages")
+    op.finish(*finisher("Installed", "packages", installed_count, total, op.skip_count))
     report.close_all()
     report.show(ctx)
     if simulated_search:
@@ -726,14 +743,24 @@ def upgrade(ctx, all, packages_specs):
                 "and proceed to a full upgrade...",
             )
         managers = list(
-            ctx.obj.selected_managers(implements_operation=Operations.upgrade_all),
+            ctx.obj.selected_managers(implements_operation=Operations.upgrade_all)
         )
+        # A host can block the full upgrade of a manager, like Omarchy blocks
+        # pacman's. The manager then runs no command, and its trail line is `⊘`.
+        blocked: set[str] = set()
+        for manager in managers:
+            skip_reason = manager.upgrade_all_skip_reason
+            if skip_reason:
+                logging.warning(
+                    f"Skipped: {skip_reason}", extra={"label": manager.subject}
+                )
+                blocked.add(manager.id)
+        runnable = [manager for manager in managers if manager.id not in blocked]
         # A full upgrade can fall back to upgrading the packages one by one, and
-        # reads the inventory and the outdated listing for its report. A manager
-        # that its host blocks runs no command, so it asks for no password.
+        # reads the inventory and the outdated listing for its report.
         prime_sudo(
             ctx,
-            [manager for manager in managers if not manager.upgrade_all_skip_reason],
+            runnable,
             operations=(
                 Operations.upgrade_all,
                 Operations.upgrade,
@@ -741,24 +768,15 @@ def upgrade(ctx, all, packages_specs):
                 Operations.outdated,
             ),
         )
-        report = ChangeReport(managers)
+        report = ChangeReport(runnable)
 
         def upgrade_all_work(manager: PackageManager) -> tuple[str, dict]:
-            # A host that blocks the full upgrade, like Omarchy for pacman: mark
-            # the manager ✘ without running its CLI.
-            skip_reason = manager.upgrade_all_skip_reason
-            if skip_reason:
-                logging.warning(
-                    f"Skipped: {skip_reason}", extra={"label": manager.subject}
-                )
-                return manager.id, {"failed": True, "detail": "skipped"}
+            if manager.id in blocked:
+                return manager.id, {"skipped": True, "detail": "blocked by host"}
             # cooldown_permits() already logs the reason at WARNING when it blocks;
-            # mark the manager ✘ without running its CLI.
+            # mark the manager ⊘ without running its CLI.
             if not cooldown_permits(manager):
-                return manager.id, {
-                    "failed": True,
-                    "detail": "cooldown",
-                }
+                return manager.id, {"skipped": True, "detail": "cooldown"}
             # Two inventory readings frame the native upgrade (see ChangeReport).
             # The outdated listing rides along to name what did not move, and is
             # handed to the upgrade so the paths enumerating it do not list twice.

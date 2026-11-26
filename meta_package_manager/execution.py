@@ -419,7 +419,7 @@ def _is_missing_mise_shim(file: Path) -> bool:
     recognized here. A probe that cannot run counts as a usable binary, which is
     how every shim counted before this check.
     """
-    if not file.is_symlink():
+    if not os.path.islink(file):
         return False
     target = Path(os.path.realpath(file))
     if target.name != "mise" or file.name == "mise":

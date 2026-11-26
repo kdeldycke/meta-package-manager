@@ -8,7 +8,6 @@ python3Packages.buildPythonApplication (finalAttrs: {
   pname = "meta-package-manager";
   version = "8.3.1";
   pyproject = true;
-  __structuredAttrs = true;
 
   src = fetchFromGitHub {
     owner = "kdeldycke";

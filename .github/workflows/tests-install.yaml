@@ -862,14 +862,14 @@ jobs:
         run: uv --no-progress venv --python 3.14
       - name: Run stable CLI via pipx
         run: |
-          uv --no-progress tool install pipx
+          uv --no-progress tool install 'pipx==1.18.19'
           pipx run                             meta-package-manager --version
           pipx run --spec meta-package-manager mpm                  --version
           pipx run --spec meta-package-manager meta-package-manager --version
           uv --no-progress tool uninstall pipx
       - name: Run dev CLI via pipx
         run: |
-          uv --no-progress tool install pipx
+          uv --no-progress tool install 'pipx==1.18.19'
           pipx run --spec git+https://github.com/kdeldycke/meta-package-manager mpm                  --version
           pipx run --spec git+https://github.com/kdeldycke/meta-package-manager meta-package-manager --version
 

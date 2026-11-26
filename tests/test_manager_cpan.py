@@ -35,6 +35,7 @@ import pytest
 from extra_platforms import is_any_windows
 
 from meta_package_manager.managers.cpan import CPAN
+from meta_package_manager.version import parse_version
 
 PATCH_ACCESS = "meta_package_manager.managers.cpan.os.access"
 PATCH_ROOT = "meta_package_manager.manager._running_as_root"
@@ -460,3 +461,54 @@ def test_perl_runs_cpan(tmp_path, shebang, beside, expected):
     manager = CPAN()
     manager.__dict__["cli_path"] = script
     assert manager._perl() == {"shebang": perl, "beside": sibling, None: None}[expected]
+
+
+@pytest.mark.parametrize(
+    ("missing", "unavailable"),
+    (
+        pytest.param("auto_commit\nbuild_cache\nurllist\n", True, id="no-config"),
+        pytest.param("urllist\n", True, id="one-setting-missing"),
+        pytest.param("pushy_https\n", False, id="pushy-https-alone"),
+        pytest.param("", False, id="configured"),
+        pytest.param("Can't locate CPAN.pm in @INC.\n", False, id="unrelated-output"),
+    ),
+)
+def test_unconfigured_cpan_pm_makes_cpan_unavailable(new_cpan, missing, unavailable):
+    """Each `cpan` command would start the first-run setup of an unconfigured CPAN.pm.
+
+    The probe asks the `perl` of `cpan`, never `cpan` itself.
+    """
+    manager, calls = new_cpan({"-MCPAN": missing})
+    manager.__dict__["executable"] = True
+    manager.__dict__["version"] = parse_version("2.38")
+    reason = manager.unavailable_reason
+    assert (reason is not None) is unavailable
+    if unavailable:
+        assert reason.startswith("CPAN.pm has no configuration")
+    assert [kwargs["override_cli_path"] for _, kwargs in calls] == [manager._perl()]
+
+
+def test_availability_never_runs_cpan(monkeypatch, tmp_path):
+    """Neither the version probe nor the configuration check runs `cpan` itself.
+
+    Each option of `cpan` but `-h` and `-j` loads the configuration of CPAN.pm,
+    whose first-run setup would start in a home where `cpan` never ran.
+    """
+    perl = tmp_path / "perl"
+    perl.touch()
+    manager = CPAN()
+    manager.__dict__["cli_path"] = tmp_path / "cpan"
+    manager.__dict__["executable"] = True
+    monkeypatch.setattr(manager, "which", lambda name: perl if name == "perl" else None)
+    cli_paths = []
+
+    def run_cli(*args, **kwargs):
+        cli_paths.append(kwargs.get("override_cli_path"))
+        if args[0] == CPAN.version_cli_options:
+            return "CPAN.pm version 2.38\n"
+        return "auto_commit\nurllist\n"
+
+    monkeypatch.setattr(manager, "run_cli", run_cli)
+    assert manager.available is False
+    assert str(manager.version) == "2.38"
+    assert cli_paths == [perl, perl]

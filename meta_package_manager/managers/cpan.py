@@ -37,8 +37,13 @@ if TYPE_CHECKING:
 class CPAN(PackageManager):
     """The cpan client of the Comprehensive Perl Archive Network.
 
-    The tracked version is CPAN.pm's library version, not the cpan script version
-    printed on the same line.
+    The tracked version is the one of the CPAN.pm library, not of the `cpan`
+    script.
+
+    `mpm` considers `cpan` unavailable while CPAN.pm has no configuration: each
+    `cpan` command would then start its first-run setup, which can download the
+    CPAN index, install local::lib from CPAN and edit a shell startup file. Run
+    `cpan` once to configure it.
 
     Installs may require `sudo` when using the system Perl; `local::lib` gives
     user-local installs instead. The write operations carry dormant privileged
@@ -126,20 +131,41 @@ class CPAN(PackageManager):
     requirement = ">=1.64"
 
     extra_env: ClassVar = {"PERL_MM_USE_DEFAULT": "1"}
-    """Suppress the interactive configuration cpan may launch on first run."""
+    """Take the default answer of each prompt, like those of a `Makefile.PL`."""
 
-    version_cli_options = ("-v",)
+    version_cli = "perl"
+    """Read the version through Perl: `cpan -v` would load the configuration.
+
+    Each option of `cpan` but `-h` and `-j` loads the configuration of CPAN.pm,
+    and starts its first-run setup where none exists (see `unavailable_reason`).
+    `perl -MCPAN` loads the library alone.
+    """
+
+    version_cli_options = ("-MCPAN", "-e", 'print "CPAN.pm version $CPAN::VERSION\\n"')
 
     version_regexes = (r"CPAN\.pm\s+version\s+(?P<version>\S+)",)
-    """Read the CPAN.pm version, the meaningful one, rather than the script's.
+    """Read the version of CPAN.pm, the library that `cpan` runs.
 
     ```{code-block} shell-session
 
-    $ cpan -v
-    Loading internal logger. Log::Log4perl recommended for better logging
-    >(info): /usr/bin/cpan script version 1.678, CPAN.pm version 2.36
+    $ perl -MCPAN -e 'print "CPAN.pm version $CPAN::VERSION\\n"'
+    CPAN.pm version 2.38
     ```
     """
+
+    _CONFIG_STATE_PROBE = (
+        "CPAN::HandleConfig::require_myconfig_or_config();"
+        ' print "$_\\n" for CPAN::HandleConfig->missing_config_data'
+    )
+    """Perl one-liner printing the settings that the configuration of CPAN.pm lacks.
+
+    It runs with `-MCPAN`, and reads the configuration files the way
+    `CPAN::HandleConfig->load` does, without the first-run setup that `load`
+    starts for a missing setting.
+    """
+
+    _SETTING_REGEXP = re.compile(r"^\w+$")
+    """One setting name, as `missing_config_data` prints it."""
 
     _INSTALLED_REGEXP = re.compile(
         r"^(?P<package_id>\S+)\t(?:undef|(?P<installed_version>\S+))$",
@@ -179,6 +205,64 @@ class CPAN(PackageManager):
 
     _SHEBANG_REGEXP = re.compile(rb"^#!\s*(\S+)")
     """The interpreter path of a script's shebang line."""
+
+    @property
+    def unavailable_reason(self) -> str | None:
+        """Add a configured CPAN.pm to the conditions of the base class.
+
+        Each option of `cpan` but `-h` and `-j` loads the configuration of
+        CPAN.pm, and `CPAN::HandleConfig->load` starts the first-run setup of
+        `CPAN::FirstTime` where it finds none, or one that lacks a setting. That
+        setup takes each default under the `PERL_MM_USE_DEFAULT` that `mpm` sets:
+        on Omarchy `4.5.0`, it downloaded the CPAN index, built local::lib from
+        CPAN into `~/perl5`, and added five lines to `~/.bashrc`. `mpm` skips
+        `cpan` until a run of `cpan` by the user configures it.
+        """
+        reason = super().unavailable_reason
+        if reason is None and self._missing_settings:
+            return (
+                "CPAN.pm has no configuration, so each cpan command would start "
+                "its first-run setup. Run cpan once to configure it"
+            )
+        return reason
+
+    @cached_property
+    def _missing_settings(self) -> tuple[str, ...]:
+        """The settings that the configuration of CPAN.pm lacks, if any.
+
+        Each one makes `CPAN::HandleConfig->load` start the first-run setup,
+        except `pushy_https` alone, for which `load` prints a notice and goes on.
+        With no configuration file, every setting is missing. In a home where
+        `cpan` never ran:
+
+        ```{code-block} console
+
+        $ perl -MCPAN -e 'CPAN::HandleConfig::require_myconfig_or_config(); print "$_\\n" for CPAN::HandleConfig->missing_config_data'
+        auto_commit
+        build_cache
+        build_dir
+        (...)
+        urllist
+        ```
+
+        Errs on the side of keeping the manager: a probe that cannot run, or that
+        prints no setting name, returns no setting.
+        """  # noqa: E501
+        perl = self._perl()
+        if perl is None:
+            return ()
+        output = self.run_cli(
+            "-MCPAN",
+            "-e",
+            self._CONFIG_STATE_PROBE,
+            override_cli_path=perl,
+            auto_extra_args=False,
+            force_exec=True,
+        )
+        missing = tuple(
+            line for line in output.splitlines() if self._SETTING_REGEXP.match(line)
+        )
+        return () if missing == ("pushy_https",) else missing
 
     @cached_property
     def _perl_config(self) -> tuple[str, str, str] | None:

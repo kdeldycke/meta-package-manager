@@ -19,6 +19,7 @@
 - [yay] Limit `upgrade --all` and `outdated` to the AUR packages on Omarchy `4.0.0` and later, where `omarchy update` runs the repository upgrade.
 - [mise] Stop listing a lazy tool that is not installed yet as outdated.
 - [mise,mpm] Stop running the mise shim of a tool that is not installed yet, which installed that tool during manager detection.
+- [cpan] Skip the manager while CPAN.pm has no configuration, and read its version without starting the first-run setup that installs local::lib.
 
 ## [`8.3.1` (2026-11-21)](https://github.com/kdeldycke/meta-package-manager/compare/v8.3.0...v8.3.1)
 

@@ -62,6 +62,7 @@ from __future__ import annotations
 import csv
 import inspect
 import re
+import shlex
 import tomllib
 from collections import Counter
 from functools import cache
@@ -2225,7 +2226,7 @@ def manager_version_probe(manager_id: str) -> str:
     else:
         version_sample = version_trace(type(m))
 
-    probe = " ".join(((m.version_cli or m.cli_names[0]), *m.version_cli_options))
+    probe = shlex.join(((m.version_cli or m.cli_names[0]), *m.version_cli_options))
     regex_suffix = (
         " the first of these regular expressions to match"
         if len(m.version_regexes) > 1

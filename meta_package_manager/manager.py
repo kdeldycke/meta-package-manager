@@ -867,10 +867,13 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         `None` for a manager that installs elsewhere. In that directory, a full
         upgrade does not update the packages of the system in place: it installs
         a newer copy of each of them there, which then hides the copy of the
-        system. So where this directory is set, {attr}`refiltered_outdated` keeps
-        the packages with a version there alone, and {meth}`upgrade` upgrades
-        them one by one in place of {meth}`upgrade_all_cli`. An upgrade of the
-        packages that `mpm upgrade` names still goes ahead.
+        system. So where this directory is set,
+        {attr}`~meta_package_manager.manager.PackageManager.refiltered_outdated`
+        keeps the packages with a version there alone, and
+        {meth}`~meta_package_manager.manager.PackageManager.upgrade` upgrades them
+        one by one in place of
+        {meth}`~meta_package_manager.manager.PackageManager.upgrade_all_cli`. An
+        upgrade of the packages that `mpm upgrade` names still goes ahead.
 
         A manager takes part with an override of `_probe_user_install_dir` and
         of `_packages_in`, like {class}`~meta_package_manager.managers.gem.Gem`
@@ -901,7 +904,7 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         """IDs of the packages with a version in `directory`.
 
         Required from a manager that overrides `_probe_user_install_dir`: see
-        {attr}`user_install_dir`.
+        {attr}`~meta_package_manager.manager.PackageManager.user_install_dir`.
         """
         raise NotImplementedError
 
@@ -1103,8 +1106,9 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         `2.000000`). This filter drops those false positives.
 
         Where the manager installs to a directory of the user by default (see
-        {attr}`user_install_dir`), only the packages with a version there stay.
-        With no package there, {attr}`outdated` does not run.
+        {attr}`~meta_package_manager.manager.PackageManager.user_install_dir`),
+        only the packages with a version there stay. With no package there,
+        {attr}`~meta_package_manager.manager.PackageManager.outdated` does not run.
         """
         kept = self._user_scope()
         if kept is not None and not kept:
@@ -1441,8 +1445,9 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         command ignore it, and a full upgrade left without it lists on its own.
 
         Where the manager installs to a directory of the user by default (see
-        {attr}`user_install_dir`), a full upgrade never runs the native one-shot
-        command: it upgrades the packages of that directory one by one.
+        {attr}`~meta_package_manager.manager.PackageManager.user_install_dir`), a
+        full upgrade never runs the native one-shot command: it upgrades the
+        packages of that directory one by one.
         """
         if package_id:
             cli = self.upgrade_one_cli(package_id, version=version)

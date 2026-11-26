@@ -855,7 +855,7 @@ def collect_from_managers(
     {class}`meta_package_manager.execution.CLIError` (each manager owns its
     subprocess and error list, so the call is thread-safe per manager). A truthy
     `data["errors"]` (or `data["failed"]`) marks that manager's trail line `✘`,
-    and a truthy `data["skipped"]` marks it `⊘` (see {func}`_state_outcome`);
+    and a truthy `data["skipped"]` marks it `⊘` (see `_state_outcome`);
     an optional `data["detail"]` suffixes its subject in parentheses (`cleanup`
     passes its categories, `upgrade --all` the host or cooldown that held a
     manager back or what moved, and each maintenance command closes on what it

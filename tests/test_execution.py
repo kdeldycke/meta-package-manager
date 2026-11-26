@@ -1700,6 +1700,72 @@ def test_search_all_cli_skips_symlink_loop(tmp_path, loop_at):
     assert found == [cli]
 
 
+@pytest.fixture
+def mise_shims(tmp_path):
+    """A stand-in `mise` binary and a directory of shims that point at it.
+
+    The stand-in answers `mise which mango` alone, as mise does for an installed
+    tool. Returns the shims directory, which holds `mango`, `papaya` and a
+    symlink named `mise`.
+    """
+    binary = tmp_path / "bin" / "mise"
+    binary.parent.mkdir()
+    binary.write_text(
+        '#!/bin/sh\n[ "$1" = which ] && [ "$2" = mango ] && exit 0\nexit 1\n',
+        encoding="UTF-8",
+    )
+    binary.chmod(0o755)
+    shims = tmp_path / "shims"
+    shims.mkdir()
+    for name in ("mango", "papaya", "mise"):
+        (shims / name).symlink_to(binary)
+    return shims
+
+
+@pytest.mark.skipif(is_any_windows(), reason="A symlink needs privileges on Windows.")
+def test_search_all_cli_skips_mise_shim_of_missing_tool(tmp_path, mise_shims):
+    """Running such a shim installs its tool, so a later real binary wins."""
+    usable = tmp_path / "usable"
+    usable.mkdir()
+    cli = usable / "papaya"
+    cli.write_text("discovery fixture", encoding="UTF-8")
+    found = list(
+        CLIExecutor().search_all_cli(
+            (cli.name,),
+            env={"PATH": os.pathsep.join((str(mise_shims), str(usable)))},
+        )
+    )
+    assert found == [cli]
+
+
+@pytest.mark.skipif(is_any_windows(), reason="A symlink needs privileges on Windows.")
+@pytest.mark.parametrize("name", ("mango", "mise"))
+def test_search_all_cli_keeps_usable_mise_symlink(mise_shims, name):
+    """The shim of an installed tool stays, and so does `mise` under another path.
+
+    The stand-in exits `1` for `mise which mise`, so the second case passes only
+    while no probe runs for a symlink named after the binary.
+    """
+    found = list(CLIExecutor().search_all_cli((name,), env={"PATH": str(mise_shims)}))
+    assert found == [mise_shims / name]
+
+
+@pytest.mark.skipif(is_any_windows(), reason="A symlink needs privileges on Windows.")
+def test_search_all_cli_keeps_mise_shim_when_probe_cannot_run(tmp_path):
+    """A `mise` that cannot be spawned leaves the shim as usable as before."""
+    binary = tmp_path / "bin" / "mise"
+    binary.parent.mkdir()
+    binary.write_text("discovery fixture", encoding="UTF-8")
+    binary.chmod(0o644)
+    shim = tmp_path / "shims" / "papaya"
+    shim.parent.mkdir()
+    shim.symlink_to(binary)
+    found = list(
+        CLIExecutor().search_all_cli((shim.name,), env={"PATH": str(shim.parent)})
+    )
+    assert found == [shim]
+
+
 def test_windows_pathext_tracks_cpython():
     """Our copy of CPython's default `PATHEXT` still matches the original.
 

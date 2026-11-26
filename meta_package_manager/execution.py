@@ -393,6 +393,51 @@ def highlight_cli_name(path: Path | None, match_names: Iterable[str]) -> str | N
     return str(path)
 
 
+MISE_SHIM_PROBE_TIMEOUT: Final = 10
+"""Seconds granted to the `mise which` call of `_is_missing_mise_shim`.
+
+The call reads local state alone: it answered within 20 ms on mise `2026.11.0`.
+"""
+
+
+def _is_missing_mise_shim(file: Path) -> bool:
+    """Tell a mise shim whose tool is not installed from a usable binary.
+
+    [mise](https://mise.jdx.dev) serves each tool through a shim: a symlink named
+    after the command, which points at the `mise` binary. The shim of a
+    [lazy tool](https://mise.jdx.dev/dev-tools/shims.html#lazy-tools) exists
+    before the tool does, and running it installs the tool. A version probe is
+    such a run: on Omarchy `4.5.0`, which declares about 30 lazy tools, the probe
+    of `gh` downloaded and installed it.
+
+    `mise which` answers without that side effect. It prints the real path of an
+    installed tool, and exits non-zero for a tool that is not installed, which it
+    leaves that way (mise `2026.11.0`).
+
+    A symlink named `mise` is the binary under another path, not a shim. A shim
+    that mise writes as a copy or as a hard link, as it can on Windows, is not
+    recognized here. A probe that cannot run counts as a usable binary, which is
+    how every shim counted before this check.
+    """
+    if not file.is_symlink():
+        return False
+    target = Path(os.path.realpath(file))
+    if target.name != "mise" or file.name == "mise":
+        return False
+    try:
+        probe = subprocess.run(
+            (str(target), "which", file.name),
+            capture_output=True,
+            stdin=subprocess.DEVNULL,
+            timeout=MISE_SHIM_PROBE_TIMEOUT,
+            check=False,
+        )
+    except (OSError, subprocess.SubprocessError) as error:
+        logging.debug(f"Cannot ask mise about {file}: {error}")
+        return False
+    return probe.returncode != 0
+
+
 READ_ONLY_TIMEOUT: Final = 120
 """Default timeout (seconds) for read-only probes and queries.
 
@@ -1236,7 +1281,8 @@ class CLIExecutor:
           `os.getenv("PATH")`).
 
         Only returns files that exist and are not empty. Inaccessible search paths
-        and candidates are skipped.
+        and candidates are skipped. So is a mise shim whose tool is not installed,
+        as running it would install the tool: see `_is_missing_mise_shim`.
 
         ```{caution}
 
@@ -1340,6 +1386,11 @@ class CLIExecutor:
                     logging.debug(f"Skip CLI candidate {file}: {error}")
                     continue
                 if not stat.S_ISREG(file_stat.st_mode) or not file_stat.st_size:
+                    continue
+                if _is_missing_mise_shim(file):
+                    logging.debug(
+                        f"Skip CLI candidate {file}: mise has not installed its tool."
+                    )
                     continue
                 logging.debug(f"CLI found at {highlight_cli_name(file, cli_names)}")
                 yield file

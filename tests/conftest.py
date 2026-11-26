@@ -347,6 +347,20 @@ def run_as_regular_user(monkeypatch):
         monkeypatch.setattr("os.geteuid", lambda: 1000)
 
 
+@fixture(autouse=True)
+def isolate_local_lib(monkeypatch):
+    """Hide the developer's local::lib from the test suite.
+
+    local::lib exports `PERL_MM_OPT` and `PERL_LOCAL_LIB_ROOT` from a shell
+    startup file. Either one turns on the local::lib rule of `cpan`, which
+    then keeps only the modules of that directory: a test replaying a
+    documented `cpan -O` would list nothing on such a machine. A test of the
+    rule sets the variables itself.
+    """
+    monkeypatch.delenv("PERL_MM_OPT", raising=False)
+    monkeypatch.delenv("PERL_LOCAL_LIB_ROOT", raising=False)
+
+
 @fixture
 def invoke(runner):  # noqa: F811
     yield partial(runner.invoke, mpm)

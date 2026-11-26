@@ -727,6 +727,41 @@ def test_paru_gated_upgrade_all_without_holds_keeps_native_cli(monkeypatch):
     assert ran == [("paru", "--sync", "--refresh", "--sysupgrade")]
 
 
+def test_gated_upgrade_all_of_a_user_directory_goes_one_by_one(monkeypatch, tmp_path):
+    """A user install directory keeps out the native upgrade, even one with exclusions.
+
+    Only the packages of that directory upgrade, one by one, and the held one waits.
+    """
+    manager = Paru()
+    manager.cooldown = timedelta(days=7)
+    now = datetime.now(tz=UTC)
+    dates = {
+        "fig": now - timedelta(days=30),
+        "kiwi": now - timedelta(days=1),
+        "plum": now - timedelta(days=30),
+    }
+    monkeypatch.setattr(manager, "release_date", dates.get)
+    _stub_outdated(monkeypatch, Paru, sorted(dates))
+    monkeypatch.setitem(manager.__dict__, "user_install_dir", tmp_path)
+    monkeypatch.setattr(
+        manager, "_packages_in", lambda directory: frozenset({"kiwi", "plum"})
+    )
+
+    def native(*args):
+        pytest.fail("the native upgrade must not run")
+
+    monkeypatch.setattr(manager, "upgrade_all_cli", native)
+    monkeypatch.setattr(manager, "upgrade_all_cli_excluding", native)
+    monkeypatch.setattr(
+        manager,
+        "upgrade_one_cli",
+        lambda package_id, version=None: ("paru", "--sync", package_id),
+    )
+    ran = _record_runs(monkeypatch, manager)
+    manager.upgrade()
+    assert ran == [("paru", "--sync", "plum")]
+
+
 @pytest.mark.parametrize(
     ("output", "expected"),
     (

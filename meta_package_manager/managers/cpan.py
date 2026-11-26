@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import os
 import re
+from functools import cached_property
 from pathlib import Path
 from typing import ClassVar
 
@@ -44,18 +45,29 @@ class CPAN(PackageManager):
     markers: `--sudo` or a `sudo = true` override escalates them, while nothing
     escalates by default.
 
+    Where cpan installs to a local::lib directory by default, `mpm outdated` and
+    `mpm upgrade --all` skip the modules outside that directory: `cpan -u` would
+    install a newer copy of each of them there, ahead of the copy of the system.
+    An `INSTALL_BASE` in `PERL_MM_OPT`, which local::lib exports, sets this
+    default. A Perl whose site directory the user cannot write to sets it too:
+    there, the first run of CPAN.pm sets up local::lib in `~/perl5`. The system
+    Perl of Arch Linux and of macOS is such a Perl. `mpm upgrade` still updates a
+    module it names, and `mpm --sudo`, which runs `cpan -u` as root, turns the
+    rule off.
+
     ```{caution}
     Perl's core modules (`warnings`, `feature`, `POSIX`, `B`, and the like) exist
     only inside Perl itself, with no standalone CPAN distribution, so their
     versions are tied to whichever Perl you run. `cpan -O` reports them as outdated
     whenever that Perl trails the newest one CPAN has indexed, yet `cpan -u` can
     never upgrade them in place, since only a newer Perl carries newer core
-    modules. `mpm` relays both faithfully. This holds for any Perl, whether the
-    macOS system one or a Homebrew install.
+    modules. On a Perl that installs to its own site directory, `mpm` relays both
+    faithfully. On a system Perl, the local::lib rule above keeps them out of
+    `mpm outdated`, unless `mpm --sudo` turns the rule off.
 
     On the macOS system Perl at `/usr/bin/perl`, that Perl sits on the sealed,
-    read-only system volume and cannot be replaced even with `sudo`, so the list
-    never clears.
+    read-only system volume and cannot be replaced even with `sudo`, so under
+    `mpm --sudo` the list never clears.
 
     With a writable, user-controlled Perl ahead on your `PATH` (via
     `brew install perl`, since `mpm` drives whichever `cpan` comes first), the
@@ -87,6 +99,14 @@ class CPAN(PackageManager):
     # second run finds.
     operation_notes: ClassVar = {
         "remove": "CPAN's client cannot uninstall a module at all.",
+        "outdated": (
+            "Lists only the modules of the local::lib directory when cpan installs "
+            "there by default."
+        ),
+        "upgrade_all": (
+            "Upgrades only the modules of the local::lib directory when cpan installs "
+            "there by default."
+        ),
     }
 
     name = "Perl CPAN"
@@ -148,6 +168,122 @@ class CPAN(PackageManager):
     _INC_PROBE = 'print "$_\\n" for @INC'
     """Perl one-liner printing `@INC`, one directory per line."""
 
+    _CONFIG_PROBE = 'print "$Config{$_}\\n" for qw(installsitelib version archname)'
+    """Perl one-liner printing the site directory, the version and the architecture.
+
+    It runs with `-MConfig`.
+    """
+
+    _INSTALL_BASE_REGEXP = re.compile(r"""\bINSTALL_BASE=("[^"]*"|'[^']*'|\S+)""")
+    """The `INSTALL_BASE` argument in `PERL_MM_OPT`, quoted or not."""
+
+    _SHEBANG_REGEXP = re.compile(rb"^#!\s*(\S+)")
+    """The interpreter path of a script's shebang line."""
+
+    @cached_property
+    def _perl_config(self) -> tuple[str, str, str] | None:
+        """The site directory, version and architecture of the Perl of `cpan`.
+
+        `None` when `_perl()` finds no `perl`, or when the probe prints
+        something else. The probe loads no CPAN.pm code. On Omarchy `4.5.0`:
+
+        ```{code-block} console
+
+        $ perl -MConfig -e 'print "$Config{$_}\\n" for qw(installsitelib version archname)'
+        /usr/share/perl5/site_perl
+        5.44.0
+        aarch64-linux-thread-multi
+        ```
+        """  # noqa: E501
+        perl = self._perl()
+        if perl is None:
+            return None
+        output = self.run_cli(
+            "-MConfig",
+            "-e",
+            self._CONFIG_PROBE,
+            override_cli_path=perl,
+            auto_extra_env=False,
+            auto_extra_args=False,
+            force_exec=True,
+        )
+        lines = output.splitlines()
+        if len(lines) != 3:
+            return None
+        site_lib, version, archname = lines
+        return site_lib, version, archname
+
+    def _probe_user_install_dir(self) -> Path | None:
+        """The local::lib directory, if cpan installs there by default, else `None`.
+
+        The hook behind
+        {attr}`~meta_package_manager.manager.PackageManager.user_install_dir`.
+        Perl's installers decide in this order:
+
+        1. An `INSTALL_BASE` in `PERL_MM_OPT` wins: `ExtUtils::MakeMaker`
+           installs there, and local::lib exports the variable. On Omarchy
+           `4.5.0`, the first run of CPAN.pm added it to `~/.bashrc`.
+        2. Without it, cpan installs to the site directory of its Perl. When
+           that directory exists but the user cannot write to it, the first run
+           of CPAN.pm sets up local::lib in the directory that
+           `PERL_LOCAL_LIB_ROOT` names first, else `~/perl5`. Root owns the site
+           directory of the system Perl on Arch Linux and on macOS.
+
+        ```{code-block} console
+
+        $ echo $PERL_MM_OPT
+        INSTALL_BASE=/home/user/perl5
+        ```
+
+        The probe reads the defaults of the current user.
+        """
+        env = {**os.environ, **(self.extra_env or {})}
+        install_base = self._INSTALL_BASE_REGEXP.search(env.get("PERL_MM_OPT") or "")
+        if install_base:
+            return Path(install_base[1].strip("\"'")).expanduser()
+        config = self._perl_config
+        if config is None:
+            return None
+        site_lib = Path(config[0])
+        if not site_lib.exists() or os.access(site_lib, os.W_OK):
+            return None
+        root = (env.get("PERL_LOCAL_LIB_ROOT") or "").split(os.pathsep)[0]
+        return Path(root) if root else Path.home() / "perl5"
+
+    def _packages_in(self, directory: Path) -> frozenset[str]:
+        """Names of the modules with a `.pm` file in the local::lib `directory`.
+
+        Perl reads a local::lib directory through `PERL5LIB`, which also adds the
+        version and architecture subdirectories of `lib/perl5`. A file takes its
+        name from the deepest of these that holds it, the way `cpan -l` names it
+        from its `@INC` entry. No `cpan` command runs. On Omarchy `4.5.0`, the
+        first run of CPAN.pm left two modules there:
+
+        ```{code-block} console
+
+        $ find ~/perl5/lib/perl5 -name '*.pm'
+        /home/user/perl5/lib/perl5/lib/core/only.pm
+        /home/user/perl5/lib/perl5/local/lib.pm
+        ```
+        """
+        base = directory / "lib" / "perl5"
+        if not base.is_dir():
+            return frozenset()
+        roots = [base]
+        if self._perl_config is not None:
+            _site_lib, version, archname = self._perl_config
+            roots = [
+                base / version / archname,
+                base / version,
+                base / archname,
+                base,
+            ]
+        modules = set()
+        for path in base.rglob("*.pm"):
+            root = next(root for root in roots if path.is_relative_to(root))
+            modules.add("::".join(path.relative_to(root).with_suffix("").parts))
+        return frozenset(modules)
+
     @property
     def installed(self) -> Iterator[Package]:
         """Fetch installed modules.
@@ -197,9 +333,9 @@ class CPAN(PackageManager):
         `strict` and `warnings`: keeping every row would list those modules twice.
 
         ```{todo}
-        Drop the second run, with `_sibling_perl()` and `_symlinked_inc_targets()`,
-        once a fixed `cpan -l` reaches the Perl that Debian and Ubuntu ship. Reported
-        upstream as [andk/cpanpm#202](https://github.com/andk/cpanpm/issues/202).
+        Drop the second run, with `_symlinked_inc_targets()`, once a fixed `cpan -l`
+        reaches the Perl that Debian and Ubuntu ship. Reported upstream as
+        [andk/cpanpm#202](https://github.com/andk/cpanpm/issues/202).
         ```
         """
         listed: set[str] = set()
@@ -250,8 +386,23 @@ class CPAN(PackageManager):
         Archive::Tar                              3.0200  3.1200
         Archive::Tar::Constant                    3.0200  3.1200
         ```
+
+        Where cpan installs to a local::lib directory by default (see
+        `_probe_user_install_dir`), `cpan -O` runs with the `lib/perl5` of that
+        directory first in `PERL5LIB`, so it reads the versions installed there.
         """
-        output = self.run_cli("-O")
+        user_dir = self.user_install_dir
+        override_extra_env = None
+        if user_dir is not None:
+            user_lib = str(user_dir / "lib" / "perl5")
+            search_path = os.environ.get("PERL5LIB", "").split(os.pathsep)
+            if user_lib not in search_path:
+                override_extra_env = {
+                    **(self.extra_env or {}),
+                    "PERL5LIB": os.pathsep.join(filter(None, [user_lib, *search_path])),
+                }
+
+        output = self.run_cli("-O", override_extra_env=override_extra_env)
         yield from self.parse_regex_lines(self._OUTDATED_REGEXP, output)
 
     @version_not_implemented
@@ -292,15 +443,41 @@ class CPAN(PackageManager):
         """
         return self.build_cli("-i", package_id, sudo=True)
 
-    def _sibling_perl(self) -> Path | None:
-        """The `perl` installed beside the resolved `cpan`, or `None`.
+    def _perl(self) -> Path | None:
+        """The `perl` that runs the resolved `cpan`, or `None`.
 
-        Perl installs its `cpan` script in the same directory as the `perl` binary:
-        `installscript` and `installbin` are both `/usr/bin` on Ubuntu and on macOS.
-        That binary's `@INC` is therefore the one `cpan -l` walks.
+        That binary's `@INC` is the one `cpan -l` walks. The interpreter that the
+        shebang of the `cpan` script names comes first, when it is an absolute
+        path to a `perl` file. Arch Linux installs `cpan` to `/usr/bin/core_perl`,
+        apart from its `perl`:
+
+        ```{code-block} console
+
+        $ head -1 /usr/bin/core_perl/cpan
+        #!/usr/bin/perl
+        ```
+
+        Else the `perl` beside `cpan`: Perl installs its `cpan` script in the same
+        directory as the `perl` binary when `installscript` and `installbin` match,
+        as they do on Ubuntu and on macOS. A `#!/usr/bin/env perl` shebang names no
+        path, so it takes this branch too.
         """
         if self.cli_path is None:
             return None
+        try:
+            with self.cli_path.open("rb") as script:
+                first_line = script.readline(256)
+        except OSError:
+            first_line = b""
+        shebang = self._SHEBANG_REGEXP.match(first_line)
+        if shebang:
+            interpreter = Path(os.fsdecode(shebang[1]))
+            if (
+                interpreter.is_absolute()
+                and interpreter.name.startswith("perl")
+                and interpreter.is_file()
+            ):
+                return interpreter
         for name in ("perl", "perl.exe"):
             candidate = self.cli_path.parent / name
             if candidate.is_file():
@@ -311,8 +488,8 @@ class CPAN(PackageManager):
         """Resolved paths of the `@INC` directories `cpan -l` cannot walk.
 
         An `@INC` entry that is a symlink to a directory is resolved, unless another
-        entry already reaches its target. The result is empty when no `perl` sits
-        beside `cpan` to ask.
+        entry already reaches its target. The result is empty when `_perl()` finds
+        no `perl` to ask.
 
         ```{code-block} console
 
@@ -328,7 +505,7 @@ class CPAN(PackageManager):
         /usr/local/lib/site_perl
         ```
         """
-        perl = self._sibling_perl()
+        perl = self._perl()
         if perl is None:
             return ()
         output = self.run_cli(

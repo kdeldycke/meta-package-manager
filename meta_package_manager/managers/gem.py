@@ -16,6 +16,7 @@
 
 from __future__ import annotations
 
+import os
 import re
 from functools import cached_property
 from pathlib import Path
@@ -34,6 +35,15 @@ if TYPE_CHECKING:
     from ..package import Package
 
 
+USER_INSTALL_FALLBACK_VERSION = parse_version("3.5.0")
+"""The first RubyGems release whose installs fall back to the user directory.
+
+From this release, an install with neither `--user-install` nor
+`--no-user-install` writes to the user directory when `GEM_HOME` is unset and
+the default directory exists but is not writable.
+"""
+
+
 class Gem(PackageManager):
     """The RubyGems package manager.
 
@@ -47,8 +57,23 @@ class Gem(PackageManager):
     default scope lives on the sealed, read-only system volume, so the gems
     Ruby bundles there surface as outdated yet cannot be upgraded in place,
     not even with `sudo`: point mpm at a writable, user-controlled Ruby
-    earlier on your `PATH` instead. Per-scope targeting (system vs user gems) is
-    tracked in [#1725](https://github.com/kdeldycke/meta-package-manager/issues/1725).
+    earlier on your `PATH` instead.
+
+    Where RubyGems installs to the user directory by default, `mpm outdated`
+    and `mpm upgrade --all` skip the gems outside that directory: `gem update`
+    would install a newer copy of each of them there. Arch Linux sets this
+    default, and so can a `gemrc` file with `--user-install`. RubyGems `3.5.0`
+    and later also take the user directory when the default one is not
+    writable and `GEM_HOME` is unset. On Debian 13, root owns the default
+    directory, so this applies to every other user. `mpm upgrade` still
+    updates a gem it names, and `mpm --sudo`, which runs `gem update` as root,
+    turns the rule off.
+    ```
+
+    ```{todo}
+    Replace the user directory rule with per-scope targeting of system and user
+    gems once [#1725](https://github.com/kdeldycke/meta-package-manager/issues/1725)
+    ships.
     ```
 
     :::{tip}
@@ -77,6 +102,14 @@ class Gem(PackageManager):
         "installed": (
             "A gem can keep several versions installed side by side; the "
             "highest is reported as the installed version."
+        ),
+        "outdated": (
+            "Lists only the gems of the user directory when RubyGems installs "
+            "there by default."
+        ),
+        "upgrade_all": (
+            "Upgrades only the gems of the user directory when RubyGems installs "
+            "there by default."
         ),
     }
 
@@ -123,6 +156,16 @@ class Gem(PackageManager):
         """,
         re.VERBOSE,
     )
+    _GEM_DIR_REGEXP = re.compile(
+        r"^\s*- INSTALLATION DIRECTORY: (.+?)\s*$", re.MULTILINE
+    )
+    _USER_DIR_REGEXP = re.compile(
+        r"^\s*- USER INSTALLATION DIRECTORY: (.+?)\s*$", re.MULTILINE
+    )
+    _CONFIG_ARGS_REGEXP = re.compile(
+        r'^\s*- (:gem|"gem"|"update") => (.+?)\s*$', re.MULTILINE
+    )
+    _USER_INSTALL_FLAG_REGEXP = re.compile(r"--(no-)?user-install\b")
 
     @cached_property
     def install_root(self) -> Path | None:
@@ -145,6 +188,116 @@ class Gem(PackageManager):
             auto_extra_args=False,
         ).strip()
         return Path(output) if output else None
+
+    def _probe_user_install_dir(self) -> Path | None:
+        """The user directory, if `gem update` installs there by default, else `None`.
+
+        The hook behind
+        {attr}`~meta_package_manager.manager.PackageManager.user_install_dir`.
+        RubyGems decides in this order:
+
+        1. The last `--user-install` or `--no-user-install` flag wins. The flags
+           of the `gem` configuration key come first, then those of the `update`
+           key. Arch Linux sets the `gem` key in its `operating_system.rb`, and a
+           `gemrc` file can set both keys.
+        2. With neither flag, RubyGems `3.5.0` and later install to the user
+           directory when `GEM_HOME` is unset and the default directory exists
+           but is not writable. Debian 13 sets no flag, and its `ruby3.3`
+           package ships the default directory, `/var/lib/gems/3.3.0`, owned
+           by root.
+
+        `gem environment` prints the merged configuration and both directories.
+        On Omarchy `4.5.0`, with RubyGems `3.6.9`:
+
+        ```{code-block} console
+
+        $ gem environment
+        RubyGems Environment:
+          - RUBYGEMS VERSION: 3.6.9
+          - RUBY VERSION: 3.4.10 (2026-06-30 patchlevel 104) [aarch64-linux]
+          - INSTALLATION DIRECTORY: /usr/lib/ruby/gems/3.4.0
+          - USER INSTALLATION DIRECTORY: /home/user/.local/share/gem/ruby/3.4.0
+          (...)
+          - GEM CONFIGURATION:
+             - :update_sources => true
+             - :verbose => true
+             - :backtrace => true
+             - :bulk_threshold => 1000
+             - "gem" => "--user-install"
+          (...)
+        ```
+
+        The probe reads the defaults of the current user.
+        """
+        output = self.run_cli(
+            "environment",
+            auto_post_args=False,
+            force_exec=True,
+            auto_extra_args=False,
+        )
+        user_dir = self._USER_DIR_REGEXP.search(output)
+        if not user_dir:
+            return None
+        config = dict(self._CONFIG_ARGS_REGEXP.findall(output))
+        # RubyGems reads the `:gem` symbol key before the `"gem"` string key.
+        arguments = (
+            config.get(":gem") or config.get('"gem"', ""),
+            config.get('"update"', ""),
+        )
+        flags = self._USER_INSTALL_FLAG_REGEXP.findall(" ".join(arguments))
+        if flags:
+            user_install = flags[-1] != "no-"
+        else:
+            gem_dir = self._GEM_DIR_REGEXP.search(output)
+            user_install = bool(
+                gem_dir
+                and self.version is not None
+                and self.version >= USER_INSTALL_FALLBACK_VERSION
+                and "GEM_HOME" not in os.environ
+                and "GEM_HOME" not in (self.extra_env or {})
+                and Path(gem_dir[1]).exists()
+                and not os.access(gem_dir[1], os.W_OK)
+            )
+        return Path(user_dir[1]) if user_install else None
+
+    def _packages_in(self, directory: Path) -> frozenset[str]:
+        """IDs of the gems with at least one version in `directory`.
+
+        `GEM_HOME` and `GEM_PATH` restrict `gem list` to `directory`, but RubyGems
+        lists the default gems of the Ruby in all cases. A gem whose versions all
+        read `default:` has no version in `directory`. On Omarchy `4.5.0`, the user
+        directory does not exist yet:
+
+        ```{code-block} console
+
+        $ GEM_HOME=/home/user/.local/share/gem/ruby/3.4.0 GEM_PATH=/home/user/.local/share/gem/ruby/3.4.0 gem list --quiet
+        benchmark (default: 0.4.0)
+        cgi (default: 0.4.2)
+        (...)
+        zlib (default: 3.2.3)
+        ```
+        """  # noqa: E501
+        output = self.run_cli(
+            "list",
+            override_extra_env={
+                **(self.extra_env or {}),
+                "GEM_HOME": str(directory),
+                "GEM_PATH": str(directory),
+            },
+            force_exec=True,
+            auto_extra_args=False,
+        )
+        gems = set()
+        for line in output.splitlines():
+            match = self._INSTALLED_REGEXP.match(line)
+            if match:
+                package_id, versions = match.groups()
+                if not all(
+                    version.strip().startswith("default:")
+                    for version in versions.split(",")
+                ):
+                    gems.add(package_id)
+        return frozenset(gems)
 
     @property
     def installed(self) -> Iterator[Package]:

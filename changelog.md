@@ -8,6 +8,8 @@
 - [rpm-ostree] Add `rpm-ostree` for Fedora's image-based variants, with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync` and `cleanup` support.
 - [dnf,dnf5,yum] Skip the manager on a host booted from ostree, like Fedora IoT or Silverblue, where `rpm-ostree` manages the packages.
 - [uv] Skip the manager when `uv pip` targets an externally managed Python, like the system Python of Arch Linux or Debian.
+- [gem] Limit `outdated` and `upgrade --all` to the gems of the user directory when RubyGems installs there by default, like on Arch Linux and Debian 13.
+- [cpan] Limit `outdated` and `upgrade --all` to the modules of the local::lib directory when cpan installs there by default, like with the system Perl of Arch Linux and macOS.
 - [mpm] Mark a package or manager that the cooldown or its host skips with `⊘` on the trail, and leave it out of the finisher's count.
 - [mpm] Raise the docs floor of `myst-parser` to `5.2`, below which the docs build fails.
 - [mpm] Refresh the benchmark against `topgrade` `17.17.0`: 13 tools it drives get a row, and `pkg-tools` gets its `topgrade` support.

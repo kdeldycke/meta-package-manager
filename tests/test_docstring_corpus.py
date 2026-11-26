@@ -173,11 +173,17 @@ def _fixtures():
 
 
 def _neutralize_binaries(manager, monkeypatch) -> None:
-    """Pin the binary-resolution dependencies a parse path might touch."""
+    """Pin the host dependencies a parse path might touch.
+
+    These are the binary resolution, and the user directory rule of `gem` and
+    `cpan`. The rule reads the host, which keeps only the packages of the user
+    directory, so a replay pins it off and keeps every documented package.
+    """
     monkeypatch.setattr(manager, "which", lambda cli_name: Path("/usr/bin") / cli_name)
     monkeypatch.setattr(
         manager, "cli_path", Path("/usr/bin") / manager.cli_names[0], raising=False
     )
+    monkeypatch.setitem(manager.__dict__, "user_install_dir", None)
 
 
 def _documented_packages(manager, member, output, monkeypatch) -> list:

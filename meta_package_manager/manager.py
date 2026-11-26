@@ -52,6 +52,7 @@ from extra_platforms import (
 from .cooldown import CooldownPolicy
 from .execution import CLIError, CLIExecutor, highlight_cli_name
 from .package import EMPTY_METADATA, Package, PackageMetadata
+from .sudo import _resolved_sudo, _running_as_root
 from .version import VersionRange
 
 TYPE_CHECKING = False
@@ -86,7 +87,7 @@ They are also among the {data}`INVOCATION_CACHES`.
 """
 
 
-INVOCATION_CACHES = (*INVENTORY_CACHES, "_cooldown_holds")
+INVOCATION_CACHES = (*INVENTORY_CACHES, "_cooldown_holds", "user_install_dir")
 """Everything {class}`PackageManager` memoizes for the duration of one invocation.
 
 The CLI drops them when each invocation closes, so the next invocation in the
@@ -95,7 +96,8 @@ pooled manager instances.
 
 The cooldown verdicts outlast a fresh reading of the inventory, unlike the
 {data}`INVENTORY_CACHES`: the report closing a command reads the verdicts that
-command reached.
+command reached. The {attr}`PackageManager.user_install_dir` is one too, because
+`--sudo` turns its rule off for one invocation.
 """
 
 
@@ -858,6 +860,66 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         """
         return None
 
+    @cached_property
+    def user_install_dir(self) -> Path | None:
+        """The directory of the user that this manager installs to by default.
+
+        `None` for a manager that installs elsewhere. In that directory, a full
+        upgrade does not update the packages of the system in place: it installs
+        a newer copy of each of them there, which then hides the copy of the
+        system. So where this directory is set, {attr}`refiltered_outdated` keeps
+        the packages with a version there alone, and {meth}`upgrade` upgrades
+        them one by one in place of {meth}`upgrade_all_cli`. An upgrade of the
+        packages that `mpm upgrade` names still goes ahead.
+
+        A manager takes part with an override of `_probe_user_install_dir` and
+        of `_packages_in`, like {class}`~meta_package_manager.managers.gem.Gem`
+        and {class}`~meta_package_manager.managers.cpan.CPAN`.
+
+        Under `mpm --sudo`, the manager runs as root, so the property is `None`
+        and no probe runs. Run as root, `mpm --sudo` escalates nothing, so the
+        probe reads the defaults of root.
+
+        A host-probing property, like {attr}`cli_path
+        <meta_package_manager.execution.CLIExecutor.cli_path>`: the
+        documentation generators must never read it. One of the
+        {data}`~meta_package_manager.manager.INVOCATION_CACHES`.
+        """
+        if _resolved_sudo(self) and not _running_as_root():
+            return None
+        return self._probe_user_install_dir()
+
+    def _probe_user_install_dir(self) -> Path | None:
+        """Find the directory of the user that this manager installs to by default.
+
+        See {attr}`user_install_dir`. `None` on the base: most managers install
+        to one place only.
+        """
+        return None
+
+    def _packages_in(self, directory: Path) -> frozenset[str]:
+        """IDs of the packages with a version in `directory`.
+
+        Required from a manager that overrides `_probe_user_install_dir`: see
+        {attr}`user_install_dir`.
+        """
+        raise NotImplementedError
+
+    def _user_scope(self) -> frozenset[str] | None:
+        """IDs of the packages in {attr}`user_install_dir`, or `None` without it.
+
+        Logs the directory that the outdated listing keeps.
+        """
+        user_dir = self.user_install_dir
+        if user_dir is None:
+            return None
+        logging.info(
+            f"Installs to {user_dir} by default: skip the packages outside that "
+            "directory.",
+            extra={"label": self.subject},
+        )
+        return self._packages_in(user_dir)
+
     @property
     def installed(self) -> Iterator[Package]:
         """List packages currently installed on the system.
@@ -1031,7 +1093,7 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
 
     @property
     def refiltered_outdated(self) -> Iterator[Package]:
-        """Wrap the `outdated` property with a version-equality filter.
+        """Wrap the `outdated` property with two filters.
 
         See {meth}`~meta_package_manager.manager.PackageManager.outdated`.
 
@@ -1039,8 +1101,17 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         strings differ at the character level but are numerically equal after
         parsing (e.g., Perl floating-point versions `2.0000` vs
         `2.000000`). This filter drops those false positives.
+
+        Where the manager installs to a directory of the user by default (see
+        {attr}`user_install_dir`), only the packages with a version there stay.
+        With no package there, {attr}`outdated` does not run.
         """
+        kept = self._user_scope()
+        if kept is not None and not kept:
+            return
         for pkg in self.outdated:
+            if kept is not None and pkg.id not in kept:
+                continue
             if (
                 pkg.installed_version is None
                 or pkg.latest_version is None
@@ -1368,6 +1439,10 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         {meth}`~meta_package_manager.manager.PackageManager.outdated_inventory`
         its report took. A single-package upgrade and the native one-shot
         command ignore it, and a full upgrade left without it lists on its own.
+
+        Where the manager installs to a directory of the user by default (see
+        {attr}`user_install_dir`), a full upgrade never runs the native one-shot
+        command: it upgrades the packages of that directory one by one.
         """
         if package_id:
             cli = self.upgrade_one_cli(package_id, version=version)
@@ -1380,6 +1455,8 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
                     extra={"label": self.subject},
                 )
                 return self._upgrade_all_with_cooldown(outdated_ids)
+            if self.user_install_dir is not None:
+                return self._upgrade_all_one_by_one(outdated_ids)
             try:
                 cli = self.upgrade_all_cli()
             except NotImplementedError:
@@ -1405,11 +1482,12 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         A manager implementing {meth}`upgrade_all_cli_excluding` keeps its
         native one-transaction upgrade, the held packages riding its exclusion
         flag (and a run with nothing held falls back to the plain
-        {meth}`upgrade_all_cli`). Every other manager upgrades the eligible
-        packages one by one instead, deliberately even when nothing is held:
-        its one-shot command may cover more than the packages enumerated here
-        (`flatpak update` also pulls runtimes), and whatever the listing did
-        not enumerate was never probed.
+        {meth}`upgrade_all_cli`), unless it installs to a directory of the user
+        by default (see {attr}`user_install_dir`). Every other manager upgrades
+        the eligible packages one by one instead, deliberately even when nothing
+        is held: its one-shot command may cover more than the packages
+        enumerated here (`flatpak update` also pulls runtimes), and whatever the
+        listing did not enumerate was never probed.
 
         Lists the outdated packages itself unless `outdated_ids` hands them
         over.
@@ -1428,7 +1506,7 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
                 held.append(package_id)
             else:
                 eligible.append(package_id)
-        if self._defines("upgrade_all_cli_excluding"):
+        if self._defines("upgrade_all_cli_excluding") and self.user_install_dir is None:
             if held:
                 cli = self.upgrade_all_cli_excluding(tuple(held))
             else:

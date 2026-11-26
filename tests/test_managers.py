@@ -243,6 +243,18 @@ def test_unique_names():
 
 
 @all_managers
+def test_user_install_dir_hooks_come_in_pairs(manager):
+    """A manager that finds a user directory also lists the packages in it.
+
+    `refiltered_outdated` reads both hooks of `user_install_dir`: one without the
+    other raises `NotImplementedError` on the host where the rule applies.
+    """
+    assert manager._defines("_probe_user_install_dir") is manager._defines(
+        "_packages_in"
+    )
+
+
+@all_managers
 def test_homepage_url(manager):
     """A home page is optional where the repository stands for it."""
     assert manager.homepage_url or manager.repository_url

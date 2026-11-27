@@ -11,6 +11,7 @@
 - [gem] Limit `outdated` and `upgrade --all` to the gems of the user directory when RubyGems installs there by default, like on Arch Linux and Debian 13.
 - [cpan] Limit `outdated` and `upgrade --all` to the modules of the local::lib directory when cpan installs there by default, like with the system Perl of Arch Linux and macOS.
 - [mpm] Mark a package or manager that the cooldown or its host skips with `⊘` on the trail, and leave it out of the finisher's count.
+- [mpm] Raise the `click-extra` floor to `10.4.0`, which adds the `⊘` skip state of the trail: below it, every batch command fails.
 - [mpm] Raise the docs floor of `myst-parser` to `5.2`, below which the docs build fails.
 - [mpm] Refresh the benchmark against `topgrade` `17.17.0`: 13 tools it drives get a row, and `pkg-tools` gets its `topgrade` support.
 - [mpm] Record `bootc`, `freebsd-update`, `pkgbase`, `syspatch` and `sysupgrade` as unsupported operating system updaters, and `lucidlink` and `tailscale` as self-updating applications.

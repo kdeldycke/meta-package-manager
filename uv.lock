@@ -10,6 +10,9 @@ resolution-markers = [
 exclude-newer = "0001-01-01T00:00:00Z" # This has no effect and is included for backwards compatibility when using relative exclude-newer values.
 exclude-newer-span = "P1W"
 
+[options.exclude-newer-package]
+click-extra = "2026-11-29T00:00:00Z"
+
 [[package]]
 name = "accessible-pygments"
 version = "0.0.5"
@@ -282,8 +285,8 @@ wheels = [
 
 [[package]]
 name = "click-extra"
-version = "10.4.0.dev0"
-source = { git = "https://github.com/kdeldycke/click-extra?branch=main#b2d555312901bb786498962423d549e1aeb41d3b" }
+version = "10.4.0"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
     { name = "cloup" },
@@ -291,6 +294,10 @@ dependencies = [
     { name = "tabulate", extra = ["widechars"] },
     { name = "wcmatch" },
     { name = "wcwidth" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f8/e3/59ccec0ba318598efc66827a9c90b83b313c3b51843c2e273a1f036eda52/click_extra-10.4.0.tar.gz", hash = "sha256:592c101ba95e964f026316ce686005e5839d091bba393f04e5613719e6b0fd0c", size = 2111791, upload-time = "2026-11-27T10:40:40.588Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/54/87/a2b0486d1cce9cab7c371e43e4b7a8749863af356b1ec7ae273e4f220296/click_extra-10.4.0-py3-none-any.whl", hash = "sha256:2fdf42451c8303ac3ec4ab867aa5d2426f62d4a25691b04fd10f52d1f5ddf9b9", size = 802069, upload-time = "2026-11-27T10:40:38.959Z" },
 ]
 
 [package.optional-dependencies]
@@ -1108,11 +1115,11 @@ docs = ">=3.14"
 
 [package.metadata]
 requires-dist = [
-    { name = "click-extra", git = "https://github.com/kdeldycke/click-extra?branch=main" },
-    { name = "click-extra", extras = ["hjson"], marker = "extra == 'hjson'", git = "https://github.com/kdeldycke/click-extra?branch=main" },
-    { name = "click-extra", extras = ["json5"], marker = "extra == 'json5'", git = "https://github.com/kdeldycke/click-extra?branch=main" },
-    { name = "click-extra", extras = ["toml"], marker = "extra == 'toml'", git = "https://github.com/kdeldycke/click-extra?branch=main" },
-    { name = "click-extra", extras = ["yaml"], marker = "extra == 'yaml'", git = "https://github.com/kdeldycke/click-extra?branch=main" },
+    { name = "click-extra", specifier = ">=10.4.0" },
+    { name = "click-extra", extras = ["hjson"], marker = "extra == 'hjson'" },
+    { name = "click-extra", extras = ["json5"], marker = "extra == 'json5'" },
+    { name = "click-extra", extras = ["toml"], marker = "extra == 'toml'" },
+    { name = "click-extra", extras = ["yaml"], marker = "extra == 'yaml'" },
     { name = "cyclonedx-python-lib", marker = "extra == 'sbom-offline'", specifier = ">=11.9" },
     { name = "extra-platforms", specifier = ">=13.10" },
     { name = "httpx", marker = "extra == 'sbom-online'", specifier = ">=0.27" },
@@ -1124,9 +1131,9 @@ provides-extras = ["hjson", "json5", "sbom-offline", "sbom-online", "toml", "yam
 
 [package.metadata.requires-dev]
 docs = [
-    { name = "click-extra", extras = ["pytest"], marker = "python_full_version >= '3.14'", git = "https://github.com/kdeldycke/click-extra?branch=main" },
-    { name = "click-extra", extras = ["sphinx"], marker = "python_full_version >= '3.14'", git = "https://github.com/kdeldycke/click-extra?branch=main" },
-    { name = "click-extra", extras = ["toml"], marker = "python_full_version >= '3.14'", git = "https://github.com/kdeldycke/click-extra?branch=main" },
+    { name = "click-extra", extras = ["pytest"], marker = "python_full_version >= '3.14'" },
+    { name = "click-extra", extras = ["sphinx"], marker = "python_full_version >= '3.14'", specifier = ">=10.2" },
+    { name = "click-extra", extras = ["toml"], marker = "python_full_version >= '3.14'" },
     { name = "coverage", marker = "python_full_version >= '3.14'", specifier = ">=7.11" },
     { name = "cyclonedx-python-lib", extras = ["validation"], marker = "python_full_version >= '3.14'" },
     { name = "extra-platforms", marker = "python_full_version >= '3.14'" },
@@ -1155,8 +1162,8 @@ docs = [
     { name = "tomlrt", marker = "python_full_version >= '3.14'", specifier = ">=2" },
 ]
 test = [
-    { name = "click-extra", extras = ["pytest"], git = "https://github.com/kdeldycke/click-extra?branch=main" },
-    { name = "click-extra", extras = ["toml"], git = "https://github.com/kdeldycke/click-extra?branch=main" },
+    { name = "click-extra", extras = ["pytest"] },
+    { name = "click-extra", extras = ["toml"] },
     { name = "coverage", specifier = ">=7.11" },
     { name = "cyclonedx-python-lib", extras = ["validation"] },
     { name = "extra-platforms" },

@@ -331,9 +331,8 @@ classifiers = [
 dependencies = [
   # click-extra 10.4 added the skipped outcome of OperationTrail, which
   # dispatch.py marks a cooldown or host skip with. Below it, every batch fails
-  # on the missing skip_count. Until 10.4 ships, [tool.uv] sources track the
-  # click-extra main branch.
-  "click-extra>=10.4.0.dev0",
+  # on the missing skip_count.
+  "click-extra>=10.4.0",
   # extra-platforms 13.10 added shell_from_path(), which shell_argv() in
   # shell_env.py resolves the login shell's family with. Below it the import
   # fails and no mpm command runs.
@@ -536,11 +535,12 @@ required-version = ">=0.12.22"
 # marker split holding a second, older resolution alive for an interpreter that
 # never renders a page.
 dependency-groups.docs = { requires-python = ">= 3.14" }
-# The click-extra main branch, until the release the `.dev` floor of the
-# dependencies awaits: `sync-dep-sources` drops the entry once it ships.
-sources.click-extra = { git = "https://github.com/kdeldycke/click-extra", branch = "main" }
 # Cooldown period.
 exclude-newer = "1 week"
+# click-extra is published by this repository's own maintainer: the cooldown
+# guards against a compromised upstream, which does not apply here, and it
+# otherwise holds each release back a week from the projects that consume it.
+exclude-newer-package = { click-extra = "2026-11-29T00:00:00Z" }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
 # source-include does not honor .gitignore, so prune the build output and caches

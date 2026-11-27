@@ -43,7 +43,7 @@ class Antigravity_CLI_Plugins(PackageManager):
     way to add one, and no search. The plugin is then listed under its `name`.
 
     The CLI itself updates with `agy update`, which is not a plugin operation and
-    is left to [`topgrade`](topgrade.md).
+    is left to {doc}`topgrade </managers/topgrade>`.
     """
 
     # `agy plugin enable` and `disable` toggle a plugin without removing it, and

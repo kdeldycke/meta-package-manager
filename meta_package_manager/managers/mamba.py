@@ -34,10 +34,10 @@ if TYPE_CHECKING:
 class Mamba(PackageManager):
     """Conda-compatible package manager, reimplemented in C++.
 
-    Reaches the same channels [`conda`](conda.md) does, resolving with libsolv
-    behind a command line of its own rather than delegating to conda. It is
-    wrapped on the same grounds as [`nala`](nala.md) over `apt`: same archives,
-    separate implementation. Since `2.0` it shares no code with conda at all,
+    Reaches the same channels {doc}`conda </managers/conda>` does, resolving with
+    libsolv behind a command line of its own rather than delegating to conda. It is
+    wrapped on the same grounds as {doc}`nala </managers/nala>` over `apt`: same
+    archives, separate implementation. Since `2.0` it shares no code with conda at all,
     the Python executable of the `1.x` line having been replaced by a
     dynamically linked build of micromamba.
 
@@ -369,7 +369,7 @@ class Mamba(PackageManager):
 class Micromamba(Mamba):
     """mamba's statically linked build, shipped as a single self-contained binary.
 
-    The same program as [`mamba`](mamba.md), built the other way: upstream's
+    The same program as {doc}`mamba </managers/mamba>`, built the other way: upstream's
     build declares *"mamba is a dynamic build of micromamba"* and compiles both
     executables from one source list. Every operation, parser and forced
     argument is therefore inherited unchanged.

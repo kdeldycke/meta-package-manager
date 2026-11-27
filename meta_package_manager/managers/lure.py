@@ -44,7 +44,7 @@ class Lure(PackageManager):
     *"Running LURE as root is forbidden as it may cause catastrophic damage to
     your system"*, and calls its own configured `RootCmd` (`sudo` by default)
     for the privileged half. mpm therefore marks nothing here privileged, the
-    same treatment [`chromebrew`](chromebrew.md) gets.
+    same treatment {doc}`chromebrew </managers/chromebrew>` gets.
     ```
 
     ```{note}

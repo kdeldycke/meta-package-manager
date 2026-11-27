@@ -37,14 +37,14 @@ class MicroDNF(PackageManager):
     The minimal container images of the RHEL family install it instead of
     `dnf`: [AlmaLinux 10's](https://github.com/AlmaLinux/container-images/blob/09f5ebe70432a7a932b5cfa6e5e5725654aa6b6d/Containerfiles/10/Containerfile.minimal#L4-L19)
     lists `microdnf` and no `dnf`. On a host that has both, `microdnf` and
-    [`dnf`](dnf.md) read the same RPM database, so their listings overlap.
+    {doc}`dnf </managers/dnf>` read the same RPM database, so their listings overlap.
 
     ```{note}
     On Fedora, and on RHEL releases after 10, the dnf5 package takes over the
     `microdnf` name as a symlink to `dnf5`
     ([dnf5.spec](https://github.com/rpm-software-management/dnf5/blob/cfdbb345396b2cfed7afe69cf70b3aba95ce7ee4/dnf5.spec#L1161-L1163)).
     No `microdnf` RPM package is installed there, so this manager reports no
-    version and leaves that binary to [`dnf5`](dnf5.md).
+    version and leaves that binary to {doc}`dnf5 </managers/dnf5>`.
     ```
 
     ```{caution}

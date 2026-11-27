@@ -54,7 +54,7 @@ class MiKTeX(PackageManager):
     """TeX package manager of the MiKTeX distribution.
 
     Reaches MiKTeX's own package repositories, which are distinct from the
-    catalog [`tlmgr`](tlmgr.md) reaches for TeX Live: two distributions, two
+    catalog {doc}`tlmgr </managers/tlmgr>` reaches for TeX Live: two distributions, two
     managers, rather than one wrapped twice.
 
     ```{note}

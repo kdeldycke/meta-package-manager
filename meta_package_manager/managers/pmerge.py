@@ -35,8 +35,8 @@ class Pmerge(PackageManager):
 
     pkgcore reads the same ebuild repositories as Portage and records into the
     same database of installed packages. On a host that carries both, this
-    manager and [`emerge`](emerge.md) list the same packages, and each one sees
-    what the other installed.
+    manager and {doc}`emerge </managers/emerge>` list the same packages, and each
+    one sees what the other installed.
 
     The queries run through `pquery`, the inventory and search tool of pkgcore,
     and the maintenance through `pmaint` and `pclean`. All four ship together.

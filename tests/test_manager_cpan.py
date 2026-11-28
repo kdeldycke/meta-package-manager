@@ -27,6 +27,7 @@ filesystem.
 
 from __future__ import annotations
 
+import logging
 import os
 from pathlib import Path
 from unittest.mock import patch
@@ -390,6 +391,28 @@ def test_upgrade_all_upgrades_the_kept_modules_one_by_one(
     monkeypatch.setattr(manager, "run", run)
     manager.upgrade()
     assert commands == [(str(manager.cli_path), "-i", "local::lib")]
+
+
+def test_upgrade_all_with_no_module_in_the_local_lib_directory(
+    new_cpan, monkeypatch, tmp_path, caplog
+):
+    """A full upgrade with no module to keep runs no command, and logs one line.
+
+    With the trail off, as at `DEBUG` verbosity, that line is the one trace of the
+    operation.
+    """
+    monkeypatch.setenv("PERL_MM_OPT", f"INSTALL_BASE={tmp_path / 'perl5'}")
+    manager, calls = new_cpan({"-O": OUTDATED})
+    commands = []
+    monkeypatch.setattr(manager, "run", lambda *args, **kwargs: commands.append(args))
+    with caplog.at_level(logging.INFO), manager.acting_as("upgrade_all"):
+        assert manager.upgrade() == ""
+    assert calls == commands == []
+    assert [
+        (record.label, record.getMessage())
+        for record in caplog.records
+        if record.getMessage() == "Nothing to upgrade."
+    ] == [("cpan.upgrade_all", "Nothing to upgrade.")]
 
 
 def test_upgrade_all_runs_cpan_u_on_its_own_site_directory(

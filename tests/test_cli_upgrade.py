@@ -80,10 +80,11 @@ def evaluate_signals(mid, stdout, stderr):
         f":{mid}: Does not implement upgrade_all_cli." in stderr,
         f":{mid}: Does not implement {Operations.upgrade_all}." in stderr,
         # Any line labeled with the operation: the `$` line of the upgrade, its
-        # dry-run, or the cooldown hold.
+        # dry-run, the cooldown hold, or the `Nothing to upgrade.` line of a
+        # one-by-one upgrade.
         f":{mid}.upgrade_all: " in stderr,
         # The trail line, the one trace of a manager with nothing to upgrade, which
-        # runs no command. The trail prints at INFO, the level these tests use.
+        # runs no command. It prints at INFO: DEBUG turns the trail off.
         f"{OK_GLYPH} {mid}.upgrade_all" in stderr,
         f"{KO_GLYPH} {mid}.upgrade_all" in stderr,
         bool(re.search(rf"Upgrade \S+ with\b.*\b{mid}\b", stderr)),

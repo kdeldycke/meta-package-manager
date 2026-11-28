@@ -1528,10 +1528,18 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         The fallback behind managers with no native one-shot upgrade command.
         Lists the outdated packages itself unless `outdated_ids` hands them
         over.
+
+        With no outdated package, no command runs, so a line logged under the
+        label of the operation says so. With the trail off, as at `DEBUG`
+        verbosity, that line is the one trace of the operation.
         """
-        if outdated_ids is None:
-            outdated_ids = self._outdated_ids()
-        return self._upgrade_each(outdated_ids)
+        package_ids = tuple(
+            self._outdated_ids() if outdated_ids is None else outdated_ids
+        )
+        if not package_ids:
+            logging.info("Nothing to upgrade.", extra={"label": self.subject})
+            return ""
+        return self._upgrade_each(package_ids)
 
     def _outdated_ids(self) -> tuple[str, ...]:
         """IDs of the outdated packages, listed under the `outdated` stamp.

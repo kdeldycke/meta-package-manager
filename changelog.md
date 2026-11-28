@@ -1,5 +1,10 @@
 # Changelog
 
+## [`8.4.1.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v8.4.0...main)
+
+> [!WARNING]
+> This version is **not released yet** and is under active development.
+
 ## [`8.4.0` (2026-11-28)](https://github.com/kdeldycke/meta-package-manager/compare/v8.3.1...v8.4.0)
 
 - [rpm-ostree] Add `rpm-ostree` for Fedora's image-based variants, with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync` and `cleanup` support.

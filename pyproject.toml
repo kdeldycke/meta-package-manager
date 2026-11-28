@@ -332,7 +332,7 @@ dependencies = [
   # click-extra 10.4 added the skipped outcome of OperationTrail, which
   # dispatch.py marks a cooldown or host skip with. Below it, every batch fails
   # on the missing skip_count.
-  "click-extra>=10.4.0",
+  "click-extra>=10.4",
   # extra-platforms 13.10 added shell_from_path(), which shell_argv() in
   # shell_env.py resolves the login shell's family with. Below it the import
   # fails and no mpm command runs.

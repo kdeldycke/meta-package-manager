@@ -1753,25 +1753,16 @@ class CLIExecutor:
         `_spends_warm_cache`). `sudo` keys that cache to the terminal and to its
         session, which a session of its own would hide.
 
-        A call mpm escalates itself leads no process group of its own, so its
-        timeout kill sends `SIGKILL` to `sudo`, then to each of its descendants.
-        `sudo` cannot forward a `SIGKILL`, and an unprivileged mpm cannot signal
-        the command `sudo` runs as root. The manager binary therefore survives
-        the kill: an `apt upgrade` outlasting the state-change timeout keeps
-        `/var/lib/dpkg/lock-frontend`, and the next `apt` or `aptitude` call
-        fails on a lock mpm already declared finished. Both hold for a command
-        that exits on `SIGTERM` and for one that ignores it (click-extra
-        `10.2.0`, `sudo` `1.9.17p2`).
-
-        ```{todo}
-        Re-scope the paragraph above once the click-extra floor reaches the
-        release carrying
-        [kdeldycke/click-extra@30455e6](https://github.com/kdeldycke/click-extra/commit/30455e69dd3348c54910450313d78da343f7cc97),
-        whose `run_cli` timeout sends `SIGTERM`, then waits, before its
-        `SIGKILL`. `sudo` forwards a `SIGTERM` to its command, which then
-        exits. A command that ignores `SIGTERM` still survives, so the
-        paragraph stays true for that case.
-        ```
+        A call mpm escalates itself leads no process group of its own. So its
+        timeout sends `SIGTERM` to `sudo` alone, which forwards it to the command
+        it runs. A command that exits on `SIGTERM` ends there. A command that
+        ignores it survives the `SIGKILL` that follows the grace period: `sudo`
+        cannot forward a `SIGKILL`, and an unprivileged mpm cannot signal the
+        command `sudo` runs as root. Such a command keeps its locks. An
+        `apt upgrade` that ignores `SIGTERM` keeps `/var/lib/dpkg/lock-frontend`,
+        and the next `apt` or `aptitude` call fails on a lock mpm already
+        declared finished. A `sleep` shows both outcomes (click-extra `10.4.0`,
+        `sudo` `1.9.17p2`).
 
         :param must_succeed: if `True`, raise
             {class}`meta_package_manager.execution.CLIError` when the command

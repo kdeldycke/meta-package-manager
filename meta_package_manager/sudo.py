@@ -2335,10 +2335,12 @@ class _StallWatchdog(logging.Handler):
         notice held back for a prompt gets its `DEBUG` record.
 
         A prompt that still holds the terminal belongs to a program the call
-        took down with it, on a timeout or an interrupt. That kill is a
-        `SIGKILL`, which leaves the program no chance to restore the echo it
-        turned off. So {attr}`prompt_unanswered` records the prompt, and the
-        terminal gets back the modes it had when the call started.
+        took down with it, on a timeout or an interrupt. On a timeout,
+        click-extra sends `SIGTERM` to the direct child of the call alone, and
+        `SIGKILL` to each of its descendants, like the `sudo` of an internal
+        escalator. A `SIGKILL` leaves that program no chance to restore the
+        echo it turned off. So {attr}`prompt_unanswered` records the prompt, and
+        the terminal gets back the modes it had when the call started.
 
         ```{note}
         The restored echo shows no password, because the kill reaches a

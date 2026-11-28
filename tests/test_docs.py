@@ -1849,6 +1849,22 @@ variant instead (the man-page query form, say). Lift this ban only when the
 click-extra floor rises to a release whose converter takes the bracketed form.
 """
 
+LINK_DESTINATION = re.compile(r"\]\((?P<destination>[^\s)<]+)")
+"""The destination of a markdown link, up to its title or its closing parenthesis.
+
+A destination in angle brackets does not match: `ANGLE_LINK_DEST` rejects it.
+"""
+
+INLINE_CODE = re.compile(r"(`+)[^`\n].*?(?<!`)\1(?!`)")
+"""An inline code span on one line, opened and closed by the same run of backticks.
+
+The MyST docstring converter reads a code span on one line only. A link in a code
+span renders as literal text, with no `href` to resolve.
+"""
+
+WEB_SCHEMES = frozenset({"http", "https", "mailto"})
+"""The URL schemes a markdown link in a docstring can point to."""
+
 
 def _strip_code_fences(docstring: str) -> str:
     """Drop the code blocks of a docstring, keeping every prose directive.
@@ -1927,6 +1943,26 @@ def test_docstrings_carry_no_angle_bracket_link_destination():
         for match in ANGLE_LINK_DEST.finditer(doc)
     ]
     assert not hits, "Angle-bracketed link destinations:\n" + "\n".join(hits)
+
+
+def test_docstring_links_are_web_addresses():
+    """A markdown link in a docstring points to a web address.
+
+    The MyST docstring converter turns each markdown link into an external
+    link. A relative destination like `conda.md`, or a bare `#anchor`, then
+    becomes an `href` that the API page cannot resolve, and the
+    `click_extra.dead_link` check fails the docs build. The class docstring of a
+    manager also renders on the page of that manager, where the relative link
+    resolves, so the break shows on the API page alone. Link another page with a
+    cross-reference role instead.
+    """
+    hits = [
+        f"{path.relative_to(PROJECT_ROOT)}:{lineno}: {match.group()}"
+        for path, lineno, doc in _prose_docstrings()
+        for match in LINK_DESTINATION.finditer(INLINE_CODE.sub("", doc))
+        if urlparse(match["destination"]).scheme not in WEB_SCHEMES
+    ]
+    assert not hits, "Docstring links to no web address:\n" + "\n".join(hits)
 
 
 TRAIL_FAILURE_GLYPH = "\u2718"

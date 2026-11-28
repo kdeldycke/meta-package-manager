@@ -2289,7 +2289,7 @@ def manager_configuration(manager_id: str) -> str:
 
     The command-to-command mapping lives in the Rosetta section
     ({func}`manager_rosetta`); this one points at the fuller
-    [configuration](configuration.md) reference rather than restating it.
+    {doc}`configuration </configuration>` reference rather than restating it.
 
     A manager whose calls carry forced arguments or environment variables
     (listed in the infobox by {func}`manager_card`) closes the section on the

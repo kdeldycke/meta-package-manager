@@ -51,7 +51,7 @@ env:
 jobs:
 
   build:
-    uses: kdeldycke/repomatic/.github/workflows/_release-build.yaml@ae54a5dea9c54a47fc6fa61eaa96ab146e5038cf # v8.2.0
+    uses: kdeldycke/repomatic/.github/workflows/_release-build.yaml@c9369ca3b456a1f3ec5a24c251de52473a1d25fd # v8.3.0
     permissions:
       id-token: write
       issues: write
@@ -80,12 +80,12 @@ jobs:
       # create-release job, so this lane needs no write access to the repo.
       id-token: write
     steps:
-      - uses: kdeldycke/repomatic/.github/actions/publish-pypi@ae54a5dea9c54a47fc6fa61eaa96ab146e5038cf # v8.2.0
+      - uses: kdeldycke/repomatic/.github/actions/publish-pypi@c9369ca3b456a1f3ec5a24c251de52473a1d25fd # v8.3.0
         with:
           artifact-name: ${{ github.event.repository.name }}-${{ matrix.short_sha }}
 
   release:
-    uses: kdeldycke/repomatic/.github/workflows/_release-engine.yaml@ae54a5dea9c54a47fc6fa61eaa96ab146e5038cf # v8.2.0
+    uses: kdeldycke/repomatic/.github/workflows/_release-engine.yaml@c9369ca3b456a1f3ec5a24c251de52473a1d25fd # v8.3.0
     needs:
       - build
       - build-gnome-extension
@@ -242,7 +242,7 @@ jobs:
           GH_TOKEN: ${{ secrets.REPOMATIC_PAT || github.token }}
           VERSION: ${{ steps.check.outputs.version }}
         run: >
-          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==8.2.0'
+          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==8.3.0'
           pr-sync --template-file .github/pr-templates/update-package-spec.md
           --template-arg channel=Guix
           --template-arg version="${VERSION}"
@@ -332,7 +332,7 @@ jobs:
           GH_TOKEN: ${{ secrets.REPOMATIC_PAT || github.token }}
           VERSION: ${{ steps.check.outputs.version }}
         run: >
-          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==8.2.0'
+          uvx --no-progress --exclude-newer-package repomatic=P0D 'repomatic==8.3.0'
           pr-sync --template-file .github/pr-templates/update-package-spec.md
           --template-arg channel=Nix
           --template-arg version="${VERSION}"

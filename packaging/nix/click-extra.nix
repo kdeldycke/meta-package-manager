@@ -82,6 +82,10 @@ buildPythonPackage (finalAttrs: {
   disabledTests = [
     "test_directive_variable_conflict and MYST"
     "test_generated_block_is_attributed_to_the_directive_body and body-ending-on-blank-lines-MYST"
+    # This test bounds the wall-clock startup of `click-extra --help` relative
+    # to Click's. The macOS build measures near that bound, and some of its
+    # runs exceed it.
+    "test_startup_time_stays_within_a_ratio_of_click"
   ]
   ++ lib.optionals (pythonOlder "3.14") [
     # cloup 4.0.0 imports `importlib.metadata` at module scope. Below Python

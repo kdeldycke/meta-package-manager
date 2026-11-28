@@ -1027,7 +1027,7 @@ wheels = [
 
 [[package]]
 name = "meta-package-manager"
-version = "8.4.0.dev0"
+version = "9.0.0.dev0"
 source = { editable = "." }
 dependencies = [
     { name = "click-extra" },

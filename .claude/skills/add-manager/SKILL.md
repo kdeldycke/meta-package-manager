@@ -215,6 +215,8 @@ Class-level attributes must follow `CANONICAL_ATTRS` in `tests/test_managers.py`
 
 `manager_intro()` inlines the class docstring straight onto `docs/managers/<id>.md`, so it is not maintainer commentary: it is the prose a user reads at `https://mpm.run/managers/<id>/`. Write it for someone about to drive *this* manager.
 
+The same docstring also renders through autodoc on the root-level API page. Link another page with an absolute target, like `` {doc}`conda </managers/conda>` ``: a relative `[conda](conda.md)` resolves on the manager page alone. The `click_extra.dead_link` check fails the docs build on each such link, and on each bare `#anchor` link.
+
 Carry what is true here and absent elsewhere, and let the shared pages carry the rest:
 
 - **A default that does not fit this manager.** `mpm` caps a mutating operation at 500 seconds, which suits a manager that downloads and not one that compiles: a large port outlasts it by hours. So the `ports` page names the ceiling and the key that raises it (`[mpm.overrides.ports] timeout`). {doc}`/overrides` documents that the knob exists; only the manager page can say who needs to reach for it.

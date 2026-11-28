@@ -49,6 +49,7 @@
    tests.test_manager_dnf
    tests.test_manager_emerge
    tests.test_manager_fwupd
+   tests.test_manager_gem
    tests.test_manager_guix
    tests.test_manager_homebrew
    tests.test_manager_ips
@@ -59,6 +60,7 @@
    tests.test_manager_nala
    tests.test_manager_oh_my_fish
    tests.test_manager_overrides
+   tests.test_manager_pacman
    tests.test_manager_pip
    tests.test_manager_pipx
    tests.test_manager_pkg

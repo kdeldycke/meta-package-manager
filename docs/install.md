@@ -41,7 +41,7 @@ assert result.exit_code == 0
 
 `````{tab-item} Specific version
 ```shell-session
-$ uvx meta-package-manager@8.3.1 --help
+$ uvx meta-package-manager@8.4.0 --help
 ```
 `````
 

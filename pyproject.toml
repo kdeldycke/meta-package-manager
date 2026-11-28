@@ -605,6 +605,10 @@ include-package-data = [ "meta_package_manager.managers:*.lua", "meta_package_ma
 # carrying a lowercase suffix needs its own entry here.
 default.extend-identifiers = { Github = "GitHub", IOS = "iOS", Javascript = "JavaScript", MacOS = "macOS", PATCHed = "PATCHed", PNGs = "PNGs", PyPi = "PyPI", Typescript = "TypeScript" }
 # False positives: "astroid" is a Python AST library (not "asteroid"); "certifi" is the CA bundle package a dependency graph lists under requests (not "certify"); "oject" appears when "pyproject.toml" is split across line breaks in CLI help output; "sur" is macOS 11 Big Sur and Homebrew's big_sur bottle tag (not "sure").
+# `repomatic init` keeps the entries a repository adds to this table and to
+# `extend-identifiers`, but it rewrites their comments. To keep the reason for
+# an entry, use an `extend-ignore-identifiers-re` item anchored on it instead.
+# `repomatic init` keeps the comment above each of its items.
 default.extend-words = { astroid = "astroid", certifi = "certifi", oject = "oject", sur = "sur", mis = "mis", uncatalogued = "uncatalogued", unparseable = "unparseable" }
 # Skip content between <!-- typos:off --> and <!-- typos:on --> markers.
 default.extend-ignore-re = [
